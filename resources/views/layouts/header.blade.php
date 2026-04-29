@@ -92,6 +92,14 @@
             </form>
         </div>
 
+        {{-- モバイル専用ログアウトボタン --}}
+        <form action="{{ route('logout') }}" method="POST" class="header__mobile-logout-form">
+            @csrf
+            <button type="submit" class="header__mobile-logout" aria-label="ログアウト">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+            </button>
+        </form>
+
         {{-- モバイル ハンバーガー --}}
         <button class="header__burger"
                 aria-label="メニューを開く"
