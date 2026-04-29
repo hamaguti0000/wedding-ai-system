@@ -5,28 +5,38 @@
 <style>
 .settings-wrap {
     max-width: 720px;
-    margin: 40px auto 80px;
-    padding: 0 20px;
+    margin: 24px auto 80px;
+    padding: 0 14px;
     font-family: 'Noto Sans JP', sans-serif;
 }
-
 .settings-wrap h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #b38b59;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 .settings-wrap .page-desc {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     color: #999;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+}
+@media (min-width: 768px) {
+    .settings-wrap { margin-top: 40px; padding: 0 20px; }
+    .settings-wrap h1 { font-size: 1.8rem; }
+    .settings-wrap .page-desc { margin-bottom: 32px; }
 }
 
 .settings-card {
     background: #fff;
     border-radius: 14px;
-    padding: 36px 40px;
+    padding: 20px 16px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+}
+@media (min-width: 480px) {
+    .settings-card { padding: 28px 28px; }
+}
+@media (min-width: 768px) {
+    .settings-card { padding: 36px 40px; }
 }
 
 .settings-section {
@@ -199,9 +209,10 @@
     color: #fff;
 }
 
-@media (max-width: 600px) {
-    .settings-card { padding: 24px 20px; }
+@media (max-width: 767px) {
     .form-row { grid-template-columns: 1fr; }
+    .admin-nav a { padding: 7px 12px; font-size: 0.8rem; }
+    .btn-save { width: 100%; padding: 13px; }
 }
 </style>
 @endpush

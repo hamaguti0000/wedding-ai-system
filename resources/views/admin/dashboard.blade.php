@@ -5,43 +5,46 @@
 <style>
 .admin-wrap {
     max-width: 900px;
-    margin: 40px auto 80px;
-    padding: 0 20px;
+    margin: 24px auto 80px;
+    padding: 0 14px;
     font-family: 'Noto Sans JP', sans-serif;
 }
-
 .admin-wrap h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #b38b59;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 .admin-nav {
     display: flex;
-    gap: 12px;
-    margin-bottom: 32px;
+    gap: 8px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
 }
 .admin-nav a {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
+    gap: 5px;
+    padding: 7px 14px;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 500;
     text-decoration: none;
     transition: background 0.2s;
+    white-space: nowrap;
 }
 .admin-nav a.active,
-.admin-nav a:hover {
-    background: #b38b59;
-    color: #fff;
-}
+.admin-nav a:hover { background: #b38b59; color: #fff; }
 .admin-nav a {
     background: #fef9f0;
     color: #b38b59;
     border: 1px solid #e8d5b7;
+}
+@media (min-width: 768px) {
+    .admin-wrap { margin-top: 40px; padding: 0 20px; }
+    .admin-wrap h1 { font-size: 1.8rem; }
+    .admin-nav { gap: 12px; margin-bottom: 32px; }
+    .admin-nav a { padding: 8px 18px; font-size: 0.85rem; }
 }
 
 /* サマリーカード */
@@ -150,10 +153,13 @@ tr:last-child td { border-bottom: none; }
 .empty-state__desc  { font-size: 0.84rem; line-height: 1.6; margin: 0; }
 
 /* モバイルで不要列を非表示 */
-@media (max-width: 600px) {
+@media (max-width: 767px) {
     .col-side, .col-date { display: none; }
     .col-count { white-space: nowrap; }
-    th, td { padding: 8px 10px; font-size: 0.85rem; }
+    th, td { padding: 8px 10px; font-size: 0.82rem; }
+    .guest-table-wrap { padding: 16px; }
+    .guest-table-wrap h2 { font-size: 0.95rem; }
+    .summary-card .count { font-size: 2rem; }
 }
 
 .text-muted { color: #aaa; font-size: 0.85rem; }

@@ -44,9 +44,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
 
     // ユーザー管理
-    Route::get('/users',          [AdminUserController::class, 'index'])  ->name('users');
-    Route::post('/users',         [AdminUserController::class, 'store'])  ->name('users.store');
-    Route::delete('/users/{id}',  [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users',                       [AdminUserController::class, 'index'])         ->name('users');
+    Route::post('/users',                      [AdminUserController::class, 'store'])         ->name('users.store');
+    Route::patch('/users/{id}/password',       [AdminUserController::class, 'updatePassword'])->name('users.password');
+    Route::delete('/users/{id}',               [AdminUserController::class, 'destroy'])       ->name('users.destroy');
 
     // 席次表管理
     Route::get('/seating',                             [AdminSeatingController::class, 'index'])         ->name('seating');

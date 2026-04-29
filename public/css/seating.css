@@ -716,6 +716,98 @@ main { padding: 0; text-align: initial; }
 /* ================================================================
    印刷スタイル（A4横・そのまま配布できる品質）
    ================================================================ */
+/* ================================================================
+   モバイル  (< 768px)
+   ================================================================ */
+@media (max-width: 767px) {
+    /* トップバー */
+    .st-topbar { padding: 0 10px; gap: 6px; height: 48px; }
+    .st-topbar__center { display: none; }        /* 進捗バーを非表示 */
+    .st-topbar-nav    { display: none; }         /* リンクナビを非表示 */
+    .st-save-status   { display: none; }         /* 保存状態を非表示 */
+    .st-topbar__divider { display: none; }
+    .st-topbar__title { font-size: 0.9rem; }
+    .st-btn-preview, .st-btn-print { padding: 4px 9px; font-size: 0.72rem; }
+
+    /* ボディ: 縦並びに変更 */
+    .st-body { flex-direction: column; overflow: auto; }
+
+    /* サイドバー: 全幅・固定高さ */
+    .st-sidebar {
+        width: 100% !important;
+        height: 220px;
+        border-right: none;
+        border-bottom: 1px solid var(--st-border-light);
+        flex-shrink: 0;
+        opacity: 1 !important;
+        overflow: hidden;
+    }
+    .is-preview .st-sidebar { height: 0; border-bottom: none; }
+
+    /* 検索・フィルター */
+    .st-sidebar__search-wrap { padding: 8px 10px; gap: 6px; }
+    .st-filter-tabs { gap: 4px; }
+    .st-filter-tab  { padding: 4px 10px; font-size: 0.75rem; }
+
+    /* ゲストリスト（横スクロール）*/
+    .st-guest-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 6px 10px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .st-guest-card {
+        flex-shrink: 0;
+        width: 130px;
+        padding: 8px 10px;
+    }
+    .st-guest-card__name { font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .st-assigned-list,
+    .st-sidebar__section--assigned { display: none; }  /* 配置済みリストは非表示 */
+
+    /* キャンバスエリア: 残りを使う */
+    .st-canvas-area { flex: 1; min-height: 0; }
+
+    /* FABテキストを非表示 */
+    .st-fab span { display: none; }
+    .st-fab { padding: 0; width: 48px; height: 48px; border-radius: 50%; justify-content: center; }
+
+    /* 凡例 */
+    .st-legend { padding: 6px 12px; gap: 8px; flex-wrap: wrap; font-size: 0.72rem; }
+
+    /* プロパティパネル: 全幅下固定 */
+    .st-props {
+        top: auto !important;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100% !important;
+        height: auto;
+        max-height: 55vh;
+        border-radius: 16px 16px 0 0;
+        border-left: none;
+        border-top: 1px solid var(--st-border-light);
+    }
+    .st-props[aria-hidden="true"] {
+        transform: translateY(100%);
+        right: 0;
+    }
+    .st-props[aria-hidden="false"],
+    .st-props.is-open {
+        transform: translateY(0);
+        right: 0;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .st-sidebar { width: 220px; }
+    .st-topbar-nav { display: none; }
+    .st-progress__bar { width: 120px; }
+}
+
 @media print {
     @page {
         size: A4 landscape;
