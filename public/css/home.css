@@ -93,13 +93,26 @@ main { padding: 0; text-align: initial; }
     letter-spacing: 4px;
     margin: 0 0 28px;
     line-height: 1;
+    /* ＆を常に中心に固定するグリッドレイアウト */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+}
+.home-hero__names span:first-child {
+    text-align: right;
+    padding-right: 0.15em;
+}
+.home-hero__names span:last-child {
+    text-align: left;
+    padding-left: 0.15em;
 }
 .home-hero__names em {
     font-style: italic;
     color: #e8c98a;
     font-size: 0.82em;
     letter-spacing: 2px;
-    margin: 0 8px;
+    text-align: center;
 }
 .home-hero__rule {
     width: 60px;
@@ -383,6 +396,12 @@ main { padding: 0; text-align: initial; }
         gap: 2px;
         font-size: clamp(2.2rem, 11vw, 3.4rem);
         letter-spacing: 2px;
+        width: auto;
+    }
+    .home-hero__names span:first-child,
+    .home-hero__names span:last-child {
+        text-align: center;
+        padding: 0;
     }
     .home-hero__names em {
         font-size: 0.52em;

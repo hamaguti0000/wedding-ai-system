@@ -253,7 +253,7 @@
                         placeholder="タロウ">
                 </div>
             </div>
-            <div class="fg fg-2">
+            <div class="fg fg-2" style="margin-bottom:14px;">
                 <div class="form-group">
                     <label>お立場</label>
                     <select name="guest_side">
@@ -273,6 +273,81 @@
                     </select>
                 </div>
             </div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>ご関係の詳細</label>
+                <input type="text" name="relationship_detail"
+                    value="{{ old('relationship_detail', $user->guestProfile?->relationship_detail) }}"
+                    placeholder="例：大学時代の友人">
+            </div>
+        </div>
+
+        {{-- ── 出欠・参加情報 ── --}}
+        <div class="edit-card guest-fields" id="attendanceFields">
+            <h2>出欠・参加情報</h2>
+            <div class="fg fg-2" style="margin-bottom:14px;">
+                <div class="form-group">
+                    <label>出欠状況</label>
+                    <select name="participation">
+                        <option value="pending"   {{ old('participation', $user->guestProfile?->participation ?? 'pending') === 'pending'   ? 'selected' : '' }}>未回答</option>
+                        <option value="attending" {{ old('participation', $user->guestProfile?->participation) === 'attending' ? 'selected' : '' }}>出席</option>
+                        <option value="declining" {{ old('participation', $user->guestProfile?->participation) === 'declining' ? 'selected' : '' }}>欠席</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>食物アレルギー</label>
+                    <select name="has_allergy">
+                        <option value="0" {{ old('has_allergy', $user->guestProfile?->has_allergy ? '1' : '0') === '0' ? 'selected' : '' }}>なし</option>
+                        <option value="1" {{ old('has_allergy', $user->guestProfile?->has_allergy ? '1' : '0') === '1' ? 'selected' : '' }}>あり</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg fg-2" style="margin-bottom:14px;">
+                <div class="form-group">
+                    <label>出席人数（合計）</label>
+                    <input type="number" name="attending_count" min="0" max="20"
+                        value="{{ old('attending_count', $user->guestProfile?->attending_count ?? 0) }}">
+                </div>
+                <div class="form-group">
+                    <label>うちお子様（12歳以下）</label>
+                    <input type="number" name="children_count" min="0" max="10"
+                        value="{{ old('children_count', $user->guestProfile?->children_count ?? 0) }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>アレルギーの詳細</label>
+                <textarea name="allergy_notes" rows="3" style="width:100%;padding:10px 13px;border:1px solid #e0d0bc;border-radius:6px;font-family:'Noto Sans JP',sans-serif;font-size:0.92rem;box-sizing:border-box;resize:vertical;"
+                    placeholder="例：卵・乳製品アレルギー">{{ old('allergy_notes', $user->guestProfile?->allergy_notes) }}</textarea>
+            </div>
+        </div>
+
+        {{-- ── 連絡先 ── --}}
+        <div class="edit-card guest-fields" id="contactFields">
+            <h2>連絡先</h2>
+            <div class="fg fg-2" style="margin-bottom:14px;">
+                <div class="form-group">
+                    <label>電話番号</label>
+                    <input type="tel" name="phone"
+                        value="{{ old('phone', $user->guestProfile?->phone) }}"
+                        placeholder="090-0000-0000">
+                </div>
+                <div class="form-group">
+                    <label>郵便番号</label>
+                    <input type="text" name="postal_code"
+                        value="{{ old('postal_code', $user->guestProfile?->postal_code) }}"
+                        placeholder="000-0000" maxlength="8">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>ご住所</label>
+                <input type="text" name="address"
+                    value="{{ old('address', $user->guestProfile?->address) }}"
+                    placeholder="東京都◯◯区◯◯町1-2-3">
+            </div>
+            <div class="form-group">
+                <label>メッセージ（ゲストから）</label>
+                <textarea name="notes" rows="3" style="width:100%;padding:10px 13px;border:1px solid #e0d0bc;border-radius:6px;font-family:'Noto Sans JP',sans-serif;font-size:0.92rem;box-sizing:border-box;resize:vertical;"
+                    placeholder="ゲストからのメッセージ">{{ old('notes', $user->guestProfile?->notes) }}</textarea>
+            </div>
         </div>
 
         <div class="btn-row">
@@ -286,16 +361,18 @@
 </div>
 
 <script>
-document.querySelectorAll('input[name="role"]').forEach(r => {
-    r.addEventListener('change', () => {
-        document.getElementById('guestFields').classList.toggle('hidden', r.value !== 'guest');
+function toggleGuestFields(isGuest) {
+    ['guestFields','attendanceFields','contactFields'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !isGuest);
     });
+}
+document.querySelectorAll('input[name="role"]').forEach(r => {
+    r.addEventListener('change', () => toggleGuestFields(r.value === 'guest'));
 });
 (function() {
     const checked = document.querySelector('input[name="role"]:checked');
-    if (checked && checked.value !== 'guest') {
-        document.getElementById('guestFields').classList.add('hidden');
-    }
+    toggleGuestFields(!checked || checked.value === 'guest');
 })();
 </script>
 @endsection

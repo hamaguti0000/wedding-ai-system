@@ -72,20 +72,30 @@ class AdminUserController extends Controller
         $user = User::with('guestProfile')->findOrFail($id);
 
         $request->validate([
-            'username'     => 'required|string|max:50|unique:users,username,' . $id,
-            'role'         => 'required|in:admin,guest',
-            'last_name'    => 'nullable|string|max:50',
-            'first_name'   => 'nullable|string|max:50',
-            'furigana_sei' => 'nullable|string|max:50',
-            'furigana_mei' => 'nullable|string|max:50',
-            'guest_side'   => 'nullable|in:groom,bride',
-            'relationship' => 'nullable|in:friend,family,colleague,other',
-            'password'     => 'nullable|string|min:6|confirmed',
+            'username'            => 'required|string|max:50|unique:users,username,' . $id,
+            'role'                => 'required|in:admin,guest',
+            'last_name'           => 'nullable|string|max:50',
+            'first_name'          => 'nullable|string|max:50',
+            'furigana_sei'        => 'nullable|string|max:50',
+            'furigana_mei'        => 'nullable|string|max:50',
+            'guest_side'          => 'nullable|in:groom,bride',
+            'relationship'        => 'nullable|in:friend,family,colleague,other',
+            'relationship_detail' => 'nullable|string|max:100',
+            'participation'       => 'nullable|in:attending,declining,pending',
+            'attending_count'     => 'nullable|integer|min:0|max:20',
+            'children_count'      => 'nullable|integer|min:0|max:10',
+            'has_allergy'         => 'nullable|in:0,1',
+            'allergy_notes'       => 'nullable|string|max:500',
+            'phone'               => ['nullable', 'string', 'max:20'],
+            'postal_code'         => 'nullable|string|max:8',
+            'address'             => 'nullable|string|max:200',
+            'notes'               => 'nullable|string|max:1000',
+            'password'            => 'nullable|string|min:6|confirmed',
         ], [
-            'username.required' => 'ユーザー名は必須です',
-            'username.unique'   => 'このユーザー名はすでに使われています',
-            'password.min'      => 'パスワードは6文字以上にしてください',
-            'password.confirmed'=> '確認用パスワードが一致しません',
+            'username.required'  => 'ユーザー名は必須です',
+            'username.unique'    => 'このユーザー名はすでに使われています',
+            'password.min'       => 'パスワードは6文字以上にしてください',
+            'password.confirmed' => '確認用パスワードが一致しません',
         ]);
 
         $fullName = trim(($request->last_name ?? '') . ' ' . ($request->first_name ?? ''));
@@ -104,12 +114,25 @@ class AdminUserController extends Controller
             GuestProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'last_name'     => $request->last_name,
-                    'first_name'    => $request->first_name,
-                    'furigana_sei'  => $request->furigana_sei,
-                    'furigana_mei'  => $request->furigana_mei,
-                    'guest_side'    => $request->guest_side ?: null,
-                    'relationship'  => $request->relationship ?: null,
+                    'last_name'           => $request->last_name,
+                    'first_name'          => $request->first_name,
+                    'furigana_sei'        => $request->furigana_sei,
+                    'furigana_mei'        => $request->furigana_mei,
+                    'guest_side'          => $request->guest_side ?: null,
+                    'relationship'        => $request->relationship ?: null,
+                    'relationship_detail' => $request->relationship_detail,
+                    'participation'       => $request->participation ?? 'pending',
+                    'attending_count'     => $request->attending_count ?? 0,
+                    'children_count'      => $request->children_count ?? 0,
+                    'has_allergy'         => $request->has_allergy === '1',
+                    'allergy_notes'       => $request->allergy_notes,
+                    'phone'               => $request->phone,
+                    'postal_code'         => $request->postal_code,
+                    'address'             => $request->address,
+                    'notes'               => $request->notes,
+                    'responded_at'        => $request->participation !== 'pending'
+                                                ? ($user->guestProfile?->responded_at ?? now())
+                                                : null,
                 ]
             );
         }
