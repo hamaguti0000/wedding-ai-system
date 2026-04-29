@@ -166,10 +166,21 @@
                 </a>
             </li>
             @endif
+            {{-- ゲスト用ログアウト（ナビ内に直接配置） --}}
+            <li class="header-drawer__nav-logout">
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit">
+                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>ログアウト
+                    </button>
+                </form>
+            </li>
             @endif
         </ul>
     </nav>
 
+    {{-- 管理者用ログアウト（フッターに配置） --}}
+    @if ($isAdmin)
     <div class="header-drawer__footer">
         <form action="{{ route('logout') }}" method="POST">
             @csrf
@@ -179,6 +190,7 @@
             </button>
         </form>
     </div>
+    @endif
 
 </div>
 

@@ -360,6 +360,40 @@
     padding-left: 25px;
 }
 
+/* ゲスト用：ナビ内ログアウト行 */
+.header-drawer__nav-logout {
+    border-top: 1px solid #f0ebe3;
+    margin-top: 8px;
+    padding-top: 4px;
+}
+.header-drawer__nav-logout form { margin: 0; }
+.header-drawer__nav-logout button {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 28px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #9b8573;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-align: left;
+}
+.header-drawer__nav-logout button i {
+    width: 18px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #b38b59;
+}
+.header-drawer__nav-logout button:hover {
+    background: #fef9f0;
+    color: #b38b59;
+}
+
 /* ドロワーログアウト */
 .header-drawer__footer {
     padding: 16px 28px 0;

@@ -166,6 +166,7 @@ main { padding: 0; text-align: initial; }
     max-width: 660px;
     width: 100%;
     text-align: left;
+    box-sizing: border-box;
 }
 .home-rsvp--attending .home-rsvp__card {
     background: #fff;
