@@ -18,7 +18,9 @@ class AdminSettingController extends Controller
     {
         $request->validate([
             'groom_name'     => 'required|string|max:50',
+            'groom_name_en'  => 'nullable|string|max:100',
             'bride_name'     => 'required|string|max:50',
+            'bride_name_en'  => 'nullable|string|max:100',
             'ceremony_date'  => 'required|date',
             'ceremony_time'  => 'required|date_format:H:i',
             'reception_time' => 'required|date_format:H:i',
@@ -44,7 +46,9 @@ class AdminSettingController extends Controller
             [],
             [
                 'groom_name'        => $request->groom_name,
+                'groom_name_en'     => $request->groom_name_en ?: null,
                 'bride_name'        => $request->bride_name,
+                'bride_name_en'     => $request->bride_name_en ?: null,
                 'ceremony_date'     => $request->ceremony_date,
                 'ceremony_time'     => $request->ceremony_time . ':00',
                 'reception_time'    => $request->reception_time . ':00',

@@ -376,7 +376,19 @@ main { padding: 0; text-align: initial; }
 
 /* ── レスポンシブ ─────────────────────────────────── */
 @media (max-width: 680px) {
-    .home-hero__names { letter-spacing: 2px; }
+    .home-hero__names {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: clamp(2.2rem, 11vw, 3.4rem);
+        letter-spacing: 2px;
+    }
+    .home-hero__names em {
+        font-size: 0.52em;
+        letter-spacing: 4px;
+        margin: 2px 0;
+    }
 
     .home-rsvp        { padding: 32px 16px; }
     .home-rsvp__card {

@@ -265,6 +265,21 @@
                         @error('bride_name')<span class="field-error">{{ $message }}</span>@enderror
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>新郎ローマ字名</label>
+                        <input type="text" name="groom_name_en"
+                            value="{{ old('groom_name_en', $setting->groom_name_en) }}"
+                            placeholder="例：Kakeru Hamaguchi">
+                        <p class="field-note">トップページのヒーロー画像に表示されます</p>
+                    </div>
+                    <div class="form-group">
+                        <label>新婦ローマ字名</label>
+                        <input type="text" name="bride_name_en"
+                            value="{{ old('bride_name_en', $setting->bride_name_en) }}"
+                            placeholder="例：Mirai Baba">
+                    </div>
+                </div>
             </div>
 
             {{-- ── 日時 ── --}}

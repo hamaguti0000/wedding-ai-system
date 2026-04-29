@@ -16,9 +16,11 @@
         <span class="home-hero__eyebrow">Wedding Invitation</span>
         <h1 class="home-hero__names">
             @if ($setting)
-                {{ $setting->groom_name }} <em>&amp;</em> {{ $setting->bride_name }}
+                <span>{{ $setting->groom_name_en ?: $setting->groom_name }}</span>
+                <em>&amp;</em>
+                <span>{{ $setting->bride_name_en ?: $setting->bride_name }}</span>
             @else
-                Kakeru <em>&amp;</em> Mirai
+                <span>Kakeru</span><em>&amp;</em><span>Mirai</span>
             @endif
         </h1>
         <div class="home-hero__rule"></div>

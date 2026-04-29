@@ -8,7 +8,9 @@ class WeddingSetting extends Model
 {
     protected $fillable = [
         'groom_name',
+        'groom_name_en',
         'bride_name',
+        'bride_name_en',
         'ceremony_date',
         'ceremony_time',
         'reception_time',
