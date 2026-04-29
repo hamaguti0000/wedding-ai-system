@@ -107,21 +107,6 @@
             </div>
 
             <div class="form-row">
-                <div class="form-group">
-                    <label>フリガナ（姓）</label>
-                    <input type="text" name="furigana_sei"
-                        value="{{ old('furigana_sei', $profile->furigana_sei ?? '') }}"
-                        placeholder="ヤマダ">
-                </div>
-                <div class="form-group">
-                    <label>フリガナ（名）</label>
-                    <input type="text" name="furigana_mei"
-                        value="{{ old('furigana_mei', $profile->furigana_mei ?? '') }}"
-                        placeholder="タロウ">
-                </div>
-            </div>
-
-            <div class="form-row">
                 <div class="form-group {{ $hasErr('phone') }}">
                     <label>電話番号</label>
                     <input type="tel" name="phone"

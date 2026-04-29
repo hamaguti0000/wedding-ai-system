@@ -41,7 +41,7 @@ describe('admin ログイン', function () {
     it('POST /login → /admin にリダイレクト', function () {
         $admin = makeAdmin();
         $this->post('/login', [
-            'email'    => $admin->email,
+            'username' => $admin->username,
             'password' => 'password',
         ])->assertRedirect('/admin');
     });
@@ -75,7 +75,7 @@ describe('guest ログイン（未回答）', function () {
     it('POST /login → /home にリダイレクト', function () {
         $guest = makeGuest();
         $this->post('/login', [
-            'email'    => $guest->email,
+            'username' => $guest->username,
             'password' => 'password',
         ])->assertRedirect('/home');
     });

@@ -35,18 +35,18 @@
             @csrf
 
             <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" name="email"
-                    value="{{ old('email') }}"
-                    placeholder="your@email.com"
-                    autofocus required>
+                <label for="username">ユーザー名</label>
+                <input id="username" type="text" name="username"
+                    value="{{ old('username') }}"
+                    placeholder="username"
+                    autofocus required autocomplete="username">
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">パスワード</label>
                 <input id="password" type="password" name="password"
                     placeholder="••••••••"
-                    required>
+                    required autocomplete="current-password">
             </div>
 
             <button type="submit" class="btn-submit">ログイン</button>

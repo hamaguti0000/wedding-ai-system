@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request; // HTTPリクエスト用
-use Illuminate\Support\Facades\Auth; // Laravel認証用
-use App\Models\User; // Userモデルを使う場合
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -18,27 +19,29 @@ class AuthController extends Controller
         return view('login');
     }
 
-    // ログイン処理
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-        if (Auth::attempt($credentials)) {
+        $user = User::where('username', $request->username)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            Auth::login($user);
             $request->session()->regenerate();
 
-            $default = Auth::user()->isAdmin()
-                ? route('admin.dashboard')
-                : route('dashboard');
-
-            return redirect()->intended($default);
+            return redirect()->intended(
+                $user->isAdmin() ? route('admin.dashboard') : route('dashboard')
+            );
         }
 
         return back()->withErrors([
-            'email' => 'メールアドレスまたはパスワードが正しくありません',
-        ]);
+            'username' => 'ユーザー名またはパスワードが正しくありません',
+        ])->onlyInput('username');
     }
 
-    // ログアウト
     public function logout(Request $request)
     {
         Auth::logout();

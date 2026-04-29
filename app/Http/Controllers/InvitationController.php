@@ -41,8 +41,6 @@ class InvitationController extends Controller
 
         $request->validate([
             'participation'   => 'required|in:attending,declining',
-            'furigana_sei'    => 'nullable|string|max:50',
-            'furigana_mei'    => 'nullable|string|max:50',
             'phone'           => ['nullable', 'string', 'max:20', 'regex:/^[0-9\-\+\(\)\s]+$/'],
             'postal_code'     => 'nullable|string|max:8',
             'address'         => 'nullable|string|max:200',
@@ -63,8 +61,6 @@ class InvitationController extends Controller
         GuestProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'furigana_sei'    => $request->furigana_sei,
-                'furigana_mei'    => $request->furigana_mei,
                 'phone'           => $request->phone,
                 'postal_code'     => $request->postal_code,
                 'address'         => $request->address,

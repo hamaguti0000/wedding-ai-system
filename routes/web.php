@@ -9,6 +9,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\AdminSeatingController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\GuestSeatingController;
 
 // ── トップページ ─────────────────────────────────────────
@@ -41,6 +42,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/',         [AdminController::class,        'index'])->name('dashboard');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
+
+    // ユーザー管理
+    Route::get('/users',          [AdminUserController::class, 'index'])  ->name('users');
+    Route::post('/users',         [AdminUserController::class, 'store'])  ->name('users.store');
+    Route::delete('/users/{id}',  [AdminUserController::class, 'destroy'])->name('users.destroy');
 
     // 席次表管理
     Route::get('/seating',                             [AdminSeatingController::class, 'index'])         ->name('seating');
