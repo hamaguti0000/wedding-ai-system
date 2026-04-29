@@ -1,0 +1,180 @@
+/*--------------------------------
+  ヘッダー共通設定
+--------------------------------*/
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: transparent;
+  /* 初期は透明 */
+  z-index: 100;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 15px 0;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5%;
+  gap: 60px;
+}
+
+/* 共通文字設定（統一） */
+.header .logo,
+.header nav a,
+.header .logout-button {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1rem;
+  /* 統一 */
+  font-weight: 500;
+  /* 統一 */
+  text-decoration: none;
+  transition: color 0.3s ease;
+  color: #fff;
+  /* 初期白 */
+}
+
+/* ロゴアイコン */
+.header .logo i {
+  margin-right: 5px;
+  font-size: 1.2rem;
+}
+
+/* ナビゲーション */
+.header nav ul {
+  display: flex;
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.header nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 5px 0;
+}
+
+/* 下線アニメーション */
+.header nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #b38b59;
+  transition: width 0.3s ease;
+}
+
+.header nav a:hover::after,
+.header nav a.active::after {
+  width: 100%;
+}
+
+.header nav a:hover {
+  color: #b38b59;
+}
+
+/* ログアウトボタン */
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: #fff;
+}
+
+.logout-button i {
+  font-size: 1rem;
+}
+
+.logout-button:hover {
+  background-color: #b38b59;
+  color: #fff;
+}
+
+/*--------------------------------
+  スクロール後のスタイル
+--------------------------------*/
+.header.scrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.header.scrolled .logo,
+.header.scrolled nav a,
+.header.scrolled .logout-button {
+  color: #333;
+}
+
+/* レスポンシブ */
+@media screen and (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    padding: 10px 5%;
+  }
+
+  .header nav ul {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .header nav a {
+    justify-content: flex-start;
+  }
+}
+
+/*--------------------------------
+  カウントダウン
+--------------------------------*/
+.countdown {
+  position: fixed;
+  /* 画面に固定 */
+  bottom: 30px;
+  /* 下から30px */
+  right: 30px;
+  /* 右から30px */
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 1px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  padding: 12px 24px;
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  transition: all 0.5s ease;
+  z-index: 99;
+  /* ヘッダーより手前に表示 */
+}
+
+/* 文字アニメーション（秒ごとに軽くスケール） */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.countdown span {
+  display: inline-block;
+  animation: pulse 1s infinite;
+}

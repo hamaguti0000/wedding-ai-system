@@ -1,0 +1,225 @@
+/* ================================================================
+   create_user.css  —  ユーザー登録フォーム
+   ================================================================ */
+
+body {
+    margin: 0;
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #fdfaf6;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    color: #b38b59;
+    text-align: center;
+    margin-bottom: 6px;
+    font-weight: 400;
+}
+
+/* ── フォームカード ──────────────────────────────────── */
+.user-register {
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+    width: 480px;
+    max-width: 95vw;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding-bottom: 8px;
+}
+
+/* ── ステッププログレスバー ──────────────────────────── */
+.step-progress {
+    padding: 20px 36px 0;
+}
+.step-progress__track {
+    height: 3px;
+    background: #f0ebe3;
+    border-radius: 2px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+.step-progress__fill {
+    height: 100%;
+    background: linear-gradient(to right, #b38b59, #d4a870);
+    border-radius: 2px;
+    width: 50%;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.step-progress__labels {
+    display: flex;
+    justify-content: space-between;
+}
+.step-progress__dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: default;
+}
+.step-progress__dot-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #e0d0bc;
+    background: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #c0b0a0;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+.step-progress__dot-label {
+    font-size: 0.68rem;
+    color: #c0b0a0;
+    letter-spacing: 0.5px;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: color 0.3s;
+}
+.step-progress__dot--active .step-progress__dot-num {
+    background: #b38b59;
+    border-color: #b38b59;
+    color: #fff;
+}
+.step-progress__dot--active .step-progress__dot-label {
+    color: #b38b59;
+    font-weight: 600;
+}
+
+/* ── スライダー ──────────────────────────────────────── */
+.form-slider-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+.form-slider {
+    display: flex;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.form-step {
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 24px 36px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ステップラベル（非表示化、プログレスバーで代替）*/
+.step-label { display: none; }
+
+/* ステップノート */
+.step-note {
+    font-size: 0.82rem;
+    color: #9b8573;
+    line-height: 1.7;
+    text-align: center;
+    padding: 10px 0 0;
+}
+
+/* ── ラベル・入力 ─────────────────────────────────────── */
+label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #7a6a5a;
+    gap: 6px;
+}
+label em { color: #c0392b; font-style: normal; font-size: 0.72rem; }
+
+input, textarea {
+    padding: 12px 14px;
+    border: 1px solid #e0d0bc;
+    border-radius: 6px;
+    font-size: 1rem;  /* iOS ズーム防止 */
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fffdf9;
+    color: #3d2f25;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+}
+input:focus, textarea:focus {
+    border-color: #b38b59;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(179,139,89,0.13);
+    background: #fff;
+}
+textarea { min-height: 100px; resize: vertical; line-height: 1.7; }
+
+/* ── ボタン ───────────────────────────────────────────── */
+button {
+    padding: 13px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    min-height: 48px;
+    -webkit-tap-highlight-color: transparent;
+}
+button:active { transform: scale(0.98); }
+
+.next-btn, .submit-btn {
+    background: #b38b59;
+    color: #fff;
+    letter-spacing: 1px;
+}
+.next-btn:hover, .submit-btn:hover { background: #9a7447; }
+
+.prev-btn {
+    background: #f0ebe3;
+    color: #7a6a5a;
+}
+.prev-btn:hover { background: #e8dfd5; }
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 4px;
+}
+.form-navigation button { flex: 1; }
+
+/* ── エラーリスト ─────────────────────────────────────── */
+.user-register > div[style*="color:red"] {
+    margin: 16px 36px 0;
+    padding: 12px 14px;
+    background: #fdf2f2;
+    border: 1px solid #f5b7b1;
+    border-radius: 6px;
+    font-size: 0.84rem;
+    color: #8b1a1a;
+}
+
+/* ── 下部リンク ───────────────────────────────────────── */
+.user-register > p {
+    text-align: center;
+    font-size: 0.82rem;
+    color: #9b8573;
+    padding: 0 36px 24px;
+}
+.user-register > p a {
+    color: #b38b59;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* ── レスポンシブ ─────────────────────────────────────── */
+@media (max-width: 480px) {
+    .form-step      { padding: 20px 22px 28px; }
+    .step-progress  { padding: 16px 22px 0; }
+    h2              { font-size: 1.6rem; }
+}

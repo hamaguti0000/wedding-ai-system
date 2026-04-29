@@ -1,0 +1,150 @@
+/*--------------------------------
+  ベース設定
+--------------------------------*/
+body {
+  margin: 0;
+  font-family: 'Noto Sans JP', sans-serif;
+  background-color: #fdfaf6;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: #b38b59;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/*--------------------------------
+  フォーム全体
+--------------------------------*/
+.user-register {
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  width: 500px;
+  max-width: 95%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/*--------------------------------
+  スライダー wrapper
+--------------------------------*/
+.form-slider-wrapper {
+  width: 100%;
+  overflow: hidden; 
+  position: relative;
+}
+
+/*--------------------------------
+  スライダー本体
+--------------------------------*/
+.form-slider {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.form-step {
+  min-width: 100%;
+  box-sizing: border-box;
+  padding: 50px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/*--------------------------------
+  ラベル・入力
+--------------------------------*/
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #555;
+}
+
+label span {
+  margin-bottom: 5px;
+}
+
+.required {
+  color: #b38b59;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #b38b59;
+  outline: none;
+  box-shadow: 0 0 8px rgba(179,139,89,0.2);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/*--------------------------------
+  ボタン
+--------------------------------*/
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.next-btn {
+  background-color: #b38b59;
+  color: #fff;
+}
+
+.next-btn:hover {
+  background-color: #a3784b;
+}
+
+.prev-btn {
+  background-color: #eee;
+  color: #333;
+}
+
+.prev-btn:hover {
+  background-color: #ddd;
+}
+
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/*--------------------------------
+  レスポンシブ
+--------------------------------*/
+@media screen and (max-width: 480px) {
+  .user-register {
+    padding: 30px 20px;
+    border-radius: 15px;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}

@@ -1,0 +1,45 @@
+### Claude Code ###
+/.claude/
+
+### Laravel ###
+*.log
+.env
+.env.*
+.env[[:space:]]
+!.env.example
+/database/database.sqlite
+/bootstrap/cache/*.php
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/storage/app/private/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+!storage/logs/.gitignore
+/vendor
+
+### Node ###
+/node_modules
+package-lock.json
+
+### IDE & OS ###
+.DS_Store
+Thumbs.db
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+.phpactor.json
+.phpunit.result.cache
+/auth.json
+Homestead.json
+Homestead.yaml
+
+### Windows 固有 ###
+*.Zone.Identifier

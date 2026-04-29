@@ -1,0 +1,187 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #1a130a;
+    overflow: hidden;
+}
+
+/* ── 背景写真 ─────────────────────────────── */
+.wedding-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+.wedding-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.38) saturate(0.7);
+    transform: scale(1.03);
+}
+.wedding-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        160deg,
+        rgba(30, 18, 6, 0.55) 0%,
+        rgba(80, 55, 25, 0.3) 100%
+    );
+}
+
+/* ── カード ───────────────────────────────── */
+.login-card {
+    position: relative;
+    z-index: 10;
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    background: rgba(255, 252, 247, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 2px;
+    padding: 52px 46px 44px;
+    box-shadow:
+        0 24px 64px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(179, 139, 89, 0.25);
+}
+
+/* ── モノグラム ───────────────────────────── */
+.monogram {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    color: #b38b59;
+    text-align: center;
+    letter-spacing: 10px;
+    margin-bottom: 18px;
+}
+
+/* ── 装飾ライン ───────────────────────────── */
+.ornament {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 34px;
+}
+.ornament::before,
+.ornament::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d4b896, transparent);
+}
+.ornament span {
+    font-size: 0.68rem;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: #b38b59;
+    white-space: nowrap;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+}
+
+/* ── フォームタイトル ─────────────────────── */
+.login-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #3d2f25;
+    text-align: center;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+}
+
+/* ── エラー・サクセスメッセージ ──────────── */
+.alert {
+    padding: 11px 16px;
+    border-radius: 3px;
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+    line-height: 1.6;
+}
+.alert-error {
+    background: #fdf2f2;
+    border-left: 3px solid #c0392b;
+    color: #8b1a1a;
+}
+.alert-info {
+    background: #fef9f0;
+    border-left: 3px solid #b38b59;
+    color: #7a5c30;
+}
+
+/* ── フォームグループ ─────────────────────── */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #9b8573;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    font-weight: 400;
+}
+.form-group input {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid #e2d0bc;
+    border-radius: 2px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fffdf9;
+    color: #3d2f25;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus {
+    border-color: #b38b59;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(179, 139, 89, 0.13);
+}
+
+/* ── 送信ボタン ───────────────────────────── */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    margin-top: 6px;
+    background: #b38b59;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    font-size: 0.9rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.btn-submit:hover  { background: #9a7447; }
+.btn-submit:active { transform: scale(0.99); }
+
+/* ── 下部リンク ───────────────────────────── */
+.card-footer {
+    margin-top: 26px;
+    text-align: center;
+    font-size: 0.83rem;
+    color: #a89282;
+    line-height: 1.8;
+}
+.card-footer a {
+    color: #b38b59;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+.card-footer a:hover { color: #9a7447; }
+
+/* ── レスポンシブ ─────────────────────────── */
+@media (max-width: 480px) {
+    .login-card { padding: 36px 20px 32px; }
+    .monogram   { font-size: 2.1rem; }
+}

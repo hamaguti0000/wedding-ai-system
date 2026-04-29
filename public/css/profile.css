@@ -1,0 +1,220 @@
+/* ================================================================
+   profile.css  —  プロフィールページ
+   ================================================================ */
+
+main { padding: 0; text-align: initial; }
+
+/* ── ページラッパー ──────────────────────────────────── */
+.pf-wrap {
+    max-width: 660px;
+    margin: 0 auto;
+    padding: 28px 16px 72px;
+}
+
+/* ── カード共通 ──────────────────────────────────────── */
+.pf-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.06), 0 0 0 1px rgba(232,213,183,0.3);
+    animation: pf-card-in 0.5s ease backwards;
+}
+.pf-card:nth-child(2) { animation-delay: 0.06s; }
+.pf-card:nth-child(3) { animation-delay: 0.12s; }
+.pf-card:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes pf-card-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── セクションヘッド ────────────────────────────────── */
+.pf-section-en {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #b38b59;
+    margin-bottom: 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+.pf-section-ja {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #3d2f25;
+    margin: 0 0 12px;
+}
+.pf-section-rule {
+    width: 32px;
+    height: 1px;
+    background: #b38b59;
+    margin-bottom: 22px;
+}
+
+/* ── ユーザーカード ──────────────────────────────────── */
+.pf-user {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.pf-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #b38b59 0%, #d4a870 100%);
+    color: #fff;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    flex-shrink: 0;
+    border: 3px solid #f0e4d0;
+}
+.pf-user-info { flex: 1; min-width: 0; }
+.pf-user-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #3d2f25;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pf-user-email {
+    font-size: 0.8rem;
+    color: #9b8573;
+    margin: 0 0 7px;
+    word-break: break-all;
+}
+.pf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+.pf-badge--guest  { background: #fef9f0; color: #b38b59; border: 1px solid #e8d5b7; }
+.pf-badge--admin  { background: #f0f4ff; color: #4a6fa5; border: 1px solid #b8c8e8; }
+
+/* ── RSVP ステータスバナー ───────────────────────────── */
+.pf-rsvp-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.pf-rsvp-banner--attending { background: #f0faf4; border: 1px solid #a8d8b9; }
+.pf-rsvp-banner--declining  { background: #fdf4f4; border: 1px solid #e8b4b4; }
+.pf-rsvp-banner--pending    { background: #fef9f0; border: 1px solid #e8d5b7; }
+.pf-rsvp-icon  { font-size: 1.4rem; flex-shrink: 0; }
+.pf-rsvp-label { font-size: 0.95rem; font-weight: 700; margin: 0 0 2px; }
+.pf-rsvp-banner--attending .pf-rsvp-label { color: #2d6a4f; }
+.pf-rsvp-banner--declining .pf-rsvp-label { color: #7b2d2d; }
+.pf-rsvp-banner--pending   .pf-rsvp-label { color: #7a5c30; }
+.pf-rsvp-date  { font-size: 0.76rem; color: #999; margin: 0; }
+
+/* ── 情報グリッド（dl）──────────────────────────────── */
+.pf-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+.pf-item { display: flex; flex-direction: column; gap: 3px; }
+.pf-item dt { font-size: 0.7rem; color: #b0a090; letter-spacing: 0.8px; }
+.pf-item dd { font-size: 0.9rem; color: #3d2f25; margin: 0; line-height: 1.5; }
+
+/* タグ（お立場・ご関係）*/
+.pf-tags   { display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    background: #fef9f0;
+    border: 1px solid #e8d5b7;
+    border-radius: 20px;
+    font-size: 0.76rem;
+    color: #b38b59;
+    font-weight: 500;
+}
+
+/* ── 式の案内 ────────────────────────────────────────── */
+.pf-wedding-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.pf-wedding-label {
+    font-size: 0.62rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #b38b59;
+    margin: 0 0 4px;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+.pf-wedding-value { font-size: 0.95rem; color: #3d2f25; margin: 0 0 2px; }
+.pf-wedding-sub   { font-size: 0.78rem; color: #9b8573; margin: 0; }
+.pf-wedding-map   {
+    display: inline-block;
+    font-size: 0.74rem;
+    color: #b38b59;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    margin-top: 4px;
+}
+
+/* ── 区切り線 ────────────────────────────────────────── */
+.pf-divider { height: 1px; background: #f0ebe3; margin: 18px 0; }
+
+/* ── アクションボタン ────────────────────────────────── */
+.pf-actions { display: flex; flex-direction: column; gap: 10px; }
+.pf-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 20px;
+    border-radius: 6px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 48px;
+}
+.pf-btn:active { transform: scale(0.99); }
+.pf-btn--primary  { background: #b38b59; color: #fff; }
+.pf-btn--primary:hover  { background: #9a7447; color: #fff; }
+.pf-btn--outline  { background: transparent; border: 1px solid #e0d0bc; color: #9b8573; }
+.pf-btn--outline:hover  { border-color: #b38b59; color: #b38b59; }
+
+/* ── アラート ────────────────────────────────────────── */
+.pf-alert-success {
+    display: flex; align-items: center; gap: 8px;
+    background: #eafaf1; border: 1px solid #a9dfbf; color: #1e6e3b;
+    padding: 12px 16px; border-radius: 6px; margin-bottom: 16px;
+    font-size: 0.88rem;
+}
+.pf-alert-success::before { content: '✓'; font-weight: 700; }
+
+/* ================================================================
+   Tablet +  (≥ 600px)
+   ================================================================ */
+@media (min-width: 600px) {
+    .pf-wrap { padding: 36px 24px 80px; }
+    .pf-card { padding: 30px 34px; }
+    .pf-grid { grid-template-columns: 1fr 1fr; }
+    .pf-wedding-grid { grid-template-columns: 1fr 1fr; }
+    .pf-actions { flex-direction: row; }
+    .pf-btn { flex: 1; }
+    .pf-avatar { width: 72px; height: 72px; font-size: 1.9rem; }
+}

@@ -1,0 +1,332 @@
+/* ================================================================
+   seating-guest.css — ゲスト向け席次表閲覧画面
+   ================================================================ */
+
+/* ── ページ全体 ─────────────────────────────────────────── */
+.gs-page {
+    min-height: calc(100vh - 60px);
+    background: #f0ede8;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── ページヘッダー ─────────────────────────────────────── */
+.gs-hero {
+    background: var(--ds-white);
+    border-bottom: 1px solid var(--ds-gold-lighter);
+    padding: var(--ds-space-5) var(--ds-space-6);
+    text-align: center;
+}
+.gs-hero__title {
+    font-family: var(--ds-font-display);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--ds-gold);
+    letter-spacing: 0.04em;
+    margin: 0 0 var(--ds-space-1);
+}
+.gs-hero__sub {
+    font-size: var(--ds-font-size-sm);
+    color: var(--ds-text-mid);
+    margin: 0;
+}
+
+/* ── 自席バナー ─────────────────────────────────────────── */
+.gs-my-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ds-space-3);
+    background: var(--ds-gold-muted);
+    border: 1px solid var(--ds-gold-light);
+    border-radius: var(--ds-radius-md);
+    padding: var(--ds-space-3) var(--ds-space-5);
+    margin: var(--ds-space-4) auto;
+    max-width: 480px;
+    font-size: var(--ds-font-size-sm);
+    color: var(--ds-gold-dark);
+}
+.gs-my-banner__icon {
+    font-size: 1.1rem;
+    color: var(--ds-gold);
+}
+.gs-my-banner__text strong {
+    font-weight: 600;
+}
+
+/* ── 未公開状態 ─────────────────────────────────────────── */
+.gs-unpublished {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ds-space-4);
+    padding: var(--ds-space-10);
+    text-align: center;
+    color: var(--ds-text-muted);
+}
+.gs-unpublished__icon {
+    font-size: 3rem;
+    opacity: 0.35;
+}
+.gs-unpublished__title {
+    font-family: var(--ds-font-display);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--ds-text-light);
+    margin: 0;
+}
+.gs-unpublished__desc {
+    font-size: var(--ds-font-size-sm);
+    color: var(--ds-text-muted);
+    margin: 0;
+    line-height: 1.8;
+}
+
+/* ── キャンバスラッパー（スクロール可能） ───────────────── */
+.gs-canvas-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: var(--ds-space-5);
+    position: relative;
+}
+.gs-canvas {
+    position: relative;
+    /* 動的に min-width/height を JS で設定 */
+    min-width: 100%;
+    min-height: 400px;
+    margin: 0 auto;
+}
+@media (min-width: 768px) {
+    .gs-canvas {
+        min-width: 800px;
+        min-height: 500px;
+    }
+}
+
+/* ── テーブル ───────────────────────────────────────────── */
+.gs-table {
+    position: absolute;
+    background: var(--ds-white);
+    border: 1px solid var(--ds-gold-lighter);
+    border-radius: var(--ds-radius-lg);
+    padding: 10px 12px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-width: 120px;
+    user-select: none;
+}
+.gs-table__name {
+    font-size: var(--ds-font-size-sm);
+    font-weight: 600;
+    color: var(--ds-gold-dark);
+    text-align: center;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+.gs-table__body {
+    position: relative;
+    min-width: 80px;
+    min-height: 56px;
+}
+
+/* ── 席（個別サークル） ─────────────────────────────────── */
+.gs-seat {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    cursor: default;
+}
+.gs-seat__circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--ds-gold-light);
+    background: var(--ds-cream-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ds-text-mid);
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: visible;
+}
+/* 席タイプ別の色 — JS が data-type の color/bg を --sc/--sb にセット */
+.gs-seat[style*="--sc"] .gs-seat__circle {
+    border-color: var(--sc, var(--ds-gold-light));
+    background: var(--sb, var(--ds-cream-mid));
+}
+/* 占有済み */
+.gs-seat.is-occupied .gs-seat__circle {
+    color: var(--ds-text-dark);
+}
+
+/* ── 自席ハイライト ─────────────────────────────────────── */
+.gs-seat--mine .gs-seat__circle {
+    border-color: var(--ds-gold) !important;
+    border-width: 3px;
+    box-shadow: 0 0 0 3px rgba(179, 139, 89, 0.2);
+    background: var(--ds-gold-lighter) !important;
+    color: var(--ds-gold-dark) !important;
+}
+/* パルスアニメーション */
+.gs-seat--mine::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--ds-gold);
+    opacity: 0;
+    animation: gs-pulse 2.4s ease-out infinite;
+    pointer-events: none;
+}
+@keyframes gs-pulse {
+    0%   { opacity: 0.7; transform: scale(0.85); }
+    70%  { opacity: 0;   transform: scale(1.4); }
+    100% { opacity: 0;   transform: scale(1.4); }
+}
+/* 「あなたの席」バッジ */
+.gs-seat--mine .gs-seat__badge {
+    display: block;
+}
+.gs-seat__badge {
+    display: none;
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ds-gold);
+    color: var(--ds-white);
+    font-size: 0.6rem;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 2px 6px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+}
+
+/* ── ツールチップ（ホバーで氏名表示） ───────────────────── */
+.gs-seat__tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ds-text-dark);
+    color: var(--ds-white);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    padding: 3px 8px;
+    border-radius: var(--ds-radius-sm);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 10;
+}
+.gs-seat:hover .gs-seat__tooltip,
+.gs-seat--mine .gs-seat__tooltip {
+    opacity: 1;
+}
+/* 自席は常にツールチップ表示 */
+.gs-seat--mine .gs-seat__tooltip {
+    background: var(--ds-gold-dark);
+}
+
+/* ── 凡例 ───────────────────────────────────────────────── */
+.gs-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-4);
+    padding: var(--ds-space-3) var(--ds-space-5);
+    background: var(--ds-white);
+    border-top: 1px solid var(--ds-gold-lighter);
+    font-size: var(--ds-font-size-xs);
+    color: var(--ds-text-mid);
+}
+.gs-legend__label { font-weight: 600; color: var(--ds-text-dark); }
+.gs-legend__item  { display: flex; align-items: center; gap: 5px; }
+.gs-legend__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.gs-legend__mine {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    color: var(--ds-gold-dark);
+}
+.gs-legend__mine-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ds-gold-lighter);
+    border: 2px solid var(--ds-gold);
+    flex-shrink: 0;
+}
+
+/* ── レスポンシブ ───────────────────────────────────────── */
+@media (max-width: 640px) {
+    .gs-hero { padding: var(--ds-space-4) var(--ds-space-4); }
+    .gs-hero__title { font-size: 1.15rem; }
+    .gs-canvas-wrap { padding: var(--ds-space-3); }
+    .gs-my-banner { margin: var(--ds-space-3) var(--ds-space-4); }
+}
+
+/* ── 印刷（ゲスト向け席次表）────────────────────────────── */
+@media print {
+    @page { size: A4 landscape; margin: 10mm; }
+
+    html, body { height: auto !important; overflow: visible !important; }
+
+    /* 不要 UI を非表示 */
+    .header, .header-drawer, .header-overlay,
+    .gs-hero, .gs-my-banner, .gs-legend { display: none !important; }
+
+    .gs-page { min-height: auto !important; background: #fff !important; }
+
+    /* 印刷時はヒーロータイトルをシンプルなヘッダーとして表示 */
+    .gs-canvas-wrap { overflow: visible !important; padding: 0 !important; }
+
+    .gs-canvas { min-width: unset !important; min-height: unset !important; }
+
+    /* テーブル・席を印刷に最適化 */
+    .gs-table {
+        box-shadow: none !important;
+        border: 1px solid #c8b890 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .gs-seat {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .gs-seat__circle {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* ホバートリップを印刷時に常時表示 */
+    .gs-seat__tooltip {
+        opacity: 1 !important;
+        background: none !important;
+        color: #2e2316 !important;
+        top: calc(100% + 1px) !important;
+        bottom: auto !important;
+        font-size: 0.6rem !important;
+        padding: 0 !important;
+        font-weight: 600 !important;
+    }
+    /* 自席ハイライトを印刷でも表示 */
+    .gs-seat--mine .gs-seat__circle {
+        border-width: 3px !important;
+    }
+    .gs-seat--mine::before { display: none !important; }
+}

@@ -1,0 +1,522 @@
+/* ================================================================
+   invitation.css  —  RSVP フォーム  /  Mobile-first
+   ================================================================ */
+
+/* ── リセット・ベース ────────────────────────────────── */
+main { padding: 0; text-align: initial; }
+
+/* ── バナー ──────────────────────────────────────────── */
+.inv-banner {
+    position: relative;
+    height: 38vh;
+    min-height: 220px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.inv-banner__img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) saturate(0.75);
+}
+.inv-banner__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(20,12,4,0.15), rgba(20,12,4,0.52));
+}
+.inv-banner__text {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    padding: 0 16px;
+}
+.inv-banner__eyebrow {
+    display: block;
+    font-size: 0.62rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+}
+.inv-banner__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 6vw, 2.8rem);
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin: 0 0 12px;
+    line-height: 1;
+}
+.inv-banner__title em {
+    font-style: italic;
+    color: #e8c98a;
+    font-size: 0.8em;
+    margin: 0 5px;
+}
+.inv-banner__rule {
+    width: 36px;
+    height: 1px;
+    background: rgba(255,255,255,0.4);
+    margin: 0 auto 12px;
+}
+.inv-banner__date {
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 300;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* ── メインラッパー ──────────────────────────────────── */
+.inv-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 16px 72px;
+}
+
+/* ── ステータスバッジ ─────────────────────────────────── */
+.inv-status {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+    line-height: 1.65;
+}
+.inv-status--attending {
+    background: #f0faf4;
+    border: 1px solid #a8d8b9;
+    color: #2d6a4f;
+}
+.inv-status--declining {
+    background: #fdf4f4;
+    border: 1px solid #e8b4b4;
+    color: #7b2d2d;
+}
+.inv-status__icon  { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+.inv-status__label { font-weight: 700; font-size: 0.92rem; }
+.inv-status__date  { font-size: 0.76rem; color: #999; margin-top: 3px; }
+
+/* ── アラート ────────────────────────────────────────── */
+.inv-alert {
+    padding: 14px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+.inv-alert--success {
+    background: #eafaf1;
+    border: 1px solid #a9dfbf;
+    color: #1e6e3b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.inv-alert--success::before { content: '✓'; font-size: 1.1rem; flex-shrink: 0; }
+.inv-alert--error {
+    background: #fdf2f2;
+    border: 1px solid #f5b7b1;
+    color: #8b1a1a;
+}
+.inv-alert--error ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* ── フォームカード ───────────────────────────────────── */
+.inv-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 22px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(232,213,183,0.3);
+
+    /* カード入場アニメーション */
+    animation: cardSlideUp 0.55s ease backwards;
+}
+.inv-card:nth-child(2) { animation-delay: 0.06s; }
+.inv-card:nth-child(3) { animation-delay: 0.12s; }
+.inv-card:nth-child(4) { animation-delay: 0.18s; }
+.inv-card:nth-child(5) { animation-delay: 0.22s; }
+
+@keyframes cardSlideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.inv-card__head {
+    text-align: center;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f0ebe3;
+    position: relative;
+}
+
+/* セクション見出し */
+.inv-section-en {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #b38b59;
+    margin-bottom: 5px;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+.inv-section-ja {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem;
+    font-weight: 400;
+    color: #3d2f25;
+    margin: 0 0 12px;
+}
+.inv-section-rule {
+    width: 36px;
+    height: 1px;
+    background: #b38b59;
+    margin: 0 auto;
+}
+
+/* カードヘッダーのエラーインジケーター */
+.inv-card__head--has-error .inv-section-en::after {
+    content: ' ●';
+    color: #e74c3c;
+    font-size: 0.5rem;
+    vertical-align: middle;
+    letter-spacing: 0;
+    animation: errorPulse 1.8s ease infinite;
+}
+@keyframes errorPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+
+/* ── 出欠ボタン ──────────────────────────────────────── */
+.inv-participation {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    justify-items: center;
+}
+.inv-part-btn {
+    width: 100%;
+    max-width: 280px;
+    min-height: 88px;
+    padding: 14px 10px;
+    border: 1.5px solid #e0d0bc;
+    border-radius: 8px;
+    background: #fffdf9;
+    color: #9b8573;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: border-color 0.2s, color 0.2s, background 0.2s,
+                transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+.inv-part-btn__icon  { font-size: 1.5rem; line-height: 1; }
+.inv-part-btn__main  { font-size: 0.95rem; }
+.inv-part-btn__label { font-size: 0.62rem; letter-spacing: 2px; opacity: 0.7; }
+
+.inv-part-btn:hover {
+    border-color: #b38b59;
+    color: #b38b59;
+    background: #fef9f0;
+}
+.inv-part-btn:active { transform: scale(0.96); }
+
+.inv-part-btn.selected.attending {
+    background: #f0faf4;
+    border-color: #27ae60;
+    border-width: 2px;
+    color: #27ae60;
+    box-shadow: 0 4px 14px rgba(39,174,96,0.15);
+    transform: scale(1.025);
+}
+.inv-part-btn.selected.declining {
+    background: #fdf4f4;
+    border-color: #e74c3c;
+    border-width: 2px;
+    color: #e74c3c;
+    box-shadow: 0 4px 14px rgba(231,76,60,0.13);
+    transform: scale(1.025);
+}
+
+/* ── セクション開閉アニメーション ────────────────────── */
+.inv-section-toggle {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+        grid-template-rows 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.32s ease,
+        margin-bottom 0.32s ease;
+    opacity: 1;
+    margin-bottom: 16px;
+}
+.inv-section-toggle > .inv-section-toggle__inner {
+    min-height: 0;
+    overflow: hidden;
+    /* 内側の card に box-shadow が消えないよう padding でマージン確保 */
+    padding: 2px 2px 4px;
+    margin: -2px -2px -4px;
+}
+.inv-section-toggle > .inv-section-toggle__inner > .inv-card {
+    margin-bottom: 0;
+}
+.inv-section-toggle.hidden {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+    margin-bottom: 0;
+}
+
+/* ── フォームフィールド ──────────────────────────────── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    color: #9b8573;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: color 0.2s;
+}
+.req { color: #c0392b; font-size: 0.68rem; }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    /* iOS: 最低タッチターゲット 48px */
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #e0d0bc;
+    border-radius: 6px;
+    font-size: 1rem;          /* iOS ズームを防ぐ: 16px 以上 */
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fffdf9;
+    color: #3d2f25;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #b38b59;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(179,139,89,0.14);
+    background: #fff;
+}
+.form-group textarea {
+    min-height: 112px;
+    resize: vertical;
+    line-height: 1.8;
+}
+.form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b38b59' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+}
+
+/* エラー状態 */
+.form-group.has-error label { color: #c0392b; }
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+    border-color: #e74c3c;
+    background: #fffafa;
+    box-shadow: 0 0 0 3px rgba(231,76,60,0.1);
+}
+
+.field-error {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #c0392b;
+    font-size: 0.78rem;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+.field-error::before { content: '!'; font-weight: 700; font-size: 0.7rem; }
+
+.field-note {
+    font-size: 0.72rem;
+    color: #b0a090;
+    margin-top: 5px;
+    line-height: 1.6;
+}
+
+/* ── 汎用ボタン選択グループ（立場・関係性・アレルギー）── */
+.inv-btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.inv-btn-group--grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+.inv-btn-option {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    padding: 11px 10px;
+    border: 1.5px solid #e0d0bc;
+    border-radius: 6px;
+    background: #fffdf9;
+    color: #9b8573;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.3;
+    transition:
+        border-color 0.18s, color 0.18s, background 0.18s,
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.18s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+.inv-btn-option__sub {
+    display: block;
+    font-size: 0.72rem;
+    opacity: 0.7;
+    letter-spacing: 1px;
+}
+.inv-btn-option:hover {
+    border-color: #b38b59;
+    color: #b38b59;
+    background: #fef9f0;
+}
+.inv-btn-option:active { transform: scale(0.97); }
+.inv-btn-option.selected {
+    background: #fef9f0;
+    border-color: #b38b59;
+    border-width: 2px;
+    color: #b38b59;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(179,139,89,0.15);
+    transform: scale(1.015);
+}
+
+/* ── 条件付き表示フィールド（grid-rows アニメーション）── */
+.inv-conditional {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-top: 0;
+    transition:
+        grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity   0.3s ease,
+        margin-top 0.3s ease;
+}
+.inv-conditional > div {
+    min-height: 0;
+    overflow: hidden;
+    padding: 2px 2px 4px;
+    margin: -2px -2px -4px;
+}
+.inv-conditional.visible {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 14px;
+}
+
+/* ── 人数セレクト行 ──────────────────────────────────── */
+.count-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+
+/* ── 送信ボタン ──────────────────────────────────────── */
+.inv-submit-wrap { padding-top: 4px; }
+.inv-submit {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 20px;
+    background: #b38b59;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+.inv-submit:hover  { background: #9a7447; }
+.inv-submit:active { transform: scale(0.99); }
+
+/* ── セーフエリア対応（iOS ホームインジケーター）────── */
+.inv-wrap { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+
+/* ================================================================
+   Large mobile  (≥ 480px)
+   ================================================================ */
+@media (min-width: 480px) {
+    .inv-participation   { grid-template-columns: 1fr 1fr; justify-items: stretch; }
+    .inv-part-btn        { max-width: none; }
+    .inv-btn-group--grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ================================================================
+   Tablet +  (≥ 600px)
+   ================================================================ */
+@media (min-width: 600px) {
+    .inv-banner { height: 44vh; }
+    .inv-wrap   { padding: 32px 24px calc(80px + env(safe-area-inset-bottom)); }
+
+    .inv-card { padding: 30px 34px; }
+
+    .form-row   { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .count-row  { grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .inv-participation { gap: 14px; }
+    .inv-part-btn      { max-width: 220px; }
+
+    .inv-submit {
+        display: inline-block;
+        width: auto;
+        min-width: 240px;
+        padding: 14px 48px;
+    }
+    .inv-submit-wrap { text-align: center; }
+}
+
+/* ================================================================
+   Desktop  (≥ 900px)
+   ================================================================ */
+@media (min-width: 900px) {
+    .inv-banner { height: 46vh; }
+    .inv-card   { padding: 34px 40px; }
+}

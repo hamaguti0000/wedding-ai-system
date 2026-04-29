@@ -1,0 +1,114 @@
+/*--------------------------------
+  ベース設定
+--------------------------------*/
+body {
+    margin: 0;
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #fdfaf6;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: #b38b59;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/*--------------------------------
+  フォーム全体
+--------------------------------*/
+.user-register {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    width: 400px;
+    max-width: 95%;
+    box-sizing: border-box;
+    padding: 50px 40px;
+}
+
+/*--------------------------------
+  メッセージ
+--------------------------------*/
+.message {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/*--------------------------------
+  ラベル・入力
+--------------------------------*/
+.user-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    color: #555;
+}
+
+label span {
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+input:focus {
+    border-color: #b38b59;
+    outline: none;
+    box-shadow: 0 0 8px rgba(179, 139, 89, 0.2);
+}
+
+/*--------------------------------
+  ボタン
+--------------------------------*/
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button[type="submit"] {
+    background-color: #b38b59;
+    color: #fff;
+}
+
+button[type="submit"]:hover {
+    background-color: #a3784b;
+}
+
+/*--------------------------------
+  レスポンシブ
+--------------------------------*/
+@media screen and (max-width: 480px) {
+    .user-register {
+        padding: 30px 20px;
+        border-radius: 15px;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+}
