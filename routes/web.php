@@ -44,10 +44,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
 
     // ユーザー管理
-    Route::get('/users',                       [AdminUserController::class, 'index'])         ->name('users');
-    Route::post('/users',                      [AdminUserController::class, 'store'])         ->name('users.store');
-    Route::patch('/users/{id}/password',       [AdminUserController::class, 'updatePassword'])->name('users.password');
-    Route::delete('/users/{id}',               [AdminUserController::class, 'destroy'])       ->name('users.destroy');
+    Route::get('/users',             [AdminUserController::class, 'index'])        ->name('users');
+    Route::post('/users',            [AdminUserController::class, 'store'])        ->name('users.store');
+    Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->name('users.edit');
+    Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->name('users.update');
+    Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->name('users.password');
+    Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->name('users.destroy');
 
     // 席次表管理
     Route::get('/seating',                             [AdminSeatingController::class, 'index'])         ->name('seating');

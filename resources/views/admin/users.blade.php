@@ -403,9 +403,14 @@ tr:last-child td { border-bottom: none; }
                         @endif
                     </td>
                     <td style="white-space:nowrap;">
+                        <a href="{{ route('admin.users.edit', $user->id) }}"
+                           class="btn-sm btn-sm-pw" style="text-decoration:none;">
+                            <i class="fa-solid fa-pen-to-square"></i> 編集
+                        </a>
+                        &nbsp;
                         <button class="btn-sm btn-sm-pw"
                             onclick="togglePw({{ $user->id }})">
-                            <i class="fa-solid fa-key"></i> PW変更
+                            <i class="fa-solid fa-key"></i> PW
                         </button>
                         &nbsp;
                         @if ($user->id !== auth()->id())
