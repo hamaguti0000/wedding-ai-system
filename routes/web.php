@@ -42,7 +42,8 @@ Route::middleware('auth')->group(function () {
 // ── 管理者用ページ（認証 + admin）────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',              [AdminController::class,            'index'])->name('dashboard');
-    Route::get('/rsvp',          [AdminRsvpController::class,       'index'])->name('rsvp');
+    Route::get('/rsvp',          [AdminRsvpController::class, 'index']) ->name('rsvp');
+    Route::get('/rsvp/export',   [AdminRsvpController::class, 'export'])->name('rsvp.export');
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');

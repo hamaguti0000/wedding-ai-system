@@ -3,7 +3,6 @@
 
 @push('styles')
 <style>
-/* ログイン履歴固有スタイル */
 .lh-wrap h1 { margin-bottom: 20px; }
 
 /* 検索パネル */
@@ -11,200 +10,104 @@
     background: #fff;
     border-radius: 14px;
     border: 1px solid #e8d5b7;
-    padding: 20px 20px 16px;
+    padding: 20px 24px 18px;
     margin-bottom: 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 .search-panel-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: #b38b59;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #b38b59; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 6px;
 }
 
-/* 検索フィールドグリッド */
-.search-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 20px;
-    margin-bottom: 14px;
-}
+/* 検索グリッド: 上段 2列 / 下段 3列 */
+.search-row { display: grid; gap: 14px 20px; margin-bottom: 14px; }
+.search-row-top    { grid-template-columns: 1fr 1fr; }
+.search-row-bottom { grid-template-columns: repeat(3, 1fr); }
+
 .search-field label {
-    display: block;
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: #7a6a5a;
-    margin-bottom: 6px;
-    letter-spacing: 0.3px;
+    display: block; font-size: 0.74rem; font-weight: 600;
+    color: #7a6a5a; margin-bottom: 6px; letter-spacing: 0.3px;
 }
 .search-field input[type="text"],
 .search-field input[type="search"] {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1px solid #e0d0bc;
-    border-radius: 7px;
-    font-size: 0.9rem;
-    font-family: 'Noto Sans JP', sans-serif;
-    color: #3d2f25;
-    background: #fffdf9;
-    box-sizing: border-box;
+    width: 100%; padding: 10px 12px; border: 1px solid #e0d0bc;
+    border-radius: 6px; font-size: 0.9rem; font-family: 'Noto Sans JP', sans-serif;
+    color: #3d2f25; background: #fffdf9; box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-field input:focus {
-    border-color: #b38b59;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(179,139,89,0.12);
+    border-color: #b38b59; outline: none; box-shadow: 0 0 0 3px rgba(179,139,89,0.12);
 }
 
 /* 日付範囲 */
-.date-range {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+.date-range { display: flex; align-items: center; gap: 8px; }
 .date-range input[type="date"] {
-    flex: 1;
-    padding: 9px 10px;
-    border: 1px solid #e0d0bc;
-    border-radius: 7px;
-    font-size: 0.88rem;
-    font-family: 'Noto Sans JP', sans-serif;
-    color: #3d2f25;
-    background: #fffdf9;
-    box-sizing: border-box;
+    flex: 1; padding: 10px 8px; border: 1px solid #e0d0bc; border-radius: 6px;
+    font-size: 0.88rem; font-family: 'Noto Sans JP', sans-serif; color: #3d2f25;
+    background: #fffdf9; box-sizing: border-box; min-width: 0;
     transition: border-color 0.2s;
-    min-width: 0;
 }
 .date-range input[type="date"]:focus {
-    border-color: #b38b59;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(179,139,89,0.12);
+    border-color: #b38b59; outline: none; box-shadow: 0 0 0 3px rgba(179,139,89,0.12);
 }
 .date-sep { font-size: 0.8rem; color: #b0a090; flex-shrink: 0; }
 
-/* 期間ショートカット */
-.date-shortcuts {
-    display: flex;
-    gap: 5px;
-    margin-top: 7px;
-    flex-wrap: wrap;
-}
+.date-shortcuts { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
 .date-shortcut {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    border: 1px solid #e0d0bc;
-    color: #9b8573;
-    background: #fffdf9;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    white-space: nowrap;
+    padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 500;
+    border: 1px solid #e0d0bc; color: #9b8573; background: #fffdf9; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s; white-space: nowrap;
 }
 .date-shortcut:hover { background: #fef9f0; border-color: #b38b59; color: #b38b59; }
 
-/* トグルボタングループ（状態・お立場） */
+/* トグルグループ（下段3列に配置）*/
 .toggle-group {
-    display: flex;
-    gap: 0;
-    border: 1px solid #e0d0bc;
-    border-radius: 7px;
-    overflow: hidden;
+    display: flex; border: 1px solid #e0d0bc; border-radius: 6px;
+    overflow: hidden; width: 100%;
 }
 .toggle-group input[type="radio"] { display: none; }
 .toggle-group label {
-    flex: 1;
-    text-align: center;
-    padding: 9px 6px;
-    font-size: 0.83rem;
-    font-weight: 500;
-    color: #9b8573;
-    background: #fffdf9;
-    cursor: pointer;
+    flex: 1; text-align: center; padding: 10px 4px;
+    font-size: 0.82rem; font-weight: 500; color: #9b8573;
+    background: #fffdf9; cursor: pointer;
     transition: background 0.15s, color 0.15s;
-    border: none;
-    white-space: nowrap;
-    line-height: 1.2;
+    border: none; line-height: 1.3; word-break: keep-all;
 }
 .toggle-group label:not(:last-child) { border-right: 1px solid #e0d0bc; }
 .toggle-group input:checked + label { background: #b38b59; color: #fff; }
 
-/* 検索ボタンエリア */
+/* 検索ボタン */
 .search-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-top: 4px;
-    border-top: 1px solid #f0ebe3;
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 10px;
+    padding-top: 14px; border-top: 1px solid #f0ebe3; flex-wrap: wrap;
 }
 .btn-search {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 24px;
-    background: #b38b59;
-    color: #fff;
-    border: none;
-    border-radius: 7px;
-    font-size: 0.9rem;
-    font-family: 'Noto Sans JP', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-    min-height: 42px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 11px 28px; background: #b38b59; color: #fff; border: none;
+    border-radius: 6px; font-size: 0.9rem; font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500; cursor: pointer; transition: background 0.2s; min-height: 44px;
 }
 .btn-search:hover { background: #9a7447; }
 .btn-reset {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 10px 16px;
-    background: transparent;
-    border: 1px solid #e0d0bc;
-    border-radius: 7px;
-    font-size: 0.86rem;
-    font-family: 'Noto Sans JP', sans-serif;
-    color: #9b8573;
-    text-decoration: none;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-    min-height: 42px;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 11px 18px; background: transparent; border: 1px solid #e0d0bc;
+    border-radius: 6px; font-size: 0.88rem; font-family: 'Noto Sans JP', sans-serif;
+    color: #9b8573; text-decoration: none; cursor: pointer;
+    transition: border-color 0.2s, color 0.2s; min-height: 44px;
 }
 .btn-reset:hover { border-color: #b38b59; color: #b38b59; }
 
-/* アクティブフィルターバッジ */
-.active-filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 14px;
-}
-.active-filters-label {
-    font-size: 0.76rem;
-    color: #9b8573;
-    font-weight: 500;
-}
+/* アクティブバッジ */
+.active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 14px; }
+.active-filters-label { font-size: 0.76rem; color: #9b8573; font-weight: 500; }
 .filter-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    background: #fef9f0;
-    border: 1px solid #e8d5b7;
-    border-radius: 20px;
-    font-size: 0.76rem;
-    color: #b38b59;
-    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; background: #fef9f0; border: 1px solid #e8d5b7;
+    border-radius: 20px; font-size: 0.76rem; color: #b38b59; font-weight: 500;
 }
 
-/* テーブル固有 */
+/* テーブル */
 .lh-table-wrap { overflow: hidden; }
 .lh-table-head { padding: 14px 20px; font-size: 0.8rem; color: #999; border-bottom: 1px solid #f5f0ea; }
 .lh-table-head strong { color: #3d2f25; }
@@ -214,17 +117,19 @@
 
 /* ページネーション */
 .pagination-wrap { display: flex; justify-content: center; padding: 20px; gap: 4px; flex-wrap: wrap; }
-.pagination-wrap a, .pagination-wrap span { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 6px; font-size: 0.85rem; text-decoration: none; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; transition: background 0.15s; }
+.pagination-wrap a, .pagination-wrap span {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px; padding: 0 10px; border-radius: 6px;
+    font-size: 0.85rem; text-decoration: none; border: 1px solid #e8d5b7;
+    color: #b38b59; background: #fef9f0; transition: background 0.15s;
+}
 .pagination-wrap a:hover { background: #b38b59; color: #fff; }
 .pagination-wrap .pg-active { background: #b38b59; color: #fff; border-color: #b38b59; }
 .pagination-wrap .pg-disabled { color: #ddd; border-color: #eee; background: #fafafa; }
 
-@media (min-width: 768px) {
-    .search-grid { grid-template-columns: 2fr 2fr 1fr 1fr; }
-}
 @media (max-width: 767px) {
-    .search-grid { grid-template-columns: 1fr; }
-    .search-panel { padding: 16px 14px 12px; }
+    .search-panel { padding: 16px; }
+    .search-row-top, .search-row-bottom { grid-template-columns: 1fr; }
     .ua-text { max-width: 140px; }
     .search-actions { flex-direction: column; align-items: stretch; }
     .btn-search, .btn-reset { justify-content: center; }
@@ -259,25 +164,21 @@
             <i class="fa-solid fa-magnifying-glass"></i> 絞り込み検索
         </div>
 
-        <form method="GET" action="{{ route('admin.login-history') }}" id="searchForm">
+        <form method="GET" action="{{ route('admin.login-history') }}">
 
-            <div class="search-grid">
-
-                {{-- ユーザー名 --}}
+            {{-- 上段: ユーザー名 / 期間 --}}
+            <div class="search-row search-row-top">
                 <div class="search-field">
                     <label>ユーザー名</label>
                     <input type="search" name="q" value="{{ $q }}"
-                           placeholder="例：yamada_taro"
-                           autocomplete="off">
+                           placeholder="例：yamada_taro" autocomplete="off">
                 </div>
-
-                {{-- 期間 --}}
                 <div class="search-field">
                     <label>期間</label>
                     <div class="date-range">
-                        <input type="date" name="from" id="fromDate" value="{{ $from }}" max="{{ date('Y-m-d') }}">
+                        <input type="date" name="from" id="fromDate" value="{{ $from }}" max="{{ now()->format('Y-m-d') }}">
                         <span class="date-sep">〜</span>
-                        <input type="date" name="to"   id="toDate"   value="{{ $to }}"   max="{{ date('Y-m-d') }}">
+                        <input type="date" name="to"   id="toDate"   value="{{ $to }}"   max="{{ now()->format('Y-m-d') }}">
                     </div>
                     <div class="date-shortcuts">
                         <button type="button" class="date-shortcut" data-range="today">今日</button>
@@ -286,8 +187,10 @@
                         <button type="button" class="date-shortcut" data-range="month">過去30日</button>
                     </div>
                 </div>
+            </div>
 
-                {{-- 状態 --}}
+            {{-- 下段: ログイン状態 / お立場 / ロール --}}
+            <div class="search-row search-row-bottom">
                 <div class="search-field">
                     <label>ログイン状態</label>
                     <div class="toggle-group">
@@ -299,8 +202,6 @@
                         <label for="st_failed">失敗</label>
                     </div>
                 </div>
-
-                {{-- お立場 --}}
                 <div class="search-field">
                     <label>お立場</label>
                     <div class="toggle-group">
@@ -312,8 +213,18 @@
                         <label for="sd_bride">新婦側</label>
                     </div>
                 </div>
-
-            </div>{{-- /.search-grid --}}
+                <div class="search-field">
+                    <label>ロール</label>
+                    <div class="toggle-group">
+                        <input type="radio" name="role" id="rl_all"   value="all"   {{ $role === 'all'   ? 'checked' : '' }}>
+                        <label for="rl_all">全て</label>
+                        <input type="radio" name="role" id="rl_admin" value="admin" {{ $role === 'admin' ? 'checked' : '' }}>
+                        <label for="rl_admin">管理者</label>
+                        <input type="radio" name="role" id="rl_guest" value="guest" {{ $role === 'guest' ? 'checked' : '' }}>
+                        <label for="rl_guest">一般</label>
+                    </div>
+                </div>
+            </div>
 
             <div class="search-actions">
                 <button type="submit" class="btn-search">
@@ -343,15 +254,18 @@
             </span>
         @endif
         @if ($status !== 'all')
-            <span class="filter-badge">
-                <i class="fa-solid fa-circle-dot"></i>
+            <span class="filter-badge"><i class="fa-solid fa-circle-dot"></i>
                 {{ $status === 'success' ? 'ログイン成功' : 'ログイン失敗' }}
             </span>
         @endif
         @if ($side !== 'all')
-            <span class="filter-badge">
-                <i class="fa-solid fa-users"></i>
+            <span class="filter-badge"><i class="fa-solid fa-users"></i>
                 {{ $side === 'groom' ? '新郎側' : '新婦側' }}
+            </span>
+        @endif
+        @if ($role !== 'all')
+            <span class="filter-badge"><i class="fa-solid fa-user-shield"></i>
+                {{ $role === 'admin' ? '管理者' : '一般ユーザー' }}
             </span>
         @endif
     </div>
@@ -413,9 +327,7 @@
                             <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td>
-                        <span style="font-size:0.84rem;">{{ $h->ip_address ?? '—' }}</span>
-                    </td>
+                    <td><span style="font-size:0.84rem;">{{ $h->ip_address ?? '—' }}</span></td>
                     <td>
                         @if ($h->user_agent)
                         <span class="ua-text" title="{{ $h->user_agent }}">
@@ -431,7 +343,6 @@
         </table>
         </div>
 
-        {{-- ページネーション --}}
         @if ($histories->hasPages())
         <div class="pagination-wrap">
             @if ($histories->onFirstPage())
@@ -439,7 +350,6 @@
             @else
                 <a href="{{ $histories->previousPageUrl() }}">‹</a>
             @endif
-
             @foreach ($histories->getUrlRange(max(1, $histories->currentPage()-2), min($histories->lastPage(), $histories->currentPage()+2)) as $page => $url)
                 @if ($page == $histories->currentPage())
                     <span class="pg-active">{{ $page }}</span>
@@ -447,7 +357,6 @@
                     <a href="{{ $url }}">{{ $page }}</a>
                 @endif
             @endforeach
-
             @if ($histories->hasMorePages())
                 <a href="{{ $histories->nextPageUrl() }}">›</a>
             @else
@@ -461,16 +370,20 @@
 </div>
 
 <script>
-// 期間ショートカットボタン
 (function() {
     const from = document.getElementById('fromDate');
     const to   = document.getElementById('toDate');
-    const fmt  = d => d.toISOString().slice(0, 10);
+
+    // toISOString() はUTC変換するため、ローカル日付をそのまま使う
+    const fmt = d => [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, '0'),
+        String(d.getDate()).padStart(2, '0')
+    ].join('-');
 
     document.querySelectorAll('.date-shortcut').forEach(btn => {
         btn.addEventListener('click', () => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
 
             switch (btn.dataset.range) {
                 case 'today':
