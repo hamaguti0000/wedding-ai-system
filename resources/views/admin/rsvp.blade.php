@@ -183,14 +183,6 @@ tr:hover td { background: #fffdf9; }
 
     <h1>回答状況</h1>
 
-    <nav class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-list-check"></i> ゲスト一覧</a>
-        <a href="{{ route('admin.rsvp') }}" class="active"><i class="fa-solid fa-envelope-open-text"></i> 回答状況</a>
-        <a href="{{ route('admin.users') }}"><i class="fa-solid fa-users"></i> ユーザー管理</a>
-        <a href="{{ route('admin.seating') }}"><i class="fa-solid fa-chair"></i> 席次表</a>
-        <a href="{{ route('admin.settings') }}"><i class="fa-solid fa-gear"></i> 式の情報</a>
-    </nav>
-
     {{-- サマリーカード --}}
     <div class="summary-row">
         <div class="summary-card total">

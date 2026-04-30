@@ -250,13 +250,6 @@ tr:last-child td { border-bottom: none; }
 
     <h1>ユーザー管理</h1>
 
-    <nav class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-list-check"></i> ゲスト一覧</a>
-        <a href="{{ route('admin.users') }}" class="active"><i class="fa-solid fa-users"></i> ユーザー管理</a>
-        <a href="{{ route('admin.seating') }}"><i class="fa-solid fa-chair"></i> 席次表</a>
-        <a href="{{ route('admin.settings') }}"><i class="fa-solid fa-gear"></i> 式の情報</a>
-    </nav>
-
     @if (session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
     @endif

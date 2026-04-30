@@ -20,10 +20,11 @@
         <nav class="header__nav" aria-label="メインナビゲーション">
             <ul>
                 @if ($isAdmin)
-                {{-- 管理者: ドロップダウン1つに集約 --}}
+                {{-- ゲスト関連: ドロップダウン --}}
                 <li class="header__nav-item">
-                    <a href="{{ route('admin.dashboard') }}">
-                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>管理メニュー
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="{{ request()->routeIs('admin.dashboard','admin.rsvp','admin.users*','admin.login-history*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-users" aria-hidden="true"></i>ゲスト
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
                     <ul class="header__dropdown">
@@ -42,19 +43,7 @@
                         <li>
                             <a href="{{ route('admin.users') }}"
                                class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-users"></i>ユーザー管理
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.seating') }}"
-                               class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chair"></i>席次表
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.settings') }}"
-                               class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                                <i class="fa-solid fa-gear"></i>式の情報
+                                <i class="fa-solid fa-user-pen"></i>ユーザー管理
                             </a>
                         </li>
                         <li>
@@ -64,6 +53,20 @@
                             </a>
                         </li>
                     </ul>
+                </li>
+                {{-- 席次表: 単独リンク --}}
+                <li>
+                    <a href="{{ route('admin.seating') }}"
+                       class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-chair" aria-hidden="true"></i>席次表
+                    </a>
+                </li>
+                {{-- 設定: 単独リンク --}}
+                <li>
+                    <a href="{{ route('admin.settings') }}"
+                       class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                        <i class="fa-solid fa-gear" aria-hidden="true"></i>設定
+                    </a>
                 </li>
                 @else
                 {{-- ゲスト: シンプルリンク --}}

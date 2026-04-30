@@ -168,25 +168,7 @@ tr:last-child td { border-bottom: none; }
 
 @section('content')
 <div class="admin-wrap">
-    <h1>RSVP 管理ダッシュボード</h1>
-
-    <nav class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <i class="fa-solid fa-list-check"></i> ゲスト一覧
-        </a>
-        <a href="{{ route('admin.rsvp') }}" class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
-            <i class="fa-solid fa-envelope-open-text"></i> 回答状況
-        </a>
-        <a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-            <i class="fa-solid fa-users"></i> ユーザー管理
-        </a>
-        <a href="{{ route('admin.seating') }}" class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
-            <i class="fa-solid fa-chair"></i> 席次表
-        </a>
-        <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-            <i class="fa-solid fa-gear"></i> 式の情報
-        </a>
-    </nav>
+    <h1>ゲスト一覧</h1>
 
     {{-- サマリー --}}
     <div class="summary-cards">

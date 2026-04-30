@@ -145,6 +145,17 @@
 }
 .btn-cancel:hover { border-color: #b38b59; color: #b38b59; }
 
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    color: #b38b59;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.15s;
+}
+.back-link:hover { color: #9a7447; }
 .alert-error {
     background: #fdf2f2; border: 1px solid #f5b7b1; color: #c0392b;
     padding: 12px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 0.88rem;
@@ -169,11 +180,9 @@
     <h1>ユーザー編集</h1>
     <p class="page-sub">{{ $user->username }} の情報を編集します</p>
 
-    <nav class="admin-nav">
-        <a href="{{ route('admin.users') }}">
-            <i class="fa-solid fa-arrow-left"></i> ユーザー管理に戻る
-        </a>
-    </nav>
+    <a href="{{ route('admin.users') }}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> ユーザー管理に戻る
+    </a>
 
     @if ($errors->any())
     <div class="alert-error">

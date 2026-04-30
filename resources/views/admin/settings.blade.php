@@ -223,24 +223,6 @@
     <h1>式の情報設定</h1>
     <p class="page-desc">ホーム画面に表示される日時・会場・ご挨拶文を編集できます。</p>
 
-    <nav class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <i class="fa-solid fa-list-check"></i> ゲスト一覧
-        </a>
-        <a href="{{ route('admin.rsvp') }}" class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
-            <i class="fa-solid fa-envelope-open-text"></i> 回答状況
-        </a>
-        <a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-            <i class="fa-solid fa-users"></i> ユーザー管理
-        </a>
-        <a href="{{ route('admin.seating') }}" class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
-            <i class="fa-solid fa-chair"></i> 席次表
-        </a>
-        <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-            <i class="fa-solid fa-gear"></i> 式の情報
-        </a>
-    </nav>
-
     @if (session('success'))
     <div class="alert-success">{{ session('success') }}</div>
     @endif
