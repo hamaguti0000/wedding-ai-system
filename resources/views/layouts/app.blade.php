@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="{{ asset('css/design-system.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
+    @if (Auth::user()?->isAdmin())
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    @endif
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     @stack('styles')

@@ -1,0 +1,420 @@
+/* ================================================================
+   admin.css  — 管理画面共通スタイル
+   全管理ページで読み込む。ページ固有スタイルは各Blade内に残す。
+   ================================================================ */
+
+/* ── ページラッパー ── */
+.admin-wrap,
+.rsvp-wrap,
+.users-wrap,
+.settings-wrap,
+.edit-wrap,
+.lh-wrap {
+    margin: 40px auto 80px;
+    padding: 0 24px;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* 標準幅（ダッシュボード・設定・ユーザー管理・編集） */
+.admin-wrap,
+.settings-wrap,
+.users-wrap,
+.edit-wrap {
+    max-width: 1000px;
+}
+
+/* 広幅（テーブルが多いページ） */
+.rsvp-wrap,
+.lh-wrap {
+    max-width: 1100px;
+}
+
+/* ── ページ見出し ── */
+.admin-wrap h1,
+.rsvp-wrap h1,
+.users-wrap h1,
+.settings-wrap h1,
+.edit-wrap h1,
+.lh-wrap h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: #b38b59;
+    margin-bottom: 6px;
+}
+
+.page-desc {
+    font-size: 0.88rem;
+    color: #999;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+/* ── カード共通 ── */
+.admin-card,
+.settings-card,
+.guest-table-wrap,
+.user-table-wrap,
+.rsvp-table-wrap,
+.lh-table-wrap {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+}
+
+.admin-card,
+.settings-card {
+    padding: 28px 32px;
+    margin-bottom: 24px;
+}
+
+.guest-table-wrap,
+.user-table-wrap {
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.guest-table-wrap h2,
+.user-table-wrap h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 16px;
+}
+
+/* ── テーブル共通 ── */
+.admin-wrap table,
+.rsvp-wrap table,
+.users-wrap table,
+.lh-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.admin-wrap th,
+.rsvp-wrap th,
+.users-wrap th,
+.lh-wrap th {
+    background: #fdf6ee;
+    color: #b38b59;
+    font-weight: 700;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 2px solid #eedfc4;
+    white-space: nowrap;
+}
+
+.admin-wrap td,
+.rsvp-wrap td,
+.users-wrap td,
+.lh-wrap td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    vertical-align: middle;
+}
+
+.admin-wrap tr:last-child td,
+.rsvp-wrap tr:last-child td,
+.users-wrap tr:last-child td,
+.lh-wrap tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-wrap tr:hover td,
+.rsvp-wrap tr:hover td,
+.users-wrap tr:hover td,
+.lh-wrap tr:hover td {
+    background: #fffdf9;
+}
+
+/* ── サマリーカード共通 ── */
+.summary-cards,
+.summary-row,
+.lh-summary {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.summary-cards {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.summary-row {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.lh-summary {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.summary-card,
+.lh-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+}
+
+.summary-card .count,
+.lh-card .num {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.summary-card .label,
+.lh-card .lbl {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    color: #777;
+}
+
+.summary-card.attending .count,
+.lh-card.success .num    { color: #27ae60; }
+.summary-card.declining .count,
+.lh-card.failed .num     { color: #e74c3c; }
+.summary-card.pending .count   { color: #f39c12; }
+.summary-card.total .count,
+.lh-card.total .num      { color: #b38b59; }
+
+/* ── バッジ共通 ── */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.badge.attending   { background: #eafaf1; color: #27ae60; }
+.badge.declining   { background: #fdf2f2; color: #e74c3c; }
+.badge.pending     { background: #fef9ee; color: #f39c12; }
+.badge.success     { background: #eafaf1; color: #27ae60; }
+.badge.failed      { background: #fdf2f2; color: #e74c3c; }
+.badge.admin-role  { background: #f0edff; color: #6c3fd9; }
+.badge.guest-role  { background: #fef9f0; color: #b38b59; }
+.badge.groom       { background: #e8f4ff; color: #2980b9; }
+.badge.bride       { background: #ffe8f0; color: #c0392b; }
+
+/* ── フォーム共通 ── */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.82rem;
+    color: #7a6a5a;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.form-group .required,
+.form-group .req {
+    color: #c0392b;
+    margin-left: 3px;
+    font-size: 0.8rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #e0d0bc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: #3d2f25;
+    background: #fffdf9;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #b38b59;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(179,139,89,0.12);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.8;
+}
+
+.field-error {
+    display: block;
+    color: #c0392b;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.field-note {
+    font-size: 0.78rem;
+    color: #b0a090;
+    margin-top: 5px;
+    line-height: 1.5;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* ── ボタン共通 ── */
+.btn-primary,
+.btn-save,
+.btn-search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 28px;
+    background: #b38b59;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    min-height: 44px;
+    letter-spacing: 0.3px;
+}
+
+.btn-primary:hover,
+.btn-save:hover,
+.btn-search:hover { background: #9a7447; color: #fff; }
+
+.btn-secondary,
+.btn-cancel,
+.btn-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px;
+    background: transparent;
+    color: #9b8573;
+    border: 1px solid #e0d0bc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    min-height: 44px;
+}
+
+.btn-secondary:hover,
+.btn-cancel:hover,
+.btn-reset:hover {
+    border-color: #b38b59;
+    color: #b38b59;
+}
+
+/* ── アラート共通 ── */
+.alert,
+.alert-success,
+.alert-error,
+.alert-error-box {
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.alert-success {
+    background: #eafaf1;
+    border: 1px solid #a9dfbf;
+    color: #1e8449;
+}
+
+.alert-error,
+.alert-error-box {
+    background: #fdf2f2;
+    border: 1px solid #f5b7b1;
+    color: #c0392b;
+}
+
+/* ── 空状態 ── */
+.empty-state {
+    text-align: center;
+    padding: 56px 20px;
+    color: #aaa;
+}
+
+.empty-state__icon  { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-state__title { font-size: 1rem; font-weight: 600; color: #888; margin: 0 0 8px; }
+.empty-state__desc  { font-size: 0.84rem; line-height: 1.6; margin: 0; }
+
+/* テキスト補助 */
+.text-muted { color: #aaa; font-size: 0.8rem; }
+
+/* テーブルスクロール */
+.table-responsive,
+.table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── レスポンシブ ── */
+@media (max-width: 767px) {
+    .admin-wrap,
+    .rsvp-wrap,
+    .users-wrap,
+    .settings-wrap,
+    .edit-wrap,
+    .lh-wrap {
+        margin-top: 20px;
+        padding: 0 14px;
+    }
+
+    .admin-wrap h1,
+    .rsvp-wrap h1,
+    .users-wrap h1,
+    .settings-wrap h1,
+    .edit-wrap h1,
+    .lh-wrap h1 {
+        font-size: 1.4rem;
+    }
+
+    .admin-card,
+    .settings-card { padding: 18px 16px; }
+    .guest-table-wrap,
+    .user-table-wrap { padding: 16px; }
+
+    .form-row { grid-template-columns: 1fr; }
+
+    .summary-cards,
+    .summary-row,
+    .lh-summary { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+    .summary-card .count,
+    .lh-card .num { font-size: 1.8rem; }
+
+    .admin-wrap th,
+    .rsvp-wrap th,
+    .users-wrap th,
+    .lh-wrap th,
+    .admin-wrap td,
+    .rsvp-wrap td,
+    .users-wrap td,
+    .lh-wrap td { padding: 9px 10px; font-size: 0.8rem; }
+}
