@@ -20,37 +20,53 @@
         <nav class="header__nav" aria-label="メインナビゲーション">
             <ul>
                 @if ($isAdmin)
-                <li>
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>ゲスト一覧
+                {{-- 管理者: ドロップダウン1つに集約 --}}
+                <li class="header__nav-item">
+                    <a href="{{ route('admin.dashboard') }}">
+                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>管理メニュー
+                        <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.rsvp') }}"
-                       class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>回答状況
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.seating') }}"
-                       class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-chair" aria-hidden="true"></i>席次表
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.users') }}"
-                       class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-users" aria-hidden="true"></i>ユーザー管理
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.settings') }}"
-                       class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                        <i class="fa-solid fa-gear" aria-hidden="true"></i>式の情報
-                    </a>
+                    <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                                <i class="fa-solid fa-list-check"></i>ゲスト一覧
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.rsvp') }}"
+                               class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-envelope-open-text"></i>回答状況
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.users') }}"
+                               class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-users"></i>ユーザー管理
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.seating') }}"
+                               class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chair"></i>席次表
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.settings') }}"
+                               class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                                <i class="fa-solid fa-gear"></i>式の情報
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.login-history') }}"
+                               class="{{ request()->routeIs('admin.login-history*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clock-rotate-left"></i>ログイン履歴
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 @else
+                {{-- ゲスト: シンプルリンク --}}
                 <li>
                     <a href="{{ route('dashboard') }}"
                        class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -155,6 +171,12 @@
                 <a href="{{ route('admin.settings') }}"
                    class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                     <i class="fa-solid fa-gear" aria-hidden="true"></i>式の情報
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.login-history') }}"
+                   class="{{ request()->routeIs('admin.login-history*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>ログイン履歴
                 </a>
             </li>
             {{-- 管理者用ログアウト（ナビ内に直接配置） --}}

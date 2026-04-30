@@ -103,6 +103,90 @@
 .header__nav a:hover { color: #b38b59; }
 .header__nav a.active { color: #b38b59; }
 
+/* ── ドロップダウンメニュー ─────────────────────────── */
+.header__nav-item { position: relative; }
+
+.header__nav-item > a {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.header__nav-item .dd-arrow {
+    font-size: 0.55rem;
+    transition: transform 0.2s;
+    opacity: 0.7;
+}
+.header__nav-item:hover .dd-arrow { transform: rotate(180deg); }
+
+.header__dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 252, 247, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid #e8d5b7;
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+    padding: 6px 0;
+    min-width: 170px;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    white-space: nowrap;
+}
+
+/* 矢印（小さい三角）*/
+.header__dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top: none;
+    border-bottom-color: #e8d5b7;
+}
+.header__dropdown::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top: none;
+    border-bottom-color: rgba(255,252,247,0.98);
+}
+
+.header__nav-item:hover .header__dropdown,
+.header__nav-item:focus-within .header__dropdown {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(-50%) translateY(0);
+}
+
+.header__dropdown li { list-style: none; }
+.header__dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: #3d2f25;
+    text-decoration: none;
+    transition: background 0.13s, color 0.13s;
+    border-bottom: none;
+}
+.header__dropdown a::after { display: none; } /* 下線エフェクトを無効化 */
+.header__dropdown a i { width: 16px; text-align: center; color: #b38b59; font-size: 0.82rem; }
+.header__dropdown a:hover { background: #fef9f0; color: #b38b59; }
+.header__dropdown a.active { background: #fef9f0; color: #b38b59; font-weight: 700; }
+.header__dropdown li:not(:last-child) a { border-bottom: 1px solid #f5efe7; }
+
 /* ── デスクトップ アクション ────────────────────────── */
 .header__actions {
     display: none;

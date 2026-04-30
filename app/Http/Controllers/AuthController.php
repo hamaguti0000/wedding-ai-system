@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,10 +33,26 @@ class AuthController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
+            LoginHistory::create([
+                'user_id'    => $user->id,
+                'username'   => $request->username,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'status'     => 'success',
+            ]);
+
             return redirect()->intended(
                 $user->isAdmin() ? route('admin.dashboard') : route('dashboard')
             );
         }
+
+        LoginHistory::create([
+            'user_id'    => null,
+            'username'   => $request->username,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'status'     => 'failed',
+        ]);
 
         return back()->withErrors([
             'username' => 'ユーザー名またはパスワードが正しくありません',

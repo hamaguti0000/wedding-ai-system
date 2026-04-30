@@ -3,17 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LoginHistory extends Model
 {
-    protected $table = 'login_histories';
-    protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
     public $timestamps = false;
 
-    public function account()
+    protected $fillable = [
+        'user_id',
+        'username',
+        'ip_address',
+        'user_agent',
+        'status',
+        'created_at',
+    ];
+
+    protected function casts(): array
     {
-        return $this->belongsTo(Account::class, 'account_id', 'id');
+        return ['created_at' => 'datetime'];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
