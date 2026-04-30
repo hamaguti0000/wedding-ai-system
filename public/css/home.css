@@ -33,6 +33,7 @@ main { padding: 0; text-align: initial; }
 .home-hero {
     position: relative;
     height: 100vh;
+    height: 100dvh; /* スマホのアドレスバーを除いた実際の高さ */
     min-height: 560px;
     overflow: hidden;
     display: flex;
@@ -131,7 +132,7 @@ main { padding: 0; text-align: initial; }
 /* スクロール誘導 */
 .home-hero__scroll {
     position: absolute;
-    bottom: 32px;
+    bottom: max(32px, env(safe-area-inset-bottom, 0px) + 24px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 2;

@@ -174,8 +174,17 @@ tr:last-child td { border-bottom: none; }
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <i class="fa-solid fa-list-check"></i> ゲスト一覧
         </a>
+        <a href="{{ route('admin.rsvp') }}" class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
+            <i class="fa-solid fa-envelope-open-text"></i> 回答状況
+        </a>
+        <a href="{{ route('admin.users') }}" class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+            <i class="fa-solid fa-users"></i> ユーザー管理
+        </a>
+        <a href="{{ route('admin.seating') }}" class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
+            <i class="fa-solid fa-chair"></i> 席次表
+        </a>
         <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-            <i class="fa-solid fa-gear"></i> 式の情報を編集
+            <i class="fa-solid fa-gear"></i> 式の情報
         </a>
     </nav>
 
@@ -222,15 +231,15 @@ tr:last-child td { border-bottom: none; }
                 @php $p = $guest->guestProfile; @endphp
                 <tr>
                     <td>
-                        @if ($p)
-                            <strong>{{ $p->fullName() }}</strong>
+                        @if ($p && ($p->last_name || $p->first_name))
+                            <strong>{{ trim($p->last_name . ' ' . $p->first_name) }}</strong>
                             @if ($p->furigana())
                             <br><span class="text-muted">{{ $p->furigana() }}</span>
                             @endif
-                            <br><span class="text-muted" style="font-size:0.78rem;">{{ $guest->email }}</span>
                         @else
-                            <span class="text-muted">{{ $guest->name }}<br>{{ $guest->email }}</span>
+                            <span class="text-muted">{{ $guest->username }}</span>
                         @endif
+                        <br><span class="text-muted" style="font-size:0.76rem;">@{{ $guest->username }}</span>
                     </td>
                     <td class="col-side">
                         @if ($p?->guest_side)

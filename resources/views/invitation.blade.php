@@ -15,7 +15,9 @@
         <span class="inv-banner__eyebrow">RSVP · ご出欠のご確認</span>
         <h1 class="inv-banner__title">
             @if ($setting)
-                {{ $setting->groom_name }} <em>&amp;</em> {{ $setting->bride_name }}
+                {{ $setting->groom_name_en ?: $setting->groom_name }}
+                <em>&amp;</em>
+                {{ $setting->bride_name_en ?: $setting->bride_name }}
             @else
                 Kakeru <em>&amp;</em> Mirai
             @endif
