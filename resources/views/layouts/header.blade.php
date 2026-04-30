@@ -23,7 +23,13 @@
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
                        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>RSVP管理
+                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>ゲスト一覧
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.rsvp') }}"
+                       class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>回答状況
                     </a>
                 </li>
                 <li>
@@ -35,7 +41,7 @@
                 <li>
                     <a href="{{ route('admin.users') }}"
                        class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>ユーザー管理
+                        <i class="fa-solid fa-users" aria-hidden="true"></i>ユーザー管理
                     </a>
                 </li>
                 <li>
@@ -124,13 +130,19 @@
             <li>
                 <a href="{{ route('admin.dashboard') }}"
                    class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="fa-solid fa-list-check" aria-hidden="true"></i>RSVP管理
+                    <i class="fa-solid fa-list-check" aria-hidden="true"></i>ゲスト一覧
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.rsvp') }}"
+                   class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>回答状況
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.users') }}"
                    class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-user-plus" aria-hidden="true"></i>ユーザー管理
+                    <i class="fa-solid fa-users" aria-hidden="true"></i>ユーザー管理
                 </a>
             </li>
             <li>

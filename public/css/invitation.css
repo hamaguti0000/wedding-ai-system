@@ -197,14 +197,14 @@ main { padding: 0; text-align: initial; }
 
 /* ── 出欠ボタン ──────────────────────────────────────── */
 .inv-participation {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
-    justify-items: center;
 }
 .inv-part-btn {
     width: 100%;
-    max-width: 280px;
+    max-width: 300px;
     min-height: 88px;
     padding: 14px 10px;
     border: 1.5px solid #e0d0bc;
@@ -484,8 +484,15 @@ main { padding: 0; text-align: initial; }
    Large mobile  (≥ 480px)
    ================================================================ */
 @media (min-width: 480px) {
-    .inv-participation   { grid-template-columns: 1fr 1fr; justify-items: stretch; }
-    .inv-part-btn        { max-width: none; }
+    .inv-participation {
+        flex-direction: row;
+        justify-content: center;
+    }
+    .inv-part-btn {
+        flex: 1;
+        max-width: 220px;
+        width: auto;
+    }
     .inv-btn-group--grid { grid-template-columns: 1fr 1fr; }
 }
 
@@ -502,7 +509,6 @@ main { padding: 0; text-align: initial; }
     .count-row  { grid-template-columns: 1fr 1fr; gap: 14px; }
 
     .inv-participation { gap: 14px; }
-    .inv-part-btn      { max-width: 220px; }
 
     .inv-submit {
         display: inline-block;

@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminRsvpController;
 use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\AdminSeatingController;
 use App\Http\Controllers\AdminUserController;
@@ -40,6 +41,7 @@ Route::middleware('auth')->group(function () {
 // ── 管理者用ページ（認証 + admin）────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',         [AdminController::class,        'index'])->name('dashboard');
+    Route::get('/rsvp',     [AdminRsvpController::class,   'index'])->name('rsvp');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
 
