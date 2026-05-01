@@ -47,8 +47,24 @@
     </div>
     @endif
 
+    @if ($deadlinePassed)
+    <div class="inv-alert inv-alert--deadline">
+        <span class="inv-alert__icon">🔒</span>
+        <div>
+            <strong>出欠回答の受付は終了しました</strong>
+            @if ($setting?->rsvp_deadline)
+            <span class="inv-alert__sub">（締め切り：{{ $setting->rsvp_deadline->format('Y年n月j日') }}）</span>
+            @endif
+        </div>
+    </div>
+    @endif
+
     @if (session('success'))
     <div class="inv-alert inv-alert--success">{{ session('success') }}</div>
+    @endif
+
+    @if (session('deadline_error'))
+    <div class="inv-alert inv-alert--deadline">{{ session('deadline_error') }}</div>
     @endif
 
     @if ($errors->any())
@@ -221,9 +237,15 @@
 
         {{-- ══ 送信ボタン ══════════════════════════════════ --}}
         <div class="inv-submit-wrap">
+            @if ($deadlinePassed)
+            <button type="button" class="inv-submit inv-submit--disabled" disabled>
+                受付終了
+            </button>
+            @else
             <button type="submit" class="inv-submit">
                 {{ $profile && $profile->participation !== 'pending' ? '回答を更新する' : '回答を送信する' }}
             </button>
+            @endif
         </div>
 
     </form>

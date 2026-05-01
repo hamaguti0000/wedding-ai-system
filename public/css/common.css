@@ -447,6 +447,20 @@
     padding-left: 25px;
 }
 
+/* ドロワー セクションラベル（モバイルのグループ見出し）*/
+.header-drawer__section-label {
+    padding: 12px 28px 4px;
+    font-size: 0.62rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #b38b59;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 700;
+    border-top: 1px solid #f0ebe3;
+    margin-top: 4px;
+    list-style: none;
+}
+
 /* ゲスト用：ナビ内ログアウト行 */
 .header-drawer__nav-logout {
     border-top: 1px solid #f0ebe3;

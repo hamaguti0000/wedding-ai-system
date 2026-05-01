@@ -20,12 +20,14 @@ class InvitationController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $user = Auth::user()->load('guestProfile');
+        $user    = Auth::user()->load('guestProfile');
+        $setting = WeddingSetting::first();
 
         return view('invitation', [
-            'user'    => $user,
-            'profile' => $user->guestProfile,
-            'setting' => WeddingSetting::first(),
+            'user'           => $user,
+            'profile'        => $user->guestProfile,
+            'setting'        => $setting,
+            'deadlinePassed' => $this->isDeadlinePassed($setting),
         ]);
     }
 
@@ -33,6 +35,12 @@ class InvitationController extends Controller
     {
         if (Auth::user()->isAdmin()) {
             return redirect()->route('admin.dashboard');
+        }
+
+        $setting = WeddingSetting::first();
+        if ($this->isDeadlinePassed($setting)) {
+            return redirect()->route('invitation')
+                ->with('deadline_error', '出欠回答の受付は終了しました。');
         }
 
         $user      = Auth::user();
@@ -76,5 +84,11 @@ class InvitationController extends Controller
 
         return redirect()->route('invitation')
             ->with('success', 'ご回答ありがとうございます。');
+    }
+
+    private function isDeadlinePassed(?WeddingSetting $setting): bool
+    {
+        return $setting?->rsvp_deadline !== null
+            && today()->isAfter($setting->rsvp_deadline);
     }
 }

@@ -17,10 +17,14 @@ class HomeController extends Controller
 
         $user->load('guestProfile');
 
+        $setting = WeddingSetting::first();
+
         return view('home', [
-            'user'    => $user,
-            'profile' => $user->guestProfile,
-            'setting' => WeddingSetting::first(),
+            'user'           => $user,
+            'profile'        => $user->guestProfile,
+            'setting'        => $setting,
+            'deadlinePassed' => $setting?->rsvp_deadline !== null
+                && today()->isAfter($setting->rsvp_deadline),
         ]);
     }
 }

@@ -48,7 +48,13 @@
         <span class="home-rsvp__icon">✦</span>
         <div class="home-rsvp__body">
             <p><strong>{{ $profile->fullName() }} 様</strong>、ご出席のご登録ありがとうございます。</p>
-            <p class="home-rsvp__sub">内容を変更したい場合は招待状ページからいつでも更新できます。</p>
+            @if (!$deadlinePassed)
+            <p class="home-rsvp__sub">内容を変更したい場合は招待状ページからいつでも更新できます。
+                @if ($setting?->rsvp_deadline)（締め切り：{{ $setting->rsvp_deadline->format('Y年n月j日') }}）@endif
+            </p>
+            @else
+            <p class="home-rsvp__sub">受付は終了しました。変更がある場合は直接ご連絡ください。</p>
+            @endif
         </div>
         <a href="{{ route('invitation') }}" class="home-rsvp__btn home-rsvp__btn--outline">招待状を確認</a>
     </div>
@@ -60,18 +66,33 @@
         <span class="home-rsvp__icon">✦</span>
         <div class="home-rsvp__body">
             <p><strong>{{ $profile->fullName() }} 様</strong>、欠席のご連絡ありがとうございます。</p>
-            <p class="home-rsvp__sub">変更がある場合はいつでも回答を更新できます。</p>
+            @if (!$deadlinePassed)
+            <p class="home-rsvp__sub">変更がある場合はいつでも回答を更新できます。
+                @if ($setting?->rsvp_deadline)（締め切り：{{ $setting->rsvp_deadline->format('Y年n月j日') }}）@endif
+            </p>
+            @else
+            <p class="home-rsvp__sub">受付は終了しました。変更がある場合は直接ご連絡ください。</p>
+            @endif
         </div>
-        <a href="{{ route('invitation') }}" class="home-rsvp__btn home-rsvp__btn--outline">回答を変更</a>
+        <a href="{{ route('invitation') }}" class="home-rsvp__btn home-rsvp__btn--outline">回答を確認</a>
     </div>
 </section>
 
 @else
 <section class="home-rsvp home-rsvp--pending">
     <div class="home-rsvp__card home-rsvp__card--cta">
+        @if ($deadlinePassed)
+        <p class="home-rsvp__notice">出欠回答の受付は終了しました。</p>
+        <p class="home-rsvp__sub">
+            @if ($setting?->rsvp_deadline)締め切り：{{ $setting->rsvp_deadline->format('Y年n月j日') }}@endif
+        </p>
+        @else
         <p class="home-rsvp__notice">まだご出欠のご回答が届いておりません。</p>
-        <p class="home-rsvp__sub">ご都合のほど、下記よりお知らせください。</p>
+        <p class="home-rsvp__sub">ご都合のほど、下記よりお知らせください。
+            @if ($setting?->rsvp_deadline)（締め切り：{{ $setting->rsvp_deadline->format('Y年n月j日') }}）@endif
+        </p>
         <a href="{{ route('invitation') }}" class="home-rsvp__btn">出欠を回答する</a>
+        @endif
     </div>
 </section>
 @endif

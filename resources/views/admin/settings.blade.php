@@ -195,6 +195,18 @@
                 </div>
             </div>
 
+            {{-- ── 出欠回答 締め切り ── --}}
+            <div class="settings-section">
+                <h2>出欠回答</h2>
+                <div class="form-group">
+                    <label>締め切り日</label>
+                    <input type="date" name="rsvp_deadline"
+                        value="{{ old('rsvp_deadline', $setting->rsvp_deadline?->format('Y-m-d')) }}">
+                    <p class="field-note">設定した日の翌日から招待状フォームへの送信ができなくなります。空欄の場合は制限なし。</p>
+                    @error('rsvp_deadline')<span class="field-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
+
             {{-- ── 席次表公開設定 ── --}}
             <div class="settings-section">
                 <h2>席次表</h2>

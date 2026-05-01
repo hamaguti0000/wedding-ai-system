@@ -24,6 +24,7 @@ class WeddingSetting extends Model
         'venue_map_embed',
         'message',
         'is_seating_public',
+        'rsvp_deadline',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class WeddingSetting extends Model
         return [
             'ceremony_date'     => 'date',
             'is_seating_public' => 'boolean',
+            'rsvp_deadline'     => 'date',
         ];
     }
 
