@@ -317,17 +317,38 @@ main { padding: 0; text-align: initial; }
     margin: 0;
     line-height: 1.7;
 }
-.home-details__map {
-    display: inline-block;
-    margin-top: 10px;
-    font-size: 0.78rem;
-    color: #b38b59;
-    letter-spacing: 1px;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    transition: color 0.2s;
+.home-details__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    justify-content: center;
 }
-.home-details__map:hover { color: #9a7447; }
+.home-details__map-btn,
+.home-details__access-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.5px;
+}
+.home-details__map-btn {
+    background: #b38b59;
+    color: #fff;
+}
+.home-details__map-btn:hover { background: #9a7447; color: #fff; }
+.home-details__access-btn {
+    background: transparent;
+    color: #b38b59;
+    border: 1px solid #b38b59;
+}
+.home-details__access-btn:hover { background: #b38b59; color: #fff; }
 
 /* ── NEWS ────────────────────────────────────────── */
 .home-news {

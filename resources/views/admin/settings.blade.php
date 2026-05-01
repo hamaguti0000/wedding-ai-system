@@ -142,8 +142,44 @@
                     <input type="url" name="venue_url"
                         value="{{ old('venue_url', $setting->venue_url) }}"
                         placeholder="https://maps.google.com/...">
-                    <p class="field-note">入力するとホーム画面に「Google Map →」リンクが表示されます。</p>
+                    <p class="field-note">ホーム・アクセスページに「Google Maps で開く」ボタンとして表示されます。</p>
                     @error('venue_url')<span class="field-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-group">
+                    <label>最寄り駅</label>
+                    <input type="text" name="venue_nearest_station"
+                        value="{{ old('venue_nearest_station', $setting->venue_nearest_station) }}"
+                        placeholder="例：○○線 ○○駅 徒歩5分">
+                </div>
+            </div>
+
+            {{-- ── アクセス情報 ── --}}
+            <div class="settings-section">
+                <h2>アクセス情報</h2>
+                <div class="form-row" style="margin-bottom:16px;">
+                    <div class="form-group">
+                        <label>電車でお越しの方</label>
+                        <textarea name="access_train" rows="3"
+                            placeholder="例：○○線 ○○駅 西口より徒歩5分&#10;○○バス 終点下車すぐ">{{ old('access_train', $setting->access_train) }}</textarea>
+                        <p class="field-note">アクセスページの「電車」カードに表示されます。</p>
+                    </div>
+                    <div class="form-group">
+                        <label>お車でお越しの方</label>
+                        <textarea name="access_car" rows="3"
+                            placeholder="例：○○ICより車で10分&#10;カーナビ住所：○○市○○町1-2-3">{{ old('access_car', $setting->access_car) }}</textarea>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>駐車場情報</label>
+                    <input type="text" name="access_parking"
+                        value="{{ old('access_parking', $setting->access_parking) }}"
+                        placeholder="例：会場に無料駐車場あり（50台）">
+                </div>
+                <div class="form-group">
+                    <label>Google Maps 埋め込みコード</label>
+                    <textarea name="venue_map_embed" rows="4"
+                        placeholder='Google Maps の「共有」→「地図を埋め込む」からコピーした &lt;iframe&gt; コードを貼り付けてください。'>{{ old('venue_map_embed', $setting->venue_map_embed) }}</textarea>
+                    <p class="field-note">アクセスページに地図が埋め込み表示されます。Google Maps → 共有 → 地図を埋め込む → HTMLをコピー</p>
                 </div>
             </div>
 

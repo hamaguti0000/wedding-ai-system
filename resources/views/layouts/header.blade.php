@@ -61,6 +61,28 @@
                         <i class="fa-solid fa-chair" aria-hidden="true"></i>席次表
                     </a>
                 </li>
+                {{-- コンテンツ: ドロップダウン --}}
+                <li class="header__nav-item">
+                    <a href="{{ route('admin.program') }}"
+                       class="{{ request()->routeIs('admin.program*','admin.faq*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-file-lines" aria-hidden="true"></i>コンテンツ
+                        <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
+                    </a>
+                    <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('admin.program') }}"
+                               class="{{ request()->routeIs('admin.program*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-list-ol"></i>式次第
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.faq') }}"
+                               class="{{ request()->routeIs('admin.faq*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-circle-question"></i>Q&amp;A
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 {{-- 設定: 単独リンク --}}
                 <li>
                     <a href="{{ route('admin.settings') }}"
@@ -80,6 +102,24 @@
                     <a href="{{ route('invitation') }}"
                        class="{{ request()->routeIs('invitation') ? 'active' : '' }}">
                         <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>招待状
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('program') }}"
+                       class="{{ request()->routeIs('program') ? 'active' : '' }}">
+                        <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式次第
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('access') }}"
+                       class="{{ request()->routeIs('access') ? 'active' : '' }}">
+                        <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>アクセス
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('faq') }}"
+                       class="{{ request()->routeIs('faq') ? 'active' : '' }}">
+                        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>Q&amp;A
                     </a>
                 </li>
                 @if ($isAttending)
@@ -171,9 +211,21 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.program') }}"
+                   class="{{ request()->routeIs('admin.program*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式次第
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.faq') }}"
+                   class="{{ request()->routeIs('admin.faq*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-circle-question" aria-hidden="true"></i>Q&amp;A
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.settings') }}"
                    class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                    <i class="fa-solid fa-gear" aria-hidden="true"></i>式の情報
+                    <i class="fa-solid fa-gear" aria-hidden="true"></i>設定
                 </a>
             </li>
             <li>
@@ -202,6 +254,24 @@
                 <a href="{{ route('invitation') }}"
                    class="{{ request()->routeIs('invitation') ? 'active' : '' }}">
                     <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>招待状
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('program') }}"
+                   class="{{ request()->routeIs('program') ? 'active' : '' }}">
+                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式次第
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('access') }}"
+                   class="{{ request()->routeIs('access') ? 'active' : '' }}">
+                    <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>アクセス
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('faq') }}"
+                   class="{{ request()->routeIs('faq') ? 'active' : '' }}">
+                    <i class="fa-solid fa-circle-question" aria-hidden="true"></i>Q&amp;A
                 </a>
             </li>
             @if ($isAttending)

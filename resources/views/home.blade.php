@@ -122,10 +122,17 @@
             @if ($setting)
             <p class="home-details__value">{{ $setting->venue_name }}</p>
             <p class="home-details__sub">{{ $setting->venue_address }}</p>
-            @if ($setting->venue_url)
-            <a href="{{ $setting->venue_url }}" target="_blank" rel="noopener"
-               class="home-details__map">Google Map →</a>
-            @endif
+            <div class="home-details__links">
+                @if ($setting->venue_url)
+                <a href="{{ $setting->venue_url }}" target="_blank" rel="noopener"
+                   class="home-details__map-btn">
+                    <i class="fa-brands fa-google"></i> Google Maps
+                </a>
+                @endif
+                <a href="{{ route('access') }}" class="home-details__access-btn">
+                    <i class="fa-solid fa-map-location-dot"></i> アクセス詳細
+                </a>
+            </div>
             @else
             <p class="home-details__value">◯◯チャペル</p>
             <p class="home-details__sub">◯◯県◯◯市◯◯町</p>

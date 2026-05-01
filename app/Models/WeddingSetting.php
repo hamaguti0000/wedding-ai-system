@@ -17,6 +17,11 @@ class WeddingSetting extends Model
         'venue_name',
         'venue_address',
         'venue_url',
+        'venue_nearest_station',
+        'access_train',
+        'access_car',
+        'access_parking',
+        'venue_map_embed',
         'message',
         'is_seating_public',
     ];
