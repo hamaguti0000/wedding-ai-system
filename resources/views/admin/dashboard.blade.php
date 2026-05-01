@@ -66,7 +66,7 @@
                         @else
                             <span class="text-muted">{{ $guest->username }}</span>
                         @endif
-                        <br><span class="text-muted" style="font-size:0.76rem;">@{{ $guest->username }}</span>
+                        <br><span class="text-muted" style="font-size:0.76rem;">{{ $guest->username }}</span>
                     </td>
                     <td class="col-side">
                         @if ($p?->guest_side)

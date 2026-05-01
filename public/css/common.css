@@ -67,7 +67,7 @@
     flex: 1;
     justify-content: center;
 }
-.header__nav ul {
+.header__nav > ul {
     display: flex;
     gap: 36px;
     margin: 0;
