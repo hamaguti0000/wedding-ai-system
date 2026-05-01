@@ -189,26 +189,44 @@
         <div class="pf-section-rule"></div>
 
         @foreach ($tasks as $assignment)
-        <div style="background:#fdfaf6;border:1px solid #e8d5b7;border-left:4px solid #b38b59;border-radius:8px;padding:16px 18px;margin-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                <span style="width:30px;height:30px;border-radius:50%;background:#fef9f0;border:1px solid #e8d5b7;display:flex;align-items:center;justify-content:center;color:#b38b59;flex-shrink:0;">
-                    <i class="fa-solid fa-clipboard-check" style="font-size:0.8rem;"></i>
+        <div style="background:#fff;border:1px solid #e8d5b7;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 3px 14px rgba(179,139,89,0.08);">
+            {{-- ヘッダー --}}
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 18px 12px;background:linear-gradient(135deg,#fef9f0,#fff);border-bottom:1px solid #f5efe8;">
+                <span style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#c9975b,#e8c98a,#b38b59);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;flex-shrink:0;box-shadow:0 3px 10px rgba(179,139,89,0.35);">
+                    <i class="fa-solid fa-clipboard-check"></i>
                 </span>
                 <div>
-                    <p style="font-size:0.98rem;font-weight:600;color:#3d2f25;margin:0 0 2px;">{{ $assignment->task->name }}</p>
+                    <p style="font-size:1rem;font-weight:600;color:#3d2f25;margin:0 0 3px;font-family:'Playfair Display',serif;">{{ $assignment->task->name }}</p>
                     @if ($assignment->custom_time)
-                    <p style="font-size:0.8rem;color:#b38b59;margin:0;display:flex;align-items:center;gap:4px;">
+                    <p style="font-size:0.78rem;color:#b38b59;margin:0;display:flex;align-items:center;gap:4px;font-weight:500;">
                         <i class="fa-regular fa-clock"></i>{{ $assignment->custom_time }}
                     </p>
                     @endif
                 </div>
             </div>
-            @if ($assignment->task->description)
-            <p style="font-size:0.86rem;color:#6b5b4e;line-height:1.8;margin:0 0 6px;white-space:pre-line;">{{ $assignment->task->description }}</p>
-            @endif
-            @if ($assignment->custom_note)
-            <p style="font-size:0.82rem;color:#9b8573;background:#fff;border-radius:5px;padding:6px 12px;margin:0;border:1px solid #f0ebe3;">{{ $assignment->custom_note }}</p>
-            @endif
+            {{-- ボディ --}}
+            <div style="padding:14px 18px;">
+                @if ($assignment->task->programItems->isNotEmpty())
+                <p style="font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;color:#b38b59;font-family:'Noto Sans JP',sans-serif;font-weight:700;margin-bottom:10px;">Program</p>
+                @foreach ($assignment->task->programItems as $pi)
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid #f5efe8;">
+                    <span style="font-size:0.76rem;color:#b38b59;width:56px;flex-shrink:0;font-weight:600;padding-top:2px;">{{ $pi->start_time ?? '—' }}</span>
+                    <span style="width:7px;height:7px;border-radius:50%;background:#b38b59;flex-shrink:0;margin-top:6px;opacity:0.55;"></span>
+                    <div>
+                        <p style="font-size:0.88rem;color:#3d2f25;font-weight:500;margin:0 0 2px;">{{ $pi->title }}</p>
+                        @if ($pi->description)<p style="font-size:0.78rem;color:#9b8573;line-height:1.6;margin:0;">{{ $pi->description }}</p>@endif
+                    </div>
+                </div>
+                @endforeach
+                <div style="margin-bottom:10px;"></div>
+                @endif
+                @if ($assignment->task->description)
+                <p style="font-size:0.86rem;color:#6b5b4e;line-height:1.9;margin:0 0 8px;white-space:pre-line;">{{ $assignment->task->description }}</p>
+                @endif
+                @if ($assignment->custom_note)
+                <p style="font-size:0.82rem;color:#9b8573;background:#fef9f0;border-radius:6px;padding:8px 14px;margin:0;border-left:3px solid #d4b896;">{{ $assignment->custom_note }}</p>
+                @endif
+            </div>
         </div>
         @endforeach
     </div>

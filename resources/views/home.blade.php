@@ -107,32 +107,55 @@
 
         @foreach ($homeTasks as $assignment)
         <div class="home-tasks__card">
-            <div class="home-tasks__card-head">
+            {{-- カードヘッダー --}}
+            <div class="home-tasks__card-top">
                 <span class="home-tasks__icon"><i class="fa-solid fa-clipboard-check"></i></span>
-                <div>
+                <div class="home-tasks__header-text">
                     <p class="home-tasks__name">{{ $assignment->task->name }}</p>
                     @if ($assignment->custom_time)
                     <p class="home-tasks__time">
-                        <i class="fa-regular fa-clock" style="font-size:0.75rem;"></i>
-                        {{ $assignment->custom_time }}
+                        <i class="fa-regular fa-clock"></i>{{ $assignment->custom_time }}
                     </p>
                     @endif
                 </div>
             </div>
-            @if ($assignment->task->description)
-            <p class="home-tasks__desc">{{ $assignment->task->description }}</p>
-            @endif
-            @if ($assignment->custom_note)
-            <p class="home-tasks__note">{{ $assignment->custom_note }}</p>
-            @endif
+
+            {{-- カードボディ --}}
+            <div class="home-tasks__body">
+                {{-- 役割別プログラム --}}
+                @if ($assignment->task->programItems->isNotEmpty())
+                <div class="home-tasks__program">
+                    <p class="home-tasks__program-label">Program</p>
+                    @foreach ($assignment->task->programItems as $pi)
+                    <div class="home-tasks__program-item">
+                        <span class="home-tasks__program-time">{{ $pi->start_time ?? '—' }}</span>
+                        <span class="home-tasks__program-dot"></span>
+                        <div class="home-tasks__program-info">
+                            <p class="home-tasks__program-title">{{ $pi->title }}</p>
+                            @if ($pi->description)
+                            <p class="home-tasks__program-desc">{{ $pi->description }}</p>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+
+                @if ($assignment->task->description)
+                <p class="home-tasks__desc">{{ $assignment->task->description }}</p>
+                @endif
+                @if ($assignment->custom_note)
+                <p class="home-tasks__note">{{ $assignment->custom_note }}</p>
+                @endif
+            </div>
+
+            <div class="home-tasks__footer">
+                <a href="{{ route('profile.edit') }}" class="home-tasks__link">
+                    プロフィールで詳細を確認 <i class="fa-solid fa-chevron-right" style="font-size:0.65rem;"></i>
+                </a>
+            </div>
         </div>
         @endforeach
-
-        <div style="text-align:center;margin-top:20px;">
-            <a href="{{ route('profile.edit') }}" class="home-tasks__link">
-                詳細をプロフィールで確認する <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>
-            </a>
-        </div>
     </div>
 </section>
 @endif
@@ -237,7 +260,7 @@
 // ここではホームページ固有のスクロールフェードのみ
 (function () {
     const fadeEls = document.querySelectorAll(
-        '.home-message__inner, .home-details__inner, .home-news__inner, .home-rsvp__card'
+        '.home-message__inner, .home-details__inner, .home-news__inner, .home-rsvp__card, .home-tasks__inner'
     );
     const obs = new IntersectionObserver((entries) => {
         entries.forEach(e => {

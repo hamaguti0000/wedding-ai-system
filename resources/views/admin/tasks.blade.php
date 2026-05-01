@@ -33,6 +33,17 @@
 .home-toggle { display: flex; align-items: center; gap: 10px; }
 .home-toggle input[type="checkbox"] { width: 16px; height: 16px; accent-color: #b38b59; }
 .home-toggle label { font-size: 0.88rem; color: #6b5b4e; cursor: pointer; }
+
+.prog-list { margin-top: 10px; }
+.prog-list-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; background: #fff; border: 1px solid #f0ebe3;
+    border-radius: 6px; margin-bottom: 6px; font-size: 0.84rem;
+}
+.prog-list-item__time { color: #b38b59; font-weight: 600; width: 56px; flex-shrink: 0; font-size: 0.78rem; }
+.prog-list-item__title { flex: 1; color: #3d2f25; }
+.prog-list-item__actions { display: flex; gap: 4px; flex-shrink: 0; }
+.prog-panel { display:none; margin-top:10px; background:#fef9f0; border-radius:8px; padding:16px; border:1px solid #e8d5b7; }
 </style>
 @endpush
 
@@ -124,10 +135,66 @@
             <button class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $task->id }})">
                 <i class="fa-solid fa-pen"></i> 編集
             </button>
+            <button class="btn-sm btn-sm-pw" onclick="toggleProg({{ $task->id }})">
+                <i class="fa-solid fa-list-ol"></i> プログラム
+                @if ($task->programItems->count())
+                <span style="background:#b38b59;color:#fff;border-radius:10px;padding:1px 6px;font-size:0.7rem;margin-left:2px;">{{ $task->programItems->count() }}</span>
+                @endif
+            </button>
             <form method="POST" action="{{ route('admin.tasks.destroy', $task->id) }}"
                   onsubmit="return confirm('削除しますか？担当者の割り当ても解除されます。')">
                 @csrf @method('DELETE')
                 <button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button>
+            </form>
+        </div>
+
+        {{-- プログラムパネル --}}
+        <div id="prog-{{ $task->id }}" class="prog-panel">
+            <p style="font-size:0.75rem;font-weight:700;color:#b38b59;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">当日のプログラム</p>
+
+            {{-- 既存項目 --}}
+            @forelse ($task->programItems as $pi)
+            <div class="prog-list-item">
+                <span class="prog-list-item__time">{{ $pi->start_time ?? '—' }}</span>
+                <span class="prog-list-item__title">
+                    {{ $pi->title }}
+                    @if ($pi->description)
+                    <span style="color:#9b8573;font-size:0.78rem;margin-left:6px;">{{ $pi->description }}</span>
+                    @endif
+                </span>
+                <div class="prog-list-item__actions">
+                    <form method="POST" action="{{ route('admin.tasks.program.move-up', [$task->id, $pi->id]) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" style="padding:3px 7px;font-size:0.7rem;"><i class="fa-solid fa-chevron-up"></i></button></form>
+                    <form method="POST" action="{{ route('admin.tasks.program.move-down', [$task->id, $pi->id]) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" style="padding:3px 7px;font-size:0.7rem;"><i class="fa-solid fa-chevron-down"></i></button></form>
+                    <button class="btn-sm btn-sm-pw" style="padding:3px 7px;font-size:0.7rem;" onclick="toggleProgEdit('pe-{{ $pi->id }}')"><i class="fa-solid fa-pen"></i></button>
+                    <form method="POST" action="{{ route('admin.tasks.program.destroy', [$task->id, $pi->id]) }}" onsubmit="return confirm('削除？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del" style="padding:3px 7px;font-size:0.7rem;"><i class="fa-solid fa-trash"></i></button></form>
+                </div>
+            </div>
+            {{-- 編集フォーム --}}
+            <div id="pe-{{ $pi->id }}" style="display:none;margin:-6px 0 6px;background:#fff;border:1px solid #e8d5b7;border-radius:6px;padding:12px;">
+                <form method="POST" action="{{ route('admin.tasks.program.update', [$task->id, $pi->id]) }}">
+                    @csrf @method('PATCH')
+                    <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;margin-bottom:8px;">
+                        <div class="form-group"><label style="font-size:0.75rem;">時間</label><input type="text" name="start_time" value="{{ $pi->start_time }}" placeholder="12:30"></div>
+                        <div class="form-group"><label style="font-size:0.75rem;">タイトル</label><input type="text" name="title" value="{{ $pi->title }}" required></div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:8px;"><label style="font-size:0.75rem;">説明</label><input type="text" name="description" value="{{ $pi->description }}" placeholder="任意"></div>
+                    <div style="display:flex;gap:6px;"><button type="submit" class="btn-primary" style="padding:6px 14px;font-size:0.8rem;">保存</button><button type="button" onclick="toggleProgEdit('pe-{{ $pi->id }}')" class="btn-secondary" style="padding:6px 10px;font-size:0.8rem;">×</button></div>
+                </form>
+            </div>
+            @empty
+            <p style="font-size:0.8rem;color:#bbb;margin-bottom:12px;">プログラム項目がありません</p>
+            @endforelse
+
+            {{-- 追加フォーム --}}
+            <form method="POST" action="{{ route('admin.tasks.program.store', $task->id) }}" style="margin-top:12px;padding-top:12px;border-top:1px solid #e8d5b7;">
+                @csrf
+                <p style="font-size:0.72rem;color:#b38b59;letter-spacing:1px;margin-bottom:8px;font-weight:600;">＋ 項目を追加</p>
+                <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;margin-bottom:8px;">
+                    <div class="form-group"><label style="font-size:0.75rem;">時間</label><input type="text" name="start_time" placeholder="12:30"></div>
+                    <div class="form-group"><label style="font-size:0.75rem;">タイトル <span class="req">*</span></label><input type="text" name="title" placeholder="例：受付開始" required></div>
+                </div>
+                <div class="form-group" style="margin-bottom:8px;"><label style="font-size:0.75rem;">説明（任意）</label><input type="text" name="description" placeholder="例：会場入口にてゲストをご案内ください"></div>
+                <button type="submit" class="btn-primary" style="padding:7px 16px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> 追加</button>
             </form>
         </div>
     </div>
@@ -163,6 +230,14 @@
 <script>
 function toggleEdit(id) {
     const el = document.getElementById('task-edit-' + id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function toggleProg(id) {
+    const el = document.getElementById('prog-' + id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function toggleProgEdit(id) {
+    const el = document.getElementById(id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 </script>

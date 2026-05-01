@@ -547,30 +547,95 @@
    ================================================================ */
 .countdown {
     position: fixed;
-    bottom: 24px;
-    right: 20px;
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #fff;
-    letter-spacing: 1px;
-    border: 1.5px solid rgba(255,255,255,0.7);
-    padding: 10px 20px;
-    border-radius: 30px;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-    transition: all 0.5s ease;
+    bottom: 28px;
+    right: 24px;
     z-index: 99;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 22px 13px 16px;
+    border-radius: 50px;
+    background: rgba(253, 250, 246, 0.97);
+    border: 1px solid rgba(179, 139, 89, 0.38);
+    box-shadow:
+        0 8px 32px rgba(179, 139, 89, 0.18),
+        0 2px 8px rgba(0, 0, 0, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #3d2f25;
+    letter-spacing: 2px;
+    cursor: pointer;
+    user-select: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.3s ease,
+                box-shadow 0.25s ease;
+    pointer-events: none;
 }
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50%       { transform: scale(1.04); }
+.countdown.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
 }
-.countdown span { display: inline-block; animation: pulse 1s infinite; }
+.countdown:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 14px 44px rgba(179, 139, 89, 0.24),
+        0 4px 12px rgba(0, 0, 0, 0.09),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+.countdown:active { transform: translateY(-1px); }
+
+/* ゴールドの宝石アイコン */
+.countdown__gem {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c9975b 0%, #e8c98a 50%, #b38b59 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.9);
+    box-shadow: 0 2px 8px rgba(179,139,89,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+    letter-spacing: 0;
+}
+.countdown__text {
+    line-height: 1;
+    white-space: nowrap;
+}
+.countdown__days {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #b38b59;
+    margin-right: 2px;
+}
+.countdown__label {
+    font-size: 0.72rem;
+    color: #9b8573;
+    letter-spacing: 1.5px;
+}
+/* 閉じるヒント */
+.countdown__close {
+    margin-left: 6px;
+    font-size: 0.6rem;
+    color: #d0c0a8;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-family: sans-serif;
+    letter-spacing: 0;
+}
+.countdown:hover .countdown__close { opacity: 1; }
 
 /* ================================================================
    Tablet+
    ================================================================ */
 @media (min-width: 768px) {
-    .countdown { bottom: 30px; right: 30px; font-size: 1.1rem; }
+    .countdown { bottom: 32px; right: 32px; }
 }

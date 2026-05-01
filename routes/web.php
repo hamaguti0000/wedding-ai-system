@@ -80,6 +80,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/tasks/{id}',           [AdminTaskController::class, 'destroy']) ->name('tasks.destroy');
     Route::patch('/tasks/{id}/move-up',    [AdminTaskController::class, 'moveUp'])  ->name('tasks.move-up');
     Route::patch('/tasks/{id}/move-down',  [AdminTaskController::class, 'moveDown'])->name('tasks.move-down');
+    Route::post  ('/tasks/{id}/program',              [AdminTaskController::class, 'storeProgram'])  ->name('tasks.program.store');
+    Route::patch ('/tasks/{id}/program/{pid}',        [AdminTaskController::class, 'updateProgram']) ->name('tasks.program.update');
+    Route::delete('/tasks/{id}/program/{pid}',        [AdminTaskController::class, 'destroyProgram'])->name('tasks.program.destroy');
+    Route::patch ('/tasks/{id}/program/{pid}/move-up',   [AdminTaskController::class, 'moveProgramUp'])  ->name('tasks.program.move-up');
+    Route::patch ('/tasks/{id}/program/{pid}/move-down', [AdminTaskController::class, 'moveProgramDown'])->name('tasks.program.move-down');
 
     // 式次第管理
     Route::get('/program',                   [AdminProgramController::class, 'index'])   ->name('program');

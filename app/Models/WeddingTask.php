@@ -17,4 +17,9 @@ class WeddingTask extends Model
     {
         return $this->hasMany(GuestTaskAssignment::class);
     }
+
+    public function programItems()
+    {
+        return $this->hasMany(TaskProgramItem::class)->orderBy('sort_order')->orderBy('id');
+    }
 }

@@ -16,7 +16,7 @@ class HomeController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $user->load(['guestProfile', 'taskAssignments.task']);
+        $user->load(['guestProfile', 'taskAssignments.task.programItems']);
 
         $setting = WeddingSetting::first();
 

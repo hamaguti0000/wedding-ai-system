@@ -39,30 +39,41 @@
         $__cdDate    = $__cdVisible ? \App\Models\WeddingSetting::value('ceremony_date') : null;
     @endphp
     @if ($__cdDate)
-    <div class="countdown" id="countdownWidget" style="display:none;" title="クリックで非表示">
-        <span id="countdownDays"></span>
+    <div class="countdown" id="countdownWidget">
+        <span class="countdown__gem">✦</span>
+        <span class="countdown__text">
+            <span id="countdownDays" class="countdown__days"></span><span class="countdown__label" id="countdownLabel"></span>
+        </span>
+        <span class="countdown__close">✕</span>
     </div>
     <script>
     (function () {
         const widget = document.getElementById('countdownWidget');
-        const label  = document.getElementById('countdownDays');
+        const daysEl = document.getElementById('countdownDays');
+        const lblEl  = document.getElementById('countdownLabel');
         const target = new Date('{{ \Carbon\Carbon::parse($__cdDate)->format('Y-m-d') }}T00:00:00+09:00');
 
         function update() {
-            const now  = new Date();
-            const diff = target - now;
-            if (diff <= 0) { widget.style.display = 'none'; return; }
+            const diff = target - new Date();
+            if (diff <= 0) { widget.classList.remove('is-visible'); return; }
             const days = Math.floor(diff / 86400000);
-            label.textContent = days === 0 ? '本日が挙式です ✦' : `挙式まで あと ${days}日`;
-            if (!sessionStorage.getItem('cdDismissed')) {
-                widget.style.display = 'block';
+            if (days === 0) {
+                daysEl.textContent = '本日';
+                lblEl.textContent  = ' 挙式当日';
+            } else {
+                daysEl.textContent = days;
+                lblEl.textContent  = ' 日後';
             }
         }
 
         update();
         setInterval(update, 60000);
+
+        if (!sessionStorage.getItem('cdDismissed')) {
+            setTimeout(() => widget.classList.add('is-visible'), 1400);
+        }
         widget.addEventListener('click', () => {
-            widget.style.display = 'none';
+            widget.classList.remove('is-visible');
             sessionStorage.setItem('cdDismissed', '1');
         });
     })();

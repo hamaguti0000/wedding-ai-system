@@ -9,7 +9,7 @@ class ProfileController extends Controller
 {
     public function show(Request $request)
     {
-        $user = $request->user()->load(['guestProfile', 'taskAssignments.task']);
+        $user = $request->user()->load(['guestProfile', 'taskAssignments.task.programItems']);
 
         return view('profile', [
             'user'    => $user,
