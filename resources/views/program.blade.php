@@ -147,6 +147,16 @@ main { padding: 0; text-align: initial; }
             &nbsp;|&nbsp; {{ $setting->ceremonyTimeFormatted() }} 挙式
         </p>
         @endif
+
+        {{-- 役割専用プログラム表示中バッジ --}}
+        @if ($isRoleProgram)
+        <div style="margin-top:18px;display:inline-flex;align-items:center;gap:8px;background:#fef9f0;border:1px solid #e8d5b7;border-radius:20px;padding:6px 16px;">
+            <i class="fa-solid fa-clipboard-check" style="color:#b38b59;font-size:0.8rem;"></i>
+            <span style="font-size:0.78rem;color:#b38b59;font-family:'Noto Sans JP',sans-serif;font-weight:600;letter-spacing:1px;">
+                {{ $roleNames->implode('・') }} のプログラム
+            </span>
+        </div>
+        @endif
     </div>
 
     @if ($items->isEmpty())
@@ -160,7 +170,7 @@ main { padding: 0; text-align: initial; }
         <div class="tl-item">
             <div class="tl-time">{{ $item->start_time ?? '' }}</div>
             <div class="tl-dot">
-                <i class="fa-solid {{ $item->icon }}"></i>
+                <i class="fa-solid {{ $item->icon ?? 'fa-circle' }}"></i>
             </div>
             <div class="tl-body">
                 <p class="tl-title">{{ $item->title }}</p>

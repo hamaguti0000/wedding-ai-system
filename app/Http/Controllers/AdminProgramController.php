@@ -3,14 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProgramItem;
+use App\Models\TaskProgramItem;
+use App\Models\WeddingTask;
 use Illuminate\Http\Request;
 
 class AdminProgramController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = ProgramItem::orderBy('display_order')->orderBy('id')->get();
-        return view('admin.program', compact('items'));
+        $roles      = WeddingTask::orderBy('sort_order')->orderBy('id')
+            ->withCount('programItems')->get();
+        $roleId     = $request->integer('role_id', 0);
+
+        if ($roleId > 0 && $roles->contains('id', $roleId)) {
+            $selectedRole = $roles->find($roleId);
+            $items        = TaskProgramItem::where('wedding_task_id', $roleId)
+                ->orderBy('sort_order')->orderBy('id')->get();
+        } else {
+            $selectedRole = null;
+            $roleId       = 0;
+            $items        = ProgramItem::orderBy('display_order')->orderBy('id')->get();
+        }
+
+        return view('admin.program', compact('items', 'roles', 'selectedRole', 'roleId'));
     }
 
     public function store(Request $request)
