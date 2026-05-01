@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NewsItem;
 use App\Models\WeddingSetting;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,6 +29,9 @@ class HomeController extends Controller
             ),
             'deadlinePassed' => $setting?->rsvp_deadline !== null
                 && today()->isAfter($setting->rsvp_deadline),
+            'news' => NewsItem::where('is_active', true)
+                ->orderBy('sort_order')->orderByDesc('published_date')
+                ->limit(5)->get(),
         ]);
     }
 }

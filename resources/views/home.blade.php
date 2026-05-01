@@ -209,18 +209,23 @@
         <h2 class="home-section__ja">お知らせ</h2>
         <div class="home-section__rule"></div>
 
+        @if ($news->isEmpty())
+        <p style="text-align:center;color:#c0b0a0;font-size:0.9rem;padding:20px 0;">お知らせはありません</p>
+        @else
         <ul class="home-news__list">
+            @foreach ($news as $item)
             <li class="home-news__item">
-                <time class="home-news__date">2025.12.24</time>
-                <span class="home-news__tag">New</span>
-                <p class="home-news__text">当日のご案内</p>
+                <time class="home-news__date">{{ $item->published_date->format('Y.m.d') }}</time>
+                @if ($item->tag)
+                <span class="home-news__tag">{{ $item->tag }}</span>
+                @else
+                <span></span>
+                @endif
+                <p class="home-news__text">{{ $item->body }}</p>
             </li>
-            <li class="home-news__item">
-                <time class="home-news__date">2025.10.16</time>
-                <span class="home-news__tag">Info</span>
-                <p class="home-news__text">WEB招待状の記入のお願い</p>
-            </li>
+            @endforeach
         </ul>
+        @endif
     </div>
 </section>
 

@@ -8,6 +8,16 @@
     .col-side, .col-date { display: none; }
     .col-count { white-space: nowrap; }
 }
+.summary-row { grid-template-columns: repeat(4, 1fr); }
+.summary-card .sub { font-size: 0.75rem; color: #b0a090; margin-top: 3px; }
+.summary-card .icon-top { font-size: 1.2rem; margin-bottom: 8px; opacity: 0.55; }
+.progress-wrap { margin: 0 0 24px; background: #fff; border-radius: 14px; padding: 18px 22px; box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #777; margin-bottom: 8px; }
+.progress-bar { height: 8px; background: #f0ebe3; border-radius: 4px; overflow: hidden; }
+.progress-bar__fill { height: 100%; background: linear-gradient(90deg, #27ae60, #52d68a); border-radius: 4px; transition: width 0.8s ease; }
+@media (max-width: 640px) {
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 @endpush
 
@@ -15,19 +25,42 @@
 <div class="admin-wrap">
     <h1>ゲスト一覧</h1>
 
-    {{-- サマリー --}}
-    <div class="summary-cards">
+    {{-- 返答率プログレスバー --}}
+    <div class="progress-wrap">
+        <div class="progress-label">
+            <span>返答率 <strong style="color:#3d2f25;">{{ $summary['response_rate'] }}%</strong></span>
+            <span>{{ $summary['total'] - $summary['pending'] }} / {{ $summary['total'] }}名 回答済み</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar__fill" style="width: {{ $summary['response_rate'] }}%"></div>
+        </div>
+    </div>
+
+    {{-- サマリー 4カード --}}
+    <div class="summary-cards summary-row" style="margin-bottom:14px;">
+        <div class="summary-card total">
+            <div class="icon-top"><i class="fa-solid fa-users"></i></div>
+            <div class="count">{{ $summary['total'] }}</div>
+            <div class="label">ゲスト合計</div>
+        </div>
         <div class="summary-card attending">
+            <div class="icon-top"><i class="fa-solid fa-circle-check"></i></div>
             <div class="count">{{ $summary['attending'] }}</div>
-            <div class="label">出席 / {{ $summary['total'] }}名</div>
+            <div class="label">出席</div>
+            <div class="sub">当日 {{ $summary['people_count'] }}名参加予定</div>
         </div>
         <div class="summary-card declining">
+            <div class="icon-top"><i class="fa-solid fa-circle-xmark"></i></div>
             <div class="count">{{ $summary['declining'] }}</div>
-            <div class="label">欠席 / {{ $summary['total'] }}名</div>
+            <div class="label">欠席</div>
         </div>
         <div class="summary-card pending">
+            <div class="icon-top"><i class="fa-regular fa-clock"></i></div>
             <div class="count">{{ $summary['pending'] }}</div>
-            <div class="label">未回答 / {{ $summary['total'] }}名</div>
+            <div class="label">未回答</div>
+            @if ($summary['allergy_count'] > 0)
+            <div class="sub" style="color:#e67e22;">アレルギー {{ $summary['allergy_count'] }}名</div>
+            @endif
         </div>
     </div>
 

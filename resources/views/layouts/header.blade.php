@@ -64,11 +64,17 @@
                 {{-- コンテンツ: ドロップダウン --}}
                 <li class="header__nav-item">
                     <a href="{{ route('admin.program') }}"
-                       class="{{ request()->routeIs('admin.program*','admin.faq*','admin.profiles') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('admin.program*','admin.faq*','admin.profiles','admin.news*','admin.tasks*') ? 'active' : '' }}">
                         <i class="fa-solid fa-file-lines" aria-hidden="true"></i>コンテンツ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
                     <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('admin.news') }}"
+                               class="{{ request()->routeIs('admin.news*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-bullhorn"></i>お知らせ
+                            </a>
+                        </li>
                         <li>
                             <a href="{{ route('admin.profiles') }}"
                                class="{{ request()->routeIs('admin.profiles') ? 'active' : '' }}">
@@ -236,6 +242,12 @@
                 <a href="{{ route('admin.seating') }}"
                    class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
                     <i class="fa-solid fa-chair" aria-hidden="true"></i>席次表
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.news') }}"
+                   class="{{ request()->routeIs('admin.news*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>お知らせ
                 </a>
             </li>
             <li>

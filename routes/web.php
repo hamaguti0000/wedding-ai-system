@@ -20,6 +20,7 @@ use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\GuestSeatingController;
 use App\Http\Controllers\CoupleProfileController;
 use App\Http\Controllers\AdminProfileController;
+use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\AdminTaskController;
 
 // ── トップページ ─────────────────────────────────────────
@@ -59,6 +60,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
+
+    // お知らせ管理
+    Route::get('/news',                  [AdminNewsController::class, 'index'])   ->name('news');
+    Route::post('/news',                 [AdminNewsController::class, 'store'])   ->name('news.store');
+    Route::patch('/news/{id}',           [AdminNewsController::class, 'update'])  ->name('news.update');
+    Route::delete('/news/{id}',          [AdminNewsController::class, 'destroy']) ->name('news.destroy');
+    Route::patch('/news/{id}/move-up',   [AdminNewsController::class, 'moveUp'])  ->name('news.move-up');
+    Route::patch('/news/{id}/move-down', [AdminNewsController::class, 'moveDown'])->name('news.move-down');
 
     // プロフィール管理
     Route::get('/profiles',  [AdminProfileController::class, 'edit'])  ->name('profiles');

@@ -34,6 +34,41 @@
 
     @stack('scripts')
 
+    @php
+        $__cdVisible = Auth::check() && !Auth::user()->isAdmin();
+        $__cdDate    = $__cdVisible ? \App\Models\WeddingSetting::value('ceremony_date') : null;
+    @endphp
+    @if ($__cdDate)
+    <div class="countdown" id="countdownWidget" style="display:none;" title="クリックで非表示">
+        <span id="countdownDays"></span>
+    </div>
+    <script>
+    (function () {
+        const widget = document.getElementById('countdownWidget');
+        const label  = document.getElementById('countdownDays');
+        const target = new Date('{{ \Carbon\Carbon::parse($__cdDate)->format('Y-m-d') }}T00:00:00+09:00');
+
+        function update() {
+            const now  = new Date();
+            const diff = target - now;
+            if (diff <= 0) { widget.style.display = 'none'; return; }
+            const days = Math.floor(diff / 86400000);
+            label.textContent = days === 0 ? '本日が挙式です ✦' : `挙式まで あと ${days}日`;
+            if (!sessionStorage.getItem('cdDismissed')) {
+                widget.style.display = 'block';
+            }
+        }
+
+        update();
+        setInterval(update, 60000);
+        widget.addEventListener('click', () => {
+            widget.style.display = 'none';
+            sessionStorage.setItem('cdDismissed', '1');
+        });
+    })();
+    </script>
+    @endif
+
 </body>
 
 </html>
