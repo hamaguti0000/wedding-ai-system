@@ -18,6 +18,8 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminProgramController;
 use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\GuestSeatingController;
+use App\Http\Controllers\CoupleProfileController;
+use App\Http\Controllers\AdminProfileController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
@@ -40,9 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/invitation', [InvitationController::class,'index'])->name('invitation');
     Route::post('/invitation',[InvitationController::class,'update'])->name('invitation.update');
     Route::get('/seating',    [GuestSeatingController::class,'index'])->name('seating.guest');
-    Route::get('/program',    [ProgramController::class,   'index'])->name('program');
-    Route::get('/access',     [AccessController::class,    'index'])->name('access');
-    Route::get('/faq',        [FaqController::class,       'index'])->name('faq');
+    Route::get('/program',    [ProgramController::class,       'index'])->name('program');
+    Route::get('/access',     [AccessController::class,        'index'])->name('access');
+    Route::get('/faq',        [FaqController::class,           'index'])->name('faq');
+    Route::get('/profiles',          [CoupleProfileController::class, 'index'])->name('profiles.index');
+    Route::get('/profiles/{person}', [CoupleProfileController::class, 'show']) ->name('profiles.show')
+         ->where('person', 'groom|bride');
 });
 
 // ── 管理者用ページ（認証 + admin）────────────────────────
@@ -53,6 +58,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
+
+    // プロフィール管理
+    Route::get('/profiles',  [AdminProfileController::class, 'edit'])  ->name('profiles');
+    Route::post('/profiles', [AdminProfileController::class, 'update'])->name('profiles.update');
 
     // 式次第管理
     Route::get('/program',                   [AdminProgramController::class, 'index'])   ->name('program');

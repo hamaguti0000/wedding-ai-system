@@ -64,11 +64,17 @@
                 {{-- コンテンツ: ドロップダウン --}}
                 <li class="header__nav-item">
                     <a href="{{ route('admin.program') }}"
-                       class="{{ request()->routeIs('admin.program*','admin.faq*') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('admin.program*','admin.faq*','admin.profiles') ? 'active' : '' }}">
                         <i class="fa-solid fa-file-lines" aria-hidden="true"></i>コンテンツ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
                     <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('admin.profiles') }}"
+                               class="{{ request()->routeIs('admin.profiles') ? 'active' : '' }}">
+                                <i class="fa-solid fa-heart"></i>プロフィール
+                            </a>
+                        </li>
                         <li>
                             <a href="{{ route('admin.program') }}"
                                class="{{ request()->routeIs('admin.program*') ? 'active' : '' }}">
@@ -102,6 +108,12 @@
                     <a href="{{ route('invitation') }}"
                        class="{{ request()->routeIs('invitation') ? 'active' : '' }}">
                         <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>招待状
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('profiles.index') }}"
+                       class="{{ request()->routeIs('profiles.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-heart" aria-hidden="true"></i>プロフィール
                     </a>
                 </li>
                 {{-- 式について ドロップダウン --}}
@@ -221,6 +233,12 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.profiles') }}"
+                   class="{{ request()->routeIs('admin.profiles') ? 'active' : '' }}">
+                    <i class="fa-solid fa-heart" aria-hidden="true"></i>プロフィール
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.program') }}"
                    class="{{ request()->routeIs('admin.program*') ? 'active' : '' }}">
                     <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式次第
@@ -264,6 +282,12 @@
                 <a href="{{ route('invitation') }}"
                    class="{{ request()->routeIs('invitation') ? 'active' : '' }}">
                     <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>招待状
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('profiles.index') }}"
+                   class="{{ request()->routeIs('profiles.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-heart" aria-hidden="true"></i>プロフィール
                 </a>
             </li>
             <li class="header-drawer__section-label">式について</li>

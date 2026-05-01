@@ -25,6 +25,10 @@ class WeddingSetting extends Model
         'message',
         'is_seating_public',
         'rsvp_deadline',
+        'groom_photo',
+        'groom_bio',
+        'bride_photo',
+        'bride_bio',
     ];
 
     protected function casts(): array
