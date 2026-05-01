@@ -97,6 +97,46 @@
 </section>
 @endif
 
+{{-- ══ 当日のお願い（タスクが割り当てられている場合のみ表示）══════════ --}}
+@if ($homeTasks->isNotEmpty())
+<section class="home-tasks">
+    <div class="home-tasks__inner">
+        <span class="home-section__en">Your Role</span>
+        <h2 class="home-section__ja">当日のお願い</h2>
+        <div class="home-section__rule"></div>
+
+        @foreach ($homeTasks as $assignment)
+        <div class="home-tasks__card">
+            <div class="home-tasks__card-head">
+                <span class="home-tasks__icon"><i class="fa-solid fa-clipboard-check"></i></span>
+                <div>
+                    <p class="home-tasks__name">{{ $assignment->task->name }}</p>
+                    @if ($assignment->custom_time)
+                    <p class="home-tasks__time">
+                        <i class="fa-regular fa-clock" style="font-size:0.75rem;"></i>
+                        {{ $assignment->custom_time }}
+                    </p>
+                    @endif
+                </div>
+            </div>
+            @if ($assignment->task->description)
+            <p class="home-tasks__desc">{{ $assignment->task->description }}</p>
+            @endif
+            @if ($assignment->custom_note)
+            <p class="home-tasks__note">{{ $assignment->custom_note }}</p>
+            @endif
+        </div>
+        @endforeach
+
+        <div style="text-align:center;margin-top:20px;">
+            <a href="{{ route('profile.edit') }}" class="home-tasks__link">
+                詳細をプロフィールで確認する <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>
+            </a>
+        </div>
+    </div>
+</section>
+@endif
+
 {{-- ══ MESSAGE ══════════════════════════════════════════════════════ --}}
 <section class="home-message">
     <div class="home-message__inner">

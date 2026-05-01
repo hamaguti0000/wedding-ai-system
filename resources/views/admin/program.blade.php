@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', '式次第管理 | Admin')
+@section('title', 'プログラム管理 | Admin')
 
 @push('styles')
 <style>
-/* 式次第管理固有スタイル */
+/* プログラム管理固有スタイル */
 .prog-item {
     background: #fff;
     border-radius: 10px;
@@ -53,7 +53,7 @@
 
 @section('content')
 <div class="admin-wrap">
-    <h1><i class="fa-solid fa-list-ol" style="font-size:1.2rem;opacity:0.7;margin-right:8px;"></i>式次第管理</h1>
+    <h1><i class="fa-solid fa-list-ol" style="font-size:1.2rem;opacity:0.7;margin-right:8px;"></i>プログラム管理</h1>
 
     @if (session('success'))
     <div class="alert-success" style="margin-bottom:20px;">{{ session('success') }}</div>

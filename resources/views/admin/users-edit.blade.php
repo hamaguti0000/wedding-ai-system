@@ -220,6 +220,49 @@
             </div>
         </div>
 
+        {{-- ── 当日の役割 ── --}}
+        @if ($tasks->isNotEmpty())
+        <div class="edit-card guest-fields" id="taskFields">
+            <h2>当日の役割</h2>
+            <p style="font-size:0.82rem;color:#9b8573;margin-bottom:16px;">
+                役割にチェックを入れると、そのゲストのホーム画面・プロフィール画面に表示されます。
+            </p>
+            @foreach ($tasks as $task)
+            @php $a = $user->taskAssignments->firstWhere('wedding_task_id', $task->id); @endphp
+            <div style="background:#fdfaf6;border:1px solid #f0ebe3;border-radius:8px;padding:14px 16px;margin-bottom:10px;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:#3d2f25;font-size:0.92rem;">
+                    <input type="checkbox" name="task_ids[]" value="{{ $task->id }}"
+                           {{ $a ? 'checked' : '' }}
+                           onchange="toggleTaskDetail('td-{{ $task->id }}', this.checked)"
+                           style="width:16px;height:16px;accent-color:#b38b59;flex-shrink:0;">
+                    {{ $task->name }}
+                </label>
+                @if ($task->description)
+                <p style="font-size:0.78rem;color:#9b8573;margin:4px 0 0 26px;line-height:1.6;">{{ $task->description }}</p>
+                @endif
+                <div id="td-{{ $task->id }}" style="margin-top:10px;margin-left:26px;{{ $a ? '' : 'display:none;' }}">
+                    <div class="form-row" style="margin-bottom:0;">
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label style="font-size:0.78rem;">実施時間</label>
+                            <input type="text" name="task_times[{{ $task->id }}]"
+                                   value="{{ $a?->custom_time }}"
+                                   placeholder="例：12:30〜13:00"
+                                   style="padding:7px 10px;font-size:0.85rem;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label style="font-size:0.78rem;">個別メモ（任意）</label>
+                            <input type="text" name="task_notes[{{ $task->id }}]"
+                                   value="{{ $a?->custom_note }}"
+                                   placeholder="例：◯◯さんと一緒にお願いします"
+                                   style="padding:7px 10px;font-size:0.85rem;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
         <div class="btn-row">
             <button type="submit" class="btn-save">
                 <i class="fa-solid fa-floppy-disk"></i> 保存する
@@ -231,8 +274,12 @@
 </div>
 
 <script>
+function toggleTaskDetail(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? 'block' : 'none';
+}
 function toggleGuestFields(isGuest) {
-    ['guestFields','attendanceFields','contactFields'].forEach(id => {
+    ['guestFields','attendanceFields','contactFields','taskFields'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('hidden', !isGuest);
     });

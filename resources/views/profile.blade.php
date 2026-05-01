@@ -181,7 +181,40 @@
         </div>
     </div>
 
-    {{-- ══ CARD 3: 式のご案内 ════════════════════════════ --}}
+    {{-- ══ CARD 3: 当日の役割 ════════════════════════════ --}}
+    @if ($tasks->isNotEmpty())
+    <div class="pf-card">
+        <span class="pf-section-en">Your Role</span>
+        <h2 class="pf-section-ja">当日のお願い</h2>
+        <div class="pf-section-rule"></div>
+
+        @foreach ($tasks as $assignment)
+        <div style="background:#fdfaf6;border:1px solid #e8d5b7;border-left:4px solid #b38b59;border-radius:8px;padding:16px 18px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <span style="width:30px;height:30px;border-radius:50%;background:#fef9f0;border:1px solid #e8d5b7;display:flex;align-items:center;justify-content:center;color:#b38b59;flex-shrink:0;">
+                    <i class="fa-solid fa-clipboard-check" style="font-size:0.8rem;"></i>
+                </span>
+                <div>
+                    <p style="font-size:0.98rem;font-weight:600;color:#3d2f25;margin:0 0 2px;">{{ $assignment->task->name }}</p>
+                    @if ($assignment->custom_time)
+                    <p style="font-size:0.8rem;color:#b38b59;margin:0;display:flex;align-items:center;gap:4px;">
+                        <i class="fa-regular fa-clock"></i>{{ $assignment->custom_time }}
+                    </p>
+                    @endif
+                </div>
+            </div>
+            @if ($assignment->task->description)
+            <p style="font-size:0.86rem;color:#6b5b4e;line-height:1.8;margin:0 0 6px;white-space:pre-line;">{{ $assignment->task->description }}</p>
+            @endif
+            @if ($assignment->custom_note)
+            <p style="font-size:0.82rem;color:#9b8573;background:#fff;border-radius:5px;padding:6px 12px;margin:0;border:1px solid #f0ebe3;">{{ $assignment->custom_note }}</p>
+            @endif
+        </div>
+        @endforeach
+    </div>
+    @endif
+
+    {{-- ══ CARD 4: 式のご案内 ════════════════════════════ --}}
     @if ($setting)
     <div class="pf-card">
         <span class="pf-section-en">Wedding Info</span>

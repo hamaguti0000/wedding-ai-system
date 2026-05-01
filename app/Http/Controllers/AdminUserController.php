@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\GuestProfile;
+use App\Models\GuestTaskAssignment;
 use App\Models\User;
+use App\Models\WeddingTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -63,8 +65,9 @@ class AdminUserController extends Controller
 
     public function edit(int $id)
     {
-        $user = User::with('guestProfile')->findOrFail($id);
-        return view('admin.users-edit', compact('user'));
+        $user  = User::with(['guestProfile', 'taskAssignments'])->findOrFail($id);
+        $tasks = WeddingTask::orderBy('sort_order')->orderBy('id')->get();
+        return view('admin.users-edit', compact('user', 'tasks'));
     }
 
     public function update(Request $request, int $id)
@@ -135,6 +138,17 @@ class AdminUserController extends Controller
                                                 : null,
                 ]
             );
+        }
+
+        // タスク割り当て更新
+        $user->taskAssignments()->delete();
+        foreach ($request->input('task_ids', []) as $taskId) {
+            GuestTaskAssignment::create([
+                'user_id'         => $user->id,
+                'wedding_task_id' => $taskId,
+                'custom_time'     => $request->input("task_times.{$taskId}") ?: null,
+                'custom_note'     => $request->input("task_notes.{$taskId}") ?: null,
+            ]);
         }
 
         return redirect()->route('admin.users')

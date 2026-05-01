@@ -9,12 +9,13 @@ class ProfileController extends Controller
 {
     public function show(Request $request)
     {
-        $user = $request->user()->load('guestProfile');
+        $user = $request->user()->load(['guestProfile', 'taskAssignments.task']);
 
         return view('profile', [
             'user'    => $user,
             'profile' => $user->guestProfile,
             'setting' => WeddingSetting::first(),
+            'tasks'   => $user->taskAssignments,
         ]);
     }
 }

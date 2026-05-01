@@ -76,9 +76,15 @@
                             </a>
                         </li>
                         <li>
+                            <a href="{{ route('admin.tasks') }}"
+                               class="{{ request()->routeIs('admin.tasks*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clipboard-list"></i>当日の役割
+                            </a>
+                        </li>
+                        <li>
                             <a href="{{ route('admin.program') }}"
                                class="{{ request()->routeIs('admin.program*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-list-ol"></i>式次第
+                                <i class="fa-solid fa-list-ol"></i>プログラム
                             </a>
                         </li>
                         <li>
@@ -127,7 +133,7 @@
                         <li>
                             <a href="{{ route('program') }}"
                                class="{{ request()->routeIs('program') ? 'active' : '' }}">
-                                <i class="fa-solid fa-list-ol"></i>式次第
+                                <i class="fa-solid fa-list-ol"></i>プログラム
                             </a>
                         </li>
                         <li>
@@ -239,9 +245,15 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.tasks') }}"
+                   class="{{ request()->routeIs('admin.tasks*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>当日の役割
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.program') }}"
                    class="{{ request()->routeIs('admin.program*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式次第
+                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>プログラム
                 </a>
             </li>
             <li>
@@ -294,7 +306,7 @@
             <li>
                 <a href="{{ route('program') }}"
                    class="{{ request()->routeIs('program') ? 'active' : '' }}">
-                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式次第
+                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i>プログラム
                 </a>
             </li>
             <li>

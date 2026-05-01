@@ -15,7 +15,7 @@ class HomeController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $user->load('guestProfile');
+        $user->load(['guestProfile', 'taskAssignments.task']);
 
         $setting = WeddingSetting::first();
 
@@ -23,6 +23,9 @@ class HomeController extends Controller
             'user'           => $user,
             'profile'        => $user->guestProfile,
             'setting'        => $setting,
+            'homeTasks'      => $user->taskAssignments->filter(
+                fn($a) => $a->task?->display_on_home
+            ),
             'deadlinePassed' => $setting?->rsvp_deadline !== null
                 && today()->isAfter($setting->rsvp_deadline),
         ]);

@@ -20,6 +20,7 @@ use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\GuestSeatingController;
 use App\Http\Controllers\CoupleProfileController;
 use App\Http\Controllers\AdminProfileController;
+use App\Http\Controllers\AdminTaskController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
@@ -62,6 +63,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // プロフィール管理
     Route::get('/profiles',  [AdminProfileController::class, 'edit'])  ->name('profiles');
     Route::post('/profiles', [AdminProfileController::class, 'update'])->name('profiles.update');
+
+    // 当日の役割管理
+    Route::get('/tasks',                   [AdminTaskController::class, 'index'])   ->name('tasks');
+    Route::post('/tasks',                  [AdminTaskController::class, 'store'])   ->name('tasks.store');
+    Route::patch('/tasks/{id}',            [AdminTaskController::class, 'update'])  ->name('tasks.update');
+    Route::delete('/tasks/{id}',           [AdminTaskController::class, 'destroy']) ->name('tasks.destroy');
+    Route::patch('/tasks/{id}/move-up',    [AdminTaskController::class, 'moveUp'])  ->name('tasks.move-up');
+    Route::patch('/tasks/{id}/move-down',  [AdminTaskController::class, 'moveDown'])->name('tasks.move-down');
 
     // 式次第管理
     Route::get('/program',                   [AdminProgramController::class, 'index'])   ->name('program');

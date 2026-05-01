@@ -42,6 +42,11 @@ class User extends Authenticatable
         return $this->hasOne(SeatAssignment::class);
     }
 
+    public function taskAssignments()
+    {
+        return $this->hasMany(GuestTaskAssignment::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

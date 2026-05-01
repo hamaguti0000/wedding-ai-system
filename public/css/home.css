@@ -246,6 +246,37 @@ main { padding: 0; text-align: initial; }
 }
 .home-rsvp__btn--outline:hover { background: #b38b59; color: #fff; }
 
+/* ── 当日のお願い ─────────────────────────────────── */
+.home-tasks {
+    background: #fdfaf6;
+    padding: 80px 20px;
+    text-align: center;
+}
+.home-tasks__inner { max-width: 620px; margin: 0 auto; }
+.home-tasks__card {
+    background: #fff;
+    border: 1px solid #e8d5b7;
+    border-left: 4px solid #b38b59;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+    text-align: left;
+    box-shadow: 0 3px 12px rgba(179,139,89,0.07);
+}
+.home-tasks__card-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 8px; }
+.home-tasks__icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #fef9f0; border: 1px solid #e8d5b7;
+    display: flex; align-items: center; justify-content: center;
+    color: #b38b59; font-size: 0.95rem; flex-shrink: 0;
+}
+.home-tasks__name { font-size: 1rem; font-weight: 600; color: #3d2f25; margin: 0 0 3px; }
+.home-tasks__time { font-size: 0.82rem; color: #b38b59; margin: 0; display: flex; align-items: center; gap: 4px; }
+.home-tasks__desc { font-size: 0.88rem; color: #6b5b4e; line-height: 1.8; margin: 0 0 6px; white-space: pre-line; }
+.home-tasks__note { font-size: 0.82rem; color: #9b8573; background: #fef9f0; border-radius: 5px; padding: 6px 12px; margin: 0; border-left: 2px solid #e8d5b7; }
+.home-tasks__link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #b38b59; text-decoration: none; font-family: 'Noto Sans JP', sans-serif; }
+.home-tasks__link:hover { color: #9a7447; }
+
 /* ── MESSAGE ─────────────────────────────────────── */
 .home-message {
     background: #fff;

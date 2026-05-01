@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', '式次第 | ' . ($setting?->groom_name_en ?: $setting?->groom_name ?? 'Wedding'))
+@section('title', 'プログラム | ' . ($setting?->groom_name_en ?: $setting?->groom_name ?? 'Wedding'))
 
 @push('styles')
 <style>
@@ -131,8 +131,8 @@ main { padding: 0; text-align: initial; }
     <img src="{{ asset('img/チャペル.jpg') }}" alt="" class="pg-banner__img">
     <div class="pg-banner__overlay"></div>
     <div class="pg-banner__text">
-        <span class="pg-banner__eyebrow">Program · 式次第</span>
-        <h1 class="pg-banner__title">式次第</h1>
+        <span class="pg-banner__eyebrow">Program · プログラム</span>
+        <h1 class="pg-banner__title">プログラム</h1>
     </div>
 </section>
 
@@ -152,7 +152,7 @@ main { padding: 0; text-align: initial; }
     @if ($items->isEmpty())
     <div class="pg-empty">
         <i class="fa-regular fa-calendar"></i>
-        <p>式次第は準備中です</p>
+        <p>プログラムは準備中です</p>
     </div>
     @else
     <div class="timeline">
