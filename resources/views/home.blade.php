@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'ホーム | {{ $setting?->groom_name }} & {{ $setting?->bride_name }} Wedding')
+@section('title', 'ホーム | ' . ($setting?->groom_name ?? '') . ' & ' . ($setting?->bride_name ?? '') . ' Wedding')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/home.css') }}">
