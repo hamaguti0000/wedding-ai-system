@@ -1099,11 +1099,19 @@ main { padding-top: 60px; text-align: initial; }
     background-color: #fdfbf6;
     background-image: none;
     box-shadow: none;
+    border-radius: 6px;
+}
+.is-preview .st-canvas-scaler {
+    border-radius: 6px;
+    filter: drop-shadow(0 10px 40px rgba(0,0,0,0.13)) drop-shadow(0 2px 8px rgba(0,0,0,0.07));
 }
 .is-preview .st-canvas-area {
     background:
         radial-gradient(ellipse 80% 55% at 50% 45%, rgba(255,253,248,0.6), transparent),
-        linear-gradient(155deg, #f0ebe0 0%, #e8dfd3 100%);
+        linear-gradient(155deg, #eee8de 0%, #e5dbd0 100%);
+    padding: 48px 40px;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ── プレビューテーブル ── */
