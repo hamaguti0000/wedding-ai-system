@@ -43,3 +43,4 @@ Homestead.yaml
 
 ### Windows 固有 ###
 *.Zone.Identifier
+.aider*

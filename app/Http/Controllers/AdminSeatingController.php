@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 
 class AdminSeatingController extends Controller
 {
+    private const MAX_SEATS_PER_TABLE = 8;
+
     public function index()
     {
         // ── Display data: View に渡す Collection ───────────────────────────
@@ -57,16 +59,17 @@ class AdminSeatingController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|max:50',
-            'seat_count'  => 'nullable|integer|min:0|max:30',
+            'seat_count'  => 'nullable|integer|min:0|max:' . self::MAX_SEATS_PER_TABLE,
         ], [
             'name.required' => 'テーブル名を入力してください',
+            'seat_count.max' => '1テーブルの最大席数は8席です',
         ]);
 
         $count  = SeatingTable::count();
         $col    = $count % 4;
         $row    = (int) floor($count / 4);
-        $posX   = 24 + $col * 260;
-        $posY   = 24 + $row * 220;
+        $posX   = 24 + $col * 380;
+        $posY   = 24 + $row * 280;
 
         $table = SeatingTable::create([
             'name'          => $request->name,
@@ -75,17 +78,16 @@ class AdminSeatingController extends Controller
             'pos_y'         => $posY,
         ]);
 
-        // 初期席を自動作成（seat_count が指定された場合）
+        // 初期席を自動作成（seat_count が指定された場合、最大8席）
         $seatCount = (int) ($request->seat_count ?? 0);
+        $seatSlots = self::seatSlots();
         $seats = [];
         for ($i = 0; $i < $seatCount; $i++) {
-            $col = $i % 4;
-            $row = (int) floor($i / 4);
             $seats[] = Seat::create([
                 'seating_table_id' => $table->id,
                 'type'             => 'normal',
-                'pos_x'            => 12 + $col * 56,
-                'pos_y'            => 12 + $row * 56,
+                'pos_x'            => $seatSlots[$i]['x'],
+                'pos_y'            => $seatSlots[$i]['y'],
             ]);
         }
 
@@ -119,10 +121,14 @@ class AdminSeatingController extends Controller
 
     // ── 席 ──────────────────────────────────────────────────
 
-    /** テーブルに席を追加 */
+    /** テーブルに席を追加（最大8席） */
     public function storeSeat(Request $request, int $tableId): JsonResponse
     {
         $table = SeatingTable::findOrFail($tableId);
+
+        if ($table->seats()->count() >= self::MAX_SEATS_PER_TABLE) {
+            return response()->json(['error' => '1テーブルの最大席数は8席です'], 422);
+        }
 
         $request->validate([
             'type'  => 'nullable|string|max:30',
@@ -131,17 +137,15 @@ class AdminSeatingController extends Controller
             'pos_y' => 'nullable|integer|min:0',
         ]);
 
-        // pos_x/y が未指定の場合は既存席数から自動計算
-        $existing = $table->seats()->count();
-        $col      = $existing % 4;
-        $row      = (int) floor($existing / 4);
+        $seatSlots = self::seatSlots();
+        $slotIdx   = $table->seats()->count(); // 追加前の数 = 次のスロット番号
 
         $seat = Seat::create([
             'seating_table_id' => $tableId,
             'type'             => $request->type ?? 'normal',
             'label'            => $request->label,
-            'pos_x'            => $request->pos_x ?? (12 + $col * 56),
-            'pos_y'            => $request->pos_y ?? (12 + $row * 56),
+            'pos_x'            => $request->pos_x ?? $seatSlots[$slotIdx]['x'],
+            'pos_y'            => $request->pos_y ?? $seatSlots[$slotIdx]['y'],
         ]);
 
         return response()->json(['success' => true, 'seat' => $seat]);
@@ -209,5 +213,19 @@ class AdminSeatingController extends Controller
     {
         SeatAssignment::where('user_id', $userId)->delete();
         return response()->json(['success' => true]);
+    }
+
+    private static function seatSlots(): array
+    {
+        return [
+            ['x' => 18,  'y' => 12],
+            ['x' => 104, 'y' => 12],
+            ['x' => 190, 'y' => 12],
+            ['x' => 276, 'y' => 12],
+            ['x' => 18,  'y' => 94],
+            ['x' => 104, 'y' => 94],
+            ['x' => 190, 'y' => 94],
+            ['x' => 276, 'y' => 94],
+        ];
     }
 }

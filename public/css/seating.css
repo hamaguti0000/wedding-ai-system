@@ -1,6 +1,6 @@
 /* ================================================================
    seating.css — 席次レイアウトツール（印刷品質対応）
-   - 1000×660 仮想キャンバス（A4横比率）
+   - 1800×1100 仮想キャンバス
    - CSS transform scale でビューポートにフィット
    - .is-preview クラスで編集/印刷プレビューを分離
    - @media print で A4横 直接印刷対応
@@ -276,7 +276,8 @@ main { padding-top: 60px; text-align: initial; }
 /* 印刷プレビューヘッダー（通常は非表示）*/
 .st-print-header {
     display: none;
-    width: 1400px; /* キャンバスと同幅 */
+    width: 100%;
+    max-width: 1800px;
     text-align: center;
     padding: 14px 0 18px;
     border-bottom: 2px solid var(--ds-gold-light);
@@ -300,16 +301,16 @@ main { padding-top: 60px; text-align: initial; }
     letter-spacing: 0.05em; margin: 0;
 }
 
-/* 仮想キャンバス スケーラー（1400×900 固定、JS が transform:scale を設定）*/
+/* 仮想キャンバス スケーラー（1800×1100 固定、JS が transform:scale を設定）*/
 .st-canvas-scaler {
-    width: 1400px; height: 900px;
+    width: 1800px; height: 1100px;
     transform-origin: top left;
     flex-shrink: 0; position: relative;
 }
 
-/* キャンバス本体（1400×900 固定サイズ）*/
+/* キャンバス本体（1800×1100 固定サイズ）*/
 .st-canvas {
-    width: 1400px; height: 900px;
+    width: 1800px; height: 1100px;
     position: relative;
     background-color: #ffffff;
     background-image:
@@ -343,7 +344,7 @@ main { padding-top: 60px; text-align: initial; }
     border-radius: 8px;
     border: 1px solid var(--st-border);
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    min-width: 180px;
+    min-width: 360px;
     cursor: default; user-select: none;
     transition: box-shadow 0.15s, border-color 0.15s;
 }
@@ -399,7 +400,7 @@ main { padding-top: 60px; text-align: initial; }
 /* テーブルボディ */
 .canvas-table__body {
     position: relative;
-    min-width: 180px; min-height: 80px;
+    min-width: 360px; min-height: 170px;
     padding: 8px;
     overflow: visible;
 }
@@ -506,8 +507,13 @@ main { padding-top: 60px; text-align: initial; }
     left: 50%; transform: translateX(-50%);
     opacity: 1; background: none;
     color: var(--st-text); font-size: 0.6rem;
-    padding: 0; white-space: nowrap;
+    padding: 0; white-space: normal;
     font-weight: 600; z-index: 5;
+    width: max-content;
+    max-width: 78px;
+    text-align: center;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
 }
 /* 空席はプレビュー時に薄く */
 .is-preview .canvas-seat:not(.is-occupied) { opacity: 0.28; }
@@ -696,17 +702,18 @@ main { padding-top: 60px; text-align: initial; }
    ================================================================ */
 .st-toast {
     position: fixed;
-    bottom: max(80px, env(safe-area-inset-bottom) + 80px);
+    bottom: max(112px, env(safe-area-inset-bottom) + 112px);
     left: 50%;
-    transform: translateX(-50%) translateY(calc(100% + 90px));
+    transform: translateX(-50%) translateY(18px);
     background: var(--st-text); color: #fff;
     padding: 10px 20px; border-radius: 20px;
     font-size: 0.82rem; font-family: var(--ds-font-body);
-    z-index: 99999; transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 99999; transition: opacity 0.2s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     white-space: nowrap; pointer-events: none;
     box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+    opacity: 0;
 }
-.st-toast--visible { transform: translateX(-50%) translateY(0); }
+.st-toast--visible { transform: translateX(-50%) translateY(0); opacity: 1; }
 .st-toast--error   { background: #c0392b; }
 .st-toast--success { background: #27ae60; }
 
@@ -915,7 +922,12 @@ main { padding-top: 60px; text-align: initial; }
         font-size: 0.6rem !important;
         padding: 0 !important;
         font-weight: 600 !important;
-        white-space: nowrap !important;
+        white-space: normal !important;
+        width: max-content !important;
+        max-width: 78px !important;
+        text-align: center !important;
+        line-height: 1.18 !important;
+        overflow-wrap: anywhere !important;
         z-index: 5 !important;
     }
 

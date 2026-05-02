@@ -175,7 +175,7 @@
                 @endif
             </div>
 
-            {{-- 1000×660 仮想キャンバス（JS が transform:scale でスケール）--}}
+            {{-- 1800×1100 仮想キャンバス（JS が transform:scale でスケール）--}}
             <div class="st-canvas-scaler" id="canvasScaler">
             <div class="st-canvas" id="seatingCanvas">
 
@@ -188,14 +188,14 @@
 
                 @foreach ($tables as $i => $table)
                 @php
-                    $x = $table->pos_x ?: (24 + ($i % 3) * 280);
-                    $y = $table->pos_y ?: (24 + (int)floor($i / 3) * 240);
+                    $x = $table->pos_x ?: (24 + ($i % 4) * 380);
+                    $y = $table->pos_y ?: (24 + (int)floor($i / 4) * 280);
                     $seatCount     = $table->seats->count();
                     $assignedCount = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
                     $maxPosX = $table->seats->max('pos_x') ?? 0;
                     $maxPosY = $table->seats->max('pos_y') ?? 0;
-                    $bodyMinW = max(180, intval($maxPosX) + 56);
-                    $bodyMinH = max(80,  intval($maxPosY) + 56);
+                    $bodyMinW = max(360, intval($maxPosX) + 84);
+                    $bodyMinH = max(170, intval($maxPosY) + 82);
                 @endphp
                 <div class="canvas-table"
                      id="ct-{{ $table->id }}"
@@ -348,7 +348,7 @@
                 <label class="st-modal__label" for="newTableSeats">初期席数</label>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <input class="st-modal__input st-modal__input--sm" id="newTableSeats"
-                           type="number" min="0" max="20" value="4">
+                           type="number" min="0" max="8" value="4">
                     <span class="st-modal__hint">後から席を追加・削除できます</span>
                 </div>
             </div>

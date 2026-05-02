@@ -1,6 +1,6 @@
 /* ================================================================
    seating.js — 席次レイアウトツール
-   - 仮想キャンバス 1000×660（A4横比率）
+   - 仮想キャンバス 1800×1100
    - CSS transform scale でスケーリング、ドラッグ座標をスケール補正
    - .is-preview クラスで編集/印刷プレビュー分離
    ================================================================ */
@@ -8,8 +8,8 @@
     'use strict';
 
     /* ── 定数 ────────────────────────────────────────────────── */
-    const CANVAS_W  = 1400;
-    const CANVAS_H  = 900;
+    const CANVAS_W  = 1800;
+    const CANVAS_H  = 1100;
     const TABLE_MIN_MARGIN = 40;  // キャンバス端からの最小余白
 
     const CSRF     = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -26,8 +26,8 @@
         if (!area) return 1;
         // プレビュー時はウィンドウ全体に合わせる、編集時はエリア幅に合わせる
         const isPreview = document.getElementById('stApp')?.classList.contains('is-preview');
-        const padX = isPreview ? 48 : 48;
-        const padY = isPreview ? 48 : 48;
+        const padX = isPreview ? 72 : 48;
+        const padY = isPreview ? 72 : 48;
         const scaleX = (area.clientWidth  - padX) / CANVAS_W;
         const scaleY = (area.clientHeight - padY) / CANVAS_H;
         return Math.min(1, Math.max(0.35, isPreview ? Math.min(scaleX, scaleY) : scaleX));
@@ -514,7 +514,7 @@
         if (!btn) return;
         const tableId = btn.dataset.tableId;
         const { ok, data } = await api.post(`/admin/seating/tables/${tableId}/seats`, { type: 'normal' });
-        if (!ok) { toast('席の追加に失敗しました', 'error'); return; }
+        if (!ok) { toast(data.error ?? data.message ?? '席の追加に失敗しました', 'error'); return; }
         const body = document.getElementById(`ct-body-${tableId}`);
         if (body) {
             body.appendChild(buildSeatNode(data.seat));
@@ -601,10 +601,10 @@
     ================================================================ */
     // テーブルボディの min-width/min-height を席位置に合わせて更新
     function syncBodySize(body) {
-        let maxRight = 180, maxBottom = 80;
+        let maxRight = 360, maxBottom = 170;
         body.querySelectorAll('.canvas-seat').forEach(s => {
-            maxRight  = Math.max(maxRight,  parseInt(s.style.left || '0') + 56);
-            maxBottom = Math.max(maxBottom, parseInt(s.style.top  || '0') + 56);
+            maxRight  = Math.max(maxRight,  parseInt(s.style.left || '0') + 84);
+            maxBottom = Math.max(maxBottom, parseInt(s.style.top  || '0') + 82);
         });
         body.style.minWidth  = maxRight  + 'px';
         body.style.minHeight = maxBottom + 'px';
@@ -636,8 +636,8 @@
         const existing = canvas.querySelectorAll('.canvas-table').length;
         const col = existing % 4;
         const row = Math.floor(existing / 4);
-        div.style.left = (t.pos_x ?? (24 + col * 240)) + 'px';
-        div.style.top  = (t.pos_y ?? (24 + row * 200)) + 'px';
+        div.style.left = (t.pos_x ?? (24 + col * 380)) + 'px';
+        div.style.top  = (t.pos_y ?? (24 + row * 280)) + 'px';
         div.innerHTML = `
             <div class="canvas-table__handle" data-drag-handle>
                 <i class="fa-solid fa-grip-dots ct-grip"></i>
