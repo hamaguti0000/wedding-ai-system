@@ -235,19 +235,94 @@
         @if ($news->isEmpty())
         <p style="text-align:center;color:#c0b0a0;font-size:0.9rem;padding:20px 0;">お知らせはありません</p>
         @else
-        <ul class="home-news__list">
+        <div class="home-news__list">
             @foreach ($news as $item)
-            <li class="home-news__item">
-                <time class="home-news__date">{{ $item->published_date->format('Y.m.d') }}</time>
-                @if ($item->tag)
-                <span class="home-news__tag">{{ $item->tag }}</span>
-                @else
-                <span></span>
-                @endif
-                <p class="home-news__text">{{ $item->body }}</p>
-            </li>
+            @php $layout = $item->layout ?? 'text'; @endphp
+
+            {{-- ── テキストのみ ── --}}
+            @if ($layout === 'text' || !$item->image_url)
+            <div class="hn-item hn-text">
+                <div class="hn-meta">
+                    <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
+                    @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
+                </div>
+                @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
+                <p class="hn-body">{{ $item->body }}</p>
+            </div>
+
+            {{-- ── 画像上 + テキスト下 ── --}}
+            @elseif ($layout === 'top')
+            <div class="hn-item hn-top">
+                <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--top">
+                <div class="hn-content">
+                    <div class="hn-meta">
+                        <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
+                        @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
+                    </div>
+                    @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
+                    <p class="hn-body">{{ $item->body }}</p>
+                </div>
+            </div>
+
+            {{-- ── 画像左 + テキスト右 ── --}}
+            @elseif ($layout === 'left')
+            <div class="hn-item hn-side hn-side--left">
+                <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--side">
+                <div class="hn-content">
+                    <div class="hn-meta">
+                        <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
+                        @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
+                    </div>
+                    @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
+                    <p class="hn-body">{{ $item->body }}</p>
+                </div>
+            </div>
+
+            {{-- ── 画像右 + テキスト左 ── --}}
+            @elseif ($layout === 'right')
+            <div class="hn-item hn-side hn-side--right">
+                <div class="hn-content">
+                    <div class="hn-meta">
+                        <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
+                        @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
+                    </div>
+                    @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
+                    <p class="hn-body">{{ $item->body }}</p>
+                </div>
+                <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--side">
+            </div>
+
+            {{-- ── フルイメージ ── --}}
+            @elseif ($layout === 'hero')
+            <div class="hn-item hn-hero">
+                <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--hero">
+                <div class="hn-hero__overlay">
+                    <div class="hn-meta hn-meta--light">
+                        <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
+                        @if ($item->tag)<span class="hn-tag hn-tag--light">{{ $item->tag }}</span>@endif
+                    </div>
+                    @if ($item->title)<p class="hn-title hn-title--light">{{ $item->title }}</p>@endif
+                    @if ($item->body)<p class="hn-body hn-body--light">{{ $item->body }}</p>@endif
+                </div>
+            </div>
+
+            {{-- ── カード型 ── --}}
+            @elseif ($layout === 'card')
+            <div class="hn-item hn-card">
+                <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--card">
+                <div class="hn-card__body">
+                    <div class="hn-meta">
+                        <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
+                        @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
+                    </div>
+                    @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
+                    <p class="hn-body">{{ $item->body }}</p>
+                </div>
+            </div>
+            @endif
+
             @endforeach
-        </ul>
+        </div>
         @endif
     </div>
 </section>
