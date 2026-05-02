@@ -130,8 +130,8 @@
    ================================================================ */
 .gs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 14px;
     padding: 20px;
     flex: 1;
     align-content: start;
@@ -425,25 +425,33 @@
 /* ================================================================
    レスポンシブ
    ================================================================ */
-@media (max-width: 480px) {
-    .gs-header__title { font-size: 1.4rem; letter-spacing: 0.2em; }
-    .gs-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 14px; }
-    .gs-card__seats { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 8px 12px; }
-    .gs-seat__circle { width: 34px; height: 34px; font-size: 0.82rem; }
-    .gs-seat__name { font-size: 0.56rem; max-width: 38px; }
-    .gs-banner { margin: 12px 14px; padding: 12px 14px; }
+/* スマホ: 横スクロール対応（8卓固定レイアウトを維持） */
+@media (max-width: 767px) {
+    .gs-header__title { font-size: 1.35rem; letter-spacing: 0.18em; }
+    .gs-banner { margin: 10px 12px; padding: 10px 14px; }
+
+    /* 8列固定のまま横スクロール */
+    .gs-grid {
+        grid-template-columns: repeat(8, minmax(100px, 1fr));
+        gap: 10px;
+        padding: 14px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .gs-card__seats { gap: 3px; padding: 8px 6px 10px; }
+    .gs-seat__circle { width: 32px; height: 32px; font-size: 0.78rem; }
+    .gs-seat__name { font-size: 0.52rem; max-width: 34px; }
+    .gs-card__name { font-size: 0.82rem; }
 }
-@media (min-width: 481px) and (max-width: 767px) {
-    .gs-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 768px) and (max-width: 1023px) {
-    .gs-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media (min-width: 1024px) {
-    .gs-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; padding: 24px; }
+@media (min-width: 768px) and (max-width: 1279px) {
+    .gs-grid {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 12px;
+        padding: 18px;
+    }
 }
 @media (min-width: 1280px) {
-    .gs-grid { grid-template-columns: repeat(5, 1fr); }
+    .gs-grid { gap: 16px; padding: 24px; }
 }
 
 /* ================================================================
