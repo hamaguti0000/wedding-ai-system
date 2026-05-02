@@ -275,15 +275,15 @@
 
 /* ── 小ボタン（一覧行内の操作ボタン） ── */
 .btn-sm {
-    padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; border: none;
+    padding: 5px 12px; font-size: 0.78rem; border-radius: 5px;
     cursor: pointer; font-family: 'Noto Sans JP', sans-serif; font-weight: 500;
-    transition: background 0.2s; white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s, color 0.15s; white-space: nowrap;
     display: inline-flex; align-items: center; gap: 4px;
 }
-.btn-sm-pw  { background: #f0f4ff; color: #3a5bd9; border: 1px solid #c5d0f8; }
-.btn-sm-pw:hover  { background: #dce5ff; }
+.btn-sm-pw  { background: #fef9f0; color: #b38b59; border: 1px solid #e8d5b7; }
+.btn-sm-pw:hover  { background: #f5edd8; border-color: #b38b59; color: #9a7447; }
 .btn-sm-del { background: transparent; color: #c0392b; border: 1px solid #e8b4b4; }
-.btn-sm-del:hover { background: #fdf2f2; }
+.btn-sm-del:hover { background: #fdf2f2; border-color: #c0392b; }
 
 /* ── ボタン共通 ── */
 .btn-primary,
