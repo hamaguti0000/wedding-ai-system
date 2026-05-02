@@ -8,8 +8,8 @@
     'use strict';
 
     /* ── 定数 ────────────────────────────────────────────────── */
-    const CANVAS_W  = 1000;
-    const CANVAS_H  = 660;
+    const CANVAS_W  = 1400;
+    const CANVAS_H  = 900;
     const TABLE_MIN_MARGIN = 40;  // キャンバス端からの最小余白
 
     const CSRF     = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -259,6 +259,7 @@
         sd.el.releasePointerCapture(e.pointerId);
         if (sd.moved) {
             api.saveSeatPos(sd.seatId, Math.round(parseFloat(sd.el.style.left)), Math.round(parseFloat(sd.el.style.top)));
+            syncBodySize(sd.body);
         } else {
             selectSeat(sd.el);
         }
@@ -515,7 +516,10 @@
         const { ok, data } = await api.post(`/admin/seating/tables/${tableId}/seats`, { type: 'normal' });
         if (!ok) { toast('席の追加に失敗しました', 'error'); return; }
         const body = document.getElementById(`ct-body-${tableId}`);
-        body?.appendChild(buildSeatNode(data.seat));
+        if (body) {
+            body.appendChild(buildSeatNode(data.seat));
+            syncBodySize(body);
+        }
         refreshHint(tableId);
         updateTableMeta(tableId);
         toast('席を追加しました', 'success');
@@ -595,6 +599,17 @@
     /* ================================================================
        DOM ビルダー
     ================================================================ */
+    // テーブルボディの min-width/min-height を席位置に合わせて更新
+    function syncBodySize(body) {
+        let maxRight = 180, maxBottom = 80;
+        body.querySelectorAll('.canvas-seat').forEach(s => {
+            maxRight  = Math.max(maxRight,  parseInt(s.style.left || '0') + 56);
+            maxBottom = Math.max(maxBottom, parseInt(s.style.top  || '0') + 56);
+        });
+        body.style.minWidth  = maxRight  + 'px';
+        body.style.minHeight = maxBottom + 'px';
+    }
+
     function buildSeatNode(s) {
         const div = document.createElement('div');
         div.className = 'canvas-seat';
@@ -641,6 +656,7 @@
         const body = div.querySelector('.canvas-table__body');
         seats.forEach(s => body.appendChild(buildSeatNode(s)));
         if (seats.length) body.querySelector('.ct-hint')?.style.setProperty('display', 'none');
+        syncBodySize(body);
         return div;
     }
 

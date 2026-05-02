@@ -190,8 +190,12 @@
                 @php
                     $x = $table->pos_x ?: (24 + ($i % 3) * 280);
                     $y = $table->pos_y ?: (24 + (int)floor($i / 3) * 240);
-                    $seatCount    = $table->seats->count();
+                    $seatCount     = $table->seats->count();
                     $assignedCount = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
+                    $maxPosX = $table->seats->max('pos_x') ?? 0;
+                    $maxPosY = $table->seats->max('pos_y') ?? 0;
+                    $bodyMinW = max(180, intval($maxPosX) + 56);
+                    $bodyMinH = max(80,  intval($maxPosY) + 56);
                 @endphp
                 <div class="canvas-table"
                      id="ct-{{ $table->id }}"
@@ -212,7 +216,8 @@
 
                     <div class="canvas-table__body"
                          id="ct-body-{{ $table->id }}"
-                         data-table-id="{{ $table->id }}">
+                         data-table-id="{{ $table->id }}"
+                         style="min-width:{{ $bodyMinW }}px; min-height:{{ $bodyMinH }}px;">
 
                         @foreach ($table->seats as $seat)
                         @php

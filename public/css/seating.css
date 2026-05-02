@@ -276,7 +276,7 @@ main { padding-top: 60px; text-align: initial; }
 /* 印刷プレビューヘッダー（通常は非表示）*/
 .st-print-header {
     display: none;
-    width: 1000px; /* キャンバスと同幅 */
+    width: 1400px; /* キャンバスと同幅 */
     text-align: center;
     padding: 14px 0 18px;
     border-bottom: 2px solid var(--ds-gold-light);
@@ -300,16 +300,16 @@ main { padding-top: 60px; text-align: initial; }
     letter-spacing: 0.05em; margin: 0;
 }
 
-/* 仮想キャンバス スケーラー（1000×660 固定、JS が transform:scale を設定）*/
+/* 仮想キャンバス スケーラー（1400×900 固定、JS が transform:scale を設定）*/
 .st-canvas-scaler {
-    width: 1000px; height: 660px;
+    width: 1400px; height: 900px;
     transform-origin: top left;
     flex-shrink: 0; position: relative;
 }
 
-/* キャンバス本体（1000×660 固定サイズ）*/
+/* キャンバス本体（1400×900 固定サイズ）*/
 .st-canvas {
-    width: 1000px; height: 660px;
+    width: 1400px; height: 900px;
     position: relative;
     background-color: #ffffff;
     background-image:
@@ -695,12 +695,14 @@ main { padding-top: 60px; text-align: initial; }
    トースト
    ================================================================ */
 .st-toast {
-    position: fixed; bottom: max(50px, env(safe-area-inset-bottom) + 50px);
-    left: 50%; transform: translateX(-50%) translateY(70px);
+    position: fixed;
+    bottom: max(80px, env(safe-area-inset-bottom) + 80px);
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(100% + 90px));
     background: var(--st-text); color: #fff;
     padding: 10px 20px; border-radius: 20px;
     font-size: 0.82rem; font-family: var(--ds-font-body);
-    z-index: 9999; transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 99999; transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     white-space: nowrap; pointer-events: none;
     box-shadow: 0 4px 16px rgba(0,0,0,0.22);
 }
