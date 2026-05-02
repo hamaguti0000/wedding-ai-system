@@ -182,20 +182,20 @@
                 @if ($tables->isEmpty())
                 <div class="st-canvas__empty" id="canvasEmpty">
                     <i class="fa-solid fa-chair" style="font-size:2.5rem;opacity:0.3;"></i>
-                    <p>テーブルがありません<br>右下の ＋ ボタンから追加してください</p>
+                    <p>テーブルがありません</p>
                 </div>
                 @endif
 
                 @foreach ($tables as $i => $table)
                 @php
-                    $x = $table->pos_x ?: (24 + ($i % 4) * 380);
-                    $y = $table->pos_y ?: (24 + (int)floor($i / 4) * 280);
+                    $x = $table->pos_x ?: (24 + ($i % 8) * 220);
+                    $y = $table->pos_y ?: (24 + (int)floor($i / 8) * 230);
                     $seatCount     = $table->seats->count();
                     $assignedCount = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
                     $maxPosX = $table->seats->max('pos_x') ?? 0;
                     $maxPosY = $table->seats->max('pos_y') ?? 0;
-                    $bodyMinW = max(360, intval($maxPosX) + 84);
-                    $bodyMinH = max(170, intval($maxPosY) + 82);
+                    $bodyMinW = max(180, intval($maxPosX) + 54);
+                    $bodyMinH = max(126, intval($maxPosY) + 76);
                 @endphp
                 <div class="canvas-table"
                      id="ct-{{ $table->id }}"
@@ -206,12 +206,6 @@
                         <i class="fa-solid fa-grip-dots ct-grip"></i>
                         <span class="ct-name" title="{{ $table->name }}">{{ $table->name }}</span>
                         <span class="ct-count" id="ct-meta-{{ $table->id }}">{{ $assignedCount }}/{{ $seatCount }}</span>
-                        <button class="ct-btn ct-btn--add" data-table-id="{{ $table->id }}" title="席を追加">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                        <button class="ct-btn ct-btn--del" data-table-id="{{ $table->id }}" title="テーブルを削除">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
                     </div>
 
                     <div class="canvas-table__body"
@@ -255,11 +249,6 @@
             </div>{{-- /.st-canvas --}}
             </div>{{-- /.st-canvas-scaler --}}
 
-            {{-- FAB --}}
-            <button class="st-fab" id="fabAddTable" title="テーブルを追加">
-                <i class="fa-solid fa-plus"></i>
-                <span>テーブルを追加</span>
-            </button>
         </div>{{-- /.st-canvas-area --}}
 
     </div>{{-- /.st-body --}}
@@ -321,42 +310,6 @@
             <p class="sp-empty-hint">ゲストリストからドラッグして<br>この席に配置できます</p>
         </div>
 
-    </div>
-    <div class="st-props__footer">
-        <button class="sp-btn sp-btn--danger" id="propsDeleteSeat">
-            <i class="fa-solid fa-trash-can"></i>この席を削除
-        </button>
-    </div>
-</div>
-
-{{-- ── テーブル追加モーダル ── --}}
-<div class="st-modal-overlay" id="addTableModal" aria-hidden="true">
-    <div class="st-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="st-modal__header">
-            <h2 class="st-modal__title" id="modalTitle">テーブルを追加</h2>
-            <button class="st-modal__close" id="modalClose" aria-label="閉じる">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="st-modal__body">
-            <div class="st-modal__field">
-                <label class="st-modal__label" for="newTableName">テーブル名 <span class="req">*</span></label>
-                <input class="st-modal__input" id="newTableName" type="text"
-                       placeholder="A卓、ヘッドテーブルなど" maxlength="50" autocomplete="off">
-            </div>
-            <div class="st-modal__field">
-                <label class="st-modal__label" for="newTableSeats">初期席数</label>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <input class="st-modal__input st-modal__input--sm" id="newTableSeats"
-                           type="number" min="0" max="8" value="4">
-                    <span class="st-modal__hint">後から席を追加・削除できます</span>
-                </div>
-            </div>
-        </div>
-        <div class="st-modal__footer">
-            <button class="st-modal__cancel" type="button" id="modalCancel">キャンセル</button>
-            <button class="st-modal__submit" type="button" id="modalSubmit">追加する</button>
-        </div>
     </div>
 </div>
 

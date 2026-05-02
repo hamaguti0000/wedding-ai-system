@@ -11,6 +11,9 @@
     const CANVAS_W  = 1800;
     const CANVAS_H  = 1100;
     const TABLE_MIN_MARGIN = 40;  // キャンバス端からの最小余白
+    const TABLE_COLS = 8;
+    const TABLE_GAP_X = 220;
+    const TABLE_GAP_Y = 230;
 
     const CSRF     = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
     const TYPE_CFG = window.SEAT_TYPE_CONFIG ?? {};
@@ -554,7 +557,7 @@
         const div = document.createElement('div');
         div.id = 'canvasEmpty';
         div.className = 'st-canvas__empty';
-        div.innerHTML = `<i class="fa-solid fa-chair" style="font-size:2.5rem;opacity:0.25;"></i><p>テーブルがありません<br>右下の ＋ ボタンから追加してください</p>`;
+        div.innerHTML = `<i class="fa-solid fa-chair" style="font-size:2.5rem;opacity:0.25;"></i><p>テーブルがありません</p>`;
         canvas.appendChild(div);
     }
 
@@ -601,10 +604,10 @@
     ================================================================ */
     // テーブルボディの min-width/min-height を席位置に合わせて更新
     function syncBodySize(body) {
-        let maxRight = 360, maxBottom = 170;
+        let maxRight = 180, maxBottom = 126;
         body.querySelectorAll('.canvas-seat').forEach(s => {
-            maxRight  = Math.max(maxRight,  parseInt(s.style.left || '0') + 84);
-            maxBottom = Math.max(maxBottom, parseInt(s.style.top  || '0') + 82);
+            maxRight  = Math.max(maxRight,  parseInt(s.style.left || '0') + 54);
+            maxBottom = Math.max(maxBottom, parseInt(s.style.top  || '0') + 76);
         });
         body.style.minWidth  = maxRight  + 'px';
         body.style.minHeight = maxBottom + 'px';
@@ -634,21 +637,15 @@
         div.dataset.tableId = t.id;
         // 新規テーブルは未使用領域に配置（既存テーブル数ベース）
         const existing = canvas.querySelectorAll('.canvas-table').length;
-        const col = existing % 4;
-        const row = Math.floor(existing / 4);
-        div.style.left = (t.pos_x ?? (24 + col * 380)) + 'px';
-        div.style.top  = (t.pos_y ?? (24 + row * 280)) + 'px';
+        const col = existing % TABLE_COLS;
+        const row = Math.floor(existing / TABLE_COLS);
+        div.style.left = (t.pos_x ?? (24 + col * TABLE_GAP_X)) + 'px';
+        div.style.top  = (t.pos_y ?? (24 + row * TABLE_GAP_Y)) + 'px';
         div.innerHTML = `
             <div class="canvas-table__handle" data-drag-handle>
                 <i class="fa-solid fa-grip-dots ct-grip"></i>
                 <span class="ct-name" title="${esc(t.name)}">${esc(t.name)}</span>
                 <span class="ct-count" id="ct-meta-${t.id}">0/${seats.length}</span>
-                <button class="ct-btn ct-btn--add" data-table-id="${t.id}" title="席を追加">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-                <button class="ct-btn ct-btn--del" data-table-id="${t.id}" title="テーブルを削除">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
             </div>
             <div class="canvas-table__body" id="ct-body-${t.id}" data-table-id="${t.id}">
                 <p class="ct-hint" id="ct-hint-${t.id}">＋ を押して席を追加</p>

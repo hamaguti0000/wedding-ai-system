@@ -13,9 +13,13 @@ use Illuminate\Http\Request;
 class AdminSeatingController extends Controller
 {
     private const MAX_SEATS_PER_TABLE = 8;
+    private const DEFAULT_TABLE_COUNT = 32;
+    private const TABLE_COLUMNS = 8;
 
     public function index()
     {
+        $this->ensureDefaultGrid();
+
         // ── Display data: View に渡す Collection ───────────────────────────
         // *Guests suffix → Collection<User> であることを名前で保証する
 
@@ -66,10 +70,10 @@ class AdminSeatingController extends Controller
         ]);
 
         $count  = SeatingTable::count();
-        $col    = $count % 4;
-        $row    = (int) floor($count / 4);
-        $posX   = 24 + $col * 380;
-        $posY   = 24 + $row * 280;
+        $col    = $count % self::TABLE_COLUMNS;
+        $row    = (int) floor($count / self::TABLE_COLUMNS);
+        $posX   = 24 + $col * 220;
+        $posY   = 24 + $row * 230;
 
         $table = SeatingTable::create([
             'name'          => $request->name,
@@ -218,14 +222,64 @@ class AdminSeatingController extends Controller
     private static function seatSlots(): array
     {
         return [
-            ['x' => 18,  'y' => 12],
-            ['x' => 104, 'y' => 12],
-            ['x' => 190, 'y' => 12],
-            ['x' => 276, 'y' => 12],
-            ['x' => 18,  'y' => 94],
-            ['x' => 104, 'y' => 94],
-            ['x' => 190, 'y' => 94],
-            ['x' => 276, 'y' => 94],
+            ['x' => 12,  'y' => 10],
+            ['x' => 54,  'y' => 10],
+            ['x' => 96,  'y' => 10],
+            ['x' => 138, 'y' => 10],
+            ['x' => 12,  'y' => 64],
+            ['x' => 54,  'y' => 64],
+            ['x' => 96,  'y' => 64],
+            ['x' => 138, 'y' => 64],
         ];
+    }
+
+    private function ensureDefaultGrid(): void
+    {
+        $tables = SeatingTable::orderBy('display_order')->orderBy('id')->get();
+        $existingCount = $tables->count();
+
+        for ($i = $existingCount; $i < self::DEFAULT_TABLE_COUNT; $i++) {
+            $tables->push(SeatingTable::create([
+                'name'          => $this->defaultTableName($i),
+                'display_order' => $i + 1,
+                'pos_x'         => 0,
+                'pos_y'         => 0,
+            ]));
+        }
+
+        $seatSlots = self::seatSlots();
+        foreach ($tables->take(self::DEFAULT_TABLE_COUNT)->values() as $i => $table) {
+            $col = $i % self::TABLE_COLUMNS;
+            $row = (int) floor($i / self::TABLE_COLUMNS);
+
+            $table->update([
+                'display_order' => $i + 1,
+                'pos_x'         => 24 + $col * 220,
+                'pos_y'         => 24 + $row * 230,
+            ]);
+
+            $existingSeats = $table->seats()->orderBy('id')->get();
+            foreach ($existingSeats->take(self::MAX_SEATS_PER_TABLE)->values() as $j => $seat) {
+                $seat->update([
+                    'pos_x' => $seatSlots[$j]['x'],
+                    'pos_y' => $seatSlots[$j]['y'],
+                ]);
+            }
+
+            $seatCount = $existingSeats->count();
+            for ($j = $seatCount; $j < self::MAX_SEATS_PER_TABLE; $j++) {
+                Seat::create([
+                    'seating_table_id' => $table->id,
+                    'type'             => 'normal',
+                    'pos_x'            => $seatSlots[$j]['x'],
+                    'pos_y'            => $seatSlots[$j]['y'],
+                ]);
+            }
+        }
+    }
+
+    private function defaultTableName(int $index): string
+    {
+        return ($index + 1) . '卓';
     }
 }
