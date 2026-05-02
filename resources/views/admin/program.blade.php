@@ -224,7 +224,6 @@
     @endforeach
     @endif
     @endif
-    @endif
 </div>
 
 <script>

@@ -43,23 +43,24 @@ class WeddingSetting extends Model
     /** "2026年7月19日" 形式 */
     public function ceremonyDateJa(): string
     {
-        return $this->ceremony_date->format('Y年n月j日');
+        return $this->ceremony_date?->format('Y年n月j日') ?? '';
     }
 
     /** "日"〜"土" */
     public function ceremonyDayOfWeek(): string
     {
+        if (!$this->ceremony_date) return '';
         return ['日', '月', '火', '水', '木', '金', '土'][$this->ceremony_date->dayOfWeek];
     }
 
     /** "14:00"（秒を除く） */
     public function ceremonyTimeFormatted(): string
     {
-        return substr($this->ceremony_time, 0, 5);
+        return $this->ceremony_time ? substr($this->ceremony_time, 0, 5) : '';
     }
 
     public function receptionTimeFormatted(): string
     {
-        return substr($this->reception_time, 0, 5);
+        return $this->reception_time ? substr($this->reception_time, 0, 5) : '';
     }
 }

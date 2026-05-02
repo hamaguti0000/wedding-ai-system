@@ -25,7 +25,7 @@
         </h1>
         <div class="home-hero__rule"></div>
         <p class="home-hero__date">
-            @if ($setting)
+            @if ($setting?->ceremony_date)
                 {{ $setting->ceremony_date->format('F j, Y') }}
                 &nbsp;|&nbsp;
                 {{ $setting->ceremonyDayOfWeek() }}曜日
@@ -188,7 +188,7 @@
     <div class="home-details__inner">
         <div class="home-details__card">
             <p class="home-details__label">Date</p>
-            @if ($setting)
+            @if ($setting?->ceremony_date)
             <p class="home-details__value">
                 {{ $setting->ceremonyDateJa() }}（{{ $setting->ceremonyDayOfWeek() }}）
             </p>

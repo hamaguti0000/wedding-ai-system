@@ -24,7 +24,7 @@
         </h1>
         <div class="inv-banner__rule"></div>
         <p class="inv-banner__date">
-            {{ $setting ? $setting->ceremony_date->format('F j, Y') : 'July 19, 2026' }}
+            {{ $setting?->ceremony_date?->format('F j, Y') ?? 'July 19, 2026' }}
         </p>
     </div>
 </section>

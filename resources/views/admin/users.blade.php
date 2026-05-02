@@ -24,12 +24,6 @@
 .guest-fields { transition: opacity 0.2s; }
 .guest-fields.hidden { opacity: 0.35; pointer-events: none; }
 
-.btn-sm { padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; border: none; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; transition: background 0.2s; white-space: nowrap; }
-.btn-sm-pw  { background: #f0f4ff; color: #3a5bd9; border: 1px solid #c5d0f8; }
-.btn-sm-pw:hover  { background: #dce5ff; }
-.btn-sm-del { background: transparent; color: #c0392b; border: 1px solid #e8b4b4; }
-.btn-sm-del:hover { background: #fdf2f2; }
-
 .pw-row { display: none; background: #fdf6ee; }
 .pw-row.open { display: table-row; }
 .pw-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 0; }

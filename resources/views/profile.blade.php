@@ -189,6 +189,7 @@
         <div class="pf-section-rule"></div>
 
         @foreach ($tasks as $assignment)
+        @if (!$assignment->task) @continue @endif
         <div style="background:#fff;border:1px solid #e8d5b7;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 3px 14px rgba(179,139,89,0.08);">
             {{-- ヘッダー --}}
             <div style="display:flex;align-items:center;gap:12px;padding:16px 18px 12px;background:linear-gradient(135deg,#fef9f0,#fff);border-bottom:1px solid #f5efe8;">
@@ -242,12 +243,16 @@
         <dl class="pf-wedding-grid">
             <div>
                 <p class="pf-wedding-label">Date</p>
+                @if ($setting->ceremony_date)
                 <p class="pf-wedding-value">
                     {{ $setting->ceremonyDateJa() }}（{{ $setting->ceremonyDayOfWeek() }}）
                 </p>
                 <p class="pf-wedding-sub">
                     挙式 {{ $setting->ceremonyTimeFormatted() }} ／ 披露宴 {{ $setting->receptionTimeFormatted() }}〜
                 </p>
+                @else
+                <p class="pf-wedding-value">日程調整中</p>
+                @endif
             </div>
             <div>
                 <p class="pf-wedding-label">Venue</p>
