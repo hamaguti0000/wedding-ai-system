@@ -9,6 +9,7 @@ main { padding: 0; text-align: initial; }
 .ac-banner {
     position: relative; height: 32vh; min-height: 200px;
     overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center;
+    padding-top: 60px; box-sizing: border-box;
 }
 .ac-banner__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.38) saturate(0.7); }
 .ac-banner__overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(20,12,4,0.1), rgba(20,12,4,0.55)); }

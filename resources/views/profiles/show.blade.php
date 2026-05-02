@@ -27,6 +27,8 @@ main { padding: 0; text-align: initial; }
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    padding-top: 60px;
+    box-sizing: border-box;
 }
 .pfshow-hero__img {
     position: absolute; inset: 0;
