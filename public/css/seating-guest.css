@@ -1,516 +1,481 @@
 /* ================================================================
-   seating-guest.css — ゲスト向け席次表閲覧画面
+   seating-guest.css — ゲスト向け席次表
+   カードグリッドレイアウト（絶対座標不使用）
    ================================================================ */
 
-/* ── ページ全体 ─────────────────────────────────────────── */
+/* ── ページ全体 ── */
 .gs-page {
     min-height: calc(100vh - 60px);
-    background: #f0ede8;
+    background: linear-gradient(160deg, #f0ebe2 0%, #e5ddd2 100%);
     display: flex;
     flex-direction: column;
+    font-family: 'Noto Sans JP', sans-serif;
 }
 
-/* ── ページヘッダー ─────────────────────────────────────── */
-.gs-hero {
-    background: var(--ds-white);
-    border-bottom: 1px solid var(--ds-gold-lighter);
-    padding: var(--ds-space-5) var(--ds-space-6);
+/* ================================================================
+   ヘッダー
+   ================================================================ */
+.gs-header {
+    background: linear-gradient(145deg, #ffffff 0%, #fdfbf8 100%);
+    border-bottom: 1px solid rgba(212,184,150,0.35);
+    box-shadow: 0 2px 18px rgba(0,0,0,0.05);
+    padding: 28px 24px 22px;
     text-align: center;
+    flex-shrink: 0;
 }
-.gs-hero__title {
-    font-family: var(--ds-font-display);
-    font-size: 1.4rem;
+.gs-header__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
     font-weight: 400;
-    color: var(--ds-gold);
-    letter-spacing: 0.04em;
-    margin: 0 0 var(--ds-space-1);
+    color: #9a7447;
+    letter-spacing: 0.28em;
+    margin: 0 0 6px;
+    line-height: 1;
 }
-.gs-hero__sub {
-    font-size: var(--ds-font-size-sm);
-    color: var(--ds-text-mid);
+.gs-header__meta {
+    font-size: 0.84rem;
+    color: #a89280;
+    letter-spacing: 0.04em;
     margin: 0;
 }
 
-/* ── 自席バナー ─────────────────────────────────────────── */
-.gs-my-banner {
+/* ================================================================
+   自席バナー
+   ================================================================ */
+.gs-banner {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--ds-space-3);
-    background: var(--ds-gold-muted);
-    border: 1px solid var(--ds-gold-light);
-    border-radius: var(--ds-radius-md);
-    padding: var(--ds-space-3) var(--ds-space-5);
-    margin: var(--ds-space-4) auto;
-    max-width: 480px;
-    font-size: var(--ds-font-size-sm);
-    color: var(--ds-gold-dark);
+    gap: 14px;
+    margin: 16px 20px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    flex-shrink: 0;
 }
-.gs-my-banner__icon {
-    font-size: 1.1rem;
-    color: var(--ds-gold);
+.gs-banner--found {
+    background: linear-gradient(135deg, rgba(179,139,89,0.12), rgba(179,139,89,0.05));
+    border: 1.5px solid rgba(179,139,89,0.35);
+    box-shadow: 0 3px 18px rgba(179,139,89,0.12);
+    justify-content: space-between;
 }
-.gs-my-banner__text strong {
+.gs-banner--pending {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(212,184,150,0.3);
+    color: #9b8573;
+    font-size: 0.86rem;
+}
+.gs-banner__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.gs-banner__icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c9975b, #b38b59);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(179,139,89,0.35);
+}
+.gs-banner--pending .gs-banner__icon {
+    background: rgba(155,133,115,0.15);
+    color: #9b8573;
+    box-shadow: none;
+}
+.gs-banner__label {
+    font-size: 0.72rem;
+    color: #b38b59;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 2px;
+}
+.gs-banner__value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: #3d2f25;
+    letter-spacing: 0.04em;
+    margin: 0;
+}
+.gs-banner__text {
+    font-size: 0.86rem;
+    color: #9b8573;
+    margin: 0;
+}
+.gs-banner__btn {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #c9975b, #b38b59);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-family: 'Noto Sans JP', sans-serif;
     font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    box-shadow: 0 3px 12px rgba(179,139,89,0.35);
+    transition: background 0.15s, transform 0.15s;
+    white-space: nowrap;
+}
+.gs-banner__btn:hover {
+    background: linear-gradient(135deg, #b38b59, #9a7447);
+    transform: translateY(-1px);
 }
 
-/* ── 未公開状態 ─────────────────────────────────────────── */
-.gs-unpublished {
+/* ================================================================
+   テーブルグリッド
+   ================================================================ */
+.gs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 20px;
+    flex: 1;
+    align-content: start;
+}
+
+/* ================================================================
+   テーブルカード
+   ================================================================ */
+.gs-card {
+    background: linear-gradient(160deg, #ffffff 0%, #fefcf8 100%);
+    border: 1px solid rgba(212,184,150,0.5);
+    border-radius: 14px;
+    box-shadow:
+        0 4px 18px rgba(0,0,0,0.07),
+        0 1px 4px rgba(0,0,0,0.04);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+    animation: gs-card-in 0.4s cubic-bezier(0.2, 0, 0.2, 1) backwards;
+}
+.gs-card:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);
+    border-color: rgba(179,139,89,0.4);
+    transform: translateY(-2px);
+}
+
+/* 自席があるテーブルを強調 */
+.gs-card--mine {
+    border: 2px solid rgba(179,139,89,0.65);
+    box-shadow:
+        0 0 0 4px rgba(179,139,89,0.1),
+        0 6px 24px rgba(179,139,89,0.18),
+        0 2px 6px rgba(0,0,0,0.06);
+}
+.gs-card--mine:hover {
+    box-shadow:
+        0 0 0 4px rgba(179,139,89,0.14),
+        0 10px 32px rgba(179,139,89,0.22),
+        0 3px 8px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+}
+
+/* カードヘッダー */
+.gs-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 9px;
+    background: linear-gradient(135deg, #f7edd9 0%, #ece0c4 100%);
+    border-bottom: 1px solid rgba(212,184,150,0.4);
+}
+.gs-card--mine .gs-card__header {
+    background: linear-gradient(135deg, #f2e4c0 0%, #e8d4a4 100%);
+    border-bottom-color: rgba(179,139,89,0.35);
+}
+.gs-card__name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: #7a5c30;
+    letter-spacing: 0.06em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.gs-card__badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #9a7447;
+    background: rgba(179,139,89,0.15);
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+.gs-card__badge-sep {
+    opacity: 0.55;
+    margin: 0 1px;
+}
+.gs-card__empty {
+    font-size: 0.76rem;
+    color: #b0a090;
+    text-align: center;
+    padding: 16px 8px;
+    margin: 0;
+}
+
+/* ================================================================
+   席グリッド（カード内）
+   ================================================================ */
+.gs-card__seats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 12px 10px 14px;
+}
+
+/* ================================================================
+   席（個別）
+   ================================================================ */
+.gs-seat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: default;
+}
+
+/* 席サークル */
+.gs-seat__circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 2px solid rgba(212,184,150,0.5);
+    background: linear-gradient(145deg, #f5f1ec, #ede8e0);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #b0a090;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+    transition: transform 0.18s, box-shadow 0.18s;
+    flex-shrink: 0;
+}
+
+/* 配置済み席 */
+.gs-seat.is-occupied .gs-seat__circle {
+    border-color: var(--sc, #b38b59);
+    background: linear-gradient(145deg,
+        color-mix(in srgb, var(--sb, #fef8ed) 30%, var(--sc, #b38b59) 70%) 0%,
+        var(--sc, #b38b59) 100%
+    );
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+.gs-seat.is-occupied:hover .gs-seat__circle {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+
+/* 自席 */
+.gs-seat.is-mine .gs-seat__circle {
+    border: 3px solid #b38b59 !important;
+    background: linear-gradient(145deg, #fff8e8, rgba(221,189,123,0.6)) !important;
+    color: #9a7447 !important;
+    box-shadow:
+        0 0 0 4px rgba(179,139,89,0.2),
+        0 4px 14px rgba(179,139,89,0.3) !important;
+}
+
+/* 自席 YOU バッジ */
+.gs-seat__badge {
+    display: none;
+    position: absolute;
+    top: -13px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #c9975b, #b38b59);
+    color: #fff;
+    font-size: 0.52rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 6px rgba(179,139,89,0.4);
+}
+.gs-seat.is-mine .gs-seat__badge { display: block; }
+
+/* 席の名前ラベル */
+.gs-seat__name {
+    font-size: 0.6rem;
+    color: #7a6a5a;
+    text-align: center;
+    line-height: 1.2;
+    margin: 0;
+    max-width: 44px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 0;
+    min-height: 0.75rem;
+}
+.gs-seat.is-occupied .gs-seat__name {
+    color: #3d2f25;
+    font-weight: 600;
+}
+.gs-seat.is-mine .gs-seat__name {
+    color: #9a7447;
+    font-weight: 700;
+}
+
+/* ================================================================
+   空・未公開状態
+   ================================================================ */
+.gs-empty {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--ds-space-4);
-    padding: var(--ds-space-10);
+    gap: 14px;
+    padding: 60px 24px;
     text-align: center;
-    color: var(--ds-text-muted);
 }
-.gs-unpublished__icon {
-    font-size: 3rem;
-    opacity: 0.35;
+.gs-empty__icon {
+    font-size: 2.8rem;
+    color: #c0b0a0;
+    opacity: 0.55;
+    line-height: 1;
 }
-.gs-unpublished__title {
-    font-family: var(--ds-font-display);
+.gs-empty__title {
+    font-family: 'Playfair Display', serif;
     font-size: 1.2rem;
     font-weight: 400;
-    color: var(--ds-text-light);
+    color: #9b8573;
     margin: 0;
+    letter-spacing: 0.04em;
 }
-.gs-unpublished__desc {
-    font-size: var(--ds-font-size-sm);
-    color: var(--ds-text-muted);
+.gs-empty__desc {
+    font-size: 0.85rem;
+    color: #b0a090;
     margin: 0;
     line-height: 1.8;
 }
 
-/* ── キャンバスラッパー（スクロール可能） ───────────────── */
-.gs-canvas-wrap {
-    flex: 1;
-    overflow: auto;
-    padding: var(--ds-space-5);
-    position: relative;
-}
-.gs-canvas {
-    position: relative;
-    /* 動的に min-width/height を JS で設定 */
-    min-width: 100%;
-    min-height: 400px;
-    margin: 0 auto;
-}
-@media (min-width: 768px) {
-    .gs-canvas {
-        min-width: 800px;
-        min-height: 500px;
-    }
-}
-
-/* ── テーブル ───────────────────────────────────────────── */
-.gs-table {
-    position: absolute;
-    background: var(--ds-white);
-    border: 1px solid var(--ds-gold-lighter);
-    border-radius: var(--ds-radius-lg);
-    padding: 10px 12px 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    min-width: 120px;
-    user-select: none;
-}
-.gs-table__name {
-    font-size: var(--ds-font-size-sm);
-    font-weight: 600;
-    color: var(--ds-gold-dark);
-    text-align: center;
-    margin-bottom: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
-}
-.gs-table__body {
-    position: relative;
-    min-width: 80px;
-    min-height: 56px;
-}
-
-/* ── 席（個別サークル） ─────────────────────────────────── */
-.gs-seat {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    cursor: default;
-}
-.gs-seat__circle {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid var(--ds-gold-light);
-    background: var(--ds-cream-mid);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ds-text-mid);
-    transition: border-color 0.2s;
-    position: relative;
-    overflow: visible;
-}
-/* 席タイプ別の色 — JS が data-type の color/bg を --sc/--sb にセット */
-.gs-seat[style*="--sc"] .gs-seat__circle {
-    border-color: var(--sc, var(--ds-gold-light));
-    background: var(--sb, var(--ds-cream-mid));
-}
-/* 占有済み */
-.gs-seat.is-occupied .gs-seat__circle {
-    color: var(--ds-text-dark);
-}
-
-/* ── 自席ハイライト ─────────────────────────────────────── */
-.gs-seat--mine .gs-seat__circle {
-    border-color: var(--ds-gold) !important;
-    border-width: 3px;
-    box-shadow: 0 0 0 3px rgba(179, 139, 89, 0.2);
-    background: var(--ds-gold-lighter) !important;
-    color: var(--ds-gold-dark) !important;
-}
-/* パルスアニメーション */
-.gs-seat--mine::before {
-    content: '';
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 2px solid var(--ds-gold);
-    opacity: 0;
-    animation: gs-pulse 2.4s ease-out infinite;
-    pointer-events: none;
-}
-@keyframes gs-pulse {
-    0%   { opacity: 0.7; transform: scale(0.85); }
-    70%  { opacity: 0;   transform: scale(1.4); }
-    100% { opacity: 0;   transform: scale(1.4); }
-}
-/* 「あなたの席」バッジ */
-.gs-seat--mine .gs-seat__badge {
-    display: block;
-}
-.gs-seat__badge {
-    display: none;
-    position: absolute;
-    top: -22px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--ds-gold);
-    color: var(--ds-white);
-    font-size: 0.6rem;
-    font-weight: 700;
-    white-space: nowrap;
-    padding: 2px 6px;
-    border-radius: 20px;
-    letter-spacing: 0.04em;
-    pointer-events: none;
-}
-
-/* ── ツールチップ（ホバーで氏名表示） ───────────────────── */
-.gs-seat__tooltip {
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--ds-text-dark);
-    color: var(--ds-white);
-    font-size: 0.7rem;
-    white-space: nowrap;
-    padding: 3px 8px;
-    border-radius: var(--ds-radius-sm);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s;
-    z-index: 10;
-}
-.gs-seat:hover .gs-seat__tooltip,
-.gs-seat--mine .gs-seat__tooltip {
-    opacity: 1;
-}
-/* 自席は常にツールチップ表示 */
-.gs-seat--mine .gs-seat__tooltip {
-    background: var(--ds-gold-dark);
-}
-
-/* ── 凡例 ───────────────────────────────────────────────── */
+/* ================================================================
+   凡例フッター
+   ================================================================ */
 .gs-legend {
+    background: linear-gradient(to top, #faf7f3 0%, #ffffff 100%);
+    border-top: 1px solid rgba(212,184,150,0.35);
+    padding: 12px 20px;
+    flex-shrink: 0;
+}
+.gs-legend__inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--ds-space-4);
-    padding: var(--ds-space-3) var(--ds-space-5);
-    background: var(--ds-white);
-    border-top: 1px solid var(--ds-gold-lighter);
-    font-size: var(--ds-font-size-xs);
-    color: var(--ds-text-mid);
+    gap: 10px 16px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 0.74rem;
+    color: #9b8573;
 }
-.gs-legend__label { font-weight: 600; color: var(--ds-text-dark); }
-.gs-legend__item  { display: flex; align-items: center; gap: 5px; }
+.gs-legend__label {
+    font-weight: 600;
+    color: #7a6a5a;
+    white-space: nowrap;
+}
+.gs-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 .gs-legend__dot {
-    width: 12px;
-    height: 12px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .gs-legend__mine {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-weight: 600;
-    color: var(--ds-gold-dark);
+    gap: 6px;
+    font-weight: 700;
+    color: #9a7447;
 }
 .gs-legend__mine-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px; height: 10px;
     border-radius: 50%;
-    background: var(--ds-gold-lighter);
-    border: 2px solid var(--ds-gold);
+    background: linear-gradient(145deg, #fff8e8, rgba(221,189,123,0.6));
+    border: 2px solid #b38b59;
     flex-shrink: 0;
 }
-
-/* ── レスポンシブ ───────────────────────────────────────── */
-@media (max-width: 640px) {
-    .gs-hero { padding: var(--ds-space-4) var(--ds-space-4); }
-    .gs-hero__title { font-size: 1.15rem; }
-    .gs-canvas-wrap { padding: var(--ds-space-3); }
-    .gs-my-banner { margin: var(--ds-space-3) var(--ds-space-4); }
+.gs-legend__sep {
+    width: 1px; height: 14px;
+    background: rgba(212,184,150,0.4);
 }
 
-/* ── 印刷（ゲスト向け席次表）────────────────────────────── */
+/* ================================================================
+   アニメーション
+   ================================================================ */
+@keyframes gs-card-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ================================================================
+   レスポンシブ
+   ================================================================ */
+@media (max-width: 480px) {
+    .gs-header__title { font-size: 1.4rem; letter-spacing: 0.2em; }
+    .gs-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 14px; }
+    .gs-card__seats { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 8px 12px; }
+    .gs-seat__circle { width: 34px; height: 34px; font-size: 0.82rem; }
+    .gs-seat__name { font-size: 0.56rem; max-width: 38px; }
+    .gs-banner { margin: 12px 14px; padding: 12px 14px; }
+}
+@media (min-width: 481px) and (max-width: 767px) {
+    .gs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+    .gs-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+    .gs-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; padding: 24px; }
+}
+@media (min-width: 1280px) {
+    .gs-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ================================================================
+   印刷
+   ================================================================ */
 @media print {
     @page { size: A4 landscape; margin: 10mm; }
 
     html, body { height: auto !important; overflow: visible !important; }
 
-    /* 不要 UI を非表示 */
     .header, .header-drawer, .header-overlay,
-    .gs-hero, .gs-my-banner, .gs-legend { display: none !important; }
+    .gs-banner, .gs-legend { display: none !important; }
 
-    .gs-page { min-height: auto !important; background: #fff !important; }
-
-    /* 印刷時はヒーロータイトルをシンプルなヘッダーとして表示 */
-    .gs-canvas-wrap { overflow: visible !important; padding: 0 !important; }
-
-    .gs-canvas { min-width: unset !important; min-height: unset !important; }
-
-    /* テーブル・席を印刷に最適化 */
-    .gs-table {
+    .gs-page { background: #fff !important; min-height: auto !important; }
+    .gs-header {
+        background: #fff !important;
         box-shadow: none !important;
-        border: 1px solid #c8b890 !important;
+        border-bottom: 2px solid #b38b59 !important;
+        padding: 10px 0 12px !important;
+    }
+    .gs-grid { padding: 12px 0 !important; gap: 8px !important; }
+    .gs-card {
+        animation: none !important;
+        box-shadow: none !important;
+        border: 1px solid #d4b896 !important;
+        break-inside: avoid;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
-    .gs-seat {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
+    .gs-card:hover { transform: none !important; }
     .gs-seat__circle {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
-    /* ホバートリップを印刷時に常時表示 */
-    .gs-seat__tooltip {
-        opacity: 1 !important;
-        background: none !important;
-        color: #2e2316 !important;
-        top: calc(100% + 1px) !important;
-        bottom: auto !important;
-        font-size: 0.6rem !important;
-        padding: 0 !important;
-        font-weight: 600 !important;
-    }
-    /* 自席ハイライトを印刷でも表示 */
-    .gs-seat--mine .gs-seat__circle {
-        border-width: 3px !important;
-    }
-    .gs-seat--mine::before { display: none !important; }
-}
-
-/* ================================================================
-   Rich UI Enhancement — ゲスト席次表 デザイン強化
-   構造・JS・座席位置には影響しない純粋な視覚改善
-   ================================================================ */
-
-/* ── ページ背景 ── */
-.gs-page {
-    background: linear-gradient(155deg, #ede8e0 0%, #e3dbd0 100%);
-}
-
-/* ── ヒーロー ── */
-.gs-hero {
-    background: linear-gradient(145deg, #ffffff 0%, #fdfbf8 100%);
-    border-bottom: 1px solid rgba(212,184,150,0.35);
-    box-shadow: 0 2px 18px rgba(0,0,0,0.05);
-    padding: 26px 24px 20px;
-}
-.gs-hero__title {
-    font-size: 1.55rem;
-    color: var(--ds-gold-dark);
-    letter-spacing: 0.06em;
-    margin-bottom: 5px;
-}
-.gs-hero__sub {
-    font-size: 0.84rem;
-    color: var(--ds-text-muted);
-    letter-spacing: 0.02em;
-}
-
-/* ── 自席バナー ── */
-.gs-my-banner {
-    background: linear-gradient(135deg, rgba(179,139,89,0.11) 0%, rgba(179,139,89,0.05) 100%);
-    border: 1.5px solid rgba(179,139,89,0.32);
-    border-radius: 14px;
-    padding: 14px 20px;
-    box-shadow: 0 3px 16px rgba(179,139,89,0.11), 0 0 0 0.5px rgba(179,139,89,0.1);
-    font-size: 0.88rem;
-    gap: 12px;
-}
-.gs-my-banner__icon {
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
-/* ── 未公開状態 ── */
-.gs-unpublished {
-    margin: 48px auto;
-    max-width: 380px;
-    background: rgba(255,255,255,0.62);
-    border-radius: 20px;
-    box-shadow: 0 4px 28px rgba(0,0,0,0.06), 0 0 0 1px rgba(212,184,150,0.22);
-    padding: var(--ds-space-10);
-}
-
-/* ── キャンバスラッパー ── */
-.gs-canvas-wrap {
-    background:
-        radial-gradient(ellipse 70% 55% at 50% 45%, rgba(255,253,248,0.4), transparent),
-        linear-gradient(155deg, #e8e0d2 0%, #ddd4c2 100%);
-}
-
-/* ── テーブルカード ── */
-.gs-table {
-    background: linear-gradient(160deg, #ffffff 0%, #fefcf8 100%);
-    border: 1px solid rgba(212,184,150,0.55);
-    border-radius: 12px;
-    box-shadow:
-        0 4px 18px rgba(0,0,0,0.08),
-        0 1px 4px rgba(0,0,0,0.04),
-        0 0 0 1px rgba(212,184,150,0.12);
-    transition: box-shadow 0.2s, border-color 0.2s;
-}
-.gs-table:hover {
-    box-shadow:
-        0 8px 28px rgba(0,0,0,0.1),
-        0 2px 6px rgba(0,0,0,0.05),
-        0 0 0 1.5px rgba(179,139,89,0.28);
-    border-color: rgba(179,139,89,0.45);
-}
-
-/* ── テーブル名（セパレーター型） ── */
-.gs-table__name {
-    font-family: var(--ds-font-display);
-    font-size: 0.88rem;
-    font-weight: 400;
-    color: #9a7447;
-    letter-spacing: 0.08em;
-    text-align: center;
-    margin-bottom: 10px;
-    padding-bottom: 9px;
-    border-bottom: 1px solid rgba(212,184,150,0.4);
-    max-width: 180px;
-}
-
-/* ── 席サークル（空席） ── */
-.gs-seat__circle {
-    background: linear-gradient(145deg,
-        var(--sb, #f8f5f1) 0%,
-        color-mix(in srgb, var(--sb, #f8f5f1) 80%, var(--sc, #8a7664) 20%) 100%
-    );
-    border-color: var(--sc, var(--ds-gold-light));
-    box-shadow: 0 2px 6px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.72);
-    transition: transform 0.18s, box-shadow 0.18s;
-}
-.gs-seat:hover .gs-seat__circle {
-    transform: scale(1.1);
-    box-shadow: 0 5px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.72);
-}
-
-/* ── 席サークル（配置済み） ── */
-.gs-seat.is-occupied .gs-seat__circle {
-    background: linear-gradient(145deg,
-        color-mix(in srgb, var(--sb, #f8f5f1) 20%, var(--sc, #8a7664) 80%) 0%,
-        var(--sc, #8a7664) 100%
-    );
-    box-shadow: 0 3px 9px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.22);
-    color: #fff;
-}
-.gs-seat.is-occupied:hover .gs-seat__circle {
-    transform: scale(1.08);
-}
-
-/* ── 自席ハイライト ── */
-.gs-seat--mine .gs-seat__circle {
-    border: 3px solid var(--ds-gold) !important;
-    background: linear-gradient(145deg, #fffaed, rgba(232,210,158,0.55)) !important;
-    color: #9a7447 !important;
-    box-shadow:
-        0 0 0 4px rgba(179,139,89,0.2),
-        0 4px 14px rgba(179,139,89,0.28) !important;
-}
-
-/* ── 自席バッジ ── */
-.gs-seat__badge {
-    background: linear-gradient(135deg, #c9975b, #b38b59);
-    box-shadow: 0 2px 8px rgba(179,139,89,0.35);
-    font-size: 0.6rem;
-    padding: 2px 8px;
-    border-radius: 20px;
-    letter-spacing: 0.05em;
-}
-
-/* ── ツールチップ ── */
-.gs-seat__tooltip {
-    background: rgba(38,20,5,0.9);
-    border: 1px solid rgba(179,139,89,0.25);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-    font-size: 0.7rem;
-    padding: 3px 9px;
-    border-radius: 6px;
-    letter-spacing: 0.02em;
-}
-.gs-seat--mine .gs-seat__tooltip {
-    background: linear-gradient(135deg, #9a7447, #b38b59);
-    border-color: rgba(179,139,89,0.4);
-    opacity: 1 !important;
-}
-
-/* ── 凡例 ── */
-.gs-legend {
-    background: linear-gradient(to top, #faf7f3 0%, #ffffff 100%);
-    border-top: 1px solid rgba(212,184,150,0.35);
-    padding: 12px 20px;
-    font-size: 0.74rem;
-    gap: 14px;
-}
-.gs-legend__dot {
-    width: 10px; height: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-}
-.gs-legend__mine-dot {
-    width: 10px; height: 10px;
-    box-shadow: 0 0 0 2px rgba(179,139,89,0.3);
-}
-
-/* ── テーブル登場アニメーション ── */
-.gs-table {
-    animation: gs-table-in 0.38s cubic-bezier(0.2, 0, 0.2, 1) backwards;
-}
-@keyframes gs-table-in {
-    from { opacity: 0; transform: translateY(6px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0)  scale(1); }
 }

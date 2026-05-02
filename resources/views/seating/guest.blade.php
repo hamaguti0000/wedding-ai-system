@@ -10,198 +10,158 @@
 @php
     $guestName = function ($user) {
         $p = $user->guestProfile;
-        return $p ? $p->last_name . ' ' . $p->first_name : $user->name;
+        return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
     $guestInit = fn($user) => mb_substr($user->guestProfile?->last_name ?? $user->name, 0, 1, 'UTF-8');
 @endphp
 
 <script>window.SEAT_TYPE_CONFIG = @json($typeConfig);</script>
-<script>window.MY_SEAT_ID = {{ $mySeat?->id ?? 'null' }};</script>
 
 <div class="gs-page">
 
-    {{-- ── ページヘッダー ── --}}
-    <div class="gs-hero">
-        <h1 class="gs-hero__title">
-            <i class="fa-solid fa-chair" style="font-size:1rem;margin-right:6px;"></i>席次表
-        </h1>
-        <p class="gs-hero__sub">
+    {{-- ── ヘッダー ── --}}
+    <header class="gs-header">
+        <h1 class="gs-header__title">席 次 表</h1>
+        <p class="gs-header__meta">
             @if ($setting?->ceremony_date)
-                {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y年n月j日') }} ·
+                {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y年n月j日') }}
+                @if ($setting?->venue_name) &nbsp;·&nbsp; {{ $setting->venue_name }} @endif
+            @elseif ($setting?->venue_name)
+                {{ $setting->venue_name }}
             @endif
-            {{ $setting?->venue_name ?? '' }}
         </p>
-    </div>
+    </header>
 
     @if (!$isPublished)
 
-        {{-- ── 未公開状態 ── --}}
-        <div class="gs-unpublished">
-            <i class="fa-solid fa-hourglass-half gs-unpublished__icon"></i>
-            <h2 class="gs-unpublished__title">席次表は準備中です</h2>
-            <p class="gs-unpublished__desc">
-                席次の確定後にこちらでご確認いただけます。<br>
-                もうしばらくお待ちください。
-            </p>
+        {{-- ── 未公開 ── --}}
+        <div class="gs-empty">
+            <div class="gs-empty__icon"><i class="fa-regular fa-clock"></i></div>
+            <h2 class="gs-empty__title">席次表は準備中です</h2>
+            <p class="gs-empty__desc">席次が確定次第こちらでご確認いただけます。</p>
         </div>
 
     @else
 
         {{-- ── 自席バナー ── --}}
-        @if ($mySeat)
-        <div class="gs-my-banner">
-            <i class="fa-solid fa-location-dot gs-my-banner__icon"></i>
-            <p class="gs-my-banner__text">
-                あなたの席は
-                <strong>
-                    {{ $tables->firstWhere('id', $myTableId)?->name ?? '—' }}
-                </strong>
-                です
-                <span id="scrollBtn"
-                      style="margin-left:8px;cursor:pointer;color:var(--ds-gold);text-decoration:underline;font-size:0.85em;">
-                    席を確認する →
-                </span>
-            </p>
+        @php
+            $myTable = $myTableId ? $tables->firstWhere('id', $myTableId) : null;
+        @endphp
+
+        @if ($myTable)
+        <div class="gs-banner gs-banner--found" id="gsBanner">
+            <div class="gs-banner__left">
+                <span class="gs-banner__icon"><i class="fa-solid fa-location-dot"></i></span>
+                <div>
+                    <p class="gs-banner__label">あなたの席</p>
+                    <p class="gs-banner__value">{{ $myTable->name }}</p>
+                </div>
+            </div>
+            <button class="gs-banner__btn" id="scrollToMyTable">確認する</button>
         </div>
         @else
-        <div class="gs-my-banner" style="border-color:var(--ds-gold-lighter);background:var(--ds-cream);">
-            <i class="fa-solid fa-circle-info gs-my-banner__icon" style="color:var(--ds-text-muted);"></i>
-            <p class="gs-my-banner__text" style="color:var(--ds-text-mid);">
-                席はまだ確定していません。確定次第ご案内します。
-            </p>
+        <div class="gs-banner gs-banner--pending">
+            <span class="gs-banner__icon"><i class="fa-solid fa-circle-info"></i></span>
+            <p class="gs-banner__text">席はまだ確定していません。確定次第ご案内します。</p>
         </div>
         @endif
 
-        {{-- ── キャンバス ── --}}
-        <div class="gs-canvas-wrap" id="gsCanvasWrap">
-            <div class="gs-canvas" id="gsCanvas">
+        {{-- ── テーブルグリッド ── --}}
+        <main class="gs-grid" id="gsGrid">
+            @foreach ($tables as $table)
+            @php
+                $isMyTable  = $myTableId && $table->id === $myTableId;
+                $totalSeats = $table->seats->count();
+                $occupied   = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
+            @endphp
+            <div class="gs-card {{ $isMyTable ? 'gs-card--mine' : '' }}"
+                 id="gst-{{ $table->id }}"
+                 style="animation-delay: {{ $loop->index * 40 }}ms">
 
-                @foreach ($tables as $i => $table)
-                @php
-                    $x = $table->pos_x ?: (24 + ($i % 3) * 280);
-                    $y = $table->pos_y ?: (24 + (int)floor($i / 3) * 240);
-                @endphp
-                <div class="gs-table"
-                     id="gst-{{ $table->id }}"
-                     style="left:{{ $x }}px; top:{{ $y }}px;">
-
-                    <div class="gs-table__name" title="{{ $table->name }}">
-                        {{ $table->name }}
-                    </div>
-
-                    <div class="gs-table__body">
-                        @foreach ($table->seats as $seat)
-                        @php
-                            $assignedUser = $seat->assignment?->user;
-                            $occupied     = $assignedUser !== null;
-                            $isMe         = $mySeat && $seat->id === $mySeat->id;
-                            $initial      = $occupied ? $guestInit($assignedUser) : '';
-                            $fullName     = $occupied ? $guestName($assignedUser) : '';
-                        @endphp
-                        <div class="gs-seat {{ $occupied ? 'is-occupied' : '' }} {{ $isMe ? 'gs-seat--mine' : '' }}"
-                             id="gs-seat-{{ $seat->id }}"
-                             data-seat-id="{{ $seat->id }}"
-                             data-type="{{ $seat->type }}"
-                             style="left:{{ $seat->pos_x }}px; top:{{ $seat->pos_y }}px;">
-
-                            @if ($isMe)
-                            <span class="gs-seat__badge">あなたの席</span>
-                            @endif
-
-                            <div class="gs-seat__circle">
-                                {{ $initial }}
-                            </div>
-
-                            @if ($occupied)
-                            <div class="gs-seat__tooltip">{{ $fullName }}</div>
-                            @endif
-                        </div>
-                        @endforeach
-                    </div>
-
+                {{-- カードヘッダー --}}
+                <div class="gs-card__header">
+                    <span class="gs-card__name">{{ $table->name }}</span>
+                    <span class="gs-card__badge">{{ $occupied }}<span class="gs-card__badge-sep">/</span>{{ $totalSeats }}</span>
                 </div>
-                @endforeach
 
-            </div>{{-- /.gs-canvas --}}
-        </div>{{-- /.gs-canvas-wrap --}}
+                {{-- 席グリッド --}}
+                <div class="gs-card__seats">
+                    @forelse ($table->seats as $seat)
+                    @php
+                        $assignedUser = $seat->assignment?->user;
+                        $isOccupied   = $assignedUser !== null;
+                        $isMe         = $mySeat && $seat->id === $mySeat->id;
+                        $initial      = $isOccupied ? $guestInit($assignedUser) : '';
+                        $fullName     = $isOccupied ? $guestName($assignedUser) : '';
+                    @endphp
+                    <div class="gs-seat {{ $isOccupied ? 'is-occupied' : '' }} {{ $isMe ? 'is-mine' : '' }}"
+                         data-type="{{ $seat->type }}">
+                        <div class="gs-seat__circle">
+                            @if ($isMe)<span class="gs-seat__badge">YOU</span>@endif
+                            {{ $initial }}
+                        </div>
+                        <p class="gs-seat__name">{{ $isOccupied ? $fullName : '　' }}</p>
+                    </div>
+                    @empty
+                    <p class="gs-card__empty">席が登録されていません</p>
+                    @endforelse
+                </div>
+
+            </div>
+            @endforeach
+        </main>
 
         {{-- ── 凡例 ── --}}
         <footer class="gs-legend">
-            <span class="gs-legend__label">席タイプ:</span>
-            @foreach ($typeConfig as $key => $cfg)
-            <span class="gs-legend__item">
-                <span class="gs-legend__dot" style="background:{{ $cfg['color'] }};"></span>
-                {{ $cfg['label'] }}
-            </span>
-            @endforeach
-            @if ($mySeat)
-            <span style="margin-left:auto;">
-                <span class="gs-legend__mine">
+            <div class="gs-legend__inner">
+                @if ($myTable)
+                <div class="gs-legend__mine">
                     <span class="gs-legend__mine-dot"></span>あなたの席
-                </span>
-            </span>
-            @endif
+                </div>
+                <span class="gs-legend__sep"></span>
+                @endif
+                <span class="gs-legend__label">席タイプ:</span>
+                @foreach ($typeConfig as $key => $cfg)
+                <div class="gs-legend__item">
+                    <span class="gs-legend__dot" style="background:{{ $cfg['color'] }};"></span>
+                    <span>{{ $cfg['label'] }}</span>
+                </div>
+                @endforeach
+            </div>
         </footer>
 
     @endif
 
-</div>{{-- /.gs-page --}}
+</div>
 
 @endsection
 
 @push('scripts')
 <script>
 (function () {
-    const cfg    = window.SEAT_TYPE_CONFIG || {};
-    const mySeatId = window.MY_SEAT_ID;
+    const cfg      = window.SEAT_TYPE_CONFIG || {};
+    const myTable  = document.querySelector('.gs-card--mine');
 
-    // 席タイプ別 CSS カスタムプロパティを適用
+    // 席タイプ別カラーを CSS カスタムプロパティで適用
     document.querySelectorAll('.gs-seat[data-type]').forEach(function (el) {
-        const type = el.dataset.type;
-        const c    = cfg[type];
+        const c = cfg[el.dataset.type];
         if (c) {
             el.style.setProperty('--sc', c.color);
             el.style.setProperty('--sb', c.bg);
         }
     });
 
-    // キャンバスの最小サイズを動的に計算
-    const canvas = document.getElementById('gsCanvas');
-    if (canvas) {
-        let maxX = 0, maxY = 0;
-        canvas.querySelectorAll('.gs-table').forEach(function (tbl) {
-            const l = parseInt(tbl.style.left) || 0;
-            const t = parseInt(tbl.style.top)  || 0;
-            maxX = Math.max(maxX, l + 220);
-            maxY = Math.max(maxY, t + 200);
-        });
-        canvas.style.minWidth  = (maxX + 40) + 'px';
-        canvas.style.minHeight = (maxY + 40) + 'px';
-    }
-
-    // 自席へスクロール
-    function scrollToMySeat() {
-        if (!mySeatId) return;
-        const el   = document.getElementById('gs-seat-' + mySeatId);
-        const wrap = document.getElementById('gsCanvasWrap');
-        if (!el || !wrap) return;
-        const elRect   = el.getBoundingClientRect();
-        const wrapRect = wrap.getBoundingClientRect();
-        wrap.scrollTo({
-            left: wrap.scrollLeft + elRect.left - wrapRect.left - (wrapRect.width  / 2) + 22,
-            top:  wrap.scrollTop  + elRect.top  - wrapRect.top  - (wrapRect.height / 2) + 22,
-            behavior: 'smooth',
-        });
-    }
-
-    // ページロード時に自動スクロール
-    window.addEventListener('load', function () {
-        setTimeout(scrollToMySeat, 300);
+    // 「確認する」ボタン → 自席テーブルカードにスクロール
+    document.getElementById('scrollToMyTable')?.addEventListener('click', function () {
+        myTable?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 
-    // 「席を確認する」ボタン
-    const btn = document.getElementById('scrollBtn');
-    if (btn) btn.addEventListener('click', scrollToMySeat);
+    // ページロード時に自席カードへ自動スクロール
+    if (myTable) {
+        setTimeout(function () {
+            myTable.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
+    }
 })();
 </script>
 @endpush
