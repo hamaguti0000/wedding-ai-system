@@ -8,7 +8,10 @@
 @section('content')
 
 @php
-    $initial = mb_substr($user->name ?? '?', 0, 1, 'UTF-8');
+    $avatarType = $user->avatarType();
+    $avatarEmoji = $user->avatar_emoji;
+    $avatarImageUrl = $user->avatarImageUrl();
+    $initial = $user->avatarInitial();
 @endphp
 
 <div class="pf-wrap">
@@ -21,7 +24,15 @@
     {{-- ══ CARD 1: ユーザー情報 ══════════════════════════ --}}
     <div class="pf-card">
         <div class="pf-user">
-            <div class="pf-avatar" aria-hidden="true">{{ $initial }}</div>
+            <div class="pf-avatar" aria-hidden="true">
+                @if ($avatarType === \App\Models\User::AVATAR_PHOTO && $avatarImageUrl)
+                    <img src="{{ $avatarImageUrl }}" alt="">
+                @elseif ($avatarType === \App\Models\User::AVATAR_EMOJI && $avatarEmoji)
+                    <span class="pf-avatar-emoji">{{ $avatarEmoji }}</span>
+                @else
+                    {{ $initial }}
+                @endif
+            </div>
             <div class="pf-user-info">
                 <p class="pf-user-name">{{ $user->name }}</p>
                 <p class="pf-user-email">{{ $user->email }}</p>
@@ -45,6 +56,33 @@
             </a>
         </div>
         @endif
+    </div>
+
+    <div class="pf-card">
+        <span class="pf-section-en">Avatar</span>
+        <h2 class="pf-section-ja">アイコン設定</h2>
+        <div class="pf-section-rule"></div>
+
+        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+            @csrf
+            @method('PATCH')
+
+            @include('partials.avatar-fields', [
+                'avatarType' => $avatarType,
+                'avatarEmoji' => $avatarEmoji,
+                'avatarImageUrl' => $avatarImageUrl,
+                'avatarInitial' => $initial,
+                'avatarTitle' => 'アイコン設定',
+                'avatarDesc' => '写真、絵文字、イニシャルから選べます。'
+            ])
+
+            <div class="pf-divider"></div>
+            <div class="pf-actions">
+                <button type="submit" class="pf-btn pf-btn--primary">
+                    <i class="fa-solid fa-image-portrait" aria-hidden="true"></i>アイコンを保存
+                </button>
+            </div>
+        </form>
     </div>
 
     {{-- ゲストの場合のみ表示 --}}

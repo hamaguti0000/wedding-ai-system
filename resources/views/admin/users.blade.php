@@ -62,7 +62,7 @@
     <div class="card">
         <p class="card-title">新規ユーザー登録</p>
 
-        <form method="POST" action="{{ route('admin.users.store') }}" id="createForm">
+        <form method="POST" action="{{ route('admin.users.store') }}" id="createForm" enctype="multipart/form-data">
             @csrf
 
             {{-- ロール選択 --}}
@@ -96,6 +96,18 @@
                         placeholder="6文字以上" autocomplete="off">
                     @error('password')<span class="field-error">{{ $message }}</span>@enderror
                 </div>
+            </div>
+
+            <div style="margin:0 0 16px;padding:16px 18px;background:#fffdf9;border:1px solid #f0ebe3;border-radius:10px;">
+                <p class="card-title" style="margin-bottom:12px;">アイコン</p>
+                @include('partials.avatar-fields', [
+                    'avatarType' => old('avatar_type', 'initial'),
+                    'avatarEmoji' => old('avatar_emoji', ''),
+                    'avatarImageUrl' => null,
+                    'avatarInitial' => '?',
+                    'avatarTitle' => 'ユーザーアイコン',
+                    'avatarDesc' => '写真、絵文字、イニシャルから選べます。'
+                ])
             </div>
 
             {{-- ゲスト専用フィールド --}}

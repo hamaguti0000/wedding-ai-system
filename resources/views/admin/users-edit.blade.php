@@ -53,7 +53,7 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
+    <form method="POST" action="{{ route('admin.users.update', $user->id) }}" enctype="multipart/form-data">
         @csrf @method('PATCH')
 
         {{-- ── ロール ── --}}
@@ -92,6 +92,19 @@
                     <input type="password" name="password_confirmation" autocomplete="new-password" placeholder="確認用">
                 </div>
             </div>
+        </div>
+
+        {{-- ── アイコン ── --}}
+        <div class="edit-card">
+            <h2>アイコン</h2>
+            @include('partials.avatar-fields', [
+                'avatarType' => old('avatar_type', $user->avatarType()),
+                'avatarEmoji' => old('avatar_emoji', $user->avatar_emoji),
+                'avatarImageUrl' => $user->avatarImageUrl(),
+                'avatarInitial' => $user->avatarInitial(),
+                'avatarTitle' => 'ユーザーアイコン',
+                'avatarDesc' => '写真、絵文字、イニシャルから選べます。'
+            ])
         </div>
 
         {{-- ── ゲスト情報 ── --}}

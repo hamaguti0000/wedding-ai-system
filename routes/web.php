@@ -41,6 +41,7 @@ Route::post('/login', [AuthController::class, 'login'])    ->name('login.post');
 Route::middleware('auth')->group(function () {
     Route::get('/home',       [HomeController::class,       'index'])->name('dashboard');
     Route::get('/profile',    [ProfileController::class,   'show']) ->name('profile.edit');
+    Route::patch('/profile',  [ProfileController::class,   'update'])->name('profile.update');
     Route::get('/invitation', [InvitationController::class,'index'])->name('invitation');
     Route::post('/invitation',[InvitationController::class,'update'])->name('invitation.update');
     Route::get('/seating',    [GuestSeatingController::class,'index'])->name('seating.guest');

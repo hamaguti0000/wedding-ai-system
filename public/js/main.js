@@ -108,7 +108,83 @@
     setInterval(refreshCsrf, INTERVAL);
 })();
 
-/* ── 5. ホームページ: スクロールフェードイン (IntersectionObserver) ── */
+/* ── 5. アバター設定フォーム ────────────────────────── */
+(function () {
+    const fields = document.querySelectorAll('[data-avatar-settings]');
+    if (!fields.length) return;
+
+    fields.forEach(field => {
+        const preview = field.querySelector('[data-avatar-preview]');
+        const typeInputs = [...field.querySelectorAll('input[name="avatar_type"]')];
+        const emojiInputs = [...field.querySelectorAll('input[name="avatar_emoji"]')];
+        const emojiPanel = field.querySelector('[data-avatar-emoji-panel]');
+        const photoPanel = field.querySelector('[data-avatar-photo-panel]');
+        const photoInput = field.querySelector('input[name="avatar_image"]');
+        const initial = field.getAttribute('data-avatar-initial') || '?';
+        const state = {
+            type: field.getAttribute('data-avatar-type') || 'initial',
+            emoji: field.getAttribute('data-avatar-emoji') || '',
+            image: field.getAttribute('data-avatar-image') || '',
+        };
+
+        const render = () => {
+            if (!preview) return;
+
+            if (state.type === 'photo' && state.image) {
+                preview.innerHTML = `<img src="${state.image}" alt="">`;
+                return;
+            }
+
+            if (state.type === 'emoji' && state.emoji) {
+                preview.innerHTML = `<span class="avatar-preview__circle-emoji">${state.emoji}</span>`;
+                return;
+            }
+
+            preview.innerHTML = `<span>${initial}</span>`;
+        };
+
+        const syncPanels = () => {
+            if (emojiPanel) emojiPanel.hidden = state.type !== 'emoji';
+            if (photoPanel) photoPanel.hidden = state.type !== 'photo';
+        };
+
+        const syncType = () => {
+            const checked = typeInputs.find(input => input.checked);
+            state.type = checked ? checked.value : 'initial';
+            syncPanels();
+            render();
+        };
+
+        const syncEmoji = () => {
+            const checked = emojiInputs.find(input => input.checked);
+            state.emoji = checked ? checked.value : '';
+            render();
+        };
+
+        typeInputs.forEach(input => input.addEventListener('change', syncType));
+        emojiInputs.forEach(input => input.addEventListener('change', syncEmoji));
+
+        if (photoInput) {
+            photoInput.addEventListener('change', () => {
+                const file = photoInput.files && photoInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    state.image = String(reader.result || '');
+                    render();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        syncPanels();
+        syncEmoji();
+        render();
+    });
+})();
+
+/* ── 6. ホームページ: スクロールフェードイン (IntersectionObserver) ── */
 (function () {
     // #top_info: CSS クラス .top-info-visible で opacity を制御
     const topInfo = document.querySelector('#top_info');

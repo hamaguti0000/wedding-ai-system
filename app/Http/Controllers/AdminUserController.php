@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\WeddingTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
 {
@@ -23,6 +25,20 @@ class AdminUserController extends Controller
             'username'     => 'required|string|max:50|unique:users,username',
             'password'     => 'required|string|min:6',
             'role'         => 'required|in:admin,guest',
+            'avatar_type'  => ['nullable', Rule::in(array_keys(User::avatarTypeOptions()))],
+            'avatar_emoji' => [
+                Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_EMOJI),
+                'nullable',
+                'string',
+                Rule::in(array_keys(User::avatarEmojiOptions())),
+            ],
+            'avatar_image' => [
+                Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO),
+                'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,webp,gif',
+                'max:5120',
+            ],
             'last_name'    => 'nullable|string|max:50',
             'first_name'   => 'nullable|string|max:50',
             'furigana_sei' => 'nullable|string|max:50',
@@ -35,15 +51,22 @@ class AdminUserController extends Controller
             'password.required' => 'パスワードは必須です',
             'password.min'      => 'パスワードは6文字以上にしてください',
             'role.required'     => 'ロールを選択してください',
+            'avatar_emoji.required' => '絵文字アイコンを選択してください',
+            'avatar_emoji.in'       => '選択された絵文字アイコンは利用できません',
+            'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
+            'avatar_image.image'    => '写真は画像ファイルを選択してください',
+            'avatar_image.max'      => '写真は5MB以下にしてください',
         ]);
 
         $fullName = trim(($request->last_name ?? '') . ' ' . ($request->first_name ?? ''));
+        $avatarData = $this->buildAvatarData($request);
 
         $user = User::create([
             'name'     => $fullName ?: $request->username,
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
+            ...$avatarData,
         ]);
 
         if ($request->role === 'guest') {
@@ -77,6 +100,20 @@ class AdminUserController extends Controller
         $request->validate([
             'username'            => 'required|string|max:50|unique:users,username,' . $id,
             'role'                => 'required|in:admin,guest',
+            'avatar_type'         => ['nullable', Rule::in(array_keys(User::avatarTypeOptions()))],
+            'avatar_emoji'        => [
+                Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_EMOJI),
+                'nullable',
+                'string',
+                Rule::in(array_keys(User::avatarEmojiOptions())),
+            ],
+            'avatar_image'        => [
+                Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO && ! $user->avatar_image_path),
+                'nullable',
+                'image',
+                'mimes:jpeg,jpg,png,webp,gif',
+                'max:5120',
+            ],
             'last_name'           => 'nullable|string|max:50',
             'first_name'          => 'nullable|string|max:50',
             'furigana_sei'        => 'nullable|string|max:50',
@@ -99,14 +136,21 @@ class AdminUserController extends Controller
             'username.unique'    => 'このユーザー名はすでに使われています',
             'password.min'       => 'パスワードは6文字以上にしてください',
             'password.confirmed' => '確認用パスワードが一致しません',
+            'avatar_emoji.required' => '絵文字アイコンを選択してください',
+            'avatar_emoji.in'       => '選択された絵文字アイコンは利用できません',
+            'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
+            'avatar_image.image'    => '写真は画像ファイルを選択してください',
+            'avatar_image.max'      => '写真は5MB以下にしてください',
         ]);
 
         $fullName = trim(($request->last_name ?? '') . ' ' . ($request->first_name ?? ''));
+        $avatarData = $this->buildAvatarData($request, $user);
 
         $userData = [
             'username' => $request->username,
             'name'     => $fullName ?: $user->username,
             'role'     => $request->role,
+            ...$avatarData,
         ];
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->password);
@@ -185,5 +229,44 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.users')
             ->with('success', 'ユーザーを削除しました');
+    }
+
+    private function buildAvatarData(Request $request, ?User $currentUser = null): array
+    {
+        if ($currentUser && ! $request->has('avatar_type')) {
+            return [];
+        }
+
+        $avatarType = $request->input('avatar_type', User::AVATAR_INITIAL);
+        $currentPath = $currentUser?->avatar_image_path;
+
+        if ($avatarType === User::AVATAR_PHOTO) {
+            if ($request->hasFile('avatar_image')) {
+                if ($currentPath) {
+                    Storage::disk('public')->delete($currentPath);
+                }
+                return [
+                    'avatar_type' => $avatarType,
+                    'avatar_emoji' => null,
+                    'avatar_image_path' => $request->file('avatar_image')->store('avatars', 'public'),
+                ];
+            }
+
+            return [
+                'avatar_type' => $avatarType,
+                'avatar_emoji' => null,
+                'avatar_image_path' => $currentPath,
+            ];
+        }
+
+        if ($currentPath) {
+            Storage::disk('public')->delete($currentPath);
+        }
+
+        return [
+            'avatar_type' => $avatarType,
+            'avatar_emoji' => $avatarType === User::AVATAR_EMOJI ? $request->input('avatar_emoji') : null,
+            'avatar_image_path' => null,
+        ];
     }
 }

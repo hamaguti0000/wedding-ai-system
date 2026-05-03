@@ -1,8 +1,12 @@
 @php
     $isAdmin        = Auth::user()?->isAdmin();
     $homeRoute      = $isAdmin ? route('admin.dashboard') : route('dashboard');
-    $userName       = Auth::user()?->name ?? '';
-    $userInitial    = mb_substr($userName, 0, 1, 'UTF-8') ?: '?';
+    $currentUser    = Auth::user();
+    $userName       = $currentUser?->name ?? '';
+    $userInitial    = $currentUser?->avatarInitial() ?? (mb_substr($userName, 0, 1, 'UTF-8') ?: '?');
+    $userAvatarType = $currentUser?->avatarType() ?? 'initial';
+    $userAvatarEmoji = $currentUser?->avatar_emoji;
+    $userAvatarImageUrl = $currentUser?->avatarImageUrl();
     $isAttending    = !$isAdmin && Auth::user()?->guestProfile?->participation === 'attending';
 @endphp
 
@@ -176,7 +180,13 @@
                    class="header__avatar {{ request()->routeIs('profile.*') ? 'header__avatar--active' : '' }}"
                    aria-label="{{ $userName }} のプロフィール"
                    aria-haspopup="false">
-                    {{ $userInitial }}
+                    @if ($userAvatarType === 'photo' && $userAvatarImageUrl)
+                        <img src="{{ $userAvatarImageUrl }}" alt="">
+                    @elseif ($userAvatarType === 'emoji' && $userAvatarEmoji)
+                        <span class="header__avatar-emoji" aria-hidden="true">{{ $userAvatarEmoji }}</span>
+                    @else
+                        {{ $userInitial }}
+                    @endif
                 </a>
                 {{-- 将来的なドロップダウンスロット --}}
             </div>
@@ -209,7 +219,15 @@
 
     {{-- ドロワー ユーザー情報 --}}
     <a href="{{ route('profile.edit') }}" class="header-drawer__user">
-        <div class="header-drawer__avatar">{{ $userInitial }}</div>
+        <div class="header-drawer__avatar">
+            @if ($userAvatarType === 'photo' && $userAvatarImageUrl)
+                <img src="{{ $userAvatarImageUrl }}" alt="">
+            @elseif ($userAvatarType === 'emoji' && $userAvatarEmoji)
+                <span class="header-drawer__avatar-emoji" aria-hidden="true">{{ $userAvatarEmoji }}</span>
+            @else
+                {{ $userInitial }}
+            @endif
+        </div>
         <div class="header-drawer__user-info">
             <p class="header-drawer__user-name">{{ $userName }}</p>
             <p class="header-drawer__user-role">{{ $isAdmin ? '管理者' : 'ゲスト' }}</p>
