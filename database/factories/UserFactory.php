@@ -34,6 +34,7 @@ class UserFactory extends Factory
             'avatar_type' => 'initial',
             'avatar_emoji' => null,
             'avatar_image_path' => null,
+            'avatar_bg_color' => null,
         ];
     }
 

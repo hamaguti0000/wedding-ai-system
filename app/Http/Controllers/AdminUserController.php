@@ -32,6 +32,10 @@ class AdminUserController extends Controller
                 'string',
                 Rule::in(array_keys(User::avatarEmojiOptions())),
             ],
+            'avatar_bg_color' => [
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
             'avatar_image' => [
                 Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO),
                 'nullable',
@@ -56,6 +60,7 @@ class AdminUserController extends Controller
             'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
             'avatar_image.image'    => '写真は画像ファイルを選択してください',
             'avatar_image.max'      => '写真は5MB以下にしてください',
+            'avatar_bg_color.regex' => '背景色の形式が正しくありません',
         ]);
 
         $fullName = trim(($request->last_name ?? '') . ' ' . ($request->first_name ?? ''));
@@ -107,6 +112,10 @@ class AdminUserController extends Controller
                 'string',
                 Rule::in(array_keys(User::avatarEmojiOptions())),
             ],
+            'avatar_bg_color'     => [
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
             'avatar_image'        => [
                 Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO && ! $user->avatar_image_path),
                 'nullable',
@@ -141,6 +150,7 @@ class AdminUserController extends Controller
             'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
             'avatar_image.image'    => '写真は画像ファイルを選択してください',
             'avatar_image.max'      => '写真は5MB以下にしてください',
+            'avatar_bg_color.regex' => '背景色の形式が正しくありません',
         ]);
 
         $fullName = trim(($request->last_name ?? '') . ' ' . ($request->first_name ?? ''));
@@ -249,6 +259,7 @@ class AdminUserController extends Controller
                     'avatar_type' => $avatarType,
                     'avatar_emoji' => null,
                     'avatar_image_path' => $request->file('avatar_image')->store('avatars', 'public'),
+                    'avatar_bg_color' => null,
                 ];
             }
 
@@ -256,6 +267,7 @@ class AdminUserController extends Controller
                 'avatar_type' => $avatarType,
                 'avatar_emoji' => null,
                 'avatar_image_path' => $currentPath,
+                'avatar_bg_color' => null,
             ];
         }
 
@@ -267,6 +279,9 @@ class AdminUserController extends Controller
             'avatar_type' => $avatarType,
             'avatar_emoji' => $avatarType === User::AVATAR_EMOJI ? $request->input('avatar_emoji') : null,
             'avatar_image_path' => null,
+            'avatar_bg_color' => $avatarType === User::AVATAR_EMOJI
+                ? $request->input('avatar_bg_color', '#ffffff')
+                : null,
         ];
     }
 }

@@ -248,7 +248,6 @@
     align-items: center;
     justify-content: center;
     line-height: 1;
-    filter: brightness(0) invert(1);
 }
 .header__avatar-emoji,
 .header-drawer__avatar-emoji {
@@ -645,6 +644,56 @@
 .avatar-settings__emoji[hidden] {
     display: none !important;
 }
+.avatar-settings__color {
+    display: grid;
+    gap: 10px;
+    padding-top: 2px;
+}
+.avatar-color-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #9b8573;
+}
+.avatar-color-input input[type="color"] {
+    width: 42px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #e0d0bc;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+.avatar-settings__swatches {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.avatar-color-swatch {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #e0d0bc;
+    border-radius: 50%;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.avatar-color-swatch span {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: block;
+}
+.avatar-color-swatch.is-active {
+    border-color: #b38b59;
+    box-shadow: 0 0 0 2px rgba(179,139,89,0.18);
+}
 .avatar-emoji-option {
     position: relative;
     display: grid;
@@ -672,9 +721,6 @@
     font-size: 1.35rem;
     line-height: 1;
 }
-.avatar-emoji-option__glyph {
-    filter: brightness(0) invert(1);
-}
 .avatar-emoji-option small {
     font-size: 0.62rem;
     color: #9b8573;
@@ -683,9 +729,6 @@
 .avatar-emoji-option:has(input:checked) {
     border-color: #b38b59;
     background: #fef9f0;
-}
-.avatar-emoji-option:has(input:checked) .avatar-emoji-option__glyph {
-    filter: brightness(0) invert(1);
 }
 .avatar-settings__photo {
     display: grid;
@@ -703,6 +746,9 @@
     margin: 0;
 }
 .avatar-settings__panel[hidden] {
+    display: none !important;
+}
+.avatar-settings__color[hidden] {
     display: none !important;
 }
 

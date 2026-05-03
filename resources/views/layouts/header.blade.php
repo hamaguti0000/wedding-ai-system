@@ -6,6 +6,7 @@
     $userInitial    = $currentUser?->avatarInitial() ?? (mb_substr($userName, 0, 1, 'UTF-8') ?: '?');
     $userAvatarType = $currentUser?->avatarType() ?? 'initial';
     $userAvatarEmoji = $currentUser?->avatar_emoji;
+    $userAvatarBgColor = $currentUser?->avatarBackgroundColor();
     $userAvatarImageUrl = $currentUser?->avatarImageUrl();
     $isAttending    = !$isAdmin && Auth::user()?->guestProfile?->participation === 'attending';
 @endphp
@@ -178,6 +179,7 @@
             <div class="header__user" id="headerUser">
                 <a href="{{ route('profile.edit') }}"
                    class="header__avatar {{ request()->routeIs('profile.*') ? 'header__avatar--active' : '' }}"
+                   @if ($userAvatarType === 'emoji') style="background: {{ $userAvatarBgColor }};" @endif
                    aria-label="{{ $userName }} のプロフィール"
                    aria-haspopup="false">
                     @if ($userAvatarType === 'photo' && $userAvatarImageUrl)
@@ -219,7 +221,7 @@
 
     {{-- ドロワー ユーザー情報 --}}
     <a href="{{ route('profile.edit') }}" class="header-drawer__user">
-        <div class="header-drawer__avatar">
+        <div class="header-drawer__avatar" @if ($userAvatarType === 'emoji') style="background: {{ $userAvatarBgColor }};" @endif>
             @if ($userAvatarType === 'photo' && $userAvatarImageUrl)
                 <img src="{{ $userAvatarImageUrl }}" alt="">
             @elseif ($userAvatarType === 'emoji' && $userAvatarEmoji)

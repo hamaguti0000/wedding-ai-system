@@ -7,6 +7,8 @@
     $avatarDesc = $avatarDesc ?? '写真、絵文字、イニシャルから選べます。';
     $avatarShowPhoto = $avatarImageUrl || $avatarType === \App\Models\User::AVATAR_PHOTO;
     $avatarEmojiGroups = \App\Models\User::avatarEmojiGroups();
+    $avatarColorOptions = \App\Models\User::avatarColorOptions();
+    $avatarBgColor = old('avatar_bg_color', $avatarBgColor ?? '#ffffff');
     $currentEmojiCategory = '';
     foreach ($avatarEmojiGroups as $group) {
         if (array_key_exists($avatarEmoji, $group['items'])) {
@@ -22,10 +24,15 @@
      data-avatar-type="{{ $avatarType }}"
      data-avatar-emoji="{{ $avatarEmoji }}"
      data-avatar-emoji-category="{{ $avatarEmojiCategory }}"
+     data-avatar-bg-color="{{ $avatarBgColor }}"
      data-avatar-image="{{ $avatarImageUrl }}"
      data-avatar-initial="{{ $avatarInitial }}">
     <div class="avatar-settings__preview">
-        <div class="avatar-preview__circle" data-avatar-preview>
+        <div class="avatar-preview__circle"
+             data-avatar-preview
+             @if ($avatarType === \App\Models\User::AVATAR_EMOJI)
+             style="background: {{ $avatarBgColor }};"
+             @endif>
             @if ($avatarType === \App\Models\User::AVATAR_PHOTO && $avatarImageUrl)
                 <img src="{{ $avatarImageUrl }}" alt="">
             @elseif ($avatarType === \App\Models\User::AVATAR_EMOJI && $avatarEmoji)
@@ -72,13 +79,31 @@
                        value="{{ $emoji }}"
                        data-avatar-emoji-category="{{ $group['key'] }}"
                        {{ $avatarEmoji === $emoji ? 'checked' : '' }}>
-                <span class="avatar-emoji-option__glyph">{{ $emoji }}</span>
+                <span>{{ $emoji }}</span>
                 <small>{{ $label }}</small>
             </label>
             @endforeach
         </div>
         @endforeach
+        <div class="avatar-settings__color" data-avatar-color-panel @if ($avatarType !== \App\Models\User::AVATAR_EMOJI) hidden @endif>
+            <label class="avatar-color-input">
+                <span>背景色</span>
+                <input type="color" name="avatar_bg_color" value="{{ $avatarBgColor }}">
+            </label>
+            <div class="avatar-settings__swatches" aria-label="背景色の候補">
+                @foreach ($avatarColorOptions as $hex => $label)
+                <button type="button"
+                        class="avatar-color-swatch {{ $avatarBgColor === $hex ? 'is-active' : '' }}"
+                        data-avatar-bg-color="{{ $hex }}"
+                        title="{{ $label }}"
+                        aria-label="{{ $label }}">
+                    <span style="background: {{ $hex }};"></span>
+                </button>
+                @endforeach
+            </div>
+        </div>
         @error('avatar_emoji')<span class="field-error">{{ $message }}</span>@enderror
+        @error('avatar_bg_color')<span class="field-error">{{ $message }}</span>@enderror
     </div>
 
     <div class="avatar-settings__panel avatar-settings__photo" data-avatar-photo-panel {{ $avatarType === \App\Models\User::AVATAR_PHOTO ? '' : 'hidden' }}>

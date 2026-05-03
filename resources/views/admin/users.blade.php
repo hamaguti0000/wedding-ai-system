@@ -103,6 +103,7 @@
                 @include('partials.avatar-fields', [
                     'avatarType' => old('avatar_type', 'initial'),
                     'avatarEmoji' => old('avatar_emoji', ''),
+                    'avatarBgColor' => old('avatar_bg_color', '#ffffff'),
                     'avatarImageUrl' => null,
                     'avatarInitial' => '?',
                     'avatarTitle' => 'ユーザーアイコン',

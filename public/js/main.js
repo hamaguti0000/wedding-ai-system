@@ -119,6 +119,9 @@
         const emojiInputs = [...field.querySelectorAll('input[name="avatar_emoji"]')];
         const categoryTabs = [...field.querySelectorAll('[data-avatar-emoji-category-tab]')];
         const categoryPanels = [...field.querySelectorAll('[data-avatar-emoji-category-panel]')];
+        const colorInput = field.querySelector('input[name="avatar_bg_color"]');
+        const colorSwatches = [...field.querySelectorAll('.avatar-color-swatch[data-avatar-bg-color]')];
+        const colorPanel = field.querySelector('[data-avatar-color-panel]');
         const emojiPanel = field.querySelector('[data-avatar-emoji-panel]');
         const photoPanel = field.querySelector('[data-avatar-photo-panel]');
         const photoInput = field.querySelector('input[name="avatar_image"]');
@@ -127,6 +130,7 @@
             type: field.getAttribute('data-avatar-type') || 'initial',
             emoji: field.getAttribute('data-avatar-emoji') || '',
             emojiCategory: field.getAttribute('data-avatar-emoji-category') || '',
+            bgColor: field.getAttribute('data-avatar-bg-color') || '#ffffff',
             image: field.getAttribute('data-avatar-image') || '',
         };
 
@@ -134,21 +138,25 @@
             if (!preview) return;
 
             if (state.type === 'photo' && state.image) {
+                preview.style.background = '';
                 preview.innerHTML = `<img src="${state.image}" alt="">`;
                 return;
             }
 
             if (state.type === 'emoji' && state.emoji) {
+                preview.style.background = state.bgColor || '#ffffff';
                 preview.innerHTML = `<span class="avatar-preview__circle-emoji">${state.emoji}</span>`;
                 return;
             }
 
+            preview.style.background = '';
             preview.innerHTML = `<span>${initial}</span>`;
         };
 
         const syncPanels = () => {
             if (emojiPanel) emojiPanel.hidden = state.type !== 'emoji';
             if (photoPanel) photoPanel.hidden = state.type !== 'photo';
+            if (colorPanel) colorPanel.hidden = state.type !== 'emoji';
         };
 
         const syncCategory = (category) => {
@@ -181,6 +189,16 @@
             render();
         };
 
+        const syncColor = value => {
+            if (!value) return;
+            state.bgColor = value;
+            if (colorInput) colorInput.value = value;
+            colorSwatches.forEach(swatch => {
+                swatch.classList.toggle('is-active', swatch.getAttribute('data-avatar-bg-color') === value);
+            });
+            render();
+        };
+
         categoryTabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 syncCategory(tab.getAttribute('data-avatar-emoji-category-tab') || '');
@@ -188,6 +206,12 @@
         });
         typeInputs.forEach(input => input.addEventListener('change', syncType));
         emojiInputs.forEach(input => input.addEventListener('change', syncEmoji));
+        if (colorInput) {
+            colorInput.addEventListener('input', () => syncColor(colorInput.value));
+        }
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => syncColor(swatch.getAttribute('data-avatar-bg-color') || '#ffffff'));
+        });
 
         if (photoInput) {
             photoInput.addEventListener('change', () => {
@@ -205,6 +229,7 @@
 
         syncPanels();
         syncEmoji();
+        syncColor(state.bgColor || '#ffffff');
         syncCategory(state.emojiCategory || categoryTabs[0]?.getAttribute('data-avatar-emoji-category-tab') || '');
         render();
     });

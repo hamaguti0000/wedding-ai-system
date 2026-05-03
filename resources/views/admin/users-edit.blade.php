@@ -100,6 +100,7 @@
             @include('partials.avatar-fields', [
                 'avatarType' => old('avatar_type', $user->avatarType()),
                 'avatarEmoji' => old('avatar_emoji', $user->avatar_emoji),
+                'avatarBgColor' => old('avatar_bg_color', $user->avatar_bg_color ?? '#ffffff'),
                 'avatarImageUrl' => $user->avatarImageUrl(),
                 'avatarInitial' => $user->avatarInitial(),
                 'avatarTitle' => 'ユーザーアイコン',

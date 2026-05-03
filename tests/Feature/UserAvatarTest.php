@@ -13,6 +13,7 @@ describe('ユーザーアイコン', function () {
             ->patch(route('profile.update'), [
                 'avatar_type' => User::AVATAR_EMOJI,
                 'avatar_emoji' => '🐻',
+                'avatar_bg_color' => '#ffffff',
             ])
             ->assertRedirect(route('profile.edit'));
 
@@ -20,6 +21,7 @@ describe('ユーザーアイコン', function () {
         expect($user->avatar_type)->toBe(User::AVATAR_EMOJI);
         expect($user->avatar_emoji)->toBe('🐻');
         expect($user->avatar_image_path)->toBeNull();
+        expect($user->avatar_bg_color)->toBe('#ffffff');
     });
 
     it('管理者のユーザー編集から写真アイコンを保存できる', function () {
@@ -41,6 +43,7 @@ describe('ユーザーアイコン', function () {
         $guest->refresh();
         expect($guest->avatar_type)->toBe(User::AVATAR_PHOTO);
         expect($guest->avatar_image_path)->not->toBeNull();
+        expect($guest->avatar_bg_color)->toBeNull();
         Storage::disk('public')->assertExists($guest->avatar_image_path);
     });
 });

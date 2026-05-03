@@ -24,6 +24,7 @@ class User extends Authenticatable
         'avatar_type',
         'avatar_emoji',
         'avatar_image_path',
+        'avatar_bg_color',
     ];
 
     protected $hidden = [
@@ -168,5 +169,34 @@ class User extends Authenticatable
     public function avatarImageUrl(): ?string
     {
         return $this->avatar_image_path ? asset('storage/' . $this->avatar_image_path) : null;
+    }
+
+    public function avatarBackgroundColor(): string
+    {
+        if ($this->avatarType() === self::AVATAR_EMOJI) {
+            if (is_string($this->avatar_bg_color) && preg_match('/^#[0-9A-Fa-f]{6}$/', $this->avatar_bg_color)) {
+                return $this->avatar_bg_color;
+            }
+
+            return '#ffffff';
+        }
+
+        return 'linear-gradient(135deg, #b38b59 0%, #d4a870 100%)';
+    }
+
+    public static function avatarColorOptions(): array
+    {
+        return [
+            '#ffffff' => '白',
+            '#fff7ed' => 'クリーム',
+            '#fef3c7' => 'やわらかい黄',
+            '#fde68a' => 'アンバー',
+            '#fecaca' => 'ローズ',
+            '#e9d5ff' => 'ラベンダー',
+            '#dbeafe' => 'ライトブルー',
+            '#d1fae5' => 'ミント',
+            '#e5e7eb' => 'グレー',
+            '#fca5a5' => 'サーモン',
+        ];
     }
 }

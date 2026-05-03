@@ -44,6 +44,10 @@ class ProfileController extends Controller
                 'string',
                 Rule::in(array_keys(User::avatarEmojiOptions())),
             ],
+            'avatar_bg_color' => [
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
             'avatar_image' => [
                 Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO && ! $user->avatar_image_path),
                 'nullable',
@@ -57,6 +61,7 @@ class ProfileController extends Controller
             'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
             'avatar_image.image'    => '写真は画像ファイルを選択してください',
             'avatar_image.max'      => '写真は5MB以下にしてください',
+            'avatar_bg_color.regex' => '背景色の形式が正しくありません',
         ]);
 
         $data = [];
@@ -82,12 +87,16 @@ class ProfileController extends Controller
                     $data['avatar_image_path'] = $currentPath;
                 }
                 $data['avatar_emoji'] = null;
+                $data['avatar_bg_color'] = null;
             } else {
                 if ($currentPath) {
                     Storage::disk('public')->delete($currentPath);
                 }
                 $data['avatar_image_path'] = null;
                 $data['avatar_emoji'] = $avatarType === User::AVATAR_EMOJI ? $request->input('avatar_emoji') : null;
+                $data['avatar_bg_color'] = $avatarType === User::AVATAR_EMOJI
+                    ? $request->input('avatar_bg_color', '#ffffff')
+                    : null;
             }
 
             $data['avatar_type'] = $avatarType;

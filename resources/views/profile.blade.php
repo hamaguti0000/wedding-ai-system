@@ -10,6 +10,7 @@
 @php
     $avatarType = $user->avatarType();
     $avatarEmoji = $user->avatar_emoji;
+    $avatarBgColor = $user->avatarBackgroundColor();
     $avatarImageUrl = $user->avatarImageUrl();
     $initial = $user->avatarInitial();
 @endphp
@@ -28,7 +29,7 @@
                 @if ($avatarType === \App\Models\User::AVATAR_PHOTO && $avatarImageUrl)
                     <img src="{{ $avatarImageUrl }}" alt="">
                 @elseif ($avatarType === \App\Models\User::AVATAR_EMOJI && $avatarEmoji)
-                    <span class="pf-avatar-emoji">{{ $avatarEmoji }}</span>
+                    <span class="pf-avatar-emoji" style="background: {{ $avatarBgColor }};">{{ $avatarEmoji }}</span>
                 @else
                     {{ $initial }}
                 @endif
@@ -70,6 +71,7 @@
             @include('partials.avatar-fields', [
                 'avatarType' => $avatarType,
                 'avatarEmoji' => $avatarEmoji,
+                'avatarBgColor' => $avatarBgColor,
                 'avatarImageUrl' => $avatarImageUrl,
                 'avatarInitial' => $initial,
                 'avatarTitle' => 'アイコン設定',
