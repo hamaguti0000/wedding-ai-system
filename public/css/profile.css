@@ -8,7 +8,7 @@ main { padding: 0; text-align: initial; }
 .pf-wrap {
     max-width: 660px;
     margin: 0 auto;
-    padding: 80px 16px 72px;
+    padding: 84px 16px 72px;
 }
 
 /* ── カード共通 ──────────────────────────────────────── */
@@ -226,7 +226,7 @@ main { padding: 0; text-align: initial; }
    Tablet +  (≥ 600px)
    ================================================================ */
 @media (min-width: 600px) {
-    .pf-wrap { padding: 36px 24px 80px; }
+    .pf-wrap { padding: 92px 24px 80px; }
     .pf-card { padding: 30px 34px; }
     .pf-grid { grid-template-columns: 1fr 1fr; }
     .pf-wedding-grid { grid-template-columns: 1fr 1fr; }

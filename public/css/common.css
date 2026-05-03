@@ -587,6 +587,7 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    margin-bottom: 8px;
 }
 .avatar-category-tab {
     display: inline-flex;
@@ -640,6 +641,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
     gap: 8px;
+    margin-top: 4px;
 }
 .avatar-settings__emoji[hidden] {
     display: none !important;
