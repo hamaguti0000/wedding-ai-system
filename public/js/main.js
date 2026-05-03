@@ -117,6 +117,8 @@
         const preview = field.querySelector('[data-avatar-preview]');
         const typeInputs = [...field.querySelectorAll('input[name="avatar_type"]')];
         const emojiInputs = [...field.querySelectorAll('input[name="avatar_emoji"]')];
+        const categoryTabs = [...field.querySelectorAll('[data-avatar-emoji-category-tab]')];
+        const categoryPanels = [...field.querySelectorAll('[data-avatar-emoji-category-panel]')];
         const emojiPanel = field.querySelector('[data-avatar-emoji-panel]');
         const photoPanel = field.querySelector('[data-avatar-photo-panel]');
         const photoInput = field.querySelector('input[name="avatar_image"]');
@@ -124,6 +126,7 @@
         const state = {
             type: field.getAttribute('data-avatar-type') || 'initial',
             emoji: field.getAttribute('data-avatar-emoji') || '',
+            emojiCategory: field.getAttribute('data-avatar-emoji-category') || '',
             image: field.getAttribute('data-avatar-image') || '',
         };
 
@@ -148,6 +151,19 @@
             if (photoPanel) photoPanel.hidden = state.type !== 'photo';
         };
 
+        const syncCategory = (category) => {
+            if (!category) return;
+            state.emojiCategory = category;
+            categoryTabs.forEach(tab => {
+                tab.classList.toggle('is-active', tab.getAttribute('data-avatar-emoji-category-tab') === category);
+            });
+            categoryPanels.forEach(panel => {
+                const active = panel.getAttribute('data-avatar-emoji-category-panel') === category;
+                panel.hidden = !active;
+                panel.classList.toggle('is-active', active);
+            });
+        };
+
         const syncType = () => {
             const checked = typeInputs.find(input => input.checked);
             state.type = checked ? checked.value : 'initial';
@@ -158,9 +174,18 @@
         const syncEmoji = () => {
             const checked = emojiInputs.find(input => input.checked);
             state.emoji = checked ? checked.value : '';
+            const checkedCategory = checked ? checked.getAttribute('data-avatar-emoji-category') : '';
+            if (checkedCategory) {
+                syncCategory(checkedCategory);
+            }
             render();
         };
 
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                syncCategory(tab.getAttribute('data-avatar-emoji-category-tab') || '');
+            });
+        });
         typeInputs.forEach(input => input.addEventListener('change', syncType));
         emojiInputs.forEach(input => input.addEventListener('change', syncEmoji));
 
@@ -180,6 +205,7 @@
 
         syncPanels();
         syncEmoji();
+        syncCategory(state.emojiCategory || categoryTabs[0]?.getAttribute('data-avatar-emoji-category-tab') || '');
         render();
     });
 })();

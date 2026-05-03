@@ -248,6 +248,7 @@
     align-items: center;
     justify-content: center;
     line-height: 1;
+    filter: brightness(0) invert(1);
 }
 .header__avatar-emoji,
 .header-drawer__avatar-emoji {
@@ -583,6 +584,30 @@
     gap: 8px;
     flex-wrap: wrap;
 }
+.avatar-settings__categories {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.avatar-category-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border: 1px solid #e0d0bc;
+    border-radius: 999px;
+    background: #fffdf9;
+    color: #9b8573;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.avatar-category-tab.is-active {
+    background: #b38b59;
+    color: #fff;
+    border-color: #b38b59;
+}
 .avatar-type-option {
     position: relative;
     display: inline-flex;
@@ -617,6 +642,9 @@
     grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
     gap: 8px;
 }
+.avatar-settings__emoji[hidden] {
+    display: none !important;
+}
 .avatar-emoji-option {
     position: relative;
     display: grid;
@@ -644,6 +672,9 @@
     font-size: 1.35rem;
     line-height: 1;
 }
+.avatar-emoji-option__glyph {
+    filter: brightness(0) invert(1);
+}
 .avatar-emoji-option small {
     font-size: 0.62rem;
     color: #9b8573;
@@ -652,6 +683,9 @@
 .avatar-emoji-option:has(input:checked) {
     border-color: #b38b59;
     background: #fef9f0;
+}
+.avatar-emoji-option:has(input:checked) .avatar-emoji-option__glyph {
+    filter: brightness(0) invert(1);
 }
 .avatar-settings__photo {
     display: grid;
