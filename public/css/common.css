@@ -697,9 +697,9 @@
 .avatar-emoji-option {
     position: relative;
     display: grid;
-    gap: 4px;
+    gap: 2px;
     justify-items: center;
-    padding: 10px 8px 8px;
+    padding: 8px 8px 7px;
     border: 1px solid #efe3d2;
     border-radius: 12px;
     background: #fff;
@@ -718,13 +718,14 @@
     pointer-events: none;
 }
 .avatar-emoji-option span {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     line-height: 1;
 }
 .avatar-emoji-option small {
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     color: #9b8573;
     text-align: center;
+    line-height: 1.1;
 }
 .avatar-emoji-option:has(input:checked) {
     border-color: #b38b59;
