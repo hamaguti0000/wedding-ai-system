@@ -333,10 +333,10 @@
 .header-drawer {
     position: fixed;
     top: 0;
+    bottom: 0;
     left: 0;
     width: min(300px, 85vw);
-    height: 100%;
-    height: 100dvh;
+    height: auto;
     background: rgba(255, 252, 247, 0.98);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -471,61 +471,45 @@
     list-style: none;
 }
 
-/* ゲスト用：ナビ内ログアウト行 */
-.header-drawer__nav-logout {
+.header-drawer__footer {
+    flex-shrink: 0;
+    padding: 16px 24px calc(16px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid #f0ebe3;
-    margin-top: 8px;
-    padding-top: 4px;
+    background: linear-gradient(to top, rgba(255,252,247,0.98), rgba(255,252,247,0.88));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
-.header-drawer__nav-logout form { margin: 0; }
-.header-drawer__nav-logout button {
+.header-drawer__logout {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     width: 100%;
-    padding: 16px 28px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #efe3d2;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     font-family: 'Noto Sans JP', sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #9b8573;
-    background: none;
-    border: none;
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: #8f7865;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
     text-align: left;
 }
-.header-drawer__nav-logout button i {
+.header-drawer__footer form { margin: 0; }
+.header-drawer__logout:hover {
+    background: #fef9f0;
+    color: #b38b59;
+    border-color: #d9c2a1;
+}
+.header-drawer__logout i {
     width: 18px;
     text-align: center;
     font-size: 0.95rem;
     color: #b38b59;
+    flex-shrink: 0;
 }
-.header-drawer__nav-logout button:hover {
-    background: #fef9f0;
-    color: #b38b59;
-}
-
-/* ドロワーログアウト */
-.header-drawer__footer {
-    padding: 16px 28px 0;
-    border-top: 1px solid #f0ebe3;
-    margin-top: 8px;
-}
-.header-drawer__logout {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    background: none;
-    border: none;
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 0.88rem;
-    color: #9b8573;
-    cursor: pointer;
-    transition: color 0.15s;
-}
-.header-drawer__logout:hover { color: #b38b59; }
-.header-drawer__logout i { font-size: 0.88rem; }
 
 /* ── オーバーレイ ────────────────────────────────────── */
 .header-overlay {

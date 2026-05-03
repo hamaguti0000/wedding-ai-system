@@ -286,15 +286,6 @@
                     <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>ログイン履歴
                 </a>
             </li>
-            {{-- 管理者用ログアウト（ナビ内に直接配置） --}}
-            <li class="header-drawer__nav-logout">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit">
-                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>ログアウト
-                    </button>
-                </form>
-            </li>
             @else
             <li>
                 <a href="{{ route('dashboard') }}"
@@ -341,19 +332,18 @@
                 </a>
             </li>
             @endif
-            {{-- ゲスト用ログアウト（ナビ内に直接配置） --}}
-            <li class="header-drawer__nav-logout">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit">
-                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>ログアウト
-                    </button>
-                </form>
-            </li>
             @endif
         </ul>
     </nav>
 
+    <div class="header-drawer__footer">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="header-drawer__logout">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>ログアウト
+            </button>
+        </form>
+    </div>
 
 </div>
 
