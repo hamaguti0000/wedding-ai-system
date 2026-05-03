@@ -107,6 +107,7 @@ main { padding: 0; text-align: initial; }
     .ac-info-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (min-width: 768px) {
+    .ac-banner { padding-top: 80px; }
     .ac-wrap { padding: 80px 24px 100px; }
     .ac-map-embed iframe { height: 450px; }
 }

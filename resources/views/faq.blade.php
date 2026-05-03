@@ -95,6 +95,7 @@ main { padding: 0; text-align: initial; }
 .fq-empty i { font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 16px; }
 
 @media (min-width: 768px) {
+    .fq-banner { padding-top: 80px; }
     .fq-wrap { padding: 80px 24px 100px; }
 }
 </style>

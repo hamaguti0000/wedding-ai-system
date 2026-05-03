@@ -193,6 +193,10 @@ main { padding: 0; text-align: initial; }
     .pfshow-hero { height: 44vh; }
     .pfshow-hero__name { font-size: clamp(1.8rem, 8vw, 2.6rem); }
 }
+@media (min-width: 768px) {
+    .pfshow-hero { padding-top: 80px; }
+    .pfshow-wrap { padding: 80px 24px 100px; }
+}
 </style>
 @endpush
 

@@ -120,6 +120,7 @@ main { padding: 0; text-align: initial; }
 .pg-empty p { font-size: 0.9rem; }
 
 @media (min-width: 768px) {
+    .pg-banner { padding-top: 80px; }
     .pg-wrap { padding: 80px 24px 100px; }
     .timeline::before { left: 80px; }
     .tl-time { width: 108px; font-size: 0.85rem; }

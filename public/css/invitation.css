@@ -519,7 +519,7 @@ main { padding: 0; text-align: initial; }
    Tablet +  (≥ 600px)
    ================================================================ */
 @media (min-width: 600px) {
-    .inv-banner { height: 44vh; }
+    .inv-banner { height: 44vh; padding-top: 80px; }
     .inv-wrap   { padding: 32px 24px calc(80px + env(safe-area-inset-bottom)); }
 
     .inv-card { padding: 30px 34px; }
@@ -542,6 +542,6 @@ main { padding: 0; text-align: initial; }
    Desktop  (≥ 900px)
    ================================================================ */
 @media (min-width: 900px) {
-    .inv-banner { height: 46vh; }
+    .inv-banner { height: 46vh; padding-top: 80px; }
     .inv-card   { padding: 34px 40px; }
 }

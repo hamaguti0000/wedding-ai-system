@@ -143,6 +143,10 @@ main { padding: 0; text-align: initial; }
     .pf-card__photo-wrap { width: 110px; height: 110px; }
     .pf-wrap { padding: 48px 16px 64px; }
 }
+@media (min-width: 768px) {
+    .pf-banner { padding-top: 80px; }
+    .pf-wrap { padding: 80px 24px 100px; }
+}
 </style>
 @endpush
 
