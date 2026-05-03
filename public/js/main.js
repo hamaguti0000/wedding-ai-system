@@ -28,12 +28,20 @@
     const overlay = document.getElementById('headerOverlay');
     if (!burger || !drawer) return;
 
+    // iOS 対応: body を fixed にしてスクロール位置を保持
+    let scrollY = 0;
+
     function openDrawer() {
+        scrollY = window.scrollY;
         burger.setAttribute('aria-expanded', 'true');
         burger.setAttribute('aria-label', 'メニューを閉じる');
         drawer.setAttribute('aria-hidden', 'false');
         drawer.classList.add('is-open');
         overlay?.classList.add('is-visible');
+        // body を fixed にすることで背景スクロールを防ぐ（iOS 対応）
+        document.body.style.position = 'fixed';
+        document.body.style.top      = `-${scrollY}px`;
+        document.body.style.width    = '100%';
         document.body.style.overflow = 'hidden';
     }
 
@@ -43,7 +51,12 @@
         drawer.setAttribute('aria-hidden', 'true');
         drawer.classList.remove('is-open');
         overlay?.classList.remove('is-visible');
+        // body を元に戻してスクロール位置を復元
+        document.body.style.position = '';
+        document.body.style.top      = '';
+        document.body.style.width    = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
     }
 
     burger.addEventListener('click', () => {

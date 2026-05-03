@@ -349,6 +349,9 @@
     padding-top: max(72px, env(safe-area-inset-top, 0px) + 72px);
     padding-bottom: max(24px, env(safe-area-inset-bottom, 0px) + 24px);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;  /* iOS momentum scroll */
+    overscroll-behavior: contain;        /* 端まで来ても body をスクロールしない */
+    touch-action: pan-y;                 /* 縦スクロールを許可 */
 }
 .header-drawer.is-open {
     transform: translateX(0);
