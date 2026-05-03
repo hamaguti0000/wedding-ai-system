@@ -413,7 +413,14 @@
 /* .header-drawer__brand は .header-drawer__user に統合済み */
 
 /* ドロワーナビ */
-.header-drawer__nav { flex: 1; padding: 8px 0; }
+.header-drawer__nav {
+    flex: 1;
+    min-height: 0;                   /* flex child を縮ませてオーバーフローさせる（必須） */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 8px 0;
+}
 .header-drawer__nav ul {
     list-style: none;
     margin: 0;
