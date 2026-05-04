@@ -19,11 +19,13 @@ class HomeController extends Controller
         $user->load(['guestProfile', 'taskAssignments.task.programItems']);
 
         $setting = WeddingSetting::first();
+        $needsEmailRegistration = blank($user->email);
 
         return view('home', [
             'user'           => $user,
             'profile'        => $user->guestProfile,
             'setting'        => $setting,
+            'needsEmailRegistration' => $needsEmailRegistration,
             'homeTasks'      => $user->taskAssignments->filter(
                 fn($a) => $a->task?->display_on_home
             ),

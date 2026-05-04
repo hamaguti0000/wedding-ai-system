@@ -8,7 +8,10 @@
     $avatarShowPhoto = $avatarImageUrl || $avatarType === \App\Models\User::AVATAR_PHOTO;
     $avatarEmojiGroups = \App\Models\User::avatarEmojiGroups();
     $avatarColorOptions = \App\Models\User::avatarColorOptions();
+    $avatarBorderColorOptions = \App\Models\User::avatarBorderColorOptions();
     $avatarBgColor = old('avatar_bg_color', $avatarBgColor ?? '#ffffff');
+    $avatarBorderColor = old('avatar_border_color', $avatarBorderColor ?? '#f0e4d0');
+    $avatarBorderWidth = old('avatar_border_width', $avatarBorderWidth ?? 3);
     $currentEmojiCategory = '';
     foreach ($avatarEmojiGroups as $group) {
         if (array_key_exists($avatarEmoji, $group['items'])) {
@@ -25,14 +28,14 @@
      data-avatar-emoji="{{ $avatarEmoji }}"
      data-avatar-emoji-category="{{ $avatarEmojiCategory }}"
      data-avatar-bg-color="{{ $avatarBgColor }}"
+     data-avatar-border-color="{{ $avatarBorderColor }}"
+     data-avatar-border-width="{{ $avatarBorderWidth }}"
      data-avatar-image="{{ $avatarImageUrl }}"
      data-avatar-initial="{{ $avatarInitial }}">
     <div class="avatar-settings__preview">
         <div class="avatar-preview__circle"
              data-avatar-preview
-             @if ($avatarType === \App\Models\User::AVATAR_EMOJI)
-             style="background: {{ $avatarBgColor }};"
-             @endif>
+             style="--avatar-border-color: {{ $avatarBorderColor }}; --avatar-border-width: {{ $avatarBorderWidth }}px; @if ($avatarType === \App\Models\User::AVATAR_EMOJI) background: {{ $avatarBgColor }}; @endif">
             @if ($avatarType === \App\Models\User::AVATAR_PHOTO && $avatarImageUrl)
                 <img src="{{ $avatarImageUrl }}" alt="">
             @elseif ($avatarType === \App\Models\User::AVATAR_EMOJI && $avatarEmoji)
@@ -104,6 +107,8 @@
         </div>
         @error('avatar_emoji')<span class="field-error">{{ $message }}</span>@enderror
         @error('avatar_bg_color')<span class="field-error">{{ $message }}</span>@enderror
+        @error('avatar_border_color')<span class="field-error">{{ $message }}</span>@enderror
+        @error('avatar_border_width')<span class="field-error">{{ $message }}</span>@enderror
     </div>
 
     <div class="avatar-settings__panel avatar-settings__photo" data-avatar-photo-panel {{ $avatarType === \App\Models\User::AVATAR_PHOTO ? '' : 'hidden' }}>
@@ -114,5 +119,30 @@
         <p class="avatar-settings__current">写真を選ぶと、ここに表示されます。</p>
         @endif
         @error('avatar_image')<span class="field-error">{{ $message }}</span>@enderror
+    </div>
+
+    <div class="avatar-settings__border">
+        <label class="avatar-border-input">
+            <span>枠線色</span>
+            <input type="color" name="avatar_border_color" value="{{ $avatarBorderColor }}">
+        </label>
+        <div class="avatar-settings__swatches" aria-label="枠線色の候補">
+            @foreach ($avatarBorderColorOptions as $hex => $label)
+            <button type="button"
+                    class="avatar-color-swatch avatar-color-swatch--border {{ $avatarBorderColor === $hex ? 'is-active' : '' }}"
+                    data-avatar-border-color="{{ $hex }}"
+                    title="{{ $label }}"
+                    aria-label="{{ $label }}">
+                <span style="background: {{ $hex }};"></span>
+            </button>
+            @endforeach
+        </div>
+        <label class="avatar-border-width">
+            <span>太さ</span>
+            <div class="avatar-border-width__row">
+                <input type="range" name="avatar_border_width" min="0" max="10" step="1" value="{{ $avatarBorderWidth }}" data-avatar-border-width>
+                <output data-avatar-border-width-value>{{ $avatarBorderWidth }}px</output>
+            </div>
+        </label>
     </div>
 </div>

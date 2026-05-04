@@ -10,13 +10,13 @@
    CSS カスタムプロパティ（印刷時も有効）
    ================================================================ */
 :root {
-    --st-canvas-bg:      #f5f1eb;
+    --st-canvas-bg:      #f4efe8;
     --st-canvas-surface: #ffffff;
-    --st-border:         #ddd0b8;
-    --st-border-light:   #ede5d5;
-    --st-text:           #2e2316;
-    --st-text-mid:       #6b5b4e;
-    --st-text-muted:     #a89280;
+    --st-border:         #dbceba;
+    --st-border-light:   #ece2d4;
+    --st-text:           #2f2417;
+    --st-text-mid:       #6a594c;
+    --st-text-muted:     #a79485;
     /* 席タイプ（Seat::typeConfig() と対応）*/
     --sc-normal:    #8a7664; --sb-normal:    #f8f5f1;
     --sc-groom:     #3d64a0; --sb-groom:     #edf2fb;
@@ -49,7 +49,7 @@ main { padding-top: 60px; text-align: initial; }
    トップバー
    ================================================================ */
 .st-topbar {
-    height: 52px;
+    height: 54px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -220,7 +220,7 @@ main { padding-top: 60px; text-align: initial; }
 }
 .st-guest-card:hover {
     background: #fff; border-color: var(--st-border-light);
-    transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.06);
 }
 .st-guest-card.is-dragging { opacity: 0.3; cursor: grabbing; transform: none; }
 
@@ -268,7 +268,9 @@ main { padding-top: 60px; text-align: initial; }
    ================================================================ */
 .st-canvas-area {
     flex: 1; overflow: auto; position: relative;
-    padding: 24px; background: var(--st-canvas-bg);
+    padding: 24px; background:
+        radial-gradient(circle at top, rgba(255,255,255,0.58), transparent 45%),
+        var(--st-canvas-bg);
     display: flex; flex-direction: column; align-items: flex-start;
     gap: 0;
 }
@@ -369,15 +371,15 @@ main { padding-top: 60px; text-align: initial; }
    ================================================================ */
 .canvas-table {
     position: absolute;
-    background: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #fffaf3 100%);
     border-radius: 8px;
-    border: 1px solid var(--st-border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border: 1px solid rgba(219,206,186,0.9);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
     min-width: 180px;
     cursor: default; user-select: none;
     transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
 }
-.canvas-table:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); border-color: var(--ds-gold-light); }
+.canvas-table:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.09); border-color: var(--ds-gold-light); }
 .canvas-table.is-dragging-table {
     box-shadow: 0 8px 28px rgba(0,0,0,0.16);
     border-color: var(--ds-gold); z-index: 50;
@@ -391,7 +393,7 @@ main { padding-top: 60px; text-align: initial; }
 .canvas-table__handle {
     display: flex; align-items: center; gap: 6px;
     padding: 7px 10px;
-    background: var(--ds-cream-mid);
+    background: linear-gradient(135deg, #f5ead7 0%, #efe0c4 100%);
     border-radius: 8px 8px 0 0;
     border-bottom: 1px solid var(--st-border-light);
     cursor: grab;
@@ -469,7 +471,7 @@ main { padding-top: 60px; text-align: initial; }
 }
 .canvas-seat:hover .canvas-seat__circle {
     transform: scale(1.08);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.11);
 }
 .canvas-seat.is-selected .canvas-seat__circle {
     box-shadow: 0 0 0 2.5px #fff, 0 0 0 4.5px var(--sc);
@@ -477,7 +479,7 @@ main { padding-top: 60px; text-align: initial; }
 
 /* 配置済み */
 .canvas-seat.is-occupied .canvas-seat__circle {
-    background: color-mix(in srgb, var(--sb) 55%, var(--sc) 45%);
+    background: color-mix(in srgb, var(--sb) 48%, var(--sc) 52%);
 }
 
 /* VIP 席は二重リング */
@@ -605,6 +607,7 @@ main { padding-top: 60px; text-align: initial; }
 .st-props__header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 14px; border-bottom: 1px solid var(--st-border-light); flex-shrink: 0;
+    background: linear-gradient(135deg, #fffdf9 0%, #faf6ef 100%);
 }
 .st-props__title { font-size: 0.82rem; font-weight: 600; color: var(--st-text); }
 .st-props__close {

@@ -72,7 +72,8 @@ main { padding: 0; text-align: initial; }
     font-size: 1.6rem;
     font-weight: 500;
     flex-shrink: 0;
-    border: 3px solid #f0e4d0;
+    border: var(--avatar-border-width, 3px) solid var(--avatar-border-color, #f0e4d0);
+    box-sizing: border-box;
     overflow: hidden;
 }
 .pf-avatar img {

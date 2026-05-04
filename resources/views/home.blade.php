@@ -41,6 +41,16 @@
     </div>
 </section>
 
+@if ($needsEmailRegistration)
+<section class="home-rsvp home-rsvp--pending">
+    <div class="home-rsvp__card home-rsvp__card--cta">
+        <p class="home-rsvp__notice">メールアドレスを登録してください。</p>
+        <p class="home-rsvp__sub">パスワード再設定や連絡に使います。プロフィール画面で登録できます。</p>
+        <a href="{{ route('profile.edit') }}" class="home-rsvp__btn">プロフィールを開く</a>
+    </div>
+</section>
+@endif
+
 {{-- ══ RSVP ステータス ══════════════════════════════════════════════ --}}
 @if ($profile && $profile->participation === 'attending')
 <section class="home-rsvp home-rsvp--attending">

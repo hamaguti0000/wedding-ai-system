@@ -101,6 +101,8 @@
                 'avatarType' => old('avatar_type', $user->avatarType()),
                 'avatarEmoji' => old('avatar_emoji', $user->avatar_emoji),
                 'avatarBgColor' => old('avatar_bg_color', $user->avatar_bg_color ?? '#ffffff'),
+                'avatarBorderColor' => old('avatar_border_color', $user->avatarBorderColor()),
+                'avatarBorderWidth' => old('avatar_border_width', $user->avatarBorderWidth()),
                 'avatarImageUrl' => $user->avatarImageUrl(),
                 'avatarInitial' => $user->avatarInitial(),
                 'avatarTitle' => 'ユーザーアイコン',

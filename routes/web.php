@@ -10,6 +10,9 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\AccessController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminOperationsController;
+use App\Http\Controllers\AdminAuditController;
+use App\Http\Controllers\AdminCheckInController;
 use App\Http\Controllers\AdminLoginHistoryController;
 use App\Http\Controllers\AdminRsvpController;
 use App\Http\Controllers\AdminSettingController;
@@ -22,6 +25,11 @@ use App\Http\Controllers\CoupleProfileController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\AdminTaskController;
+use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\AdminGalleryController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\GuestbookController;
+use App\Http\Controllers\AdminGuestbookController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
@@ -51,11 +59,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/profiles',          [CoupleProfileController::class, 'index'])->name('profiles.index');
     Route::get('/profiles/{person}', [CoupleProfileController::class, 'show']) ->name('profiles.show')
          ->where('person', 'groom|bride');
+    // ギャラリー・ニュース一覧・ゲストブック
+    Route::get('/gallery',            [GalleryController::class,   'index'])->name('gallery');
+    Route::get('/news',               [NewsController::class,       'index'])->name('news.index');
+    Route::get('/guestbook',          [GuestbookController::class,  'index'])->name('guestbook');
+    Route::post('/guestbook',         [GuestbookController::class,  'store'])->name('guestbook.store');
+    Route::delete('/guestbook/mine',  [GuestbookController::class,  'destroy'])->name('guestbook.destroy');
 });
 
 // ── 管理者用ページ（認証 + admin）────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',              [AdminController::class,            'index'])->name('dashboard');
+    Route::get('/ops',           [AdminOperationsController::class, 'index'])->name('ops');
+    Route::get('/ops/live',      [AdminOperationsController::class, 'metrics'])->name('ops.live');
+    Route::get('/audit/check-in',[AdminAuditController::class, 'index'])->name('audit.checkin');
     Route::get('/rsvp',          [AdminRsvpController::class, 'index']) ->name('rsvp');
     Route::get('/rsvp/export',   [AdminRsvpController::class, 'export'])->name('rsvp.export');
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');
@@ -69,6 +86,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/news/{id}',          [AdminNewsController::class, 'destroy']) ->name('news.destroy');
     Route::patch('/news/{id}/move-up',   [AdminNewsController::class, 'moveUp'])  ->name('news.move-up');
     Route::patch('/news/{id}/move-down', [AdminNewsController::class, 'moveDown'])->name('news.move-down');
+
+    // ギャラリー管理
+    Route::get('/gallery',                   [AdminGalleryController::class, 'index'])    ->name('gallery');
+    Route::post('/gallery',                  [AdminGalleryController::class, 'store'])    ->name('gallery.store');
+    Route::patch('/gallery/{id}',            [AdminGalleryController::class, 'update'])   ->name('gallery.update');
+    Route::delete('/gallery/{id}',           [AdminGalleryController::class, 'destroy'])  ->name('gallery.destroy');
+    Route::patch('/gallery/{id}/move-up',    [AdminGalleryController::class, 'moveUp'])   ->name('gallery.move-up');
+    Route::patch('/gallery/{id}/move-down',  [AdminGalleryController::class, 'moveDown']) ->name('gallery.move-down');
+
+    // ゲストブック管理
+    Route::get('/guestbook',         [AdminGuestbookController::class, 'index'])  ->name('guestbook');
+    Route::patch('/guestbook/{id}',  [AdminGuestbookController::class, 'update']) ->name('guestbook.update');
+    Route::delete('/guestbook/{id}', [AdminGuestbookController::class, 'destroy'])->name('guestbook.destroy');
 
     // プロフィール管理
     Route::get('/profiles',  [AdminProfileController::class, 'edit'])  ->name('profiles');
@@ -105,11 +135,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // ユーザー管理
     Route::get('/users',             [AdminUserController::class, 'index'])        ->name('users');
+    Route::get('/users/{id}',        [AdminUserController::class, 'show'])         ->name('users.show');
+    Route::get('/users/{id}/qr',     [AdminUserController::class, 'qr'])           ->name('users.qr');
     Route::post('/users',            [AdminUserController::class, 'store'])        ->name('users.store');
     Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->name('users.edit');
     Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->name('users.update');
     Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->name('users.password');
     Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->name('users.destroy');
+
+    // 受付チェックイン
+    Route::get('/check-in',                    [AdminCheckInController::class, 'index']) ->name('checkin.index');
+    Route::get('/check-in/guests',             [AdminCheckInController::class, 'guests']) ->name('checkin.guests');
+    Route::post('/check-in/scan',              [AdminCheckInController::class, 'scan'])  ->name('checkin.scan');
+    Route::post('/check-in/guests/{guestProfile}/check-in', [AdminCheckInController::class, 'checkInGuest'])->name('checkin.guests.check-in');
+    Route::delete('/check-in/guests/{guestProfile}/check-in', [AdminCheckInController::class, 'cancelGuestCheckIn'])->name('checkin.guests.cancel');
+    Route::get('/check-in/{token}',            [AdminCheckInController::class, 'show'])  ->name('checkin.show');
+    Route::post('/check-in/{token?}',          [AdminCheckInController::class, 'store']) ->name('checkin.store');
 
     // 席次表管理
     Route::get('/seating',                             [AdminSeatingController::class, 'index'])         ->name('seating');

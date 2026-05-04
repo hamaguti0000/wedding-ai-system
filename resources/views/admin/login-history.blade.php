@@ -164,7 +164,7 @@
             <i class="fa-solid fa-magnifying-glass"></i> 絞り込み検索
         </div>
 
-        <form method="GET" action="{{ route('admin.login-history') }}">
+        <form method="GET" action="{{ route('admin.login-history') }}" data-live-search-form data-live-search-delay="350" data-live-search-target="#activeFiltersWrap,#historyResults">
 
             {{-- 上段: ユーザー名 / 期間 --}}
             <div class="search-row search-row-top">
@@ -241,38 +241,40 @@
     </div>
 
     {{-- アクティブフィルターバッジ --}}
-    @if ($hasFilter)
-    <div class="active-filters">
-        <span class="active-filters-label"><i class="fa-solid fa-filter"></i> 絞り込み中：</span>
-        @if ($q !== '')
-            <span class="filter-badge"><i class="fa-solid fa-user"></i> 「{{ $q }}」</span>
-        @endif
-        @if ($from !== '' || $to !== '')
-            <span class="filter-badge">
-                <i class="fa-solid fa-calendar"></i>
-                {{ $from ?: '…' }} 〜 {{ $to ?: '…' }}
-            </span>
-        @endif
-        @if ($status !== 'all')
-            <span class="filter-badge"><i class="fa-solid fa-circle-dot"></i>
-                {{ $status === 'success' ? 'ログイン成功' : 'ログイン失敗' }}
-            </span>
-        @endif
-        @if ($side !== 'all')
-            <span class="filter-badge"><i class="fa-solid fa-users"></i>
-                {{ $side === 'groom' ? '新郎側' : '新婦側' }}
-            </span>
-        @endif
-        @if ($role !== 'all')
-            <span class="filter-badge"><i class="fa-solid fa-user-shield"></i>
-                {{ $role === 'admin' ? '管理者' : '一般ユーザー' }}
-            </span>
+    <div id="activeFiltersWrap">
+        @if ($hasFilter)
+        <div class="active-filters">
+            <span class="active-filters-label"><i class="fa-solid fa-filter"></i> 絞り込み中：</span>
+            @if ($q !== '')
+                <span class="filter-badge"><i class="fa-solid fa-user"></i> 「{{ $q }}」</span>
+            @endif
+            @if ($from !== '' || $to !== '')
+                <span class="filter-badge">
+                    <i class="fa-solid fa-calendar"></i>
+                    {{ $from ?: '…' }} 〜 {{ $to ?: '…' }}
+                </span>
+            @endif
+            @if ($status !== 'all')
+                <span class="filter-badge"><i class="fa-solid fa-circle-dot"></i>
+                    {{ $status === 'success' ? 'ログイン成功' : 'ログイン失敗' }}
+                </span>
+            @endif
+            @if ($side !== 'all')
+                <span class="filter-badge"><i class="fa-solid fa-users"></i>
+                    {{ $side === 'groom' ? '新郎側' : '新婦側' }}
+                </span>
+            @endif
+            @if ($role !== 'all')
+                <span class="filter-badge"><i class="fa-solid fa-user-shield"></i>
+                    {{ $role === 'admin' ? '管理者' : '一般ユーザー' }}
+                </span>
+            @endif
+        </div>
         @endif
     </div>
-    @endif
 
     {{-- 結果テーブル --}}
-    <div class="lh-table-wrap">
+    <div class="lh-table-wrap" id="historyResults">
         <div class="lh-table-head">
             @if ($hasFilter)
                 絞り込み結果：<strong>{{ $histories->total() }}件</strong>
@@ -412,6 +414,8 @@
                     break;
                 }
             }
+            from.dispatchEvent(new Event('change', { bubbles: true }));
+            to.dispatchEvent(new Event('change', { bubbles: true }));
         });
     });
 })();

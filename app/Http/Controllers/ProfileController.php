@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\CheckInAuditLog;
 use App\Models\WeddingSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,18 +14,25 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         $user = $request->user()->load(['guestProfile', 'taskAssignments.task.programItems']);
+        $user->guestProfile?->ensureCheckInToken();
+        $checkInUrl = $user->guestProfile?->checkInUrl();
+        $needsEmailRegistration = blank($user->email);
 
         return view('profile', [
             'user'    => $user,
             'profile' => $user->guestProfile,
             'setting' => WeddingSetting::first(),
             'tasks'   => $user->taskAssignments,
+            'checkInUrl' => $checkInUrl,
+            'needsEmailRegistration' => $needsEmailRegistration,
         ]);
     }
 
     public function update(Request $request)
     {
         $user = $request->user();
+        $originalEmail = $user->email;
+        $profile = $user->guestProfile;
 
         $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
@@ -48,6 +56,16 @@ class ProfileController extends Controller
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
             ],
+            'avatar_border_color' => [
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
+            'avatar_border_width' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:10',
+            ],
             'avatar_image' => [
                 Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO && ! $user->avatar_image_path),
                 'nullable',
@@ -62,6 +80,8 @@ class ProfileController extends Controller
             'avatar_image.image'    => '写真は画像ファイルを選択してください',
             'avatar_image.max'      => '写真は5MB以下にしてください',
             'avatar_bg_color.regex' => '背景色の形式が正しくありません',
+            'avatar_border_color.regex' => '枠線色の形式が正しくありません',
+            'avatar_border_width.integer' => '枠線の太さは数値で入力してください',
         ]);
 
         $data = [];
@@ -100,10 +120,25 @@ class ProfileController extends Controller
             }
 
             $data['avatar_type'] = $avatarType;
+            $data['avatar_border_color'] = $request->input('avatar_border_color', '#f0e4d0');
+            $data['avatar_border_width'] = (int) $request->input('avatar_border_width', 3);
         }
 
         $user->update($data);
 
-        return redirect()->route('profile.edit')->with('success', 'アイコンを更新しました');
+        if ($profile && array_key_exists('email', $data) && $data['email'] !== $originalEmail) {
+            CheckInAuditLog::record(
+                $profile,
+                $user,
+                'profile_update',
+                'profile',
+                $originalEmail ? 'プロフィールのメールアドレスを更新しました' : 'メールアドレスを登録しました',
+                [
+                    'email' => $data['email'],
+                ]
+            );
+        }
+
+        return redirect()->route('profile.edit')->with('success', 'プロフィールを更新しました');
     }
 }

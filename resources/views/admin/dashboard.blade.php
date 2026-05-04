@@ -25,6 +25,16 @@
 <div class="admin-wrap">
     <h1>ゲスト一覧</h1>
 
+    @if ($needsEmailRegistration)
+    <div style="margin:0 0 16px;padding:16px 18px;background:#fff7ef;border:1px solid #e8c8a5;border-radius:14px;color:#6b4b2d;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <div>
+            <div style="font-weight:700;">メールアドレスを登録してください</div>
+            <div style="font-size:0.86rem;margin-top:4px;">パスワード再設定や連絡に使います。プロフィール画面から登録できます。</div>
+        </div>
+        <a href="{{ route('profile.edit') }}" class="btn-primary" style="text-decoration:none;">プロフィールを開く</a>
+    </div>
+    @endif
+
     {{-- 返答率プログレスバー --}}
     <div class="progress-wrap">
         <div class="progress-label">

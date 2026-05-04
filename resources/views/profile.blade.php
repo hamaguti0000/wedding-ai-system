@@ -8,11 +8,15 @@
 @section('content')
 
 @php
+    $checkInUrl = $checkInUrl ?? null;
     $avatarType = $user->avatarType();
     $avatarEmoji = $user->avatar_emoji;
     $avatarBgColor = $user->avatarBackgroundColor();
+    $avatarBorderColor = $user->avatarBorderColor();
+    $avatarBorderWidth = $user->avatarBorderWidth();
     $avatarImageUrl = $user->avatarImageUrl();
     $initial = $user->avatarInitial();
+    $checkInQrUrl = $checkInUrl ? 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' . urlencode($checkInUrl) : null;
 @endphp
 
 <div class="pf-wrap">
@@ -22,10 +26,16 @@
     <div class="pf-alert-success">{{ session('success') }}</div>
     @endif
 
+    @if ($needsEmailRegistration)
+    <div class="pf-alert-success" style="background:#fff7ef;color:#7a4f2a;border-color:#e8c8a5;">
+        メールアドレスを登録してください。パスワード再設定や連絡に使います。
+    </div>
+    @endif
+
     {{-- ══ CARD 1: ユーザー情報 ══════════════════════════ --}}
     <div class="pf-card">
         <div class="pf-user">
-            <div class="pf-avatar" aria-hidden="true">
+            <div class="pf-avatar" aria-hidden="true" style="--avatar-border-color: {{ $avatarBorderColor }}; --avatar-border-width: {{ $avatarBorderWidth }}px;">
                 @if ($avatarType === \App\Models\User::AVATAR_PHOTO && $avatarImageUrl)
                     <img src="{{ $avatarImageUrl }}" alt="">
                 @elseif ($avatarType === \App\Models\User::AVATAR_EMOJI && $avatarEmoji)
@@ -48,15 +58,44 @@
                 @endif
             </div>
         </div>
+    </div>
 
-        @if ($user->isAdmin())
-        <div class="pf-divider"></div>
-        <div class="pf-actions">
-            <a href="{{ route('admin.dashboard') }}" class="pf-btn pf-btn--primary">
-                <i class="fa-solid fa-list-check" aria-hidden="true"></i>管理ダッシュボードへ
-            </a>
-        </div>
-        @endif
+    <div class="pf-card">
+        <span class="pf-section-en">Contact</span>
+        <h2 class="pf-section-ja">メールアドレス</h2>
+        <div class="pf-section-rule"></div>
+
+        <form method="POST" action="{{ route('profile.update') }}">
+            @csrf
+            @method('PATCH')
+
+            <div style="display:grid;gap:12px;">
+                <div>
+                    <label for="profile-email" style="display:block;font-size:0.82rem;font-weight:700;color:#7f6a57;margin-bottom:6px;">メールアドレス</label>
+                    <input
+                        id="profile-email"
+                        type="email"
+                        name="email"
+                        value="{{ old('email', $user->email) }}"
+                        required
+                        autocomplete="email"
+                        placeholder="example@example.com"
+                        style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid #e4d6c3;background:#fff;font-size:0.95rem;box-sizing:border-box;"
+                    >
+                    @error('email')
+                        <div class="field-error" style="margin-top:6px;">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div style="color:#8f7d6f;font-size:0.86rem;line-height:1.7;">
+                    パスワード再設定や連絡に使います。初回ログイン時に登録しておくと後から困りません。
+                </div>
+                <div class="pf-actions" style="justify-content:flex-start;">
+                    <button type="submit" class="pf-btn pf-btn--primary">
+                        <i class="fa-solid fa-envelope"></i>メールを保存
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 
     <div class="pf-card">
@@ -72,6 +111,8 @@
                 'avatarType' => $avatarType,
                 'avatarEmoji' => $avatarEmoji,
                 'avatarBgColor' => $avatarBgColor,
+                'avatarBorderColor' => $avatarBorderColor,
+                'avatarBorderWidth' => $avatarBorderWidth,
                 'avatarImageUrl' => $avatarImageUrl,
                 'avatarInitial' => $initial,
                 'avatarTitle' => 'アイコン設定',
@@ -86,6 +127,47 @@
             </div>
         </form>
     </div>
+
+    @if ($user->isAdmin())
+    <div class="pf-card">
+        <div class="pf-actions">
+            <a href="{{ route('admin.dashboard') }}" class="pf-btn pf-btn--primary">
+                <i class="fa-solid fa-list-check" aria-hidden="true"></i>管理ダッシュボードへ
+            </a>
+        </div>
+    </div>
+    @endif
+
+    @if (!$user->isAdmin() && $profile && $checkInUrl)
+    <div class="pf-card">
+        <span class="pf-section-en">Check-in QR</span>
+        <h2 class="pf-section-ja">受付QR</h2>
+        <div class="pf-section-rule"></div>
+
+        <div style="display:grid;gap:14px;justify-items:center;text-align:center;">
+            <div style="width:min(100%,320px);padding:16px;border-radius:16px;background:#fcf8f2;border:1px solid #f2e7d8;">
+                @if ($checkInQrUrl)
+                <img src="{{ $checkInQrUrl }}" alt="受付QRコード" style="width:100%;display:block;border-radius:12px;background:#fff;padding:12px;box-sizing:border-box;box-shadow:inset 0 0 0 1px #f0e3d2;">
+                @endif
+            </div>
+            <div style="max-width:520px;color:#7f6a57;font-size:0.88rem;line-height:1.7;">
+                当日はこのQRを受付でかざしてください。
+                スマホに保存しておくと、受付がスムーズです。
+            </div>
+            <div style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e4d6c3;background:#fff;color:#6b5847;font-size:.8rem;word-break:break-all;">
+                {{ $checkInUrl }}
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <a href="{{ route('seating.guest') }}" class="pf-btn pf-btn--outline" style="min-width:160px;">
+                    <i class="fa-solid fa-chair"></i> 席次表へ
+                </a>
+                <a href="{{ route('invitation') }}" class="pf-btn pf-btn--primary" style="min-width:160px;">
+                    <i class="fa-solid fa-envelope-open-text"></i> 招待状へ
+                </a>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- ゲストの場合のみ表示 --}}
     @if (!$user->isAdmin())

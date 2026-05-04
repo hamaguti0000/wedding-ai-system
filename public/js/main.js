@@ -108,6 +108,79 @@
     setInterval(refreshCsrf, INTERVAL);
 })();
 
+/* ── 4. ライブ検索フォーム ─────────────────────────────── */
+(function () {
+    const forms = document.querySelectorAll('form[data-live-search-form]');
+    if (!forms.length) return;
+
+    forms.forEach(form => {
+        const delay = Math.max(0, parseInt(form.getAttribute('data-live-search-delay') || '300', 10) || 300);
+        const targets = (form.getAttribute('data-live-search-target') || '')
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+        let controller = null;
+        let timer = null;
+
+        const schedule = (ms = delay) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if (!targets.length) return;
+
+                const url = new URL(form.action, window.location.origin);
+                const params = new URLSearchParams(new FormData(form));
+                url.search = params.toString();
+
+                if (controller) {
+                    controller.abort();
+                }
+                controller = new AbortController();
+
+                fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html',
+                    },
+                    signal: controller.signal,
+                    credentials: 'same-origin',
+                })
+                    .then(resp => resp.text())
+                    .then(html => {
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        targets.forEach(selector => {
+                            const current = document.querySelector(selector);
+                            const next = doc.querySelector(selector);
+                            if (!current) return;
+                            if (!next) {
+                                current.remove();
+                                return;
+                            }
+                            current.outerHTML = next.outerHTML;
+                        });
+                        history.replaceState(null, '', url.pathname + (url.search ? `?${url.searchParams.toString()}` : ''));
+                    })
+                    .catch(err => {
+                        if (err?.name !== 'AbortError') return;
+                    });
+            }, ms);
+        };
+
+        form.querySelectorAll('input[type="search"], input[type="text"], input[type="date"], input[type="radio"], input[type="checkbox"], select, textarea')
+            .forEach(control => {
+                const type = (control.getAttribute('type') || '').toLowerCase();
+                if (type === 'search' || type === 'text' || control.tagName === 'TEXTAREA') {
+                    control.addEventListener('input', () => schedule());
+                    return;
+                }
+                control.addEventListener('change', () => schedule(0));
+            });
+
+        form.addEventListener('submit', () => {
+            clearTimeout(timer);
+        });
+    });
+})();
+
 /* ── 5. アバター設定フォーム ────────────────────────── */
 (function () {
     const fields = document.querySelectorAll('[data-avatar-settings]');
@@ -121,6 +194,10 @@
         const categoryPanels = [...field.querySelectorAll('[data-avatar-emoji-category-panel]')];
         const colorInput = field.querySelector('input[name="avatar_bg_color"]');
         const colorSwatches = [...field.querySelectorAll('.avatar-color-swatch[data-avatar-bg-color]')];
+        const borderInput = field.querySelector('input[name="avatar_border_color"]');
+        const borderSwatches = [...field.querySelectorAll('.avatar-color-swatch[data-avatar-border-color]')];
+        const borderWidthInput = field.querySelector('input[name="avatar_border_width"]');
+        const borderWidthValue = field.querySelector('[data-avatar-border-width-value]');
         const colorPanel = field.querySelector('[data-avatar-color-panel]');
         const emojiPanel = field.querySelector('[data-avatar-emoji-panel]');
         const photoPanel = field.querySelector('[data-avatar-photo-panel]');
@@ -131,11 +208,15 @@
             emoji: field.getAttribute('data-avatar-emoji') || '',
             emojiCategory: field.getAttribute('data-avatar-emoji-category') || '',
             bgColor: field.getAttribute('data-avatar-bg-color') || '#ffffff',
+            borderColor: field.getAttribute('data-avatar-border-color') || '#f0e4d0',
+            borderWidth: field.getAttribute('data-avatar-border-width') || '3',
             image: field.getAttribute('data-avatar-image') || '',
         };
 
         const render = () => {
             if (!preview) return;
+            preview.style.setProperty('--avatar-border-color', state.borderColor || '#f0e4d0');
+            preview.style.setProperty('--avatar-border-width', `${state.borderWidth || 3}px`);
 
             if (state.type === 'photo' && state.image) {
                 preview.style.background = '';
@@ -199,6 +280,24 @@
             render();
         };
 
+        const syncBorderColor = value => {
+            if (!value) return;
+            state.borderColor = value;
+            if (borderInput) borderInput.value = value;
+            borderSwatches.forEach(swatch => {
+                swatch.classList.toggle('is-active', swatch.getAttribute('data-avatar-border-color') === value);
+            });
+            render();
+        };
+
+        const syncBorderWidth = value => {
+            if (value === null || value === undefined || value === '') return;
+            state.borderWidth = String(Math.max(0, Math.min(10, parseInt(value, 10) || 0)));
+            if (borderWidthInput) borderWidthInput.value = state.borderWidth;
+            if (borderWidthValue) borderWidthValue.textContent = `${state.borderWidth}px`;
+            render();
+        };
+
         categoryTabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 syncCategory(tab.getAttribute('data-avatar-emoji-category-tab') || '');
@@ -212,6 +311,15 @@
         colorSwatches.forEach(swatch => {
             swatch.addEventListener('click', () => syncColor(swatch.getAttribute('data-avatar-bg-color') || '#ffffff'));
         });
+        if (borderInput) {
+            borderInput.addEventListener('input', () => syncBorderColor(borderInput.value));
+        }
+        borderSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => syncBorderColor(swatch.getAttribute('data-avatar-border-color') || '#f0e4d0'));
+        });
+        if (borderWidthInput) {
+            borderWidthInput.addEventListener('input', () => syncBorderWidth(borderWidthInput.value));
+        }
 
         if (photoInput) {
             photoInput.addEventListener('change', () => {
@@ -230,6 +338,8 @@
         syncPanels();
         syncEmoji();
         syncColor(state.bgColor || '#ffffff');
+        syncBorderColor(state.borderColor || '#f0e4d0');
+        syncBorderWidth(state.borderWidth || '3');
         syncCategory(state.emojiCategory || categoryTabs[0]?.getAttribute('data-avatar-emoji-category-tab') || '');
         render();
     });

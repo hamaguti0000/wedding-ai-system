@@ -25,6 +25,8 @@ class User extends Authenticatable
         'avatar_emoji',
         'avatar_image_path',
         'avatar_bg_color',
+        'avatar_border_color',
+        'avatar_border_width',
     ];
 
     protected $hidden = [
@@ -184,6 +186,24 @@ class User extends Authenticatable
         return 'linear-gradient(135deg, #b38b59 0%, #d4a870 100%)';
     }
 
+    public function avatarBorderColor(): string
+    {
+        if (is_string($this->avatar_border_color) && preg_match('/^#[0-9A-Fa-f]{6}$/', $this->avatar_border_color)) {
+            return $this->avatar_border_color;
+        }
+
+        return '#f0e4d0';
+    }
+
+    public function avatarBorderWidth(): int
+    {
+        if (is_numeric($this->avatar_border_width)) {
+            return max(0, min(10, (int) $this->avatar_border_width));
+        }
+
+        return 3;
+    }
+
     public static function avatarColorOptions(): array
     {
         return [
@@ -197,6 +217,22 @@ class User extends Authenticatable
             '#d1fae5' => 'ミント',
             '#e5e7eb' => 'グレー',
             '#fca5a5' => 'サーモン',
+        ];
+    }
+
+    public static function avatarBorderColorOptions(): array
+    {
+        return [
+            '#f0e4d0' => 'やわらかい金',
+            '#b38b59' => 'ゴールド',
+            '#d9c2a1' => 'サンド',
+            '#9b8573' => 'トープ',
+            '#3d2f25' => 'ダークブラウン',
+            '#e8b8c8' => 'ローズ',
+            '#b8c8e8' => 'ブルー',
+            '#a8d8b9' => 'グリーン',
+            '#cfc7f5' => 'ラベンダー',
+            '#ffffff' => 'ホワイト',
         ];
     }
 }

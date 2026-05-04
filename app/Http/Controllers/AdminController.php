@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -17,6 +18,7 @@ class AdminController extends Controller
         $declining = $guests->filter(fn($u) => $u->guestProfile?->participation === 'declining');
         $pending   = $guests->filter(fn($u) => !$u->guestProfile || $u->guestProfile->participation === 'pending');
         $responded = $guests->count() - $pending->count();
+        $needsEmailRegistration = blank(Auth::user()?->email);
 
         $summary = [
             'total'          => $guests->count(),
@@ -30,6 +32,6 @@ class AdminController extends Controller
                 : 0,
         ];
 
-        return view('admin.dashboard', compact('guests', 'summary'));
+        return view('admin.dashboard', compact('guests', 'summary', 'needsEmailRegistration'));
     }
 }

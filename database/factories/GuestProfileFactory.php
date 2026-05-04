@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class GuestProfileFactory extends Factory
 {
@@ -29,6 +30,9 @@ class GuestProfileFactory extends Factory
             'allergy_notes'       => null,
             'notes'               => null,
             'responded_at'        => null,
+            'checkin_token'       => (string) Str::uuid(),
+            'checked_in_at'       => null,
+            'checked_in_by_user_id' => null,
         ];
     }
 }

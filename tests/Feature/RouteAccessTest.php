@@ -14,6 +14,10 @@ describe('未認証', function () {
         $this->get('/admin')->assertRedirect('/login');
     });
 
+    it('/admin/ops は /login にリダイレクト', function () {
+        $this->get('/admin/ops')->assertRedirect('/login');
+    });
+
     it('/profile は /login にリダイレクト', function () {
         $this->get('/profile')->assertRedirect('/login');
     });
@@ -62,6 +66,26 @@ describe('admin ログイン', function () {
         $this->actingAs(makeAdmin())->get('/profile')->assertStatus(200);
     });
 
+    it('/admin/users/{id}/qr は 200', function () {
+        $guest = makeGuest('attending');
+        $this->actingAs(makeAdmin())
+            ->get(route('admin.users.qr', $guest->id))
+            ->assertStatus(200);
+    });
+
+    it('/admin/check-in/guests は 200', function () {
+        makeGuest('attending');
+        $this->actingAs(makeAdmin())
+            ->get(route('admin.checkin.guests'))
+            ->assertStatus(200);
+    });
+
+    it('/admin/audit/check-in は 200', function () {
+        $this->actingAs(makeAdmin())
+            ->get(route('admin.audit.checkin'))
+            ->assertStatus(200);
+    });
+
     it('/seating → /admin/seating にリダイレクト', function () {
         $this->actingAs(makeAdmin())
             ->get('/seating')
@@ -92,6 +116,10 @@ describe('guest ログイン（未回答）', function () {
 
     it('/admin は 403', function () {
         $this->actingAs(makeGuest())->get('/admin')->assertStatus(403);
+    });
+
+    it('/admin/ops は 403', function () {
+        $this->actingAs(makeGuest())->get('/admin/ops')->assertStatus(403);
     });
 
     it('/invitation は 200', function () {

@@ -104,6 +104,8 @@
                     'avatarType' => old('avatar_type', 'initial'),
                     'avatarEmoji' => old('avatar_emoji', ''),
                     'avatarBgColor' => old('avatar_bg_color', '#ffffff'),
+                    'avatarBorderColor' => old('avatar_border_color', '#f0e4d0'),
+                    'avatarBorderWidth' => old('avatar_border_width', 3),
                     'avatarImageUrl' => null,
                     'avatarInitial' => '?',
                     'avatarTitle' => 'ユーザーアイコン',
@@ -210,6 +212,16 @@
                         @endif
                     </td>
                     <td style="white-space:nowrap;">
+                        <a href="{{ route('admin.users.qr', $user->id) }}"
+                           class="btn-sm btn-sm-pw" style="text-decoration:none;">
+                            <i class="fa-solid fa-qrcode"></i> QR
+                        </a>
+                        &nbsp;
+                        <a href="{{ route('admin.users.show', $user->id) }}"
+                           class="btn-sm btn-sm-pw" style="text-decoration:none;">
+                            <i class="fa-solid fa-id-card"></i> 詳細
+                        </a>
+                        &nbsp;
                         <a href="{{ route('admin.users.edit', $user->id) }}"
                            class="btn-sm btn-sm-pw" style="text-decoration:none;">
                             <i class="fa-solid fa-pen-to-square"></i> 編集

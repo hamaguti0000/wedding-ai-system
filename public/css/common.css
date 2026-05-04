@@ -220,7 +220,8 @@
     font-weight: 500;
     letter-spacing: 0;
     text-decoration: none;
-    border: 2px solid rgba(255,255,255,0.35);
+    border: var(--avatar-border-width, 3px) solid var(--avatar-border-color, #f0e4d0);
+    box-sizing: border-box;
     flex-shrink: 0;
     transition:
         transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -263,17 +264,7 @@
 }
 .header__avatar:active { transform: scale(0.97); }
 .header__avatar--active {
-    border-color: rgba(232,201,138,0.9);
     box-shadow: 0 0 0 3px rgba(179,139,89,0.25);
-}
-
-/* scrolled 時はボーダーをゴールドに */
-.header.scrolled .header__avatar {
-    border-color: rgba(179,139,89,0.4);
-}
-.header.scrolled .header__avatar:hover {
-    border-color: #b38b59;
-    box-shadow: 0 4px 16px rgba(179,139,89,0.3);
 }
 
 .header__logout {
@@ -413,7 +404,8 @@
     font-size: 1.15rem;
     font-weight: 500;
     flex-shrink: 0;
-    border: 2px solid rgba(179,139,89,0.2);
+    border: var(--avatar-border-width, 3px) solid var(--avatar-border-color, #f0e4d0);
+    box-sizing: border-box;
     overflow: hidden;
 }
 .header-drawer__user-info { flex: 1; min-width: 0; }
@@ -559,7 +551,8 @@
     font-family: 'Playfair Display', serif;
     font-size: 1.6rem;
     font-weight: 500;
-    border: 3px solid #f0e4d0;
+    border: var(--avatar-border-width, 3px) solid var(--avatar-border-color, #f0e4d0);
+    box-sizing: border-box;
     overflow: hidden;
     flex-shrink: 0;
     display: flex;
@@ -673,6 +666,45 @@
     gap: 8px;
     flex-wrap: wrap;
 }
+.avatar-settings__border {
+    display: grid;
+    gap: 10px;
+    padding-top: 4px;
+}
+.avatar-border-input,
+.avatar-border-width {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #9b8573;
+}
+.avatar-border-input input[type="color"] {
+    width: 42px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #e0d0bc;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+.avatar-border-width__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+.avatar-border-width input[type="range"] {
+    flex: 1;
+    accent-color: #b38b59;
+}
+.avatar-border-width output {
+    min-width: 36px;
+    text-align: right;
+    font-size: 0.78rem;
+    color: #7a6a5a;
+}
 .avatar-color-swatch {
     width: 32px;
     height: 32px;
@@ -695,6 +727,10 @@
 .avatar-color-swatch.is-active {
     border-color: #b38b59;
     box-shadow: 0 0 0 2px rgba(179,139,89,0.18);
+}
+.avatar-color-swatch--border.is-active {
+    border-color: #8f6a3f;
+    box-shadow: 0 0 0 2px rgba(143,106,63,0.18);
 }
 .avatar-emoji-option {
     position: relative;

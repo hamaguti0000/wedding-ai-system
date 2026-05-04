@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CheckInAuditLog;
 use App\Models\GuestProfile;
 use App\Models\WeddingSetting;
 use Illuminate\Http\Request;
@@ -66,7 +67,7 @@ class InvitationController extends Controller
             'allergy_notes.required'   => 'アレルギーの詳細をご入力ください',
         ]);
 
-        GuestProfile::updateOrCreate(
+        $profile = GuestProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
                 'phone'           => $request->phone,
@@ -79,6 +80,19 @@ class InvitationController extends Controller
                 'allergy_notes'   => $hasAllergy ? $request->allergy_notes : null,
                 'notes'           => $request->notes,
                 'responded_at'    => now(),
+            ]
+        );
+
+        CheckInAuditLog::record(
+            $profile,
+            $user,
+            'rsvp_update',
+            'rsvp',
+            $request->participation === 'attending'
+                ? '出席回答を登録しました'
+                : '欠席回答を登録しました',
+            [
+                'participation' => $request->participation,
             ]
         );
 

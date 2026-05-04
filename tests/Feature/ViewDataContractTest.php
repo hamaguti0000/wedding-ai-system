@@ -198,6 +198,54 @@ describe('AdminController::index() のデータ構造', function () {
     });
 });
 
+// ─── AdminOperationsController ───────────────────────────
+
+describe('AdminOperationsController::index() のデータ構造', function () {
+
+    it('View に渡す変数の型が保証されている', function () {
+        $data = $this->actingAs(makeAdmin())->get('/admin/ops')
+            ->assertStatus(200)
+            ->getOriginalContent()
+            ->getData();
+
+        expect($data['summary'])->toBeArray();
+        expect($data['recentResponses'])->toBeIterable();
+        expect($data['recentCheckins'])->toBeIterable();
+        expect($data['recentOperationLogs'])->toBeIterable();
+    });
+});
+
+// ─── AdminCheckInController ──────────────────────────────
+
+describe('AdminCheckInController::index() のデータ構造', function () {
+
+    it('View に渡す変数の型が保証されている', function () {
+        $data = $this->actingAs(makeAdmin())->get('/admin/check-in')
+            ->assertStatus(200)
+            ->getOriginalContent()
+            ->getData();
+
+        expect($data['summary'])->toBeArray();
+        expect($data['checkedInProfiles'])->toBeIterable();
+        expect($data['focusProfile'] ?? null)->toBeNull();
+    });
+});
+
+describe('AdminCheckInController::guests() のデータ構造', function () {
+
+    it('View に渡す変数の型が保証されている', function () {
+        $data = $this->actingAs(makeAdmin())->get(route('admin.checkin.guests'))
+            ->assertStatus(200)
+            ->getOriginalContent()
+            ->getData();
+
+        expect($data['summary'])->toBeArray();
+        expect($data['guests'])->toBeIterable();
+        expect($data['status'])->toBeString();
+        expect($data['statusLabels'])->toBeArray();
+    });
+});
+
 // ─── Seat::typeConfig() の構造保証 ─────────────────────────
 
 describe('Seat::typeConfig() の構造', function () {

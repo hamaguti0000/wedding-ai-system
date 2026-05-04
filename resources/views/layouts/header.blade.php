@@ -7,6 +7,8 @@
     $userAvatarType = $currentUser?->avatarType() ?? 'initial';
     $userAvatarEmoji = $currentUser?->avatar_emoji;
     $userAvatarBgColor = $currentUser?->avatarBackgroundColor();
+    $userAvatarBorderColor = $currentUser?->avatarBorderColor() ?? '#f0e4d0';
+    $userAvatarBorderWidth = $currentUser?->avatarBorderWidth() ?? 3;
     $userAvatarImageUrl = $currentUser?->avatarImageUrl();
     $isAttending    = !$isAdmin && Auth::user()?->guestProfile?->participation === 'attending';
 @endphp
@@ -25,10 +27,57 @@
         <nav class="header__nav" aria-label="メインナビゲーション">
             <ul>
                 @if ($isAdmin)
-                {{-- ゲスト関連: ドロップダウン --}}
+                <li class="header__nav-item">
+                    <a href="{{ route('admin.ops') }}"
+                       class="{{ request()->routeIs('admin.ops*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>運営
+                        <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
+                    </a>
+                    <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('admin.ops') }}"
+                               class="{{ request()->routeIs('admin.ops*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chart-line"></i>運営ダッシュボード
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.login-history') }}"
+                               class="{{ request()->routeIs('admin.login-history*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clock-rotate-left"></i>ログイン履歴
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="header__nav-item">
+                    <a href="{{ route('admin.checkin.index') }}"
+                       class="{{ request()->routeIs('admin.checkin*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-qrcode" aria-hidden="true"></i>受付
+                        <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
+                    </a>
+                    <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('admin.checkin.index') }}"
+                               class="{{ request()->routeIs('admin.checkin.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-qrcode"></i>受付チェックイン
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.checkin.guests') }}"
+                               class="{{ request()->routeIs('admin.checkin.guests') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clipboard-user"></i>受付一覧
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.audit.checkin') }}"
+                               class="{{ request()->routeIs('admin.audit.checkin*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clipboard-list"></i>操作ログ
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="header__nav-item">
                     <a href="{{ route('admin.dashboard') }}"
-                       class="{{ request()->routeIs('admin.dashboard','admin.rsvp','admin.users*','admin.login-history*') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('admin.dashboard','admin.rsvp*','admin.users*','admin.seating*') ? 'active' : '' }}">
                         <i class="fa-solid fa-users" aria-hidden="true"></i>ゲスト
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -52,24 +101,16 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.login-history') }}"
-                               class="{{ request()->routeIs('admin.login-history*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-clock-rotate-left"></i>ログイン履歴
+                            <a href="{{ route('admin.seating') }}"
+                               class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chair"></i>席次表
                             </a>
                         </li>
                     </ul>
                 </li>
-                {{-- 席次表: 単独リンク --}}
-                <li>
-                    <a href="{{ route('admin.seating') }}"
-                       class="{{ request()->routeIs('admin.seating*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-chair" aria-hidden="true"></i>席次表
-                    </a>
-                </li>
-                {{-- コンテンツ: ドロップダウン --}}
                 <li class="header__nav-item">
-                    <a href="{{ route('admin.program') }}"
-                       class="{{ request()->routeIs('admin.program*','admin.faq*','admin.profiles','admin.news*','admin.tasks*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.news') }}"
+                       class="{{ request()->routeIs('admin.news*','admin.profiles','admin.tasks*','admin.program*','admin.faq*') ? 'active' : '' }}">
                         <i class="fa-solid fa-file-lines" aria-hidden="true"></i>コンテンツ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -104,9 +145,20 @@
                                 <i class="fa-solid fa-circle-question"></i>Q&amp;A
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.gallery') }}"
+                               class="{{ request()->routeIs('admin.gallery*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-images"></i>ギャラリー
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.guestbook') }}"
+                               class="{{ request()->routeIs('admin.guestbook*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-comment-dots"></i>ゲストブック
+                            </a>
+                        </li>
                     </ul>
                 </li>
-                {{-- 設定: 単独リンク --}}
                 <li>
                     <a href="{{ route('admin.settings') }}"
                        class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
@@ -161,6 +213,34 @@
                         </li>
                     </ul>
                 </li>
+                {{-- ギャラリー・お知らせ・ゲストブック --}}
+                <li class="header__nav-item">
+                    <a href="{{ route('gallery') }}"
+                       class="{{ request()->routeIs('gallery','news.index','guestbook') ? 'active' : '' }}">
+                        <i class="fa-solid fa-heart" aria-hidden="true"></i>楽しむ
+                        <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
+                    </a>
+                    <ul class="header__dropdown">
+                        <li>
+                            <a href="{{ route('gallery') }}"
+                               class="{{ request()->routeIs('gallery') ? 'active' : '' }}">
+                                <i class="fa-solid fa-images"></i>ギャラリー
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('news.index') }}"
+                               class="{{ request()->routeIs('news.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-bullhorn"></i>お知らせ一覧
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('guestbook') }}"
+                               class="{{ request()->routeIs('guestbook') ? 'active' : '' }}">
+                                <i class="fa-solid fa-comment-dots"></i>ゲストブック
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 @if ($isAttending)
                 <li>
                     <a href="{{ route('seating.guest') }}"
@@ -179,7 +259,7 @@
             <div class="header__user" id="headerUser">
                 <a href="{{ route('profile.edit') }}"
                    class="header__avatar {{ request()->routeIs('profile.*') ? 'header__avatar--active' : '' }}"
-                   @if ($userAvatarType === 'emoji') style="background: {{ $userAvatarBgColor }};" @endif
+                   style="--avatar-border-color: {{ $userAvatarBorderColor }}; --avatar-border-width: {{ $userAvatarBorderWidth }}px; @if ($userAvatarType === 'emoji') background: {{ $userAvatarBgColor }}; @endif"
                    aria-label="{{ $userName }} のプロフィール"
                    aria-haspopup="false">
                     @if ($userAvatarType === 'photo' && $userAvatarImageUrl)
@@ -221,7 +301,7 @@
 
     {{-- ドロワー ユーザー情報 --}}
     <a href="{{ route('profile.edit') }}" class="header-drawer__user">
-        <div class="header-drawer__avatar" @if ($userAvatarType === 'emoji') style="background: {{ $userAvatarBgColor }};" @endif>
+        <div class="header-drawer__avatar" style="--avatar-border-color: {{ $userAvatarBorderColor }}; --avatar-border-width: {{ $userAvatarBorderWidth }}px; @if ($userAvatarType === 'emoji') background: {{ $userAvatarBgColor }}; @endif">
             @if ($userAvatarType === 'photo' && $userAvatarImageUrl)
                 <img src="{{ $userAvatarImageUrl }}" alt="">
             @elseif ($userAvatarType === 'emoji' && $userAvatarEmoji)
@@ -240,6 +320,39 @@
     <nav class="header-drawer__nav" aria-label="モバイルナビゲーション">
         <ul>
             @if ($isAdmin)
+            <li class="header-drawer__section-label">運営</li>
+            <li>
+                <a href="{{ route('admin.ops') }}"
+                   class="{{ request()->routeIs('admin.ops*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-chart-line" aria-hidden="true"></i>運営ダッシュボード
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.login-history') }}"
+                   class="{{ request()->routeIs('admin.login-history*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>ログイン履歴
+                </a>
+            </li>
+            <li class="header-drawer__section-label">受付</li>
+            <li>
+                <a href="{{ route('admin.checkin.index') }}"
+                   class="{{ request()->routeIs('admin.checkin*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-qrcode" aria-hidden="true"></i>受付チェックイン
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.checkin.guests') }}"
+                   class="{{ request()->routeIs('admin.checkin.guests') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clipboard-user" aria-hidden="true"></i>受付一覧
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.audit.checkin') }}"
+                   class="{{ request()->routeIs('admin.audit.checkin*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>操作ログ
+                </a>
+            </li>
+            <li class="header-drawer__section-label">ゲスト</li>
             <li>
                 <a href="{{ route('admin.dashboard') }}"
                    class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -264,6 +377,7 @@
                     <i class="fa-solid fa-chair" aria-hidden="true"></i>席次表
                 </a>
             </li>
+            <li class="header-drawer__section-label">コンテンツ</li>
             <li>
                 <a href="{{ route('admin.news') }}"
                    class="{{ request()->routeIs('admin.news*') ? 'active' : '' }}">
@@ -352,6 +466,25 @@
                 </a>
             </li>
             @endif
+            <li class="header-drawer__section-label">楽しむ</li>
+            <li>
+                <a href="{{ route('gallery') }}"
+                   class="{{ request()->routeIs('gallery') ? 'active' : '' }}">
+                    <i class="fa-solid fa-images" aria-hidden="true"></i>ギャラリー
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('news.index') }}"
+                   class="{{ request()->routeIs('news.index') ? 'active' : '' }}">
+                    <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>お知らせ一覧
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('guestbook') }}"
+                   class="{{ request()->routeIs('guestbook') ? 'active' : '' }}">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>ゲストブック
+                </a>
+            </li>
             @endif
         </ul>
     </nav>

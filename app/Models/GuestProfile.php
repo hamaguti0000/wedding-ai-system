@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class GuestProfile extends Model
 {
@@ -30,12 +31,16 @@ class GuestProfile extends Model
         'dietary_notes',
         'notes',
         'responded_at',
+        'checkin_token',
+        'checked_in_at',
+        'checked_in_by_user_id',
     ];
 
     protected function casts(): array
     {
         return [
             'responded_at'    => 'datetime',
+            'checked_in_at'   => 'datetime',
             'attending_count' => 'integer',
             'children_count'  => 'integer',
             'has_allergy'     => 'boolean',
@@ -45,6 +50,11 @@ class GuestProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function checkedInBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'checked_in_by_user_id');
     }
 
     public function fullName(): string
@@ -94,5 +104,35 @@ class GuestProfile extends Model
     public function isDeclining(): bool
     {
         return $this->participation === 'declining';
+    }
+
+    public function isCheckedIn(): bool
+    {
+        return $this->checked_in_at !== null;
+    }
+
+    public function ensureCheckInToken(): string
+    {
+        if (! $this->checkin_token) {
+            $this->forceFill([
+                'checkin_token' => (string) Str::uuid(),
+            ])->saveQuietly();
+
+            $this->refresh();
+        }
+
+        return (string) $this->checkin_token;
+    }
+
+    public function checkInUrl(): string
+    {
+        return route('admin.checkin.show', ['token' => $this->ensureCheckInToken()]);
+    }
+
+    public function checkInStatusLabel(): string
+    {
+        return $this->isCheckedIn()
+            ? '受付済み'
+            : '未受付';
     }
 }
