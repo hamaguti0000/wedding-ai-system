@@ -251,18 +251,19 @@
 
             {{-- ── テキストのみ ── --}}
             @if ($layout === 'text' || !$item->image_url)
-            <div class="hn-item hn-text">
+            <a href="{{ route('news.show', $item->id) }}" class="hn-item hn-text hn-link">
                 <div class="hn-meta">
                     <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
                     @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
                 </div>
                 @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
-                <p class="hn-body">{{ $item->body }}</p>
-            </div>
+                <p class="hn-body">{{ Str::limit($item->body, 120) }}</p>
+                <span class="hn-more">続きを読む <i class="fa-solid fa-arrow-right" style="font-size:0.65rem;"></i></span>
+            </a>
 
             {{-- ── 画像上 + テキスト下 ── --}}
             @elseif ($layout === 'top')
-            <div class="hn-item hn-top">
+            <a href="{{ route('news.show', $item->id) }}" class="hn-item hn-top hn-link">
                 <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--top">
                 <div class="hn-content">
                     <div class="hn-meta">
@@ -270,13 +271,14 @@
                         @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
                     </div>
                     @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
-                    <p class="hn-body">{{ $item->body }}</p>
+                    <p class="hn-body">{{ Str::limit($item->body, 100) }}</p>
+                    <span class="hn-more">続きを読む <i class="fa-solid fa-arrow-right" style="font-size:0.65rem;"></i></span>
                 </div>
-            </div>
+            </a>
 
             {{-- ── 画像左 + テキスト右 ── --}}
             @elseif ($layout === 'left')
-            <div class="hn-item hn-side hn-side--left">
+            <a href="{{ route('news.show', $item->id) }}" class="hn-item hn-side hn-side--left hn-link">
                 <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--side">
                 <div class="hn-content">
                     <div class="hn-meta">
@@ -284,27 +286,29 @@
                         @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
                     </div>
                     @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
-                    <p class="hn-body">{{ $item->body }}</p>
+                    <p class="hn-body">{{ Str::limit($item->body, 100) }}</p>
+                    <span class="hn-more">続きを読む <i class="fa-solid fa-arrow-right" style="font-size:0.65rem;"></i></span>
                 </div>
-            </div>
+            </a>
 
             {{-- ── 画像右 + テキスト左 ── --}}
             @elseif ($layout === 'right')
-            <div class="hn-item hn-side hn-side--right">
+            <a href="{{ route('news.show', $item->id) }}" class="hn-item hn-side hn-side--right hn-link">
                 <div class="hn-content">
                     <div class="hn-meta">
                         <time class="hn-date">{{ $item->published_date->format('Y.m.d') }}</time>
                         @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
                     </div>
                     @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
-                    <p class="hn-body">{{ $item->body }}</p>
+                    <p class="hn-body">{{ Str::limit($item->body, 100) }}</p>
+                    <span class="hn-more">続きを読む <i class="fa-solid fa-arrow-right" style="font-size:0.65rem;"></i></span>
                 </div>
                 <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--side">
-            </div>
+            </a>
 
             {{-- ── フルイメージ ── --}}
             @elseif ($layout === 'hero')
-            <div class="hn-item hn-hero">
+            <a href="{{ route('news.show', $item->id) }}" class="hn-item hn-hero hn-link">
                 <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--hero">
                 <div class="hn-hero__overlay">
                     <div class="hn-meta hn-meta--light">
@@ -312,13 +316,13 @@
                         @if ($item->tag)<span class="hn-tag hn-tag--light">{{ $item->tag }}</span>@endif
                     </div>
                     @if ($item->title)<p class="hn-title hn-title--light">{{ $item->title }}</p>@endif
-                    @if ($item->body)<p class="hn-body hn-body--light">{{ $item->body }}</p>@endif
+                    <span class="hn-more" style="color:rgba(255,255,255,0.8);">続きを読む <i class="fa-solid fa-arrow-right" style="font-size:0.65rem;"></i></span>
                 </div>
-            </div>
+            </a>
 
             {{-- ── カード型 ── --}}
             @elseif ($layout === 'card')
-            <div class="hn-item hn-card">
+            <a href="{{ route('news.show', $item->id) }}" class="hn-item hn-card hn-link">
                 <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="hn-img hn-img--card">
                 <div class="hn-card__body">
                     <div class="hn-meta">
@@ -326,9 +330,10 @@
                         @if ($item->tag)<span class="hn-tag">{{ $item->tag }}</span>@endif
                     </div>
                     @if ($item->title)<p class="hn-title">{{ $item->title }}</p>@endif
-                    <p class="hn-body">{{ $item->body }}</p>
+                    <p class="hn-body">{{ Str::limit($item->body, 100) }}</p>
+                    <span class="hn-more">続きを読む <i class="fa-solid fa-arrow-right" style="font-size:0.65rem;"></i></span>
                 </div>
-            </div>
+            </a>
             @endif
 
             @endforeach

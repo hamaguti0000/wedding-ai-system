@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     // ギャラリー・ニュース一覧・ゲストブック
     Route::get('/gallery',            [GalleryController::class,   'index'])->name('gallery');
     Route::get('/news',               [NewsController::class,       'index'])->name('news.index');
+    Route::get('/news/{id}',          [NewsController::class,       'show']) ->name('news.show');
     Route::get('/guestbook',          [GuestbookController::class,  'index'])->name('guestbook');
     Route::post('/guestbook',         [GuestbookController::class,  'store'])->name('guestbook.store');
     Route::delete('/guestbook/mine',  [GuestbookController::class,  'destroy'])->name('guestbook.destroy');

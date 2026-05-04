@@ -15,4 +15,19 @@ class NewsController extends Controller
 
         return view('news', compact('news'));
     }
+
+    public function show(int $id)
+    {
+        $item = NewsItem::where('is_active', true)->findOrFail($id);
+
+        $prev = NewsItem::where('is_active', true)
+            ->where('id', '<', $id)
+            ->orderByDesc('id')->first();
+
+        $next = NewsItem::where('is_active', true)
+            ->where('id', '>', $id)
+            ->orderBy('id')->first();
+
+        return view('news-show', compact('item', 'prev', 'next'));
+    }
 }
