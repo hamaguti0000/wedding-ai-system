@@ -153,7 +153,7 @@
 
     {{-- ── 各ロケーション ── --}}
     <div class="media-grid">
-        @foreach(SiteImage::LOCATIONS as $key => $label)
+        @foreach(\App\Models\SiteImage::LOCATIONS as $key => $label)
         @php
             $cnt  = $counts->get($key);
             $total  = $cnt?->total ?? 0;
