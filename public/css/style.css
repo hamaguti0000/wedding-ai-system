@@ -83,10 +83,10 @@ main { padding-top: 80px; }
 /* ── フッター ────────────────────────────────────────────── */
 footer {
   background: #f8f6f4;
-  color: #999;
+  color: #6b6360;
   text-align: center;
   padding: 24px 0;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   letter-spacing: 0.5px;
 }
 

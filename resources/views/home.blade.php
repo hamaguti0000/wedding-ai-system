@@ -107,6 +107,49 @@
 </section>
 @endif
 
+{{-- ══ インフォメーション（返信期日・シャトルバス）══════════════════ --}}
+<section class="home-notice">
+    <div class="home-notice__inner">
+
+        <div class="home-notice__item">
+            <div class="home-notice__icon-wrap">
+                <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <div class="home-notice__body">
+                <p class="home-notice__label">ご返信期日</p>
+                <p class="home-notice__text">
+                    @if ($setting?->rsvp_deadline)
+                        {{ $setting->rsvp_deadline->format('Y年n月j日') }}までにご回答くださいますようお願い申し上げます。
+                    @else
+                        2026年6月25日までにご回答くださいますようお願い申し上げます。
+                    @endif
+                </p>
+            </div>
+        </div>
+
+        <div class="home-notice__divider"></div>
+
+        <div class="home-notice__item">
+            <div class="home-notice__icon-wrap">
+                <i class="fa-solid fa-bus-simple"></i>
+            </div>
+            <div class="home-notice__body">
+                <p class="home-notice__label">シャトルバスのご案内</p>
+                <p class="home-notice__text">
+                    当方にてシャトルバスをご準備しております<br>
+                    ご利用の方はＪＲ長崎駅西口（出島メッセ前一般乗場）まで<br>
+                    お越しくださいますようお願い申し上げます
+                </p>
+                <p class="home-notice__time">
+                    <i class="fa-regular fa-clock"></i>&ensp;出発時間：15:00 ／ 15:30 ／ 16:00 ／ 16:30
+                </p>
+                <p class="home-notice__note">ご結婚式参加の方は予約なしでご利用いただけます</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
 {{-- ══ 当日のお願い（タスクが割り当てられている場合のみ表示）══════════ --}}
 @if ($homeTasks->isNotEmpty())
 <section class="home-tasks">
@@ -350,7 +393,7 @@
 // ここではホームページ固有のスクロールフェードのみ
 (function () {
     const fadeEls = document.querySelectorAll(
-        '.home-message__inner, .home-details__inner, .home-news__inner, .home-rsvp__card, .home-tasks__inner'
+        '.home-message__inner, .home-details__inner, .home-news__inner, .home-rsvp__card, .home-tasks__inner, .home-notice__inner'
     );
     const obs = new IntersectionObserver((entries) => {
         entries.forEach(e => {

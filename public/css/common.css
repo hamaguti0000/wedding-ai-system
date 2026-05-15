@@ -567,7 +567,7 @@
 }
 .avatar-settings__desc {
     font-size: 0.76rem;
-    color: #9b8573;
+    color: #7a6555;
     margin: 0;
     line-height: 1.5;
 }
@@ -590,7 +590,7 @@
     border: 1px solid #e0d0bc;
     border-radius: 999px;
     background: #fffdf9;
-    color: #9b8573;
+    color: #7a6555;
     font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
@@ -619,7 +619,7 @@
     border: 1px solid #e0d0bc;
     border-radius: 999px;
     background: #fffdf9;
-    color: #9b8573;
+    color: #7a6555;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
@@ -650,7 +650,7 @@
     gap: 10px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #9b8573;
+    color: #7a6555;
 }
 .avatar-color-input input[type="color"] {
     width: 42px;
@@ -678,7 +678,7 @@
     gap: 10px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #9b8573;
+    color: #7a6555;
 }
 .avatar-border-input input[type="color"] {
     width: 42px;
@@ -761,7 +761,7 @@
 }
 .avatar-emoji-option small {
     font-size: 0.7rem;
-    color: #9b8573;
+    color: #7a6555;
     text-align: center;
     line-height: 1.1;
 }
@@ -781,7 +781,7 @@
 }
 .avatar-settings__current {
     font-size: 0.76rem;
-    color: #9b8573;
+    color: #7a6555;
     margin: 0;
 }
 .avatar-settings__panel[hidden] {
@@ -892,7 +892,7 @@
 }
 .countdown__label {
     font-size: 0.72rem;
-    color: #9b8573;
+    color: #7a6555;
     letter-spacing: 1.5px;
 }
 /* 閉じるヒント */
