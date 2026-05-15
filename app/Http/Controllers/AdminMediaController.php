@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SiteImage;
 use App\Models\WeddingSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class AdminMediaController extends Controller
@@ -100,6 +101,7 @@ class AdminMediaController extends Controller
         $modes[$location] = $request->mode;
         $setting->image_display_modes = $modes;
         $setting->save();
+        Cache::forget('site_image_modes');
 
         return back()->with('success', '表示モードを変更しました');
     }

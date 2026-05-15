@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class SiteImage extends Model
 {
@@ -50,9 +51,10 @@ class SiteImage extends Model
     /** バナー用：表示モードに従い1枚返す（null = 画像なし） */
     public static function forDisplay(string $location): ?self
     {
-        $setting = WeddingSetting::first();
-        $modes   = $setting?->image_display_modes ?? [];
-        $mode    = $modes[$location] ?? 'random';
+        $modes = Cache::remember('site_image_modes', 60, fn() =>
+            WeddingSetting::value('image_display_modes') ?? []
+        );
+        $mode = $modes[$location] ?? 'random';
 
         $query = static::forLocation($location)->active()->ordered();
 
