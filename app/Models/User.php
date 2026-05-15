@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Mail\EmailVerificationMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -27,19 +30,85 @@ class User extends Authenticatable
         'avatar_bg_color',
         'avatar_border_color',
         'avatar_border_width',
+        'email_verification_token',
+        'email_verification_sent_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verification_token',
     ];
 
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'          => 'datetime',
+            'email_verification_sent_at' => 'datetime',
+            'password'                   => 'hashed',
         ];
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return !blank($this->email) && !is_null($this->email_verified_at);
+    }
+
+    public function isEmailUnverified(): bool
+    {
+        return !blank($this->email) && is_null($this->email_verified_at);
+    }
+
+    /** トークンを生成してメールを送信する。60分以内の再送は拒否。 */
+    public function sendEmailVerification(bool $force = false): bool
+    {
+        if (blank($this->email)) {
+            return false;
+        }
+
+        // 60分以内に送信済みなら再送しない（force=true で強制送信）
+        if (!$force && $this->email_verification_sent_at
+            && $this->email_verification_sent_at->diffInMinutes(now()) < 60) {
+            return false;
+        }
+
+        $token = Str::random(64);
+
+        $this->update([
+            'email_verified_at'          => null,
+            'email_verification_token'   => hash('sha256', $token),
+            'email_verification_sent_at' => now(),
+        ]);
+
+        Mail::to($this->email)->send(new EmailVerificationMail($this, $token));
+
+        return true;
+    }
+
+    /** トークン照合して認証済みにする */
+    public static function verifyEmailToken(string $token): ?self
+    {
+        $hashed = hash('sha256', $token);
+
+        $user = static::where('email_verification_token', $hashed)->first();
+
+        if (!$user) {
+            return null;
+        }
+
+        // 24時間以内のトークンのみ有効
+        if ($user->email_verification_sent_at
+            && $user->email_verification_sent_at->addHours(24)->isPast()) {
+            return null;
+        }
+
+        $user->update([
+            'email_verified_at'          => now(),
+            'email_verification_token'   => null,
+            'email_verification_sent_at' => null,
+        ]);
+
+        return $user;
     }
 
     public function guestProfile(): HasOne

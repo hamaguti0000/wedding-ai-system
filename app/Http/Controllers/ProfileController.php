@@ -126,17 +126,29 @@ class ProfileController extends Controller
 
         $user->update($data);
 
-        if ($profile && array_key_exists('email', $data) && $data['email'] !== $originalEmail) {
+        $emailChanged = array_key_exists('email', $data) && $data['email'] !== $originalEmail;
+
+        if ($profile && $emailChanged) {
             CheckInAuditLog::record(
                 $profile,
                 $user,
                 'profile_update',
                 'profile',
                 $originalEmail ? 'プロフィールのメールアドレスを更新しました' : 'メールアドレスを登録しました',
-                [
-                    'email' => $data['email'],
-                ]
+                ['email' => $data['email']]
             );
+        }
+
+        // メールアドレスが追加・変更された場合は確認メールを送信
+        if ($emailChanged) {
+            try {
+                $user->refresh()->sendEmailVerification(force: true);
+            } catch (\Throwable) {
+                // 送信失敗でも更新は完了させる
+            }
+            return redirect()->route('profile.edit')
+                ->with('success', 'プロフィールを更新しました')
+                ->with('email_verification_sent', true);
         }
 
         return redirect()->route('profile.edit')->with('success', 'プロフィールを更新しました');

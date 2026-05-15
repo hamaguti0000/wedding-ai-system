@@ -26,6 +26,31 @@
     <div class="pf-alert-success">{{ session('success') }}</div>
     @endif
 
+    {{-- 確認メール送信済み通知 --}}
+    @if (session('email_verification_sent'))
+    <div class="pf-alert-success" style="background:#f0faf4;color:#2d6a4f;border-color:#a8d8b9;">
+        <strong>確認メールを送信しました。</strong>
+        メールボックスをご確認いただき、リンクをクリックして認証を完了してください。
+    </div>
+    @endif
+
+    {{-- メール未確認バナー --}}
+    @if ($user->isEmailUnverified())
+    <div class="pf-alert-success" style="background:#fff8f0;color:#7a4f2a;border-color:#e8c8a5;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <span>
+            <strong>{{ $user->email }}</strong> は未確認です。
+            確認メールが届いていない場合は再送できます。
+        </span>
+        <form method="POST" action="{{ route('email.verify.resend') }}" style="margin:0;">
+            @csrf
+            <button type="submit"
+                style="padding:6px 16px;background:#b38b59;color:#fff;border:none;border-radius:3px;font-size:0.8rem;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;">
+                確認メールを再送する
+            </button>
+        </form>
+    </div>
+    @endif
+
     @if ($needsEmailRegistration)
     <div class="pf-alert-success" style="background:#fff7ef;color:#7a4f2a;border-color:#e8c8a5;">
         メールアドレスを登録してください。パスワード再設定や連絡に使います。

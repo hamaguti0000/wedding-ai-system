@@ -47,6 +47,14 @@ class AccountController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        // メールアドレスが登録されていれば確認メールを送信
+        try {
+            $user->sendEmailVerification();
+        } catch (\Throwable) {
+            // メール送信失敗でも登録は完了させる
+        }
+
+        return redirect()->route('dashboard')
+            ->with('email_verification_sent', true);
     }
 }

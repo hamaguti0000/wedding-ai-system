@@ -31,6 +31,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\AdminGuestbookController;
 use App\Http\Controllers\AdminMediaController;
+use App\Http\Controllers\EmailVerificationController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
@@ -45,6 +46,11 @@ Route::get('/', function () {
 // ── ログイン ──────────────────────────────────────────────
 Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])    ->name('login.post');
+
+// ── メール認証 ────────────────────────────────────────────
+Route::get('/verify', [EmailVerificationController::class, 'verify'])->name('email.verify');
+Route::post('/verify/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('auth')->name('email.verify.resend');
 
 // ── ゲスト用ページ（認証必須）────────────────────────────
 Route::middleware('auth')->group(function () {
