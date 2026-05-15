@@ -131,7 +131,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="gl-banner">
-    <img src="{{ asset('img/チャペル.jpg') }}" alt="" class="gl-banner__img">
+    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="gl-banner__img">
     <div class="gl-banner__overlay"></div>
     <div class="gl-banner__text">
         <span class="gl-banner__eyebrow">Gallery · ギャラリー</span>

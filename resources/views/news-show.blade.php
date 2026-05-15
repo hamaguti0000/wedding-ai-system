@@ -118,7 +118,7 @@ main { padding: 0; text-align: initial; }
 {{-- バナー：画像ありならその画像、なければチャペル --}}
 @php $layout = $item->layout ?? 'text'; @endphp
 <section class="ns-banner">
-    <img src="{{ $item->image_url ?? asset('img/チャペル.jpg') }}" alt=""
+    <img src="{{ $item->image_url ?? ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt=""
          class="ns-banner__img {{ $item->image_url ? 'ns-banner__img--article' : '' }}">
     <div class="ns-banner__overlay"></div>
     <div class="ns-banner__text">

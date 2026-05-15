@@ -34,15 +34,20 @@ class WeddingSetting extends Model
         'shuttle_bus_times',
         'shuttle_bus_note',
         'shuttle_bus_map_url',
+        'hero_type',
+        'hero_video_path',
+        'hero_interval',
+        'image_display_modes',
     ];
 
     protected function casts(): array
     {
         return [
-            'ceremony_date'      => 'date',
-            'is_seating_public'  => 'boolean',
-            'rsvp_deadline'      => 'date',
+            'ceremony_date'       => 'date',
+            'is_seating_public'   => 'boolean',
+            'rsvp_deadline'       => 'date',
             'shuttle_bus_enabled' => 'boolean',
+            'image_display_modes' => 'array',
         ];
     }
 

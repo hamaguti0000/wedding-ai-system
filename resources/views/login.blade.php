@@ -11,7 +11,7 @@
 
     {{-- 背景写真 --}}
     <div class="wedding-bg">
-        <img src="{{ asset('img/チャペル.jpg') }}" alt="">
+        <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="">
     </div>
 
     {{-- ログインカード --}}

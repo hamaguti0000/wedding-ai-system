@@ -116,7 +116,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="ac-banner">
-    <img src="{{ asset('img/チャペル.jpg') }}" alt="" class="ac-banner__img">
+    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="ac-banner__img">
     <div class="ac-banner__overlay"></div>
     <div class="ac-banner__text">
         <span class="ac-banner__eyebrow">Access · アクセス</span>

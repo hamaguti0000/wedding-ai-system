@@ -9,7 +9,7 @@
 
 {{-- ══ バナーヘッダー ══════════════════════════════════ --}}
 <section class="inv-banner">
-    <img src="{{ asset('img/チャペル.jpg') }}" alt="" class="inv-banner__img">
+    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="inv-banner__img">
     <div class="inv-banner__overlay"></div>
     <div class="inv-banner__text">
         <span class="inv-banner__eyebrow">RSVP · ご出欠のご確認</span>

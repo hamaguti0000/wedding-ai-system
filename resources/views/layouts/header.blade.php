@@ -160,6 +160,12 @@
                     </ul>
                 </li>
                 <li>
+                    <a href="{{ route('admin.media') }}"
+                       class="{{ request()->routeIs('admin.media*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-photo-film" aria-hidden="true"></i>メディア
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('admin.settings') }}"
                        class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                         <i class="fa-solid fa-gear" aria-hidden="true"></i>設定
@@ -406,6 +412,12 @@
                 <a href="{{ route('admin.faq') }}"
                    class="{{ request()->routeIs('admin.faq*') ? 'active' : '' }}">
                     <i class="fa-solid fa-circle-question" aria-hidden="true"></i>Q&amp;A
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.media') }}"
+                   class="{{ request()->routeIs('admin.media*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-photo-film" aria-hidden="true"></i>メディア
                 </a>
             </li>
             <li>

@@ -159,7 +159,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="gb-banner">
-    <img src="{{ asset('img/チャペル.jpg') }}" alt="" class="gb-banner__img">
+    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="gb-banner__img">
     <div class="gb-banner__overlay"></div>
     <div class="gb-banner__text">
         <span class="gb-banner__eyebrow">Guestbook · ゲストブック</span>

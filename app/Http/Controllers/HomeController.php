@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NewsItem;
+use App\Models\SiteImage;
 use App\Models\WeddingSetting;
 use Illuminate\Support\Facades\Auth;
 

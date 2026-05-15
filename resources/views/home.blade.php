@@ -8,8 +8,32 @@
 @section('content')
 
 {{-- ══ HERO ════════════════════════════════════════════════════════ --}}
-<section class="home-hero">
+@php
+    $heroType   = $setting?->hero_type ?? 'slideshow';
+    $heroImages = \App\Models\SiteImage::forHero();
+@endphp
+<section class="home-hero"
+    data-hero-type="{{ $heroType }}"
+    data-interval="{{ $setting?->hero_interval ?? 5000 }}">
+
+    {{-- 動画 --}}
+    @if ($heroType === 'video' && $setting?->hero_video_path)
+    <video class="home-hero__video" autoplay muted loop playsinline>
+        <source src="{{ asset('storage/' . $setting->hero_video_path) }}" type="video/mp4">
+    </video>
+
+    {{-- スライドショー --}}
+    @elseif ($heroImages->isNotEmpty())
+    @foreach ($heroImages as $i => $img)
+    <img src="{{ $img->url }}" alt=""
+         class="home-hero__slide{{ $i === 0 ? ' is-active' : '' }}">
+    @endforeach
+
+    {{-- フォールバック（未設定時） --}}
+    @else
     <img src="{{ asset('img/チャペル.jpg') }}" alt="チャペル" class="home-hero__img">
+    @endif
+
     <div class="home-hero__overlay"></div>
 
     <div class="home-hero__text">
@@ -407,8 +431,21 @@
 
 @push('scripts')
 <script>
-// ヒーローと #top_info のアニメーションは main.js が担当
-// ここではホームページ固有のスクロールフェードのみ
+// ── ヒーロースライドショー ──────────────────────────
+(function () {
+    const hero = document.querySelector('.home-hero[data-hero-type="slideshow"]');
+    if (!hero) return;
+    const slides = hero.querySelectorAll('.home-hero__slide');
+    if (slides.length < 2) return;
+    let current = 0;
+    const interval = parseInt(hero.dataset.interval || '5000', 10);
+    setInterval(() => {
+        slides[current].classList.remove('is-active');
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('is-active');
+    }, interval);
+})();
+// ── スクロールフェード ─────────────────────────────
 (function () {
     const fadeEls = document.querySelectorAll(
         '.home-message__inner, .home-details__inner, .home-news__inner, .home-rsvp__card, .home-tasks__inner, .home-notice__inner'

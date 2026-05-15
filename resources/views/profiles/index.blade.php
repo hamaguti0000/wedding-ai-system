@@ -152,7 +152,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="pf-banner">
-    <img src="{{ asset('img/チャペル.jpg') }}" alt="" class="pf-banner__img">
+    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="pf-banner__img">
     <div class="pf-banner__overlay"></div>
     <div class="pf-banner__text">
         <span class="pf-banner__eyebrow">Profile · おふたりのご紹介</span>

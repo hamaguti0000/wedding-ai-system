@@ -30,6 +30,7 @@ use App\Http\Controllers\AdminGalleryController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\AdminGuestbookController;
+use App\Http\Controllers\AdminMediaController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
@@ -79,6 +80,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
     Route::post('/settings',[AdminSettingController::class, 'update'])->name('settings.update');
+
+    // メディア管理
+    Route::get   ('/media',                         [AdminMediaController::class, 'index'])      ->name('media');
+    Route::get   ('/media/{location}',              [AdminMediaController::class, 'show'])       ->name('media.show');
+    Route::post  ('/media/{location}/upload',       [AdminMediaController::class, 'store'])      ->name('media.store');
+    Route::delete('/media/images/{id}',             [AdminMediaController::class, 'destroy'])    ->name('media.destroy');
+    Route::patch ('/media/images/{id}/toggle',      [AdminMediaController::class, 'toggle'])     ->name('media.toggle');
+    Route::post  ('/media/reorder',                 [AdminMediaController::class, 'reorder'])    ->name('media.reorder');
+    Route::post  ('/media/{location}/mode',         [AdminMediaController::class, 'setMode'])    ->name('media.mode');
+    Route::post  ('/media/hero/type',               [AdminMediaController::class, 'setHeroType'])->name('media.hero-type');
+    Route::post  ('/media/hero/video',              [AdminMediaController::class, 'uploadVideo'])->name('media.video');
+    Route::delete('/media/hero/video',              [AdminMediaController::class, 'deleteVideo'])->name('media.video-delete');
 
     // お知らせ管理
     Route::get('/news',                  [AdminNewsController::class, 'index'])   ->name('news');
