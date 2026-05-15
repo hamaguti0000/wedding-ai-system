@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -44,8 +45,10 @@ Route::get('/', function () {
 });
 
 // ── ログイン ──────────────────────────────────────────────
-Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])    ->name('login.post');
+Route::get('/login',    [AuthController::class,  'showLogin'])   ->name('login');
+Route::post('/login',   [AuthController::class,  'login'])        ->name('login.post');
+Route::get('/register', [AccountController::class,'showRegister'])->name('register');
+Route::post('/register',[AccountController::class,'register'])    ->name('register.post');
 
 // ── メール認証 ────────────────────────────────────────────
 Route::get('/verify', [EmailVerificationController::class, 'verify'])->name('email.verify');

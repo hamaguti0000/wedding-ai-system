@@ -34,8 +34,8 @@ describe('未認証', function () {
         $this->get('/login')->assertStatus(200);
     });
 
-    it('/register は 404', function () {
-        $this->get('/register')->assertStatus(404);
+    it('/register は 200（登録ページが存在する）', function () {
+        $this->get('/register')->assertStatus(200);
     });
 });
 

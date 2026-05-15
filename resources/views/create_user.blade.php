@@ -14,8 +14,8 @@
         <h2>ユーザー登録</h2>
 
         @if ($errors->any())
-        <div style="color:red; margin-bottom:15px;">
-            <ul style="padding-left:1.2em; margin:0;">
+        <div class="reg-errors">
+            <ul>
                 @foreach ($errors->all() as $e)
                 <li>{{ $e }}</li>
                 @endforeach
@@ -23,9 +23,10 @@
         </div>
         @endif
 
-        {{-- STEP2のフィールド（email）にエラーがある場合はSTEP2から開始 --}}
+        {{-- step1(email)のみエラーならSTEP2から開始、step0にもエラーがあればSTEP1から --}}
         @php
-            $startStep = ($errors->hasAny(['email'])) ? 1 : 0;
+            $hasStep0Errors = $errors->hasAny(['last_name','first_name','password','password_confirmation']);
+            $startStep = (!$hasStep0Errors && $errors->has('email')) ? 1 : 0;
         @endphp
 
         {{-- ステッププログレスバー --}}

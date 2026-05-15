@@ -217,6 +217,25 @@ button:active { transform: scale(0.98); }
     text-underline-offset: 2px;
 }
 
+/* ── バリデーションエラー ────────────────────────────── */
+.reg-errors {
+    margin: 0 28px 16px;
+    padding: 14px 18px;
+    background: #fdf4f4;
+    border: 1px solid #e8b4b4;
+    border-radius: 6px;
+    border-left: 4px solid #c0392b;
+}
+.reg-errors ul {
+    margin: 0;
+    padding: 0 0 0 18px;
+}
+.reg-errors li {
+    font-size: 0.85rem;
+    color: #7b2d2d;
+    line-height: 1.9;
+}
+
 /* ── レスポンシブ ─────────────────────────────────────── */
 @media (max-width: 480px) {
     .form-step      { padding: 20px 22px 28px; }
