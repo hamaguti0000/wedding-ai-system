@@ -154,6 +154,12 @@
                 @if ($setting->shuttle_bus_note)
                 <p class="home-notice__note">{{ $setting->shuttle_bus_note }}</p>
                 @endif
+                @if ($setting->shuttle_bus_map_url)
+                <a href="{{ $setting->shuttle_bus_map_url }}" target="_blank" rel="noopener"
+                   class="home-notice__map-btn">
+                    <i class="fa-brands fa-google"></i> 乗り場の地図を見る
+                </a>
+                @endif
             </div>
         </div>
         @endif

@@ -38,6 +38,7 @@ class AdminSettingController extends Controller
             'shuttle_bus_departure'   => 'nullable|string|max:300',
             'shuttle_bus_times'       => 'nullable|string|max:300',
             'shuttle_bus_note'        => 'nullable|string|max:500',
+            'shuttle_bus_map_url'     => 'nullable|url|max:500',
         ], [
             'groom_name.required'     => '新郎名は必須です',
             'bride_name.required'     => '新婦名は必須です',
@@ -77,6 +78,7 @@ class AdminSettingController extends Controller
                 'shuttle_bus_departure' => $request->shuttle_bus_departure ?: null,
                 'shuttle_bus_times'     => $request->shuttle_bus_times ?: null,
                 'shuttle_bus_note'      => $request->shuttle_bus_note ?: null,
+                'shuttle_bus_map_url'  => $request->shuttle_bus_map_url ?: null,
             ]
         );
 

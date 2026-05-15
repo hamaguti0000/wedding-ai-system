@@ -33,6 +33,7 @@ class WeddingSetting extends Model
         'shuttle_bus_departure',
         'shuttle_bus_times',
         'shuttle_bus_note',
+        'shuttle_bus_map_url',
     ];
 
     protected function casts(): array

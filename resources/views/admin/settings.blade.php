@@ -238,6 +238,14 @@
                         value="{{ old('shuttle_bus_note', $setting->shuttle_bus_note) }}"
                         placeholder="例：ご結婚式参加の方は予約なしでご利用いただけます">
                 </div>
+                <div class="form-group">
+                    <label>乗り場の Google Maps URL</label>
+                    <input type="url" name="shuttle_bus_map_url"
+                        value="{{ old('shuttle_bus_map_url', $setting->shuttle_bus_map_url) }}"
+                        placeholder="https://maps.google.com/...">
+                    <p class="field-note">設定するとホームに「地図を見る」ボタンが表示されます。Google Maps で乗り場を検索 → 共有 → リンクをコピー。</p>
+                    @error('shuttle_bus_map_url')<span class="field-error">{{ $message }}</span>@enderror
+                </div>
             </div>
 
             {{-- ── 席次表公開設定 ── --}}
