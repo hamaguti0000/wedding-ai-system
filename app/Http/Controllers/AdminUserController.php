@@ -25,7 +25,7 @@ class AdminUserController extends Controller
     {
         $request->validate([
             'username'     => 'required|string|max:50|unique:users,username',
-            'password'     => 'required|string|min:6',
+            'password'     => 'required|string|min:8|max:255',
             'role'         => 'required|in:admin,guest',
             'avatar_type'  => ['nullable', Rule::in(array_keys(User::avatarTypeOptions()))],
             'avatar_emoji' => [
@@ -202,7 +202,7 @@ class AdminUserController extends Controller
             'postal_code'         => 'nullable|string|max:8',
             'address'             => 'nullable|string|max:200',
             'notes'               => 'nullable|string|max:1000',
-            'password'            => 'nullable|string|min:6|confirmed',
+            'password'            => 'nullable|string|min:8|max:255|confirmed',
         ], [
             'username.required'  => 'ユーザー名は必須です',
             'username.unique'    => 'このユーザー名はすでに使われています',
@@ -312,7 +312,7 @@ class AdminUserController extends Controller
     public function updatePassword(Request $request, int $id)
     {
         $request->validate([
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:8|max:255|confirmed',
         ], [
             'password.required'  => '新しいパスワードを入力してください',
             'password.min'       => 'パスワードは6文字以上にしてください',
