@@ -29,14 +29,19 @@ class WeddingSetting extends Model
         'groom_bio',
         'bride_photo',
         'bride_bio',
+        'shuttle_bus_enabled',
+        'shuttle_bus_departure',
+        'shuttle_bus_times',
+        'shuttle_bus_note',
     ];
 
     protected function casts(): array
     {
         return [
-            'ceremony_date'     => 'date',
-            'is_seating_public' => 'boolean',
-            'rsvp_deadline'     => 'date',
+            'ceremony_date'      => 'date',
+            'is_seating_public'  => 'boolean',
+            'rsvp_deadline'      => 'date',
+            'shuttle_bus_enabled' => 'boolean',
         ];
     }
 

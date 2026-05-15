@@ -34,6 +34,10 @@ class AdminSettingController extends Controller
             'venue_map_embed'         => 'nullable|string|max:5000',
             'message'                 => 'nullable|string|max:1000',
             'rsvp_deadline'           => 'nullable|date',
+            'shuttle_bus_enabled'     => 'boolean',
+            'shuttle_bus_departure'   => 'nullable|string|max:300',
+            'shuttle_bus_times'       => 'nullable|string|max:300',
+            'shuttle_bus_note'        => 'nullable|string|max:500',
         ], [
             'groom_name.required'     => '新郎名は必須です',
             'bride_name.required'     => '新婦名は必須です',
@@ -67,8 +71,12 @@ class AdminSettingController extends Controller
                 'access_parking'        => $request->access_parking ?: null,
                 'venue_map_embed'       => $request->venue_map_embed ?: null,
                 'message'               => $request->message,
-                'is_seating_public' => $request->boolean('is_seating_public'),
-                'rsvp_deadline'     => $request->rsvp_deadline ?: null,
+                'is_seating_public'     => $request->boolean('is_seating_public'),
+                'rsvp_deadline'         => $request->rsvp_deadline ?: null,
+                'shuttle_bus_enabled'   => $request->boolean('shuttle_bus_enabled'),
+                'shuttle_bus_departure' => $request->shuttle_bus_departure ?: null,
+                'shuttle_bus_times'     => $request->shuttle_bus_times ?: null,
+                'shuttle_bus_note'      => $request->shuttle_bus_note ?: null,
             ]
         );
 

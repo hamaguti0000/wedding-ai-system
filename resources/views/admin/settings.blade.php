@@ -207,6 +207,39 @@
                 </div>
             </div>
 
+            {{-- ── シャトルバス ── --}}
+            <div class="settings-section">
+                <h2>シャトルバス</h2>
+                <div class="toggle-row" style="margin-bottom:12px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="shuttle_bus_enabled" value="1"
+                            {{ old('shuttle_bus_enabled', $setting->shuttle_bus_enabled ?? false) ? 'checked' : '' }}>
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-label">シャトルバス案内をホームに表示する</span>
+                </div>
+                <p class="toggle-note" style="margin-bottom:20px;">オンにすると、ホーム画面にシャトルバスの案内カードが表示されます。</p>
+                <div class="form-group">
+                    <label>乗り場（出発地点）</label>
+                    <input type="text" name="shuttle_bus_departure"
+                        value="{{ old('shuttle_bus_departure', $setting->shuttle_bus_departure) }}"
+                        placeholder="例：ＪＲ長崎駅西口（出島メッセ前一般乗場）">
+                </div>
+                <div class="form-group">
+                    <label>出発時間</label>
+                    <input type="text" name="shuttle_bus_times"
+                        value="{{ old('shuttle_bus_times', $setting->shuttle_bus_times) }}"
+                        placeholder="例：15:00 ／ 15:30 ／ 16:00 ／ 16:30">
+                    <p class="field-note">スラッシュや読点で区切って入力してください。</p>
+                </div>
+                <div class="form-group">
+                    <label>補足・ご注意</label>
+                    <input type="text" name="shuttle_bus_note"
+                        value="{{ old('shuttle_bus_note', $setting->shuttle_bus_note) }}"
+                        placeholder="例：ご結婚式参加の方は予約なしでご利用いただけます">
+                </div>
+            </div>
+
             {{-- ── 席次表公開設定 ── --}}
             <div class="settings-section">
                 <h2>席次表</h2>
