@@ -10,7 +10,7 @@
 <body>
     @php
         $sentAt = $user->email_verification_sent_at;
-        $resendAvailableAt = $sentAt?->copy()->addMinutes(60);
+        $resendAvailableAt = $sentAt?->copy()->addMinutes(\App\Models\User::EMAIL_VERIFICATION_RESEND_COOLDOWN_MINUTES);
         $formEmail = old('email', $user->email);
         $isSameAsCurrentEmail = strtolower(trim((string) $formEmail)) === strtolower(trim((string) $user->email));
         $isWaitingForResend = $user->isEmailUnverified()

@@ -14,6 +14,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const EMAIL_VERIFICATION_RESEND_COOLDOWN_MINUTES = 1;
+
     public const AVATAR_INITIAL = 'initial';
     public const AVATAR_EMOJI = 'emoji';
     public const AVATAR_PHOTO = 'photo';
@@ -72,16 +74,16 @@ class User extends Authenticatable
         return !blank($this->email) && is_null($this->email_verified_at);
     }
 
-    /** トークンを生成してメールを送信する。60分以内の再送は拒否。 */
+    /** トークンを生成してメールを送信する。一定時間内の再送は拒否。 */
     public function sendEmailVerification(bool $force = false): bool
     {
         if ($this->isAdmin() || blank($this->email)) {
             return false;
         }
 
-        // 60分以内に送信済みなら再送しない（force=true で強制送信）
+        // 短時間に送信済みなら再送しない（force=true で強制送信）
         if (!$force && $this->email_verification_sent_at
-            && $this->email_verification_sent_at->diffInMinutes(now()) < 60) {
+            && $this->email_verification_sent_at->diffInMinutes(now()) < self::EMAIL_VERIFICATION_RESEND_COOLDOWN_MINUTES) {
             return false;
         }
 

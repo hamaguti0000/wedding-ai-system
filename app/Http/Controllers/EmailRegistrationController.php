@@ -73,7 +73,7 @@ class EmailRegistrationController extends Controller
         }
 
         if (! $sent) {
-            return back()->with('info', '確認メールは送信済みです。しばらくしてから再送できます。メール内のURLをクリックして認証を完了してください。');
+            return back()->with('info', '確認メールは送信済みです。1分後に再送できます。メール内のURLをクリックして認証を完了してください。');
         }
 
         return back()->with('email_verification_sent', true);

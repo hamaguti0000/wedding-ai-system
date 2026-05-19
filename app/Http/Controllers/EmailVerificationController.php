@@ -46,7 +46,7 @@ class EmailVerificationController extends Controller
         $sent = $user->sendEmailVerification();
 
         if (!$sent) {
-            return back()->with('info', '確認メールは60分以内に送信済みです。しばらくしてから再試行してください。');
+            return back()->with('info', '確認メールは送信済みです。1分後に再送できます。');
         }
 
         return back()->with('success', '確認メールを再送信しました。受信ボックスをご確認ください。');

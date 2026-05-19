@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\WeddingSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -31,7 +32,10 @@ class EmailVerificationMail extends Mailable
 
     public function envelope(): Envelope
     {
+        $fromName = trim($this->groomName . '・' . $this->brideName);
+
         return new Envelope(
+            from: new Address(config('mail.from.address'), $fromName),
             subject: 'メールアドレスの確認 | ' . $this->groomName . ' & ' . $this->brideName . ' Wedding',
         );
     }
