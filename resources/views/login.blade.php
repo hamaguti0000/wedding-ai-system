@@ -31,6 +31,10 @@
         <div class="alert alert-info">{{ session('message') }}</div>
         @endif
 
+        @if (session('status'))
+        <div class="alert alert-info">{{ __(session('status')) }}</div>
+        @endif
+
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
 
@@ -51,6 +55,11 @@
 
             <button type="submit" class="btn-submit">ログイン</button>
         </form>
+
+        <div class="card-footer">
+            <a href="{{ route('password.request') }}">パスワードを忘れた方はこちら</a><br>
+            <a href="{{ route('email.forgot') }}">登録メールアドレスを忘れた方はこちら</a>
+        </div>
 
     </div>
 

@@ -1,39 +1,51 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新しいパスワード | Kakeru &amp; Mirai Wedding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+</head>
+<body>
+    <div class="wedding-bg">
+        @php $bg = \App\Models\SiteImage::forDisplay('login_bg'); @endphp
+        <img src="{{ $bg?->url ?? asset('img/チャペル.jpg') }}" alt="">
+    </div>
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+    <div class="login-card">
+        <div class="monogram">K &amp; M</div>
+        <div class="ornament"><span>New Password</span></div>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        @if ($errors->any())
+        <div class="alert alert-error">{{ $errors->first() }}</div>
+        @endif
+
+        <form method="POST" action="{{ route('password.store') }}">
+            @csrf
+            <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+            <div class="form-group">
+                <label for="email">メールアドレス</label>
+                <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">新しいパスワード</label>
+                <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="••••••••">
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirmation">新しいパスワード（確認）</label>
+                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn-submit">パスワードを更新</button>
+        </form>
+
+        <div class="card-footer">
+            <a href="{{ route('login') }}">ログインへ戻る</a>
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+    </div>
+</body>
+</html>

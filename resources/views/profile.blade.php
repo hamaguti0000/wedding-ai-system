@@ -26,6 +26,18 @@
     <div class="pf-alert-success">{{ session('success') }}</div>
     @endif
 
+    @if (session('message') || session('info'))
+    <div class="pf-alert-success" style="background:#fff8f0;color:#7a4f2a;border-color:#e8c8a5;">
+        {{ session('message') ?? session('info') }}
+    </div>
+    @endif
+
+    @if (session('error'))
+    <div class="pf-alert-success" style="background:#fdf2f2;color:#8b1a1a;border-color:#e8b4b4;">
+        {{ session('error') }}
+    </div>
+    @endif
+
     {{-- 確認メール送信済み通知 --}}
     @if (session('email_verification_sent'))
     <div class="pf-alert-success" style="background:#f0faf4;color:#2d6a4f;border-color:#a8d8b9;">

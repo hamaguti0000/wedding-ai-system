@@ -12,6 +12,10 @@ class AccountController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
+            if (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail()) {
+                return redirect()->route('profile.edit');
+            }
+
             return redirect()->route('dashboard');
         }
         return view('create_user');
@@ -58,7 +62,7 @@ class AccountController extends Controller
             // メール送信失敗でも登録は完了させる
         }
 
-        return redirect()->route('dashboard')
+        return redirect()->route('profile.edit')
             ->with('email_verification_sent', true);
     }
 }

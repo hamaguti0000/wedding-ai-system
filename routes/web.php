@@ -33,10 +33,17 @@ use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\AdminGuestbookController;
 use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\ForgotEmailController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
     if (Auth::check()) {
+        if (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail()) {
+            return redirect()->route('profile.edit');
+        }
+
         return redirect()->route(
             Auth::user()->isAdmin() ? 'admin.dashboard' : 'dashboard'
         );
@@ -49,6 +56,12 @@ Route::get('/login',    [AuthController::class,  'showLogin'])   ->name('login')
 Route::post('/login',   [AuthController::class,  'login'])        ->name('login.post');
 Route::get('/register', [AccountController::class,'showRegister'])->name('register');
 Route::post('/register',[AccountController::class,'register'])    ->name('register.post');
+Route::get('/forgot-email', [ForgotEmailController::class, 'show'])->name('email.forgot');
+Route::post('/forgot-email', [ForgotEmailController::class, 'lookup'])->name('email.forgot.lookup');
+Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 
 // ── メール認証 ────────────────────────────────────────────
 Route::get('/verify', [EmailVerificationController::class, 'verify'])->name('email.verify');
@@ -56,7 +69,7 @@ Route::post('/verify/resend', [EmailVerificationController::class, 'resend'])
     ->middleware('auth')->name('email.verify.resend');
 
 // ── ゲスト用ページ（認証必須）────────────────────────────
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'email.ready'])->group(function () {
     Route::get('/home',       [HomeController::class,       'index'])->name('dashboard');
     Route::get('/profile',    [ProfileController::class,   'show']) ->name('profile.edit');
     Route::patch('/profile',  [ProfileController::class,   'update'])->name('profile.update');
@@ -79,7 +92,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // ── 管理者用ページ（認証 + admin）────────────────────────
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'email.ready', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',              [AdminController::class,            'index'])->name('dashboard');
     Route::get('/ops',           [AdminOperationsController::class, 'index'])->name('ops');
     Route::get('/ops/live',      [AdminOperationsController::class, 'metrics'])->name('ops.live');

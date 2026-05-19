@@ -7,7 +7,8 @@ body {
     justify-content: center;
     font-family: 'Noto Sans JP', sans-serif;
     background: #1a130a;
-    overflow: hidden;
+    overflow: auto;
+    padding: 24px 0;
 }
 
 /* ── 背景写真 ─────────────────────────────── */
@@ -113,6 +114,13 @@ body {
     background: #fef9f0;
     border-left: 3px solid #b38b59;
     color: #7a5c30;
+}
+
+.login-note {
+    margin: -4px 0 22px;
+    color: #7a6555;
+    font-size: 0.86rem;
+    line-height: 1.8;
 }
 
 /* ── フォームグループ ─────────────────────── */
