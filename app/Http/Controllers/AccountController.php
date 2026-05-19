@@ -13,7 +13,11 @@ class AccountController extends Controller
     {
         if (Auth::check()) {
             if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
-                return redirect()->route('profile.edit');
+                return redirect()->route('email.register');
+            }
+
+            if (! Auth::user()->isAdmin() && Auth::user()->password_change_required) {
+                return redirect()->route('password.change');
             }
 
             return redirect()->route('dashboard');
@@ -63,7 +67,7 @@ class AccountController extends Controller
             // メール送信失敗でも登録は完了させる
         }
 
-        return redirect()->route('profile.edit')
+        return redirect()->route('email.register')
             ->with('email_verification_sent', true);
     }
 }

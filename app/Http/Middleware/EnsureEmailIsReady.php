@@ -21,12 +21,12 @@ class EnsureEmailIsReady
         }
 
         if (blank($user->email)) {
-            return redirect()->route('profile.edit')
+            return redirect()->route('email.register')
                 ->with('message', 'メールアドレスを登録してください。パスワード再設定に必要です。');
         }
 
         if (! $user->hasVerifiedEmail()) {
-            return redirect()->route('profile.edit')
+            return redirect()->route('email.register')
                 ->with('message', 'メールアドレスの認証を完了してください。');
         }
 
@@ -36,8 +36,8 @@ class EnsureEmailIsReady
     private function isExemptRoute(Request $request): bool
     {
         return $request->routeIs(
-            'profile.edit',
-            'profile.update',
+            'email.register',
+            'email.register.update',
             'email.verify',
             'email.verify.resend',
             'logout',

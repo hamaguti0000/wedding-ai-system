@@ -17,8 +17,8 @@ class EnsurePasswordChanged
         }
 
         if ($request->routeIs(
-            'profile.edit',
-            'profile.update',
+            'email.register',
+            'email.register.update',
             'email.verify',
             'email.verify.resend',
             'password.change',

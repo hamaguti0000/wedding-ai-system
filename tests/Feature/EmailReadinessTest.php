@@ -3,14 +3,14 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
-it('メール未登録のユーザーはログイン後プロフィールへ誘導される', function () {
+it('メール未登録のユーザーはログイン後メール登録画面へ誘導される', function () {
     $user = makeGuest('attending');
     $user->forceFill(['email' => null, 'email_verified_at' => null])->save();
 
     $this->post('/login', [
         'username' => $user->username,
         'password' => 'password',
-    ])->assertRedirect(route('profile.edit'));
+    ])->assertRedirect(route('email.register'));
 });
 
 it('メール未登録のユーザーはゲストページへ進めない', function () {
@@ -19,7 +19,7 @@ it('メール未登録のユーザーはゲストページへ進めない', func
 
     $this->actingAs($user)
         ->get(route('dashboard'))
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('email.register'));
 });
 
 it('メール未認証のユーザーは認証完了までゲストページへ進めない', function () {
@@ -28,7 +28,7 @@ it('メール未認証のユーザーは認証完了までゲストページへ�
 
     $this->actingAs($user)
         ->get(route('invitation'))
-        ->assertRedirect(route('profile.edit'));
+        ->assertRedirect(route('email.register'));
 });
 
 it('メール認証済みでも初期パスワード変更が必要なら変更画面へ進む', function () {
@@ -56,8 +56,8 @@ it('メール登録時に確認メールが送信される', function () {
     $user->forceFill(['email' => null, 'email_verified_at' => null])->save();
 
     $this->actingAs($user)
-        ->patch(route('profile.update'), ['email' => 'guest@example.com'])
-        ->assertRedirect(route('profile.edit'))
+        ->patch(route('email.register.update'), ['email' => 'guest@example.com'])
+        ->assertRedirect()
         ->assertSessionHas('email_verification_sent');
 
     $user->refresh();

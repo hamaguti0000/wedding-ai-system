@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 // 正常系
 // ─────────────────────────────────────────────
 
-it('正しい入力で登録できてプロフィールにリダイレクトされる', function () {
+it('正しい入力で登録できてメール登録画面にリダイレクトされる', function () {
     Mail::fake();
 
     $res = $this->post('/register', [
@@ -21,7 +21,7 @@ it('正しい入力で登録できてプロフィールにリダイレクトさ�
         'password_confirmation' => 'SecurePass1',
     ]);
 
-    $res->assertRedirect(route('profile.edit'));
+    $res->assertRedirect(route('email.register'));
     $this->assertDatabaseHas('users', ['email' => 'taro@example.com']);
     $this->assertAuthenticated();
 });

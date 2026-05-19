@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 describe('ユーザーアイコン', function () {
@@ -136,33 +137,36 @@ describe('受付QR表示', function () {
 
 describe('プロフィールメール', function () {
 
-    it('プロフィールからメールアドレスを登録できる', function () {
+    it('メール登録画面からメールアドレスを登録できる', function () {
+        Mail::fake();
+
         $user = makeGuest('attending');
         $user->forceFill(['email' => null])->save();
 
         $this->actingAs($user)
-            ->patch(route('profile.update'), [
+            ->patch(route('email.register.update'), [
                 'email' => 'guest@example.com',
             ])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect()
+            ->assertSessionHas('email_verification_sent');
 
         $user->refresh();
         expect($user->email)->toBe('guest@example.com');
-        $this->assertDatabaseHas('check_in_audit_logs', [
-            'guest_profile_id' => $user->guestProfile->id,
-            'action' => 'profile_update',
-            'source' => 'profile',
+        expect($user->email_verified_at)->toBeNull();
+        $this->assertDatabaseHas('email_audit_logs', [
+            'user_id' => $user->id,
+            'actor_user_id' => $user->id,
+            'action' => 'self_set',
+            'new_email' => 'guest@example.com',
         ]);
     });
 
-    it('メール未登録のときプロフィール画面で案内が出る', function () {
+    it('メール未登録のときプロフィール画面ではなくメール登録画面へ誘導される', function () {
         $user = makeGuest('attending');
         $user->forceFill(['email' => null])->save();
 
         $this->actingAs($user)
             ->get(route('profile.edit'))
-            ->assertOk()
-            ->assertSee('メールアドレス')
-            ->assertSee('初回ログイン時に登録しておくと後から困りません');
+            ->assertRedirect(route('email.register'));
     });
 });

@@ -51,14 +51,22 @@
     <div class="verify-card">
 
       @if ($status === 'success')
+        @php
+          $verifiedUser = $user ?? auth()->user();
+          $nextRoute = $verifiedUser?->password_change_required ? 'password.change' : 'dashboard';
+        @endphp
         <div class="verify-icon">✦</div>
         <div class="verify-rule"></div>
         <h1 class="verify-title">確認が完了しました</h1>
         <p class="verify-msg">
           メールアドレスの確認が完了しました。<br>
-          ウェディングサイトへようこそ。
+          @if ($verifiedUser?->password_change_required)
+            次に安全のため新しいパスワードを設定してください。
+          @else
+            ウェディングサイトへようこそ。
+          @endif
         </p>
-        <a href="{{ route('dashboard') }}" class="verify-btn">ホームへ進む</a>
+        <a href="{{ route($nextRoute) }}" class="verify-btn">次へ進む</a>
 
       @elseif ($status === 'expired')
         <div class="verify-icon" style="color:#c0392b;">⚠</div>
@@ -67,7 +75,7 @@
         <p class="verify-msg">
           このリンクは有効期限（24時間）が切れているか、<br>
           既に使用済みです。<br>
-          ログイン後にプロフィール画面から<br>
+          ログイン後にメール登録画面から<br>
           確認メールを再送信してください。
         </p>
         <a href="{{ route('login') }}" class="verify-btn verify-btn--outline">ログインへ</a>

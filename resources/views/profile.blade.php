@@ -76,7 +76,7 @@
 
     <div class="pf-card pf-card--contact">
         <span class="pf-section-en">Contact</span>
-        <h2 class="pf-section-ja">メールアドレス登録</h2>
+        <h2 class="pf-section-ja">メールアドレス</h2>
         <div class="pf-section-rule"></div>
 
         @if ($needsEmailRegistration)
@@ -84,7 +84,10 @@
             <div class="pf-mail-status__icon"><i class="fa-solid fa-envelope"></i></div>
             <div class="pf-mail-status__body">
                 <p class="pf-mail-status__title">メールアドレスの登録が必要です</p>
-                <p class="pf-mail-status__text">パスワード再設定と大切な連絡に使います。下の欄にメールアドレスを入力して保存してください。</p>
+                <p class="pf-mail-status__text">パスワード再設定と大切な連絡に使います。専用画面で登録してください。</p>
+            </div>
+            <div class="pf-mail-status__action">
+                <a href="{{ route('email.register') }}" class="pf-btn pf-btn--primary">メール登録画面へ</a>
             </div>
         </div>
         @elseif ($user->isEmailUnverified())
@@ -100,6 +103,9 @@
                 @csrf
                 <button type="submit" class="pf-btn pf-btn--outline">確認メールを再送</button>
             </form>
+            <div class="pf-mail-status__action">
+                <a href="{{ route('email.register') }}" class="pf-btn pf-btn--outline">メール登録画面へ</a>
+            </div>
         </div>
         @else
         <div class="pf-mail-status pf-mail-status--verified">
@@ -108,39 +114,11 @@
                 <p class="pf-mail-status__title">メールアドレスは認証済みです</p>
                 <p class="pf-mail-status__text"><strong>{{ $user->email }}</strong> はパスワード再設定に利用できます。</p>
             </div>
+            <div class="pf-mail-status__action">
+                <a href="{{ route('email.register') }}" class="pf-btn pf-btn--outline">メールを変更する</a>
+            </div>
         </div>
         @endif
-
-        <form method="POST" action="{{ route('profile.update') }}">
-            @csrf
-            @method('PATCH')
-
-            <div class="pf-mail-form">
-                <div class="pf-mail-field">
-                    <label for="profile-email">メールアドレス</label>
-                    <input
-                        id="profile-email"
-                        type="email"
-                        name="email"
-                        value="{{ old('email', $user->email) }}"
-                        required
-                        autocomplete="email"
-                        placeholder="example@example.com"
-                    >
-                    @error('email')
-                        <div class="field-error" style="margin-top:6px;">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="pf-mail-help">
-                    保存すると確認メールを送信します。認証URLは24時間有効です。
-                </div>
-                <div class="pf-actions">
-                    <button type="submit" class="pf-btn pf-btn--primary">
-                        <i class="fa-solid fa-envelope"></i>{{ $user->email ? 'メールを変更して確認メールを送る' : 'メールを登録して確認メールを送る' }}
-                    </button>
-                </div>
-            </div>
-        </form>
     </div>
 
     <div class="pf-card">

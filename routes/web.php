@@ -34,6 +34,7 @@ use App\Http\Controllers\AdminGuestbookController;
 use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ForgotEmailController;
+use App\Http\Controllers\EmailRegistrationController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\AdminEmailAuditController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -43,7 +44,11 @@ use App\Http\Controllers\Auth\NewPasswordController;
 Route::get('/', function () {
     if (Auth::check()) {
         if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
-            return redirect()->route('profile.edit');
+            return redirect()->route('email.register');
+        }
+
+        if (! Auth::user()->isAdmin() && Auth::user()->password_change_required) {
+            return redirect()->route('password.change');
         }
 
         return redirect()->route(
@@ -69,6 +74,10 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('p
 Route::get('/verify', [EmailVerificationController::class, 'verify'])->name('email.verify');
 Route::post('/verify/resend', [EmailVerificationController::class, 'resend'])
     ->middleware('auth')->name('email.verify.resend');
+Route::middleware('auth')->group(function () {
+    Route::get('/email/register', [EmailRegistrationController::class, 'edit'])->name('email.register');
+    Route::patch('/email/register', [EmailRegistrationController::class, 'update'])->name('email.register.update');
+});
 Route::middleware(['auth', 'email.ready'])->group(function () {
     Route::get('/password/change', [PasswordChangeController::class, 'edit'])->name('password.change');
     Route::patch('/password/change', [PasswordChangeController::class, 'update'])->name('password.change.update');
