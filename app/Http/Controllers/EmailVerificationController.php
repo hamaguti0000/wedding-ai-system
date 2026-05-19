@@ -23,11 +23,9 @@ class EmailVerificationController extends Controller
             return view('verify', ['status' => 'expired']);
         }
 
-        // 認証済みでなければログインさせる
-        if (!Auth::check()) {
-            Auth::login($user);
-            $request->session()->regenerate();
-        }
+        // 別ユーザーのセッションで認証URLを開いた場合も、トークンの持ち主として扱う。
+        Auth::login($user);
+        $request->session()->regenerate();
 
         return view('verify', ['status' => 'success', 'user' => $user]);
     }

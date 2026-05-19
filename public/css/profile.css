@@ -214,6 +214,82 @@ main { padding: 0; text-align: initial; }
 .pf-btn--outline  { background: transparent; border: 1px solid #e0d0bc; color: #9b8573; }
 .pf-btn--outline:hover  { border-color: #b38b59; color: #b38b59; }
 
+/* ── メール登録 ─────────────────────────────────────── */
+.pf-card--contact { border: 1px solid #eadcc9; }
+.pf-mail-status {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px 15px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+}
+.pf-mail-status__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+.pf-mail-status__title {
+    margin: 0 0 4px;
+    font-size: .94rem;
+    font-weight: 700;
+    color: #3d2f25;
+}
+.pf-mail-status__text {
+    margin: 0;
+    color: #7f6a57;
+    font-size: .84rem;
+    line-height: 1.7;
+}
+.pf-mail-status__action {
+    grid-column: 1 / -1;
+    margin: 2px 0 0;
+}
+.pf-mail-status__action .pf-btn {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: .82rem;
+}
+.pf-mail-status--required { background: #fff7ef; border: 1px solid #e8c8a5; }
+.pf-mail-status--required .pf-mail-status__icon { background: #f7e4cf; color: #9a5f23; }
+.pf-mail-status--pending { background: #fffaf0; border: 1px solid #e8d5a8; }
+.pf-mail-status--pending .pf-mail-status__icon { background: #f6e7bc; color: #7a5c30; }
+.pf-mail-status--verified { background: #f0faf4; border: 1px solid #a8d8b9; }
+.pf-mail-status--verified .pf-mail-status__icon { background: #dff3e7; color: #2d6a4f; }
+.pf-mail-form { display: grid; gap: 12px; }
+.pf-mail-field label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 700;
+    color: #7f6a57;
+    margin-bottom: 6px;
+}
+.pf-mail-field input {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1px solid #e4d6c3;
+    background: #fff;
+    font-size: .95rem;
+    box-sizing: border-box;
+}
+.pf-mail-field input:focus {
+    outline: none;
+    border-color: #b38b59;
+    box-shadow: 0 0 0 3px rgba(179,139,89,.13);
+}
+.pf-mail-help {
+    color: #8f7d6f;
+    font-size: .84rem;
+    line-height: 1.7;
+}
+
 /* ── アラート ────────────────────────────────────────── */
 .pf-alert-success {
     display: flex; align-items: center; gap: 8px;
@@ -234,4 +310,13 @@ main { padding: 0; text-align: initial; }
     .pf-actions { flex-direction: row; }
     .pf-btn { flex: 1; }
     .pf-avatar { width: 72px; height: 72px; font-size: 1.9rem; }
+    .pf-mail-status {
+        grid-template-columns: 44px 1fr auto;
+        align-items: center;
+    }
+    .pf-mail-status__action {
+        grid-column: auto;
+        margin: 0;
+    }
+    .pf-mail-status__action .pf-btn { width: auto; white-space: nowrap; }
 }

@@ -42,30 +42,7 @@
     @if (session('email_verification_sent'))
     <div class="pf-alert-success" style="background:#f0faf4;color:#2d6a4f;border-color:#a8d8b9;">
         <strong>確認メールを送信しました。</strong>
-        メールボックスをご確認いただき、リンクをクリックして認証を完了してください。
-    </div>
-    @endif
-
-    {{-- メール未確認バナー --}}
-    @if ($user->isEmailUnverified())
-    <div class="pf-alert-success" style="background:#fff8f0;color:#7a4f2a;border-color:#e8c8a5;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <span>
-            <strong>{{ $user->email }}</strong> は未確認です。
-            確認メールが届いていない場合は再送できます。
-        </span>
-        <form method="POST" action="{{ route('email.verify.resend') }}" style="margin:0;">
-            @csrf
-            <button type="submit"
-                style="padding:6px 16px;background:#b38b59;color:#fff;border:none;border-radius:3px;font-size:0.8rem;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap;">
-                確認メールを再送する
-            </button>
-        </form>
-    </div>
-    @endif
-
-    @if ($needsEmailRegistration)
-    <div class="pf-alert-success" style="background:#fff7ef;color:#7a4f2a;border-color:#e8c8a5;">
-        メールアドレスを登録してください。パスワード再設定や連絡に使います。
+        メールボックスをご確認いただき、リンクをクリックして認証を完了してください。見つからない場合は迷惑メールフォルダも確認してください。
     </div>
     @endif
 
@@ -97,18 +74,50 @@
         </div>
     </div>
 
-    <div class="pf-card">
+    <div class="pf-card pf-card--contact">
         <span class="pf-section-en">Contact</span>
-        <h2 class="pf-section-ja">メールアドレス</h2>
+        <h2 class="pf-section-ja">メールアドレス登録</h2>
         <div class="pf-section-rule"></div>
+
+        @if ($needsEmailRegistration)
+        <div class="pf-mail-status pf-mail-status--required">
+            <div class="pf-mail-status__icon"><i class="fa-solid fa-envelope"></i></div>
+            <div class="pf-mail-status__body">
+                <p class="pf-mail-status__title">メールアドレスの登録が必要です</p>
+                <p class="pf-mail-status__text">パスワード再設定と大切な連絡に使います。下の欄にメールアドレスを入力して保存してください。</p>
+            </div>
+        </div>
+        @elseif ($user->isEmailUnverified())
+        <div class="pf-mail-status pf-mail-status--pending">
+            <div class="pf-mail-status__icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+            <div class="pf-mail-status__body">
+                <p class="pf-mail-status__title">確認メールを送信済みです</p>
+                <p class="pf-mail-status__text">
+                    <strong>{{ $user->email }}</strong> 宛のメール内リンクをクリックすると認証が完了します。見つからない場合は迷惑メールフォルダも確認してください。
+                </p>
+            </div>
+            <form method="POST" action="{{ route('email.verify.resend') }}" class="pf-mail-status__action">
+                @csrf
+                <button type="submit" class="pf-btn pf-btn--outline">確認メールを再送</button>
+            </form>
+        </div>
+        @else
+        <div class="pf-mail-status pf-mail-status--verified">
+            <div class="pf-mail-status__icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="pf-mail-status__body">
+                <p class="pf-mail-status__title">メールアドレスは認証済みです</p>
+                <p class="pf-mail-status__text"><strong>{{ $user->email }}</strong> はパスワード再設定に利用できます。</p>
+            </div>
+        </div>
+        @endif
 
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             @method('PATCH')
 
-            <div style="display:grid;gap:12px;">
-                <div>
-                    <label for="profile-email" style="display:block;font-size:0.82rem;font-weight:700;color:#7f6a57;margin-bottom:6px;">メールアドレス</label>
+            <div class="pf-mail-form">
+                <div class="pf-mail-field">
+                    <label for="profile-email">メールアドレス</label>
                     <input
                         id="profile-email"
                         type="email"
@@ -117,18 +126,17 @@
                         required
                         autocomplete="email"
                         placeholder="example@example.com"
-                        style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid #e4d6c3;background:#fff;font-size:0.95rem;box-sizing:border-box;"
                     >
                     @error('email')
                         <div class="field-error" style="margin-top:6px;">{{ $message }}</div>
                     @enderror
                 </div>
-                <div style="color:#8f7d6f;font-size:0.86rem;line-height:1.7;">
-                    パスワード再設定や連絡に使います。初回ログイン時に登録しておくと後から困りません。
+                <div class="pf-mail-help">
+                    保存すると確認メールを送信します。認証URLは24時間有効です。
                 </div>
-                <div class="pf-actions" style="justify-content:flex-start;">
+                <div class="pf-actions">
                     <button type="submit" class="pf-btn pf-btn--primary">
-                        <i class="fa-solid fa-envelope"></i>メールを保存
+                        <i class="fa-solid fa-envelope"></i>{{ $user->email ? 'メールを変更して確認メールを送る' : 'メールを登録して確認メールを送る' }}
                     </button>
                 </div>
             </div>
