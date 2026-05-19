@@ -81,6 +81,21 @@
                     autocomplete="off" required>
                 @error('username')<span class="field-error">{{ $message }}</span>@enderror
             </div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>メールアドレス</label>
+                <input type="email" name="email"
+                    value="{{ old('email', $user->email) }}"
+                    autocomplete="email"
+                    placeholder="guest@example.com">
+                @error('email')<span class="field-error">{{ $message }}</span>@enderror
+                <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.84rem;color:#7f6a57;font-weight:500;letter-spacing:0;text-transform:none;">
+                    <input type="checkbox" name="delete_email" value="1" style="width:auto;">
+                    メールアドレスを削除する
+                </label>
+                <p style="margin:8px 0 0;color:#9b8573;font-size:0.8rem;line-height:1.6;">
+                    ゲストのメールを登録・変更すると確認メールを送信します。管理者はメール認証の対象外です。
+                </p>
+            </div>
             <div class="fg fg-2">
                 <div class="form-group">
                     <label>新しいパスワード</label>

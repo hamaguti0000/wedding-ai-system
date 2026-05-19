@@ -119,6 +119,7 @@
                     <a href="{{ route('admin.rsvp') }}"><i class="fa-solid fa-envelope-open-text"></i> RSVP一覧</a>
                     <a href="{{ route('admin.seating') }}"><i class="fa-solid fa-chair"></i> 席次表</a>
                     <a href="{{ route('admin.login-history') }}"><i class="fa-solid fa-clock-rotate-left"></i> ログイン履歴</a>
+                    <a href="{{ route('admin.audit.email') }}"><i class="fa-solid fa-envelope-circle-check"></i> メール操作ログ</a>
                     <a href="{{ route('admin.audit.checkin') }}"><i class="fa-solid fa-clipboard-list"></i> 操作ログ</a>
                 </div>
             </details>

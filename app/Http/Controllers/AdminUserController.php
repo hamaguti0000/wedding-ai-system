@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CheckInAuditLog;
+use App\Models\EmailAuditLog;
 use App\Models\GuestProfile;
 use App\Models\GuestTaskAssignment;
 use App\Models\User;
@@ -26,6 +27,7 @@ class AdminUserController extends Controller
         $request->validate([
             'username'     => 'required|string|max:50|unique:users,username',
             'password'     => 'required|string|min:8|max:255',
+            'email'        => 'nullable|string|email:rfc,filter|max:255|unique:users,email',
             'role'         => 'required|in:admin,guest',
             'avatar_type'  => ['nullable', Rule::in(array_keys(User::avatarTypeOptions()))],
             'avatar_emoji' => [
@@ -64,6 +66,9 @@ class AdminUserController extends Controller
         ], [
             'username.required' => 'ユーザー名は必須です',
             'username.unique'   => 'このユーザー名はすでに使われています',
+            'email.email'       => '正しいメールアドレスを入力してください',
+            'email.max'         => 'メールアドレスは255文字以内で入力してください',
+            'email.unique'      => 'このメールアドレスは既に登録されています',
             'password.required' => 'パスワードは必須です',
             'password.min'      => 'パスワードは6文字以上にしてください',
             'role.required'     => 'ロールを選択してください',
@@ -83,10 +88,34 @@ class AdminUserController extends Controller
         $user = User::create([
             'name'     => $fullName ?: $request->username,
             'username' => $request->username,
+            'email'    => $request->filled('email') ? trim($request->email) : null,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
+            'email_verified_at' => $request->role === 'admin' && $request->filled('email') ? now() : null,
+            'password_change_required' => $request->role === 'guest',
+            'password_changed_at' => $request->role === 'admin' ? now() : null,
             ...$avatarData,
         ]);
+
+        if ($user->email) {
+            EmailAuditLog::record(
+                $user,
+                auth()->user(),
+                'admin_set',
+                null,
+                $user->email,
+                '管理者がメールアドレスを登録しました',
+                ['role' => $user->role]
+            );
+
+            if (! $user->isAdmin()) {
+                try {
+                    $user->sendEmailVerification(force: true);
+                } catch (\Throwable) {
+                    // ユーザー作成はメール送信失敗で止めない
+                }
+            }
+        }
 
         if ($request->role === 'guest') {
             $profile = GuestProfile::create([
@@ -157,6 +186,14 @@ class AdminUserController extends Controller
 
         $request->validate([
             'username'            => 'required|string|max:50|unique:users,username,' . $id,
+            'email'               => [
+                'nullable',
+                'string',
+                'email:rfc,filter',
+                'max:255',
+                Rule::unique(User::class)->ignore($user->id),
+            ],
+            'delete_email'        => 'nullable|boolean',
             'role'                => 'required|in:admin,guest',
             'avatar_type'         => ['nullable', Rule::in(array_keys(User::avatarTypeOptions()))],
             'avatar_emoji'        => [
@@ -206,6 +243,9 @@ class AdminUserController extends Controller
         ], [
             'username.required'  => 'ユーザー名は必須です',
             'username.unique'    => 'このユーザー名はすでに使われています',
+            'email.email'        => '正しいメールアドレスを入力してください',
+            'email.max'          => 'メールアドレスは255文字以内で入力してください',
+            'email.unique'       => 'このメールアドレスは既に登録されています',
             'password.min'       => 'パスワードは6文字以上にしてください',
             'password.confirmed' => '確認用パスワードが一致しません',
             'avatar_emoji.required' => '絵文字アイコンを選択してください',
@@ -220,17 +260,64 @@ class AdminUserController extends Controller
 
         $fullName = trim(($request->last_name ?? '') . ' ' . ($request->first_name ?? ''));
         $avatarData = $this->buildAvatarData($request, $user);
+        $originalEmail = $user->email;
+        $newEmail = $request->boolean('delete_email')
+            ? null
+            : ($request->filled('email') ? trim($request->email) : null);
 
         $userData = [
             'username' => $request->username,
             'name'     => $fullName ?: $user->username,
             'role'     => $request->role,
+            'email'    => $newEmail,
             ...$avatarData,
         ];
+
+        if ($newEmail !== $originalEmail) {
+            $userData['email_verified_at'] = $request->role === 'admin' && $newEmail ? now() : null;
+            $userData['email_verification_token'] = null;
+            $userData['email_verification_sent_at'] = null;
+        } elseif ($request->role === 'admin' && $newEmail && ! $user->email_verified_at) {
+            $userData['email_verified_at'] = now();
+        }
+
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->password);
+            $userData['password_change_required'] = false;
+            $userData['password_changed_at'] = now();
         }
+
+        if ($request->role === 'admin') {
+            $userData['password_change_required'] = false;
+            $userData['password_changed_at'] = $user->password_changed_at ?? now();
+        }
+
         $user->update($userData);
+
+        if ($newEmail !== $originalEmail) {
+            $action = $newEmail === null ? 'admin_delete' : ($originalEmail ? 'admin_update' : 'admin_set');
+            $message = $newEmail === null
+                ? '管理者がメールアドレスを削除しました'
+                : ($originalEmail ? '管理者がメールアドレスを変更しました' : '管理者がメールアドレスを登録しました');
+
+            EmailAuditLog::record(
+                $user,
+                auth()->user(),
+                $action,
+                $originalEmail,
+                $newEmail,
+                $message,
+                ['role' => $request->role]
+            );
+
+            if ($newEmail && ! $user->isAdmin()) {
+                try {
+                    $user->sendEmailVerification(force: true);
+                } catch (\Throwable) {
+                    // メール送信失敗でも管理者の保存は完了させる
+                }
+            }
+        }
 
         if ($request->role === 'guest') {
             $profile = GuestProfile::updateOrCreate(
@@ -320,7 +407,11 @@ class AdminUserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
-        $user->update(['password' => Hash::make($request->password)]);
+        $user->update([
+            'password' => Hash::make($request->password),
+            'password_change_required' => false,
+            'password_changed_at' => now(),
+        ]);
 
         if ($user->guestProfile) {
             CheckInAuditLog::record(

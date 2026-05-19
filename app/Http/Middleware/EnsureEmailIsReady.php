@@ -12,7 +12,7 @@ class EnsureEmailIsReady
     {
         $user = $request->user();
 
-        if (! $user) {
+        if (! $user || $user->isAdmin()) {
             return $next($request);
         }
 

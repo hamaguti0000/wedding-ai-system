@@ -34,13 +34,15 @@ use App\Http\Controllers\AdminGuestbookController;
 use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ForgotEmailController;
+use App\Http\Controllers\PasswordChangeController;
+use App\Http\Controllers\AdminEmailAuditController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
     if (Auth::check()) {
-        if (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail()) {
+        if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
             return redirect()->route('profile.edit');
         }
 
@@ -67,9 +69,13 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('p
 Route::get('/verify', [EmailVerificationController::class, 'verify'])->name('email.verify');
 Route::post('/verify/resend', [EmailVerificationController::class, 'resend'])
     ->middleware('auth')->name('email.verify.resend');
+Route::middleware(['auth', 'email.ready'])->group(function () {
+    Route::get('/password/change', [PasswordChangeController::class, 'edit'])->name('password.change');
+    Route::patch('/password/change', [PasswordChangeController::class, 'update'])->name('password.change.update');
+});
 
 // ── ゲスト用ページ（認証必須）────────────────────────────
-Route::middleware(['auth', 'email.ready'])->group(function () {
+Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () {
     Route::get('/home',       [HomeController::class,       'index'])->name('dashboard');
     Route::get('/profile',    [ProfileController::class,   'show']) ->name('profile.edit');
     Route::patch('/profile',  [ProfileController::class,   'update'])->name('profile.update');
@@ -92,11 +98,12 @@ Route::middleware(['auth', 'email.ready'])->group(function () {
 });
 
 // ── 管理者用ページ（認証 + admin）────────────────────────
-Route::middleware(['auth', 'email.ready', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',              [AdminController::class,            'index'])->name('dashboard');
     Route::get('/ops',           [AdminOperationsController::class, 'index'])->name('ops');
     Route::get('/ops/live',      [AdminOperationsController::class, 'metrics'])->name('ops.live');
     Route::get('/audit/check-in',[AdminAuditController::class, 'index'])->name('audit.checkin');
+    Route::get('/audit/email', [AdminEmailAuditController::class, 'index'])->name('audit.email');
     Route::get('/rsvp',          [AdminRsvpController::class, 'index']) ->name('rsvp');
     Route::get('/rsvp/export',   [AdminRsvpController::class, 'export'])->name('rsvp.export');
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');

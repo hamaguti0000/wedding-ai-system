@@ -83,12 +83,18 @@
             </div>
 
             {{-- ログイン情報 --}}
-            <div class="fg fg-2" style="margin-bottom:16px;">
+            <div class="fg fg-3" style="margin-bottom:16px;">
                 <div class="form-group">
                     <label>ユーザー名 <span class="req">*</span></label>
                     <input type="text" name="username" value="{{ old('username') }}"
                         placeholder="yamada_taro" autocomplete="off">
                     @error('username')<span class="field-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-group">
+                    <label>メールアドレス</label>
+                    <input type="email" name="email" value="{{ old('email') }}"
+                        placeholder="guest@example.com" autocomplete="email">
+                    @error('email')<span class="field-error">{{ $message }}</span>@enderror
                 </div>
                 <div class="form-group">
                     <label>パスワード <span class="req">*</span></label>
@@ -174,6 +180,7 @@
                 <tr>
                     <th>ユーザー名</th>
                     <th>氏名</th>
+                    <th class="col-md-hide">メール</th>
                     <th class="col-md-hide">ロール</th>
                     <th class="col-md-hide">出欠</th>
                     <th>操作</th>
@@ -195,6 +202,16 @@
                             @endif
                         @else
                             <span class="text-muted">{{ $user->name }}</span>
+                        @endif
+                    </td>
+                    <td class="col-md-hide">
+                        @if ($user->email)
+                            {{ $user->email }}
+                            @if (!$user->isAdmin())
+                                <br><span class="text-muted">{{ $user->hasVerifiedEmail() ? '認証済み' : '未認証' }}</span>
+                            @endif
+                        @else
+                            <span class="text-muted">未登録</span>
                         @endif
                     </td>
                     <td class="col-md-hide">
@@ -246,7 +263,7 @@
                 </tr>
                 {{-- パスワード変更行 --}}
                 <tr class="pw-row" id="pw-row-{{ $user->id }}">
-                    <td colspan="5">
+                    <td colspan="6">
                         <form method="POST" action="{{ route('admin.users.password', $user->id) }}"
                               class="pw-form">
                             @csrf @method('PATCH')

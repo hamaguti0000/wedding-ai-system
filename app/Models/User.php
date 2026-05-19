@@ -23,6 +23,8 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'password_change_required',
+        'password_changed_at',
         'role',
         'avatar_type',
         'avatar_emoji',
@@ -45,24 +47,34 @@ class User extends Authenticatable
         return [
             'email_verified_at'          => 'datetime',
             'email_verification_sent_at' => 'datetime',
+            'password_change_required'   => 'boolean',
+            'password_changed_at'        => 'datetime',
             'password'                   => 'hashed',
         ];
     }
 
     public function hasVerifiedEmail(): bool
     {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
         return !blank($this->email) && !is_null($this->email_verified_at);
     }
 
     public function isEmailUnverified(): bool
     {
+        if ($this->isAdmin()) {
+            return false;
+        }
+
         return !blank($this->email) && is_null($this->email_verified_at);
     }
 
     /** トークンを生成してメールを送信する。60分以内の再送は拒否。 */
     public function sendEmailVerification(bool $force = false): bool
     {
-        if (blank($this->email)) {
+        if ($this->isAdmin() || blank($this->email)) {
             return false;
         }
 

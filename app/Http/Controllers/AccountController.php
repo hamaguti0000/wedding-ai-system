@@ -12,7 +12,7 @@ class AccountController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
-            if (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail()) {
+            if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
                 return redirect()->route('profile.edit');
             }
 
@@ -50,6 +50,7 @@ class AccountController extends Controller
             'email'    => trim($request->email),
             'password' => $request->password,
             'role'     => 'guest',
+            'password_change_required' => true,
         ]);
 
         Auth::login($user);

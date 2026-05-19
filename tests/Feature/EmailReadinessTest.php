@@ -31,6 +31,24 @@ it('メール未認証のユーザーは認証完了までゲストページへ�
         ->assertRedirect(route('profile.edit'));
 });
 
+it('メール認証済みでも初期パスワード変更が必要なら変更画面へ進む', function () {
+    $user = makeGuest('attending');
+    $user->forceFill(['password_change_required' => true, 'password_changed_at' => null])->save();
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertRedirect(route('password.change'));
+});
+
+it('管理者はメール未登録でも管理画面へ進める', function () {
+    $admin = makeAdmin();
+    $admin->forceFill(['email' => null, 'email_verified_at' => null, 'password_change_required' => true])->save();
+
+    $this->actingAs($admin)
+        ->get(route('admin.dashboard'))
+        ->assertOk();
+});
+
 it('メール登録時に確認メールが送信される', function () {
     Mail::fake();
 

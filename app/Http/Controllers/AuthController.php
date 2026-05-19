@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            if (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail()) {
+            if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
                 return redirect()->route('profile.edit');
             }
 
@@ -45,14 +45,19 @@ class AuthController extends Controller
                 'status'     => 'success',
             ]);
 
-            if (blank($user->email)) {
+            if (! $user->isAdmin() && blank($user->email)) {
                 return redirect()->route('profile.edit')
                     ->with('message', 'メールアドレスを登録してください。パスワード再設定に必要です。');
             }
 
-            if (! $user->hasVerifiedEmail()) {
+            if (! $user->isAdmin() && ! $user->hasVerifiedEmail()) {
                 return redirect()->route('profile.edit')
                     ->with('message', 'メールアドレスの認証を完了してください。');
+            }
+
+            if (! $user->isAdmin() && $user->password_change_required) {
+                return redirect()->route('password.change')
+                    ->with('message', '安全のため、新しいパスワードを設定してください。');
             }
 
             return redirect()->intended(

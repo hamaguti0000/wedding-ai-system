@@ -46,6 +46,12 @@
                                 <i class="fa-solid fa-clock-rotate-left"></i>ログイン履歴
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.audit.email') }}"
+                               class="{{ request()->routeIs('admin.audit.email*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-envelope-circle-check"></i>メール操作ログ
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li class="header__nav-item">
@@ -77,7 +83,7 @@
                 </li>
                 <li class="header__nav-item">
                     <a href="{{ route('admin.dashboard') }}"
-                       class="{{ request()->routeIs('admin.dashboard','admin.rsvp*','admin.users*','admin.seating*') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('admin.dashboard','admin.rsvp*','admin.users*','admin.seating*','admin.audit.email*') ? 'active' : '' }}">
                         <i class="fa-solid fa-users" aria-hidden="true"></i>ゲスト
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -98,6 +104,12 @@
                             <a href="{{ route('admin.users') }}"
                                class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-user-pen"></i>ユーザー管理
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.audit.email') }}"
+                               class="{{ request()->routeIs('admin.audit.email*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-envelope-circle-check"></i>メール操作ログ
                             </a>
                         </li>
                         <li>
@@ -339,6 +351,12 @@
                     <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>ログイン履歴
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.audit.email') }}"
+                   class="{{ request()->routeIs('admin.audit.email*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-envelope-circle-check" aria-hidden="true"></i>メール操作ログ
+                </a>
+            </li>
             <li class="header-drawer__section-label">受付</li>
             <li>
                 <a href="{{ route('admin.checkin.index') }}"
@@ -375,6 +393,12 @@
                 <a href="{{ route('admin.users') }}"
                    class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
                     <i class="fa-solid fa-users" aria-hidden="true"></i>ユーザー管理
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.audit.email') }}"
+                   class="{{ request()->routeIs('admin.audit.email*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-envelope-circle-check" aria-hidden="true"></i>メール操作ログ
                 </a>
             </li>
             <li>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\CheckInAuditLog;
+use App\Models\EmailAuditLog;
 use App\Models\WeddingSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -74,6 +75,10 @@ class ProfileController extends Controller
                 'max:5120',
             ],
         ], [
+            'email.required' => 'メールアドレスは必須です',
+            'email.email' => '正しいメールアドレスを入力してください',
+            'email.max' => 'メールアドレスは255文字以内で入力してください',
+            'email.unique' => 'このメールアドレスは既に登録されています',
             'avatar_emoji.required' => '絵文字アイコンを選択してください',
             'avatar_emoji.in'       => '選択された絵文字アイコンは利用できません',
             'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
@@ -136,6 +141,18 @@ class ProfileController extends Controller
                 'profile',
                 $originalEmail ? 'プロフィールのメールアドレスを更新しました' : 'メールアドレスを登録しました',
                 ['email' => $data['email']]
+            );
+        }
+
+        if ($emailChanged) {
+            EmailAuditLog::record(
+                $user,
+                $user,
+                $originalEmail ? 'self_update' : 'self_set',
+                $originalEmail,
+                $data['email'],
+                $originalEmail ? '本人がメールアドレスを変更しました' : '本人がメールアドレスを登録しました',
+                ['source' => 'profile']
             );
         }
 
