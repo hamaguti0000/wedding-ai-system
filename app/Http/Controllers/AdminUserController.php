@@ -283,8 +283,8 @@ class AdminUserController extends Controller
 
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->password);
-            $userData['password_change_required'] = false;
-            $userData['password_changed_at'] = now();
+            $userData['password_change_required'] = $request->role === 'guest';
+            $userData['password_changed_at'] = $request->role === 'guest' ? null : now();
         }
 
         if ($request->role === 'admin') {
@@ -409,8 +409,8 @@ class AdminUserController extends Controller
         $user = User::findOrFail($id);
         $user->update([
             'password' => Hash::make($request->password),
-            'password_change_required' => false,
-            'password_changed_at' => now(),
+            'password_change_required' => $user->role === 'guest',
+            'password_changed_at' => $user->role === 'guest' ? null : now(),
         ]);
 
         if ($user->guestProfile) {
