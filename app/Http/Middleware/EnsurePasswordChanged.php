@@ -16,7 +16,16 @@ class EnsurePasswordChanged
             return $next($request);
         }
 
-        if ($request->routeIs('password.change', 'password.change.update', 'logout', 'csrf.refresh')) {
+        if ($request->routeIs(
+            'profile.edit',
+            'profile.update',
+            'email.verify',
+            'email.verify.resend',
+            'password.change',
+            'password.change.update',
+            'logout',
+            'csrf.refresh'
+        )) {
             return $next($request);
         }
 
