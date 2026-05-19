@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'username',
         'email',
+        'email_verified_at',
         'password',
         'password_change_required',
         'password_changed_at',
@@ -114,11 +115,11 @@ class User extends Authenticatable
             return null;
         }
 
-        $user->update([
+        $user->forceFill([
             'email_verified_at'          => now(),
             'email_verification_token'   => null,
             'email_verification_sent_at' => null,
-        ]);
+        ])->save();
 
         return $user;
     }
