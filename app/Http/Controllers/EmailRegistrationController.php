@@ -62,12 +62,18 @@ class EmailRegistrationController extends Controller
             );
         }
 
+        $forceSend = $email !== $originalEmail;
+
         try {
-            $user->refresh()->sendEmailVerification(force: true);
+            $sent = $user->refresh()->sendEmailVerification(force: $forceSend);
         } catch (\Throwable) {
             return back()
                 ->withInput()
                 ->with('error', 'メールアドレスは保存しましたが、確認メールの送信に失敗しました。時間をおいて再送してください。');
+        }
+
+        if (! $sent) {
+            return back()->with('info', '確認メールは送信済みです。しばらくしてから再送できます。メール内のURLをクリックして認証を完了してください。');
         }
 
         return back()->with('email_verification_sent', true);

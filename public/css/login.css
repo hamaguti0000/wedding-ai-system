@@ -171,6 +171,12 @@ body {
 }
 .btn-submit:hover  { background: #9a7447; }
 .btn-submit:active { transform: scale(0.99); }
+.btn-submit:disabled {
+    background: #c9b9a3;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.78;
+}
 
 /* ── 下部リンク ───────────────────────────── */
 .card-footer {
