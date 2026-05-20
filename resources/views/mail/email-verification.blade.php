@@ -113,7 +113,7 @@
 
   {{-- ヘッダー --}}
   <div class="header">
-    <p class="header__monogram">{{ mb_substr($groomName, -1) }} &amp; {{ mb_substr($brideName, -1) }}</p>
+    <p class="header__monogram">{{ $groomName }} &amp; {{ $brideName }}</p>
     <div class="header__rule"></div>
     <p class="header__tagline">Wedding Invitation</p>
   </div>

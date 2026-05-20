@@ -26,8 +26,8 @@ class EmailVerificationMail extends Mailable
         $this->verifyUrl = url('/verify?token=' . $plainToken);
 
         $setting = WeddingSetting::first();
-        $this->groomName = $setting?->groom_name ?? 'Kakeru';
-        $this->brideName = $setting?->bride_name ?? 'Mirai';
+        $this->groomName = $setting?->groom_name_en ?: ($setting?->groom_name ?? 'Kakeru');
+        $this->brideName = $setting?->bride_name_en ?: ($setting?->bride_name ?? 'Mirai');
     }
 
     public function envelope(): Envelope

@@ -208,6 +208,49 @@ body {
     outline: none;
     box-shadow: 0 0 0 3px rgba(179, 139, 89, 0.13);
 }
+.password-field {
+    position: relative;
+}
+.password-field input {
+    padding-right: 48px;
+}
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: #9b8573;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    transform: translateY(-50%);
+}
+.password-toggle:hover,
+.password-toggle:focus-visible,
+.password-toggle.is-visible {
+    background: #f5eadc;
+    color: #7a5c30;
+}
+.password-toggle:focus-visible {
+    outline: 2px solid rgba(179, 139, 89, 0.35);
+    outline-offset: 2px;
+}
+.icon-eye {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
 /* ── 送信ボタン ───────────────────────────── */
 .btn-submit {
