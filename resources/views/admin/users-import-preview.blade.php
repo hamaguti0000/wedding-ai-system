@@ -3,7 +3,18 @@
 
 @push('styles')
 <style>
-.import-page { max-width: 1160px; margin: 0 auto; display: grid; gap: 18px; }
+.import-page { max-width: 1160px; margin: 56px auto 80px; padding: 0 24px; display: grid; gap: 18px; }
+.import-page, .import-page * { box-sizing: border-box; }
+.import-page form,
+.import-hero,
+.import-summary,
+.import-panel,
+.guest-list,
+.guest-card,
+.guest-fields,
+.field-row,
+.field-group,
+.confirm-bar { min-width: 0; }
 .import-hero {
     display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
     background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 22px 24px;
@@ -48,14 +59,15 @@
 .row-errors { margin: 0; padding-left: 18px; color: #be123c; font-size: .8rem; line-height: 1.55; }
 .guest-fields { display: grid; gap: 12px; }
 .field-row { display: grid; gap: 10px; }
-.field-row.cols-3 { grid-template-columns: 1fr 1fr 1.2fr; }
-.field-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.field-row.cols-3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr); }
+.field-row.cols-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .field-group label {
     display: block; margin-bottom: 5px; color: #7a6b5d; font-size: .76rem;
     font-weight: 800; letter-spacing: .4px;
 }
 .field-group input, .field-group textarea {
-    width: 100%; border: 1px solid #d9c8b5; border-radius: 7px; padding: 9px 10px;
+    display: block; width: 100%; max-width: 100%; min-width: 0;
+    border: 1px solid #d9c8b5; border-radius: 7px; padding: 9px 10px;
     background: #fff; color: #302821; font-size: .9rem;
 }
 .field-group textarea { min-height: 42px; resize: vertical; }
@@ -76,10 +88,11 @@
     background: rgba(255,255,255,.96); border: 1px solid #eadfce; border-radius: 12px;
     padding: 14px 16px; box-shadow: 0 10px 28px rgba(0,0,0,.12);
 }
-.confirm-bar input { width: 100%; border: 1px solid #d9c8b5; border-radius: 7px; padding: 10px 11px; }
+.confirm-bar input { display: block; width: 100%; max-width: 100%; min-width: 0; border: 1px solid #d9c8b5; border-radius: 7px; padding: 10px 11px; }
 .confirm-help { color: #76685d; font-size: .8rem; line-height: 1.6; margin: 5px 0 0; }
 .field-error { display: block; color: #be123c; white-space: pre-line; margin-top: 5px; font-size: .82rem; }
 @media (max-width: 860px) {
+    .import-page { margin: 32px auto 56px; padding: 0 14px; }
     .import-hero { display: block; padding: 16px; }
     .import-actions { margin-top: 12px; }
     .import-summary { grid-template-columns: 1fr; }
