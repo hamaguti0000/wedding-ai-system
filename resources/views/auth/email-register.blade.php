@@ -51,7 +51,11 @@
         </div>
         @endif
 
-        @if ($user->isEmailUnverified())
+        @if ($user->hasVerifiedEmail())
+        <div class="alert alert-info">
+            <strong>{{ $user->email }}</strong> の認証は完了しています。次の画面へ進んでください。
+        </div>
+        @elseif ($user->isEmailUnverified())
         <div class="alert alert-info">
             <strong>{{ $user->email }}</strong> 宛に確認メールを送信しています。メール内のURLをクリックすると次に進めます。
             @if ($isWaitingForResend)
@@ -60,10 +64,17 @@
         </div>
         @endif
 
-        <p class="login-note">
-            パスワードを忘れた時の再設定に使います。入力後に届く確認メールのURLをクリックしてください。
-        </p>
+        @if ($user->hasVerifiedEmail())
+            <p class="login-note">
+                メール認証は完了しています。初回パスワード変更が必要な場合は、次にパスワード変更画面へ進みます。
+            </p>
+        @else
+            <p class="login-note">
+                パスワードを忘れた時の再設定に使います。入力後に届く確認メールのURLをクリックしてください。
+            </p>
+        @endif
 
+        @unless ($user->hasVerifiedEmail())
         <form method="POST" action="{{ route('email.register.update') }}" data-email-form>
             @csrf
             @method('PATCH')
@@ -86,6 +97,7 @@
                 @endif
             </p>
         </form>
+        @endunless
 
         @if ($user->hasVerifiedEmail())
         <div class="card-footer">
