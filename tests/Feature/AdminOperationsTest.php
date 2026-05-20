@@ -184,6 +184,18 @@ describe('ユーザー管理', function () {
             ->assertSessionHasErrors('guest_csv');
     });
 
+    it('CSV登録URLにGETでアクセスしてもユーザー管理へ戻る', function () {
+        $admin = makeAdmin();
+
+        $this->actingAs($admin)
+            ->get('/admin/users/import/preview')
+            ->assertRedirect(route('admin.users'));
+
+        $this->actingAs($admin)
+            ->get('/admin/users/import')
+            ->assertRedirect(route('admin.users'));
+    });
+
     it('admin はユーザーを一括削除できる', function () {
         $admin = makeAdmin();
         $guestA = makeGuest('pending');

@@ -320,7 +320,7 @@
                             <i class="fa-solid fa-pen-to-square"></i> 編集
                         </a>
                         &nbsp;
-                        <button class="btn-sm btn-sm-pw"
+                        <button type="button" class="btn-sm btn-sm-pw"
                             onclick="togglePw({{ $user->id }})">
                             <i class="fa-solid fa-key"></i> PW
                         </button>

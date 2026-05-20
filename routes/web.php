@@ -187,16 +187,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // ユーザー管理
     Route::get('/users',             [AdminUserController::class, 'index'])        ->name('users');
-    Route::get('/users/{id}',        [AdminUserController::class, 'show'])         ->name('users.show');
-    Route::get('/users/{id}/qr',     [AdminUserController::class, 'qr'])           ->name('users.qr');
     Route::post('/users',            [AdminUserController::class, 'store'])        ->name('users.store');
+    Route::get('/users/import/preview', fn () => redirect()->route('admin.users'));
     Route::post('/users/import/preview', [AdminUserController::class, 'previewImport'])->name('users.import.preview');
+    Route::get('/users/import', fn () => redirect()->route('admin.users'));
     Route::post('/users/import',     [AdminUserController::class, 'import'])       ->name('users.import');
-    Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->name('users.edit');
-    Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->name('users.update');
-    Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->name('users.password');
     Route::delete('/users',          [AdminUserController::class, 'bulkDestroy'])  ->name('users.bulk-destroy');
-    Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->name('users.destroy');
+    Route::get('/users/{id}',        [AdminUserController::class, 'show'])         ->whereNumber('id')->name('users.show');
+    Route::get('/users/{id}/qr',     [AdminUserController::class, 'qr'])           ->whereNumber('id')->name('users.qr');
+    Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->whereNumber('id')->name('users.edit');
+    Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->whereNumber('id')->name('users.update');
+    Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->whereNumber('id')->name('users.password');
+    Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->whereNumber('id')->name('users.destroy');
 
     // 受付チェックイン
     Route::get('/check-in',                    [AdminCheckInController::class, 'index']) ->name('checkin.index');
