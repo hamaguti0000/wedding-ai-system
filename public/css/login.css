@@ -39,7 +39,7 @@ body {
 .login-card {
     position: relative;
     z-index: 10;
-    width: 420px;
+    width: 460px;
     max-width: calc(100vw - 32px);
     background: rgba(255, 252, 247, 0.94);
     backdrop-filter: blur(16px);
@@ -84,6 +84,62 @@ body {
     white-space: nowrap;
     font-family: 'Noto Sans JP', sans-serif;
     font-weight: 400;
+}
+
+/* ── 初回設定ステップ ───────────────────── */
+.setup-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: -14px 0 26px;
+}
+.setup-step {
+    min-width: 0;
+    padding: 10px 8px;
+    border: 1px solid #eadcc9;
+    border-radius: 3px;
+    background: rgba(255, 253, 249, 0.74);
+    color: #9b8573;
+    text-align: center;
+}
+.setup-step__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-bottom: 6px;
+    border-radius: 999px;
+    background: #f5eadc;
+    color: #9b7446;
+    font-size: 0.72rem;
+    line-height: 1;
+}
+.setup-step__label {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+.setup-step.is-current {
+    border-color: #b38b59;
+    background: #fff8ee;
+    color: #5e4632;
+}
+.setup-step.is-current .setup-step__number {
+    background: #b38b59;
+    color: #fff;
+}
+.setup-step.is-done:not(.is-current) {
+    border-color: #d8c19f;
+    color: #735f4e;
+}
+.setup-step.is-done:not(.is-current) .setup-step__number {
+    background: #3d2f25;
+    color: #fff;
+}
+.verify-card .setup-steps {
+    margin: 0 0 22px;
 }
 
 /* ── フォームタイトル ─────────────────────── */
@@ -196,6 +252,14 @@ body {
 
 /* ── レスポンシブ ─────────────────────────── */
 @media (max-width: 480px) {
-    .login-card { padding: 36px 20px 32px; }
+    body { align-items: flex-start; padding: 16px 0; }
+    .login-card { padding: 34px 18px 30px; max-width: calc(100vw - 24px); }
     .monogram   { font-size: 2.1rem; }
+    .ornament { margin-bottom: 28px; }
+    .ornament span { letter-spacing: 2.2px; }
+    .setup-steps { gap: 5px; margin-bottom: 22px; }
+    .setup-step { padding: 8px 4px; }
+    .setup-step__number { width: 20px; height: 20px; margin-bottom: 5px; }
+    .setup-step__label { font-size: 0.68rem; }
+    .btn-submit { letter-spacing: 1.6px; }
 }

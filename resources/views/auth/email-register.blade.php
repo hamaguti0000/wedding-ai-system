@@ -28,6 +28,10 @@
     <div class="login-card">
         <div class="monogram">K &amp; M</div>
         <div class="ornament"><span>Email Registration</span></div>
+        @include('auth.partials.onboarding-steps', [
+            'current' => $user->hasVerifiedEmail() ? 'password' : ($user->email ? 'verify' : 'email'),
+            'emailDone' => $user->hasVerifiedEmail(),
+        ])
 
         @if ($errors->any())
         <div class="alert alert-error">{{ $errors->first() }}</div>
@@ -49,7 +53,7 @@
 
         @if ($user->isEmailUnverified())
         <div class="alert alert-info">
-            <strong>{{ $user->email }}</strong> は未確認です。確認メールのURLをクリックすると次に進めます。
+            <strong>{{ $user->email }}</strong> 宛に確認メールを送信しています。メール内のURLをクリックすると次に進めます。
             @if ($isWaitingForResend)
                 再送は約{{ $waitingMinutes }}分後にできます。
             @endif
@@ -57,7 +61,7 @@
         @endif
 
         <p class="login-note">
-            パスワードを忘れた時の再設定に使います。ここでメールアドレスを登録し、届いた確認メールのURLをクリックしてください。
+            パスワードを忘れた時の再設定に使います。入力後に届く確認メールのURLをクリックしてください。
         </p>
 
         <form method="POST" action="{{ route('email.register.update') }}" data-email-form>

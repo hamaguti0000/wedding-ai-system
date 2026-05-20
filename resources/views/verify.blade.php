@@ -58,6 +58,11 @@
         <div class="verify-icon">✦</div>
         <div class="verify-rule"></div>
         <h1 class="verify-title">確認が完了しました</h1>
+        @include('auth.partials.onboarding-steps', [
+          'current' => 'password',
+          'emailDone' => true,
+          'passwordDone' => ! $verifiedUser?->password_change_required,
+        ])
         <p class="verify-msg">
           メールアドレスの確認が完了しました。<br>
           @if ($verifiedUser?->password_change_required)

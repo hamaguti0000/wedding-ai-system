@@ -16,6 +16,10 @@
     <div class="login-card">
         <div class="monogram">K &amp; M</div>
         <div class="ornament"><span>Password</span></div>
+        @include('auth.partials.onboarding-steps', [
+            'current' => 'password',
+            'emailDone' => true,
+        ])
 
         @if ($errors->any())
         <div class="alert alert-error">{{ $errors->first() }}</div>
@@ -26,7 +30,7 @@
         @endif
 
         <p class="login-note">
-            初期パスワードのまま利用を続けないよう、新しいパスワードを設定してください。
+            メール認証は完了しています。最後に、ご自身だけが分かる新しいパスワードを設定してください。
         </p>
 
         <form method="POST" action="{{ route('password.change.update') }}">
@@ -48,7 +52,7 @@
                 <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="もう一度入力">
             </div>
 
-            <button type="submit" class="btn-submit">変更して進む</button>
+            <button type="submit" class="btn-submit">パスワードを変更して進む</button>
         </form>
 
         <div class="card-footer">
