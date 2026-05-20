@@ -35,7 +35,7 @@
         <div class="alert alert-info">{{ __(session('status')) }}</div>
         @endif
 
-        <form method="POST" action="{{ route('login.post') }}">
+        <form method="POST" action="{{ route('login.post') }}" data-login-form>
             @csrf
 
             <div class="form-group">
@@ -53,7 +53,7 @@
                     required autocomplete="current-password">
             </div>
 
-            <button type="submit" class="btn-submit">ログイン</button>
+            <button type="submit" class="btn-submit" data-login-button>ログイン</button>
         </form>
 
         <div class="card-footer">
@@ -62,6 +62,40 @@
         </div>
 
     </div>
+
+    <script>
+        (() => {
+            const form = document.querySelector('[data-login-form]');
+            const button = document.querySelector('[data-login-button]');
+            const token = form?.querySelector('input[name="_token"]');
+
+            if (!form || !button || !token) return;
+
+            let refreshed = false;
+
+            form.addEventListener('submit', async (event) => {
+                if (refreshed) return;
+
+                event.preventDefault();
+                button.disabled = true;
+                button.textContent = 'ログイン中...';
+
+                try {
+                    const response = await fetch('{{ route('csrf.refresh') }}', {
+                        headers: { 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                    });
+                    const data = await response.json();
+                    if (data.token) token.value = data.token;
+                } catch (error) {
+                    // トークン更新に失敗しても通常のログイン送信は試みる。
+                }
+
+                refreshed = true;
+                form.requestSubmit();
+            });
+        })();
+    </script>
 
 </body>
 </html>

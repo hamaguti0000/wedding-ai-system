@@ -19,6 +19,26 @@
 .role-toggle input:checked + label { background: #b38b59; color: #fff; }
 
 .guest-fields.hidden { opacity: 0.35; pointer-events: none; }
+.form-group label.check-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 0.84rem;
+    color: #7f6a57;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    cursor: pointer;
+}
+.check-field input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
+    accent-color: #b38b59;
+    -webkit-appearance: auto;
+    appearance: auto;
+}
 
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 .btn-save { flex: 1; }
@@ -83,13 +103,14 @@
             </div>
             <div class="form-group" style="margin-bottom:14px;">
                 <label>メールアドレス</label>
-                <input type="email" name="email"
+                <input type="email" name="email" data-email-input
                     value="{{ old('email', $user->email) }}"
                     autocomplete="email"
                     placeholder="guest@example.com">
                 @error('email')<span class="field-error">{{ $message }}</span>@enderror
-                <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.84rem;color:#7f6a57;font-weight:500;letter-spacing:0;text-transform:none;">
-                    <input type="checkbox" name="delete_email" value="1" style="width:auto;">
+                <label class="check-field">
+                    <input type="checkbox" name="delete_email" value="1" data-delete-email-checkbox
+                        {{ old('delete_email') ? 'checked' : '' }}>
                     メールアドレスを削除する
                 </label>
                 <p style="margin:8px 0 0;color:#9b8573;font-size:0.8rem;line-height:1.6;">
@@ -321,6 +342,25 @@ document.querySelectorAll('input[name="role"]').forEach(r => {
 (function() {
     const checked = document.querySelector('input[name="role"]:checked');
     toggleGuestFields(!checked || checked.value === 'guest');
+
+    const deleteEmail = document.querySelector('[data-delete-email-checkbox]');
+    const emailInput = document.querySelector('[data-email-input]');
+
+    function toggleEmailInput() {
+        if (!deleteEmail || !emailInput) return;
+        emailInput.disabled = deleteEmail.checked;
+        if (deleteEmail.checked) {
+            emailInput.dataset.previousValue = emailInput.value;
+            emailInput.value = '';
+            emailInput.placeholder = '保存するとメールアドレスを削除します';
+        } else {
+            emailInput.value = emailInput.dataset.previousValue || emailInput.value;
+            emailInput.placeholder = 'guest@example.com';
+        }
+    }
+
+    deleteEmail?.addEventListener('change', toggleEmailInput);
+    toggleEmailInput();
 })();
 </script>
 @endsection
