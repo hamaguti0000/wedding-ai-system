@@ -29,6 +29,9 @@
 .pw-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 0; }
 .pw-form input { padding: 7px 10px; border: 1px solid #e0d0bc; border-radius: 5px; font-size: 0.85rem; width: 160px; min-width: 100px; }
 .pw-form input:focus { border-color: #b38b59; outline: none; }
+.csv-help { margin: 8px 0 0; color: #7b6a5c; font-size: 0.82rem; line-height: 1.7; }
+.csv-help code { background: #f7efe5; border-radius: 4px; padding: 2px 5px; font-size: 0.78rem; }
+.field-error { white-space: pre-line; }
 
 @media (max-width: 767px) {
     .card { padding: 16px; }
@@ -57,6 +60,37 @@
     @if (session('error'))
     <div class="alert alert-error">{{ session('error') }}</div>
     @endif
+
+    {{-- ── CSV一括登録 ── --}}
+    <div class="card">
+        <p class="card-title">ゲストCSV一括登録</p>
+
+        <form method="POST" action="{{ route('admin.users.import.preview') }}" enctype="multipart/form-data">
+            @csrf
+
+            <div class="fg fg-2" style="margin-bottom:16px;">
+                <div class="form-group">
+                    <label>CSVファイル <span class="req">*</span></label>
+                    <input type="file" name="guest_csv" accept=".csv,text/csv,text/plain">
+                    @error('guest_csv')<span class="field-error">{{ $message }}</span>@enderror
+                    <p class="csv-help">
+                        必須列: <code>ユーザー名</code>。任意列: <code>姓</code> <code>名</code> <code>関係</code> <code>肩書き1</code> <code>肩書き2</code> <code>お言葉</code><br>
+                        ユーザー名は半角英数字、<code>.</code> <code>-</code> <code>_</code> のみ使えます。タブ区切りCSVも読み込めます。
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label>登録前確認</label>
+                    <p class="csv-help" style="margin-top:0;">
+                        読み込み後に一覧画面で内容を確認・編集できます。ユーザー名の重複や必須不足も登録前に一覧表示します。
+                    </p>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="fa-solid fa-file-import"></i> CSVを読み込む
+            </button>
+        </form>
+    </div>
 
     {{-- ── 新規登録フォーム ── --}}
     <div class="card">

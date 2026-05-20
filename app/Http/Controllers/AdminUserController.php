@@ -9,8 +9,10 @@ use App\Models\GuestTaskAssignment;
 use App\Models\User;
 use App\Models\WeddingTask;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
@@ -146,6 +148,110 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.users')
             ->with('success', "「{$request->username}」を登録しました");
+    }
+
+    public function previewImport(Request $request)
+    {
+        $request->validate([
+            'guest_csv' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ], [
+            'guest_csv.required' => 'CSVファイルを選択してください',
+            'guest_csv.mimes' => 'CSVまたはテキストファイルを選択してください',
+            'guest_csv.max' => 'CSVファイルは2MB以下にしてください',
+        ]);
+
+        $rows = $this->readGuestCsv($request->file('guest_csv')->getRealPath());
+        if (count($rows) === 0) {
+            throw ValidationException::withMessages([
+                'guest_csv' => '登録できる行がありません',
+            ]);
+        }
+
+        return view('admin.users-import-preview', [
+            'rows' => $this->buildImportPreviewRows($rows),
+        ]);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'rows' => ['required', 'array', 'min:1'],
+            'initial_password' => ['required', 'string', 'min:8', 'max:255'],
+        ], [
+            'rows.required' => '登録するゲストがありません',
+            'initial_password.required' => '初期パスワードを入力してください',
+            'initial_password.min' => '初期パスワードは8文字以上にしてください',
+        ]);
+
+        $rows = $this->normalizeImportRows($request->input('rows', []));
+        $previewRows = $this->buildImportPreviewRows($rows);
+        $hasErrors = collect($previewRows)->contains(fn ($row) => count($row['errors']) > 0);
+
+        if ($hasErrors) {
+            return view('admin.users-import-preview', [
+                'rows' => $previewRows,
+            ])->withErrors([
+                'rows' => 'エラーのある行があります。ユーザー名の重複や空欄を修正してから登録してください。',
+            ]);
+        }
+
+        $created = DB::transaction(function () use ($previewRows, $request) {
+            $count = 0;
+
+            foreach ($previewRows as $row) {
+                $username = $this->cleanCsvValue($row['username'] ?? '');
+                $lastName = $this->cleanCsvValue($row['last_name'] ?? '');
+                $firstName = $this->cleanCsvValue($row['first_name'] ?? '');
+                $fullName = trim($lastName . ' ' . $firstName);
+                $relationshipDetail = $this->cleanCsvValue($row['relationship_detail'] ?? '');
+                $notes = $this->cleanCsvValue($row['notes'] ?? '');
+
+                $user = User::create([
+                    'name' => $fullName ?: $username,
+                    'username' => $username,
+                    'email' => null,
+                    'password' => Hash::make($request->initial_password),
+                    'role' => 'guest',
+                    'password_change_required' => true,
+                    'password_changed_at' => null,
+                    'avatar_type' => User::AVATAR_INITIAL,
+                    'avatar_image_path' => null,
+                    'avatar_bg_color' => null,
+                    'avatar_border_color' => '#f0e4d0',
+                    'avatar_border_width' => 3,
+                ]);
+
+                $profile = GuestProfile::create([
+                    'user_id' => $user->id,
+                    'last_name' => $lastName ?: null,
+                    'first_name' => $firstName ?: null,
+                    'guest_side' => $this->guestSideFromCsv($row),
+                    'relationship' => $this->relationshipFromCsv($row),
+                    'relationship_detail' => $relationshipDetail ?: null,
+                    'participation' => 'pending',
+                    'notes' => $notes ?: null,
+                    'checkin_token' => (string) Str::uuid(),
+                ]);
+
+                $profile->ensureCheckInToken();
+
+                CheckInAuditLog::record(
+                    $profile,
+                    auth()->user(),
+                    'user_create',
+                    'admin',
+                    'CSV一括登録でゲストを作成しました',
+                    ['user_id' => $user->id]
+                );
+
+                $count++;
+            }
+
+            return $count;
+        });
+
+        return redirect()->route('admin.users')
+            ->with('success', "{$created}名のゲストをCSVから登録しました");
     }
 
     public function edit(int $id)
@@ -506,5 +612,273 @@ class AdminUserController extends Controller
             'avatar_border_color' => $request->input('avatar_border_color', '#f0e4d0'),
             'avatar_border_width' => (int) $request->input('avatar_border_width', 3),
         ];
+    }
+
+    private function normalizeImportRows(array $rows): array
+    {
+        return array_values(array_map(function ($row) {
+            $title1 = $this->cleanCsvValue($row['title1'] ?? '');
+            $title2 = $this->cleanCsvValue($row['title2'] ?? '');
+
+            return [
+                'username' => $this->cleanCsvValue($row['username'] ?? ''),
+                'last_name' => $this->cleanCsvValue($row['last_name'] ?? ''),
+                'first_name' => $this->cleanCsvValue($row['first_name'] ?? ''),
+                'relationship_text' => $this->cleanCsvValue($row['relationship_text'] ?? ''),
+                'title1' => $title1,
+                'title2' => $title2,
+                'relationship_detail' => trim(implode(' ', array_filter([$title1, $title2]))),
+                'notes' => $this->cleanCsvValue($row['notes'] ?? ''),
+                'source_errors' => $row['source_errors'] ?? [],
+            ];
+        }, $rows));
+    }
+
+    private function buildImportPreviewRows(array $rows): array
+    {
+        $rows = $this->normalizeImportRows($rows);
+        $usernameCounts = [];
+
+        foreach ($rows as $row) {
+            if ($row['username'] !== '') {
+                $usernameCounts[$row['username']] = ($usernameCounts[$row['username']] ?? 0) + 1;
+            }
+        }
+
+        $existingUsernames = User::whereIn('username', array_keys($usernameCounts))
+            ->pluck('username')
+            ->flip();
+
+        return array_map(function ($row, $index) use ($usernameCounts, $existingUsernames) {
+            $errors = $row['source_errors'] ?? [];
+
+            if ($row['username'] === '') {
+                $errors[] = 'ユーザー名が空です';
+            } elseif (mb_strlen($row['username']) > 50) {
+                $errors[] = 'ユーザー名は50文字以内にしてください';
+            } else {
+                if (! preg_match('/\A[A-Za-z0-9._-]+\z/', $row['username'])) {
+                    $errors[] = 'ユーザー名は半角英数字、ドット、ハイフン、アンダーバーのみ使えます';
+                }
+
+                if (($usernameCounts[$row['username']] ?? 0) > 1) {
+                    $errors[] = 'CSV内でユーザー名が重複しています';
+                }
+
+                if ($existingUsernames->has($row['username'])) {
+                    $errors[] = '既に登録済みのユーザー名です';
+                }
+            }
+
+            foreach ([
+                'last_name' => ['label' => '姓', 'max' => 50],
+                'first_name' => ['label' => '名', 'max' => 50],
+                'relationship_text' => ['label' => '関係', 'max' => 100],
+                'title1' => ['label' => '肩書き1', 'max' => 100],
+                'title2' => ['label' => '肩書き2', 'max' => 100],
+                'relationship_detail' => ['label' => '肩書き', 'max' => 100],
+                'notes' => ['label' => 'お言葉', 'max' => 1000],
+            ] as $key => $rule) {
+                if (mb_strlen($row[$key] ?? '') > $rule['max']) {
+                    $errors[] = "{$rule['label']}は{$rule['max']}文字以内にしてください";
+                }
+            }
+
+            if ($row['last_name'] === '' && $row['first_name'] === '') {
+                $errors[] = '姓または名を入力してください';
+            }
+
+            foreach (['last_name' => '姓', 'first_name' => '名'] as $key => $label) {
+                if (str_contains($row[$key] ?? '', '？') || str_contains($row[$key] ?? '', '?')) {
+                    $errors[] = "{$label}に未確認文字「？」が含まれています";
+                }
+            }
+
+            return [
+                ...$row,
+                'line' => $index + 2,
+                'guest_side' => $this->guestSideFromCsv($row),
+                'relationship' => $this->relationshipFromCsv($row),
+                'errors' => $errors,
+            ];
+        }, $rows, array_keys($rows));
+    }
+
+    private function readGuestCsv(string $path): array
+    {
+        $content = file_get_contents($path);
+        if ($content === false) {
+            throw ValidationException::withMessages([
+                'guest_csv' => 'CSVファイルを読み込めませんでした',
+            ]);
+        }
+
+        if (! mb_check_encoding($content, 'UTF-8')) {
+            $content = mb_convert_encoding($content, 'UTF-8', 'SJIS-win,CP932,EUC-JP,UTF-8');
+        }
+
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content) ?? $content;
+        $lines = preg_split('/\r\n|\r|\n/', trim($content));
+        if (! $lines || trim($lines[0] ?? '') === '') {
+            return [];
+        }
+
+        $delimiter = substr_count($lines[0], "\t") > substr_count($lines[0], ',') ? "\t" : ',';
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, $content);
+        rewind($handle);
+
+        $headers = fgetcsv($handle, 0, $delimiter);
+        if (! is_array($headers)) {
+            fclose($handle);
+            return [];
+        }
+
+        $headers = $this->normalizeCsvHeaders($headers);
+        $this->validateCsvHeaders($headers);
+        $rows = [];
+        $line = 1;
+
+        while (($values = fgetcsv($handle, 0, $delimiter)) !== false) {
+            $line++;
+            if (count(array_filter($values, fn ($value) => trim((string) $value) !== '')) === 0) {
+                continue;
+            }
+
+            $sourceErrors = [];
+            if (count($values) < count($headers)) {
+                $sourceErrors[] = "{$line}行目: CSVの列数がヘッダーより少ないです";
+            }
+
+            if (count($values) > count($headers)) {
+                $extraValues = array_slice($values, count($headers));
+                if (count(array_filter($extraValues, fn ($value) => trim((string) $value) !== '')) > 0) {
+                    $sourceErrors[] = "{$line}行目: CSVの列数がヘッダーより多いです。カンマを含む値はダブルクォートで囲んでください";
+                }
+            }
+
+            $raw = [];
+            foreach ($headers as $index => $key) {
+                if ($key === '') {
+                    continue;
+                }
+                $raw[$key] = $values[$index] ?? null;
+            }
+
+            $rows[] = [
+                'username' => $this->firstCsvValue($raw, ['username', 'user_name', 'ユーザー名', 'ユーザーネーム', 'ログインid', 'ログインID', 'id', 'ID']),
+                'last_name' => $this->firstCsvValue($raw, ['姓', '名字', '苗字', 'last_name']),
+                'first_name' => $this->firstCsvValue($raw, ['名', '名前', 'first_name']),
+                'relationship_text' => $this->firstCsvValue($raw, ['関係', 'ご関係', 'relationship']),
+                'title1' => $this->firstCsvValue($raw, ['肩書き1', '肩書1', '肩書き', 'title1']),
+                'title2' => $this->firstCsvValue($raw, ['肩書き2', '肩書2', '補足', 'title2']),
+                'relationship_detail' => trim(implode(' ', array_filter([
+                    $this->firstCsvValue($raw, ['肩書き1', '肩書1', '肩書き', 'title1']),
+                    $this->firstCsvValue($raw, ['肩書き2', '肩書2', '補足', 'title2']),
+                ], fn ($value) => filled($value)))),
+                'notes' => $this->firstCsvValue($raw, ['お言葉', 'メッセージ', 'notes']),
+                'source_errors' => $sourceErrors,
+            ];
+        }
+
+        fclose($handle);
+
+        return $rows;
+    }
+
+    private function normalizeCsvHeaders(array $headers): array
+    {
+        return array_map(function ($header) {
+            return trim(preg_replace('/^\xEF\xBB\xBF/', '', (string) $header));
+        }, $headers);
+    }
+
+    private function validateCsvHeaders(array $headers): void
+    {
+        $filledHeaders = array_values(array_filter($headers, fn ($header) => $header !== ''));
+        if (count($filledHeaders) === 0) {
+            throw ValidationException::withMessages([
+                'guest_csv' => 'CSVのヘッダー行が空です',
+            ]);
+        }
+
+        $duplicates = collect($filledHeaders)
+            ->countBy()
+            ->filter(fn ($count) => $count > 1)
+            ->keys()
+            ->all();
+
+        if ($duplicates) {
+            throw ValidationException::withMessages([
+                'guest_csv' => '同じ列名が複数あります: ' . implode(', ', $duplicates),
+            ]);
+        }
+
+        $hasUsernameHeader = collect($headers)->contains(function ($header) {
+            return in_array($header, ['username', 'user_name', 'ユーザー名', 'ユーザーネーム', 'ログインid', 'ログインID', 'id', 'ID'], true);
+        });
+
+        if (! $hasUsernameHeader) {
+            throw ValidationException::withMessages([
+                'guest_csv' => 'ユーザー名列がありません。ヘッダーに「ユーザー名」または「username」を追加してください',
+            ]);
+        }
+    }
+
+    private function firstCsvValue(array $row, array $keys): ?string
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $row)) {
+                return $row[$key];
+            }
+        }
+
+        return null;
+    }
+
+    private function cleanCsvValue(?string $value): string
+    {
+        return trim((string) $value);
+    }
+
+    private function guestSideFromCsv(array $row): ?string
+    {
+        $text = implode(' ', [
+            $row['title1'] ?? '',
+            $row['title2'] ?? '',
+        ]);
+
+        if (str_contains($text, '新郎')) {
+            return 'groom';
+        }
+
+        if (str_contains($text, '新婦')) {
+            return 'bride';
+        }
+
+        return null;
+    }
+
+    private function relationshipFromCsv(array $row): ?string
+    {
+        $text = implode(' ', [
+            $row['relationship_text'] ?? '',
+            $row['title1'] ?? '',
+            $row['title2'] ?? '',
+        ]);
+
+        if (str_contains($text, '親族') || str_contains($text, '家族') || str_contains($text, '父') || str_contains($text, '母') || str_contains($text, '祖') || str_contains($text, '兄') || str_contains($text, '姉') || str_contains($text, '弟') || str_contains($text, '妹') || str_contains($text, '伯') || str_contains($text, '叔') || str_contains($text, '従')) {
+            return 'family';
+        }
+
+        if (str_contains($text, '職場') || str_contains($text, '会社') || str_contains($text, '同僚') || str_contains($text, '上司')) {
+            return 'colleague';
+        }
+
+        if (str_contains($text, '友人') || str_contains($text, '知人')) {
+            return 'friend';
+        }
+
+        return $text === '' ? null : 'other';
     }
 }

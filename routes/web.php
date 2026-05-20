@@ -190,6 +190,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/{id}',        [AdminUserController::class, 'show'])         ->name('users.show');
     Route::get('/users/{id}/qr',     [AdminUserController::class, 'qr'])           ->name('users.qr');
     Route::post('/users',            [AdminUserController::class, 'store'])        ->name('users.store');
+    Route::post('/users/import/preview', [AdminUserController::class, 'previewImport'])->name('users.import.preview');
+    Route::post('/users/import',     [AdminUserController::class, 'import'])       ->name('users.import');
     Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->name('users.edit');
     Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->name('users.update');
     Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->name('users.password');

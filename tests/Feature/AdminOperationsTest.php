@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GuestProfile;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 
@@ -60,6 +61,127 @@ describe('ゲスト詳細画面', function () {
             ->get(route('admin.audit.checkin'))
             ->assertStatus(200)
             ->assertSee('操作ログ');
+    });
+});
+
+describe('ユーザー管理', function () {
+
+    it('admin はCSVを確認してからゲストを一括登録できる', function () {
+        $csv = implode("\n", [
+            'No.,関係,姓,名,ユーザー名,敬称,肩書き1,肩書き2,お言葉',
+            '1,親族,濵口,達彦,hamaguchi_tatsuhiko,様,新郎父,,',
+            '2,親族,小山,りみ,koyama_rimi,様,新郎従姉妹,母側兄弟の長女,よろしくお願いします',
+        ]);
+
+        $file = UploadedFile::fake()->createWithContent('guests.csv', $csv);
+
+        $this->actingAs(makeAdmin())
+            ->post(route('admin.users.import.preview'), [
+                'guest_csv' => $file,
+            ])
+            ->assertOk()
+            ->assertSee('CSV登録確認')
+            ->assertSee('hamaguchi_tatsuhiko')
+            ->assertSee('登録可');
+
+        $this->actingAs(makeAdmin())
+            ->post(route('admin.users.import'), [
+                'initial_password' => 'password123',
+                'rows' => [
+                    [
+                        'last_name' => '濵口',
+                        'first_name' => '達彦',
+                        'username' => 'hamaguchi_tatsuhiko',
+                        'relationship_text' => '親族',
+                        'title1' => '新郎父',
+                        'title2' => '',
+                        'notes' => '',
+                    ],
+                    [
+                        'last_name' => '小山',
+                        'first_name' => 'りみ',
+                        'username' => 'koyama_rimi_fixed',
+                        'relationship_text' => '親族',
+                        'title1' => '新郎従姉妹',
+                        'title2' => '母側兄弟の長女',
+                        'notes' => 'よろしくお願いします',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('admin.users'));
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'hamaguchi_tatsuhiko',
+            'role' => 'guest',
+            'password_change_required' => true,
+        ]);
+        $this->assertDatabaseHas('guest_profiles', [
+            'last_name' => '濵口',
+            'first_name' => '達彦',
+            'guest_side' => 'groom',
+            'relationship' => 'family',
+            'relationship_detail' => '新郎父',
+        ]);
+        $this->assertDatabaseHas('guest_profiles', [
+            'last_name' => '小山',
+            'first_name' => 'りみ',
+            'notes' => 'よろしくお願いします',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'username' => 'koyama_rimi_fixed',
+        ]);
+    });
+
+    it('CSV内の登録済みユーザー名と重複を一覧で見られる', function () {
+        User::factory()->create(['username' => 'existing_guest']);
+
+        $file = UploadedFile::fake()->createWithContent(
+            'guests.csv',
+            "姓,名,ユーザー名\n山田,太郎,existing_guest\n田中,花子,duplicate_guest\n佐藤,一郎,duplicate_guest"
+        );
+
+        $this->actingAs(makeAdmin())
+            ->post(route('admin.users.import.preview'), [
+                'guest_csv' => $file,
+            ])
+            ->assertOk()
+            ->assertSee('既に登録済みのユーザー名です')
+            ->assertSee('CSV内でユーザー名が重複しています')
+            ->assertSee('要修正');
+
+        expect(User::where('username', 'existing_guest')->count())->toBe(1);
+    });
+
+    it('CSVのデータエラーを登録前に一覧で見られる', function () {
+        $file = UploadedFile::fake()->createWithContent(
+            'guests.csv',
+            "姓,名,ユーザー名\n小山,？,bad user\n山田,太郎,valid_user,余分な列"
+        );
+
+        $this->actingAs(makeAdmin())
+            ->post(route('admin.users.import.preview'), [
+                'guest_csv' => $file,
+            ])
+            ->assertOk()
+            ->assertSee('ユーザー名は半角英数字')
+            ->assertSee('名に未確認文字')
+            ->assertSee('CSVの列数がヘッダーより多いです')
+            ->assertSee('要修正');
+    });
+
+    it('CSVにユーザー名ヘッダーがない場合はエラーにする', function () {
+        $file = UploadedFile::fake()->createWithContent(
+            'guests.csv',
+            "姓,名\n山田,太郎"
+        );
+
+        $this->actingAs(makeAdmin())
+            ->from(route('admin.users'))
+            ->post(route('admin.users.import.preview'), [
+                'guest_csv' => $file,
+            ])
+            ->assertRedirect(route('admin.users'))
+            ->assertSessionHasErrors('guest_csv');
     });
 });
 

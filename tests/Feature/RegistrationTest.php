@@ -148,7 +148,7 @@ it('8文字ちょうどのパスワードは許可される', function () {
         'password_confirmation' => 'Secure01',
     ]);
 
-    $res->assertRedirect(route('dashboard'));
+    $res->assertRedirect(route('email.register'));
 });
 
 it('パスワードが255文字を超えると拒否される', function () {
@@ -306,5 +306,5 @@ it('POST /register は認証不要でアクセスできる', function () {
         'password_confirmation' => 'SecurePass1',
     ]);
 
-    $res->assertRedirect(route('dashboard'));
+    $res->assertRedirect(route('email.register'));
 });

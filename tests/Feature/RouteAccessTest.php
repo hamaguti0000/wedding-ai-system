@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GuestProfile;
+use App\Models\EmailAuditLog;
 use App\Models\User;
 
 // ─── 未認証アクセス ───────────────────────────────────────
@@ -84,6 +85,26 @@ describe('admin ログイン', function () {
         $this->actingAs(makeAdmin())
             ->get(route('admin.audit.checkin'))
             ->assertStatus(200);
+    });
+
+    it('/admin/audit/email は 200', function () {
+        $admin = makeAdmin();
+        $guest = makeGuest();
+
+        EmailAuditLog::record(
+            $guest,
+            $admin,
+            'admin_set',
+            null,
+            'guest@example.com',
+            '管理者がメールアドレスを登録しました',
+        );
+
+        $this->actingAs($admin)
+            ->get(route('admin.audit.email'))
+            ->assertStatus(200)
+            ->assertSee('メール操作ログ')
+            ->assertSee('guest@example.com');
     });
 
     it('/seating → /admin/seating にリダイレクト', function () {
