@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
@@ -174,7 +175,7 @@ class AdminUserController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'rows' => ['required', 'array', 'min:1'],
             'initial_password' => ['required', 'string', 'min:8', 'max:255'],
         ], [
@@ -182,6 +183,20 @@ class AdminUserController extends Controller
             'initial_password.required' => '初期パスワードを入力してください',
             'initial_password.min' => '初期パスワードは8文字以上にしてください',
         ]);
+
+        if ($validator->fails()) {
+            $rows = $this->normalizeImportRows($request->input('rows', []));
+
+            if (count($rows) === 0) {
+                return redirect()->route('admin.users')
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            return view('admin.users-import-preview', [
+                'rows' => $this->buildImportPreviewRows($rows),
+            ])->withErrors($validator);
+        }
 
         $rows = $this->normalizeImportRows($request->input('rows', []));
         $previewRows = $this->buildImportPreviewRows($rows);

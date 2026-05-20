@@ -152,6 +152,30 @@ describe('ユーザー管理', function () {
         expect(User::where('username', 'existing_guest')->count())->toBe(1);
     });
 
+    it('CSV本登録で初期パスワード未入力なら確認画面にエラーを表示する', function () {
+        $this->actingAs(makeAdmin())
+            ->post(route('admin.users.import'), [
+                'rows' => [
+                    [
+                        'last_name' => '濵口',
+                        'first_name' => '達彦',
+                        'username' => 'hamaguchi_tatsuhiko',
+                        'relationship_text' => '親族',
+                        'title1' => '新郎父',
+                        'title2' => '',
+                        'notes' => '',
+                    ],
+                ],
+            ])
+            ->assertOk()
+            ->assertSee('初期パスワードを入力してください')
+            ->assertSee('hamaguchi_tatsuhiko');
+
+        $this->assertDatabaseMissing('users', [
+            'username' => 'hamaguchi_tatsuhiko',
+        ]);
+    });
+
     it('CSVのデータエラーを登録前に一覧で見られる', function () {
         $file = UploadedFile::fake()->createWithContent(
             'guests.csv',
