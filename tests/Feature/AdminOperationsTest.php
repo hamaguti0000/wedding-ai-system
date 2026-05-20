@@ -183,6 +183,36 @@ describe('ユーザー管理', function () {
             ->assertRedirect(route('admin.users'))
             ->assertSessionHasErrors('guest_csv');
     });
+
+    it('admin はユーザーを一括削除できる', function () {
+        $admin = makeAdmin();
+        $guestA = makeGuest('pending');
+        $guestB = makeGuest('pending');
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.bulk-destroy'), [
+                'user_ids' => [$guestA->id, $guestB->id],
+            ])
+            ->assertRedirect(route('admin.users'));
+
+        $this->assertDatabaseMissing('users', ['id' => $guestA->id]);
+        $this->assertDatabaseMissing('users', ['id' => $guestB->id]);
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    });
+
+    it('一括削除で自分自身は削除されない', function () {
+        $admin = makeAdmin();
+        $guest = makeGuest('pending');
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.bulk-destroy'), [
+                'user_ids' => [$admin->id, $guest->id],
+            ])
+            ->assertRedirect(route('admin.users'));
+
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+        $this->assertDatabaseMissing('users', ['id' => $guest->id]);
+    });
 });
 
 describe('受付チェックイン', function () {

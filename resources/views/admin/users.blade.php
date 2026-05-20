@@ -32,6 +32,21 @@
 .csv-help { margin: 8px 0 0; color: #7b6a5c; font-size: 0.82rem; line-height: 1.7; }
 .csv-help code { background: #f7efe5; border-radius: 4px; padding: 2px 5px; font-size: 0.78rem; }
 .field-error { white-space: pre-line; }
+.bulk-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; margin: 14px 16px 0; border: 1px solid #f0e4d4;
+    border-radius: 10px; background: #fffdf9;
+}
+.bulk-toolbar__left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: #7b6a5c; font-size: .86rem; }
+.bulk-toolbar__count { font-weight: 800; color: #4f4036; }
+.select-col { width: 42px; text-align: center; }
+.user-select { width: 17px; height: 17px; accent-color: #b38b59; }
+.btn-bulk-del {
+    display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 7px;
+    padding: 8px 11px; background: #be123c; color: #fff; font-weight: 800; font-size: .82rem;
+    cursor: pointer;
+}
+.btn-bulk-del:disabled { opacity: .45; cursor: not-allowed; }
 
 @media (max-width: 767px) {
     .card { padding: 16px; }
@@ -40,6 +55,7 @@
     .col-md-hide { display: none; }
     .users-wrap table { min-width: 360px; }
     .pw-form input { width: 120px; }
+    .bulk-toolbar { align-items: flex-start; flex-direction: column; margin: 12px 12px 0; }
 }
 @media (min-width: 768px) {
     .fg-2 { grid-template-columns: 1fr 1fr; }
@@ -208,10 +224,26 @@
         @if ($users->isEmpty())
         <div class="empty-state">まだユーザーが登録されていません</div>
         @else
+        <form method="POST" action="{{ route('admin.users.bulk-destroy') }}" id="bulkDeleteForm"
+              onsubmit="return confirmBulkDelete()" style="display:none;">
+            @csrf @method('DELETE')
+        </form>
+        <div class="bulk-toolbar">
+            <div class="bulk-toolbar__left">
+                <span class="bulk-toolbar__count"><span id="selectedUserCount">0</span>名選択中</span>
+                <span>削除したいユーザーにチェックを入れてください。自分自身は選択できません。</span>
+            </div>
+            <button type="submit" class="btn-bulk-del" id="bulkDeleteButton" form="bulkDeleteForm" disabled>
+                <i class="fa-solid fa-trash-can"></i> 選択したユーザーを削除
+            </button>
+        </div>
         <div class="table-scroll">
         <table>
             <thead>
                 <tr>
+                    <th class="select-col">
+                        <input type="checkbox" id="selectAllUsers" class="user-select" aria-label="全員を選択">
+                    </th>
                     <th>ユーザー名</th>
                     <th>氏名</th>
                     <th class="col-md-hide">メール</th>
@@ -227,6 +259,16 @@
                     $status = $p?->participation ?? 'pending';
                 @endphp
                 <tr>
+                    <td class="select-col">
+                        @if ($user->id !== auth()->id())
+                            <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
+                                   class="user-select user-row-select"
+                                   form="bulkDeleteForm"
+                                   aria-label="{{ $user->username }}を選択">
+                        @else
+                            <input type="checkbox" class="user-select" disabled aria-label="自分自身は選択不可">
+                        @endif
+                    </td>
                     <td><strong>{{ $user->username ?? '—' }}</strong></td>
                     <td>
                         @if ($p && ($p->last_name || $p->first_name))
@@ -297,7 +339,7 @@
                 </tr>
                 {{-- パスワード変更行 --}}
                 <tr class="pw-row" id="pw-row-{{ $user->id }}">
-                    <td colspan="6">
+                    <td colspan="7">
                         <form method="POST" action="{{ route('admin.users.password', $user->id) }}"
                               class="pw-form">
                             @csrf @method('PATCH')
@@ -330,6 +372,40 @@ function togglePw(id) {
         row.querySelector('input[name="password"]').focus();
     }
 }
+
+function updateBulkDeleteState() {
+    const selected = document.querySelectorAll('.user-row-select:checked').length;
+    const count = document.getElementById('selectedUserCount');
+    const button = document.getElementById('bulkDeleteButton');
+    const selectAll = document.getElementById('selectAllUsers');
+    const selectable = document.querySelectorAll('.user-row-select');
+
+    if (count) count.textContent = selected;
+    if (button) button.disabled = selected === 0;
+    if (selectAll) {
+        selectAll.checked = selectable.length > 0 && selected === selectable.length;
+        selectAll.indeterminate = selected > 0 && selected < selectable.length;
+    }
+}
+
+function confirmBulkDelete() {
+    const selected = document.querySelectorAll('.user-row-select:checked').length;
+    if (selected === 0) return false;
+    return confirm(selected + '名のユーザーを削除しますか？');
+}
+
+document.getElementById('selectAllUsers')?.addEventListener('change', e => {
+    document.querySelectorAll('.user-row-select').forEach(input => {
+        input.checked = e.target.checked;
+    });
+    updateBulkDeleteState();
+});
+
+document.querySelectorAll('.user-row-select').forEach(input => {
+    input.addEventListener('change', updateBulkDeleteState);
+});
+
+updateBulkDeleteState();
 
 // ロール切替でゲスト専用フィールドを表示/非表示
 document.querySelectorAll('input[name="role"]').forEach(radio => {

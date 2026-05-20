@@ -195,6 +195,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->name('users.edit');
     Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->name('users.update');
     Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->name('users.password');
+    Route::delete('/users',          [AdminUserController::class, 'bulkDestroy'])  ->name('users.bulk-destroy');
     Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->name('users.destroy');
 
     // 受付チェックイン

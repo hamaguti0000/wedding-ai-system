@@ -564,6 +564,49 @@ class AdminUserController extends Controller
             ->with('success', 'ユーザーを削除しました');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+        ], [
+            'user_ids.required' => '削除するユーザーを選択してください',
+        ]);
+
+        $ids = collect($request->input('user_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->reject(fn ($id) => $id === auth()->id())
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return redirect()->route('admin.users')
+                ->with('error', '削除できるユーザーが選択されていません');
+        }
+
+        $users = User::with('guestProfile')->whereIn('id', $ids)->get();
+
+        foreach ($users as $user) {
+            if ($user->guestProfile) {
+                CheckInAuditLog::record(
+                    $user->guestProfile,
+                    auth()->user(),
+                    'user_delete',
+                    'admin',
+                    '管理画面でユーザーを一括削除しました',
+                    [
+                        'user_id' => $user->id,
+                    ]
+                );
+            }
+        }
+
+        $deleted = User::whereIn('id', $users->pluck('id'))->delete();
+
+        return redirect()->route('admin.users')
+            ->with('success', "{$deleted}名のユーザーを削除しました");
+    }
+
     private function buildAvatarData(Request $request, ?User $currentUser = null): array
     {
         if ($currentUser && ! $request->has('avatar_type')) {
