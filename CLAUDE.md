@@ -9,7 +9,7 @@
 
 **結婚式招待サイト** — ゲストが招待状への出欠回答・アレルギー情報入力・ゲストブックへの書き込みなどをオンラインで行えるWebアプリ。新郎新婦側の管理者がすべてのコンテンツ・ゲスト情報を管理できる。
 
-- **ドメイン**: `https://k-m-wedding815.top`
+- **ドメイン**: `https://k-m-wedding815.com`
 - **本番サーバー**: ConoHa VPS (`133.117.74.212`) / root
 - **Gitリポジトリ**: `https://github.com/hamaguti0000/wedding-ai-system`
 
@@ -244,7 +244,7 @@ vendor/bin/sail artisan test --filter=RegistrationTest  # 登録のみ
 本番 `.env` に必要な主なキー（値は別管理）：
 
 ```
-APP_URL=https://k-m-wedding815.top
+APP_URL=https://k-m-wedding815.com
 APP_ENV=production
 APP_DEBUG=false
 
@@ -252,7 +252,7 @@ DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 
 MAIL_MAILER=ses
-MAIL_FROM_ADDRESS=noreply@k-m-wedding815.top
+MAIL_FROM_ADDRESS=noreply@k-m-wedding815.com
 MAIL_FROM_NAME="K&M Wedding"
 AWS_ACCESS_KEY_ID=        # SES本番申請通過後に設定
 AWS_SECRET_ACCESS_KEY=    # 同上
