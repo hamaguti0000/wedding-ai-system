@@ -122,7 +122,7 @@
                 </li>
                 <li class="header__nav-item">
                     <a href="{{ route('admin.news') }}"
-                       class="{{ request()->routeIs('admin.news*','admin.profiles','admin.tasks*','admin.program*','admin.faq*') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('admin.news*','admin.profiles','admin.tasks*','admin.program*','admin.faq*','admin.reminders*') ? 'active' : '' }}">
                         <i class="fa-solid fa-file-lines" aria-hidden="true"></i>コンテンツ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -167,6 +167,12 @@
                             <a href="{{ route('admin.guestbook') }}"
                                class="{{ request()->routeIs('admin.guestbook*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-comment-dots"></i>ゲストブック
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.reminders') }}"
+                               class="{{ request()->routeIs('admin.reminders*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-envelope-open-text"></i>リマインダーメール
                             </a>
                         </li>
                     </ul>
@@ -234,7 +240,7 @@
                 {{-- ギャラリー・お知らせ・ゲストブック --}}
                 <li class="header__nav-item">
                     <a href="{{ route('gallery') }}"
-                       class="{{ request()->routeIs('gallery','news.index','guestbook') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('gallery','gallery.upload','news.index','guestbook') ? 'active' : '' }}">
                         <i class="fa-solid fa-heart" aria-hidden="true"></i>楽しむ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -243,6 +249,12 @@
                             <a href="{{ route('gallery') }}"
                                class="{{ request()->routeIs('gallery') ? 'active' : '' }}">
                                 <i class="fa-solid fa-images"></i>ギャラリー
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('gallery.upload') }}"
+                               class="{{ request()->routeIs('gallery.upload') ? 'active' : '' }}">
+                                <i class="fa-solid fa-camera"></i>写真を投稿
                             </a>
                         </li>
                         <li>
@@ -439,6 +451,12 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.reminders') }}"
+                   class="{{ request()->routeIs('admin.reminders*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>リマインダーメール
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.media') }}"
                    class="{{ request()->routeIs('admin.media*') ? 'active' : '' }}">
                     <i class="fa-solid fa-photo-film" aria-hidden="true"></i>メディア
@@ -507,6 +525,12 @@
                 <a href="{{ route('gallery') }}"
                    class="{{ request()->routeIs('gallery') ? 'active' : '' }}">
                     <i class="fa-solid fa-images" aria-hidden="true"></i>ギャラリー
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('gallery.upload') }}"
+                   class="{{ request()->routeIs('gallery.upload') ? 'active' : '' }}">
+                    <i class="fa-solid fa-camera" aria-hidden="true"></i>写真を投稿
                 </a>
             </li>
             <li>
