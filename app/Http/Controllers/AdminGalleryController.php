@@ -10,8 +10,20 @@ class AdminGalleryController extends Controller
 {
     public function index()
     {
-        $photos = GalleryPhoto::orderBy('sort_order')->orderBy('id')->get();
-        return view('admin.gallery', compact('photos'));
+        $photos  = GalleryPhoto::where('is_guest_upload', false)
+            ->orderBy('sort_order')->orderBy('id')->get();
+
+        $pending = GalleryPhoto::where('is_guest_upload', true)
+            ->where('status', 'pending')
+            ->with('uploader')
+            ->orderByDesc('created_at')->get();
+
+        $guestApproved = GalleryPhoto::where('is_guest_upload', true)
+            ->whereIn('status', ['approved', 'rejected'])
+            ->with('uploader')
+            ->orderByDesc('created_at')->get();
+
+        return view('admin.gallery', compact('photos', 'pending', 'guestApproved'));
     }
 
     public function store(Request $request)
@@ -37,6 +49,7 @@ class AdminGalleryController extends Controller
                 'caption'    => $request->captions[$i] ?? null,
                 'sort_order' => $maxOrder + $count + 1,
                 'is_active'  => true,
+                'status'     => 'approved',
             ]);
             $count++;
         }
@@ -63,6 +76,30 @@ class AdminGalleryController extends Controller
         Storage::disk('public')->delete($photo->file_path);
         $photo->delete();
         return back()->with('success', '削除しました');
+    }
+
+    /** ゲスト投稿を承認してギャラリーに追加 */
+    public function approve(int $id)
+    {
+        $photo = GalleryPhoto::where('is_guest_upload', true)->findOrFail($id);
+        $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
+
+        $photo->update([
+            'status'     => 'approved',
+            'is_active'  => true,
+            'sort_order' => $maxOrder + 1,
+        ]);
+
+        return back()->with('success', '写真を承認してギャラリーに追加しました');
+    }
+
+    /** ゲスト投稿を却下（ファイルは保持） */
+    public function reject(int $id)
+    {
+        $photo = GalleryPhoto::where('is_guest_upload', true)->findOrFail($id);
+        $photo->update(['status' => 'rejected', 'is_active' => false]);
+
+        return back()->with('success', '写真を却下しました');
     }
 
     public function moveUp(int $id)

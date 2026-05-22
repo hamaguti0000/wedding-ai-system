@@ -37,6 +37,7 @@ use App\Http\Controllers\ForgotEmailController;
 use App\Http\Controllers\EmailRegistrationController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\AdminEmailAuditController;
+use App\Http\Controllers\AdminReminderController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
@@ -98,7 +99,9 @@ Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () 
     Route::get('/profiles/{person}', [CoupleProfileController::class, 'show']) ->name('profiles.show')
          ->where('person', 'groom|bride');
     // ギャラリー・ニュース一覧・ゲストブック
-    Route::get('/gallery',            [GalleryController::class,   'index'])->name('gallery');
+    Route::get('/gallery',              [GalleryController::class,   'index'])->name('gallery');
+    Route::get('/gallery/upload',       [GalleryController::class,   'uploadForm'])->name('gallery.upload');
+    Route::post('/gallery/upload',      [GalleryController::class,   'upload'])->name('gallery.upload.post');
     Route::get('/news',               [NewsController::class,       'index'])->name('news.index');
     Route::get('/news/{id}',          [NewsController::class,       'show']) ->name('news.show');
     Route::get('/guestbook',          [GuestbookController::class,  'index'])->name('guestbook');
@@ -146,6 +149,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/gallery/{id}',           [AdminGalleryController::class, 'destroy'])  ->name('gallery.destroy');
     Route::patch('/gallery/{id}/move-up',    [AdminGalleryController::class, 'moveUp'])   ->name('gallery.move-up');
     Route::patch('/gallery/{id}/move-down',  [AdminGalleryController::class, 'moveDown']) ->name('gallery.move-down');
+    Route::post('/gallery/{id}/approve',     [AdminGalleryController::class, 'approve'])  ->name('gallery.approve');
+    Route::post('/gallery/{id}/reject',      [AdminGalleryController::class, 'reject'])   ->name('gallery.reject');
+
+    // リマインダーメール管理
+    Route::get('/reminders',              [AdminReminderController::class, 'index'])   ->name('reminders');
+    Route::post('/reminders',             [AdminReminderController::class, 'store'])   ->name('reminders.store');
+    Route::post('/reminders/{id}/send',   [AdminReminderController::class, 'send'])    ->name('reminders.send');
+    Route::patch('/reminders/{id}/cancel',[AdminReminderController::class, 'cancel'])  ->name('reminders.cancel');
+    Route::delete('/reminders/{id}',      [AdminReminderController::class, 'destroy']) ->name('reminders.destroy');
 
     // ゲストブック管理
     Route::get('/guestbook',         [AdminGuestbookController::class, 'index'])  ->name('guestbook');

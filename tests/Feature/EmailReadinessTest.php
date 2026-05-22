@@ -75,8 +75,16 @@ it('確認メールのヘッダーはトップページと同じ英字名を表�
 
     $html = (new EmailVerificationMail(makeGuest('pending'), 'sample-token'))->render();
 
-    expect($html)->toContain('Kakeru &amp; Mirai')
-        ->not->toContain('翔 &amp; 礼');
+    // ヘッダーに英字名が含まれ、& が em タグで囲まれている（トップページのヒーローデザインと同じ構成）
+    // インラインCSSを使うため <em style="..."> の形式になっている
+    expect($html)
+        ->toContain('Kakeru')
+        ->toContain('Mirai')
+        ->toContain('<em style=')   // em タグにインラインスタイルが付いている
+        ->toContain('&amp;')        // & が HTML エンティティで記述されている
+        ->toContain('color:#e8c98a') // ゴールドカラーがインラインで設定されている
+        ->not->toContain('翔')
+        ->not->toContain('礼');
 });
 
 it('ログイン画面にパスワード再設定と登録メール確認の導線がある', function () {

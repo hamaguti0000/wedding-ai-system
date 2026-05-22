@@ -472,27 +472,6 @@ class AdminUserController extends Controller
             CheckInAuditLog::record(
                 $profile,
                 auth()->user(),
-                'user_create',
-                'admin',
-                '管理画面でゲストを作成しました',
-                [
-                    'user_id' => $user->id,
-                ]
-            );
-        }
-
-        if ($request->role === 'admin') {
-            // 管理者アカウントはプロフィールを持たないため、操作ログは記録しない
-        }
-
-        if ($request->role === 'guest' && isset($profile)) {
-            // 追加の記録は不要
-        }
-
-        if ($request->role === 'guest' && isset($profile)) {
-            CheckInAuditLog::record(
-                $profile,
-                auth()->user(),
                 'user_update',
                 'admin',
                 '管理画面でゲスト情報を更新しました',
