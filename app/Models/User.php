@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Mail\EmailVerificationMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -139,6 +140,11 @@ class User extends Authenticatable
     public function taskAssignments()
     {
         return $this->hasMany(GuestTaskAssignment::class);
+    }
+
+    public function loginHistories(): HasMany
+    {
+        return $this->hasMany(LoginHistory::class);
     }
 
     public function isAdmin(): bool

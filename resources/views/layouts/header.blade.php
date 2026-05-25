@@ -404,13 +404,7 @@
             <li>
                 <a href="{{ route('admin.users') }}"
                    class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-users" aria-hidden="true"></i>ユーザー管理
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.audit.email') }}"
-                   class="{{ request()->routeIs('admin.audit.email*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-envelope-circle-check" aria-hidden="true"></i>メール操作ログ
+                    <i class="fa-solid fa-user-pen" aria-hidden="true"></i>ユーザー管理
                 </a>
             </li>
             <li>
@@ -466,12 +460,6 @@
                 <a href="{{ route('admin.settings') }}"
                    class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                     <i class="fa-solid fa-gear" aria-hidden="true"></i>設定
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.login-history') }}"
-                   class="{{ request()->routeIs('admin.login-history*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>ログイン履歴
                 </a>
             </li>
             @else

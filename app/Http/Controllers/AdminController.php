@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,6 +14,13 @@ class AdminController extends Controller
             ->with('guestProfile')
             ->orderBy('created_at')
             ->get();
+
+        // ゲストごとの最近のログイン履歴（最新5件）を取得してIDでグループ化
+        $loginHistoryMap = LoginHistory::whereIn('user_id', $guests->pluck('id'))
+            ->latest()
+            ->get()
+            ->groupBy('user_id')
+            ->map(fn($items) => $items->take(5));
 
         $attending = $guests->filter(fn($u) => $u->guestProfile?->participation === 'attending');
         $declining = $guests->filter(fn($u) => $u->guestProfile?->participation === 'declining');
@@ -32,6 +40,6 @@ class AdminController extends Controller
                 : 0,
         ];
 
-        return view('admin.dashboard', compact('guests', 'summary', 'needsEmailRegistration'));
+        return view('admin.dashboard', compact('guests', 'summary', 'needsEmailRegistration', 'loginHistoryMap'));
     }
 }
