@@ -73,8 +73,6 @@ class AdminRsvpController extends Controller
 
     public function index(Request $request)
     {
-        $filter = $request->get('filter', 'all');
-
         $guests = User::where('role', 'guest')
             ->with('guestProfile')
             ->orderBy('created_at')
@@ -87,14 +85,7 @@ class AdminRsvpController extends Controller
             'pending'   => $guests->filter(fn($u) => !$u->guestProfile || $u->guestProfile->participation === 'pending')->count(),
         ];
 
-        $filtered = match($filter) {
-            'attending' => $guests->filter(fn($u) => $u->guestProfile?->participation === 'attending'),
-            'declining' => $guests->filter(fn($u) => $u->guestProfile?->participation === 'declining'),
-            'pending'   => $guests->filter(fn($u) => !$u->guestProfile || $u->guestProfile->participation === 'pending'),
-            default     => $guests,
-        };
-
-        // 出席者の合計人数（大人＋子供）
+        // 出席者の合計人数（大人＋子供）— ビューで全件渡してクライアント側フィルター
         $totalAttending = $guests
             ->filter(fn($u) => $u->guestProfile?->participation === 'attending')
             ->sum(fn($u) => $u->guestProfile->attending_count ?? 0);
@@ -104,7 +95,7 @@ class AdminRsvpController extends Controller
             ->sum(fn($u) => $u->guestProfile->children_count ?? 0);
 
         return view('admin.rsvp', compact(
-            'filtered', 'summary', 'filter', 'totalAttending', 'totalChildren'
+            'guests', 'summary', 'totalAttending', 'totalChildren'
         ));
     }
 }

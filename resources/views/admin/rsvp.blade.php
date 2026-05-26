@@ -29,7 +29,7 @@
 }
 .attend-banner strong { font-size: 1.25rem; }
 
-.filter-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.filter-tabs { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
 .filter-tabs-left { display: flex; gap: 6px; flex-wrap: wrap; }
 .filter-tab {
     padding: 7px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 500;
@@ -37,6 +37,25 @@
     color: #b38b59; background: #fef9f0; transition: background 0.15s; white-space: nowrap;
 }
 .filter-tab.active, .filter-tab:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+/* ── 検索・ソート ── */
+.filter-btn-rsvp {
+    padding: 7px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 500;
+    border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0;
+    cursor: pointer; transition: background 0.15s; white-space: nowrap;
+}
+.filter-btn-rsvp.active, .filter-btn-rsvp:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+.rsvp-search-wrap { position: relative; }
+.rsvp-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
+.rsvp-search { width: 200px; padding: 8px 30px 8px 32px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.85rem; background: #fffdf9; box-sizing: border-box; }
+.rsvp-search:focus { border-color: #b38b59; outline: none; }
+.rsvp-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
+.rsvp-clear.visible { display: block; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: #f5ede0; }
+.sort-icon { display: inline-block; margin-left: 4px; font-size: 0.75rem; color: #c0b0a0; }
+th.sort-asc .sort-icon, th.sort-desc .sort-icon { color: #b38b59; }
+.rsvp-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
+.rsvp-no-results.visible { display: block; }
 
 .btn-csv {
     display: inline-flex; align-items: center; gap: 6px;
@@ -147,56 +166,51 @@
     </div>
     @endif
 
-    {{-- フィルタータブ + CSV --}}
+    {{-- フィルター（クライアントサイド）+ 検索 + CSV --}}
     <div class="filter-tabs">
         <div class="filter-tabs-left">
-            <a href="{{ route('admin.rsvp') }}"
-               class="filter-tab {{ $filter === 'all' ? 'active' : '' }}">
-                全員（{{ $summary['total'] }}）
-            </a>
-            <a href="{{ route('admin.rsvp', ['filter' => 'attending']) }}"
-               class="filter-tab {{ $filter === 'attending' ? 'active' : '' }}">
-                出席（{{ $summary['attending'] }}）
-            </a>
-            <a href="{{ route('admin.rsvp', ['filter' => 'declining']) }}"
-               class="filter-tab {{ $filter === 'declining' ? 'active' : '' }}">
-                欠席（{{ $summary['declining'] }}）
-            </a>
-            <a href="{{ route('admin.rsvp', ['filter' => 'pending']) }}"
-               class="filter-tab {{ $filter === 'pending' ? 'active' : '' }}">
-                未回答（{{ $summary['pending'] }}）
+            <button class="filter-btn-rsvp active" data-rsvp="all">全員（{{ $summary['total'] }}）</button>
+            <button class="filter-btn-rsvp" data-rsvp="attending">出席（{{ $summary['attending'] }}）</button>
+            <button class="filter-btn-rsvp" data-rsvp="declining">欠席（{{ $summary['declining'] }}）</button>
+            <button class="filter-btn-rsvp" data-rsvp="pending">未回答（{{ $summary['pending'] }}）</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <div class="rsvp-search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="rsvpSearch" class="rsvp-search"
+                       placeholder="名前・ユーザー名で検索" autocomplete="off">
+                <button type="button" id="rsvpClear" class="rsvp-clear" aria-label="クリア">✕</button>
+            </div>
+            <a href="{{ route('admin.rsvp.export') }}" class="btn-csv">
+                <i class="fa-solid fa-file-csv"></i> CSV出力
             </a>
         </div>
-        <a href="{{ route('admin.rsvp.export', ['filter' => $filter]) }}" class="btn-csv">
-            <i class="fa-solid fa-file-csv"></i> CSV出力
-        </a>
     </div>
 
     {{-- 詳細テーブル --}}
     <div class="rsvp-table-wrap">
         <div class="table-head">
-            <span>{{ $filtered->count() }}件 表示中
-                <span style="font-size:0.75rem;color:#bbb;margin-left:6px;">— 行をクリックで詳細表示</span>
-            </span>
+            <span id="rsvpCount"><strong>{{ $guests->count() }}</strong>件 表示中</span>
+            <span style="font-size:0.75rem;color:#bbb;margin-left:6px;">— 行をクリックで詳細表示</span>
         </div>
 
-        @if ($filtered->isEmpty())
+        @if ($guests->isEmpty())
         <div class="empty-state">該当するゲストがいません</div>
         @else
         <div class="table-scroll">
-        <table>
+        <table id="rsvpTable">
             <thead>
                 <tr>
-                    <th>氏名</th>
-                    <th>お立場 / ご関係</th>
-                    <th>出欠</th>
-                    <th>人数</th>
+                    <th class="sortable" data-col="name">氏名 <span class="sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="sortable" data-col="side">お立場 / ご関係 <span class="sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="sortable" data-col="status">出欠 <span class="sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="sortable" data-col="count">人数 <span class="sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th>アレルギー</th>
-                    <th>回答日時</th>
+                    <th class="sortable" data-col="responded">回答日時 <span class="sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach ($filtered as $guest)
+            <tbody id="rsvpTbody">
+                @foreach ($guests as $guest)
                 @php $p = $guest->guestProfile; $status = $p?->participation ?? 'pending'; @endphp
                 <tr data-id="{{ $guest->id }}"
                     data-name="{{ trim(($p?->last_name ?? '') . ' ' . ($p?->first_name ?? '')) ?: $guest->username }}"
@@ -269,6 +283,11 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
+        <div class="rsvp-no-results" id="rsvpNoResults">
+            <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+            <p style="font-weight:600;color:#888;">該当するゲストが見つかりません</p>
+            <p style="font-size:0.84rem;color:#aaa;margin-top:4px;">検索条件やフィルターを変更してみてください</p>
         </div>
         @endif
     </div>
@@ -368,6 +387,103 @@
 </div>
 
 <script>
+// ── 検索・フィルター・ソート ────────────────────────────────
+(function () {
+    const state = { q: '', rsvp: 'all', col: null, dir: 'asc' };
+    const tbody    = document.getElementById('rsvpTbody');
+    const searchEl = document.getElementById('rsvpSearch');
+    const clearBtn = document.getElementById('rsvpClear');
+    const countEl  = document.getElementById('rsvpCount');
+    const noRes    = document.getElementById('rsvpNoResults');
+    if (!tbody) return;
+
+    const getRows = () => Array.from(tbody.querySelectorAll('tr[data-id]'));
+
+    function matches(row) {
+        const d = row.dataset;
+        if (state.q) {
+            const q = state.q;
+            if (!d.name.toLowerCase().includes(q) && !d.username.toLowerCase().includes(q) && !d.furigana.includes(q)) return false;
+        }
+        if (state.rsvp !== 'all' && d.status !== state.rsvp) return false;
+        return true;
+    }
+
+    const statusOrder = { attending: 0, declining: 1, pending: 2 };
+    function compare(a, b) {
+        const da = a.dataset, db = b.dataset;
+        let va, vb;
+        switch (state.col) {
+            case 'name':      va = da.name;                    vb = db.name;                    break;
+            case 'side':      va = da.side || '';              vb = db.side || '';              break;
+            case 'status':    va = statusOrder[da.status] ?? 2; vb = statusOrder[db.status] ?? 2; break;
+            case 'count':     va = parseInt(da.count) || 0;   vb = parseInt(db.count) || 0;   break;
+            case 'responded': va = da.responded || '';         vb = db.responded || '';         break;
+            default: return 0;
+        }
+        if (va < vb) return state.dir === 'asc' ? -1 :  1;
+        if (va > vb) return state.dir === 'asc' ?  1 : -1;
+        return 0;
+    }
+
+    function updateIcons() {
+        document.querySelectorAll('#rsvpTable th.sortable').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+            const icon = th.querySelector('.sort-icon i');
+            if (icon) icon.className = 'fa-solid fa-sort';
+            if (th.dataset.col === state.col) {
+                th.classList.add('sort-' + state.dir);
+                if (icon) icon.className = state.dir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+            }
+        });
+    }
+
+    function applyAll() {
+        const rows = getRows();
+        let visible = 0;
+        rows.forEach(row => { const show = matches(row); row.style.display = show ? '' : 'none'; if (show) visible++; });
+        if (state.col) {
+            rows.filter(r => r.style.display !== 'none').sort(compare).forEach(r => tbody.appendChild(r));
+        }
+        if (countEl) countEl.innerHTML = `<strong>${visible}</strong>件 表示中`;
+        if (noRes)   noRes.classList.toggle('visible', visible === 0);
+    }
+
+    // ソートヘッダー
+    document.querySelectorAll('#rsvpTable th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.col;
+            state.dir = state.col === col ? (state.dir === 'asc' ? 'desc' : 'asc') : 'asc';
+            state.col = col;
+            updateIcons(); applyAll();
+        });
+    });
+
+    // フィルターボタン
+    document.querySelectorAll('.filter-btn-rsvp[data-rsvp]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn-rsvp[data-rsvp]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.rsvp = btn.dataset.rsvp;
+            applyAll();
+        });
+    });
+
+    // 検索
+    searchEl?.addEventListener('input', () => {
+        state.q = searchEl.value.toLowerCase().trim();
+        clearBtn?.classList.toggle('visible', state.q.length > 0);
+        applyAll();
+    });
+    clearBtn?.addEventListener('click', () => {
+        searchEl.value = ''; state.q = '';
+        clearBtn.classList.remove('visible');
+        searchEl.focus(); applyAll();
+    });
+
+    applyAll();
+})();
+
 function openDetail(row) {
     const d = row.dataset;
     document.getElementById('dmName').textContent       = d.name || '—';

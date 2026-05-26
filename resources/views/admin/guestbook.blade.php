@@ -3,6 +3,27 @@
 
 @push('styles')
 <style>
+/* ── 検索・フィルター ── */
+.gb-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 14px 16px; margin-bottom: 14px;
+    background: #fff; border-radius: 10px; border: 1px solid #f0ebe3;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.gb-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 300px; }
+.gb-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
+.gb-search { width: 100%; padding: 8px 30px 8px 32px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.85rem; background: #fffdf9; box-sizing: border-box; }
+.gb-search:focus { border-color: #b38b59; outline: none; }
+.gb-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
+.gb-clear.visible { display: block; }
+.gb-filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.gb-filter-btn.active, .gb-filter-btn:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+.gb-sort-select { padding: 7px 10px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.82rem; color: #7a6a5a; background: #fffdf9; cursor: pointer; }
+.gb-sort-select:focus { border-color: #b38b59; outline: none; }
+.gb-result-count { font-size: 0.82rem; color: #999; margin-bottom: 10px; }
+.gb-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
+.gb-no-results.visible { display: block; }
+
 .gb-msg-item {
     background: #fff; border-radius: 10px; padding: 16px 20px;
     margin-bottom: 10px; border: 1px solid #f0ebe3;
@@ -37,16 +58,31 @@
     <div class="alert-success" style="margin-bottom:20px;">{{ session('success') }}</div>
     @endif
 
-    <div style="margin-bottom:8px;font-size:0.82rem;color:#999;">
-        {{ $messages->count() }}件（公開: {{ $messages->where('is_public', true)->count() }}件）
-    </div>
-
     @if ($messages->isEmpty())
     <div class="empty-state">
         <div class="empty-state__icon">💌</div>
         <p class="empty-state__title">まだメッセージがありません</p>
     </div>
     @else
+    {{-- ツールバー --}}
+    <div class="gb-toolbar">
+        <div class="gb-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="gbSearch" class="gb-search" placeholder="名前・メッセージで検索" autocomplete="off">
+            <button type="button" id="gbClear" class="gb-clear" aria-label="クリア">✕</button>
+        </div>
+        <button class="gb-filter-btn active" data-pub="all">すべて</button>
+        <button class="gb-filter-btn" data-pub="1">公開</button>
+        <button class="gb-filter-btn" data-pub="0">非公開</button>
+        <select id="gbSort" class="gb-sort-select">
+            <option value="desc">新しい順</option>
+            <option value="asc">古い順</option>
+        </select>
+    </div>
+    <div class="gb-result-count" id="gbCount">
+        <strong>{{ $messages->count() }}</strong>件（公開: {{ $messages->where('is_public', true)->count() }}件）
+    </div>
+    <div id="gbList">
     @foreach ($messages as $msg)
     @php
         $user = $msg->user;
@@ -56,7 +92,12 @@
         $bgColor = $user?->avatarBackgroundColor() ?? 'linear-gradient(135deg,#b38b59,#d4a870)';
         $borderColor = $user?->avatarBorderColor() ?? '#f0e4d0';
     @endphp
-    <div class="gb-msg-item {{ $msg->is_public ? '' : 'hidden-msg' }}">
+    <div class="gb-msg-item {{ $msg->is_public ? '' : 'hidden-msg' }}"
+         data-public="{{ $msg->is_public ? '1' : '0' }}"
+         data-name="{{ strtolower($user?->name ?? '') }}"
+         data-username="{{ strtolower($user?->username ?? '') }}"
+         data-message="{{ strtolower($msg->message) }}"
+         data-timestamp="{{ $msg->created_at->timestamp }}">
         <div class="gb-msg-avatar" style="border-color:{{ $borderColor }};{{ $avatarType !== 'emoji' ? "background:{$bgColor};" : '' }}">
             @if ($avatarType === 'photo' && $imgUrl)
                 <img src="{{ $imgUrl }}" alt="">
@@ -92,6 +133,72 @@
         </div>
     </div>
     @endforeach
+    </div>{{-- #gbList --}}
+    <div class="gb-no-results" id="gbNoResults">
+        <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+        <p style="font-weight:600;color:#888;">該当するメッセージが見つかりません</p>
+    </div>
     @endif
 </div>
+
+<script>
+(function () {
+    const state  = { q: '', pub: 'all', sort: 'desc' };
+    const list   = document.getElementById('gbList');
+    const srch   = document.getElementById('gbSearch');
+    const clrBtn = document.getElementById('gbClear');
+    const countEl= document.getElementById('gbCount');
+    const noRes  = document.getElementById('gbNoResults');
+    if (!list) return;
+
+    const getItems = () => Array.from(list.querySelectorAll('.gb-msg-item'));
+
+    function applyAll() {
+        const items = getItems();
+        let visible = 0;
+        items.forEach(item => {
+            const d = item.dataset;
+            let show = true;
+            if (state.q && !d.name.includes(state.q) && !d.username.includes(state.q) && !d.message.includes(state.q)) show = false;
+            if (state.pub !== 'all' && d.public !== state.pub) show = false;
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        // ソート
+        items.filter(i => i.style.display !== 'none')
+             .sort((a, b) => {
+                 const ta = parseInt(a.dataset.timestamp) || 0;
+                 const tb = parseInt(b.dataset.timestamp) || 0;
+                 return state.sort === 'desc' ? tb - ta : ta - tb;
+             })
+             .forEach(item => list.appendChild(item));
+        if (countEl) countEl.innerHTML = `<strong>${visible}</strong>件`;
+        if (noRes)   noRes.classList.toggle('visible', visible === 0);
+    }
+
+    srch?.addEventListener('input', () => {
+        state.q = srch.value.toLowerCase().trim();
+        clrBtn?.classList.toggle('visible', state.q.length > 0);
+        applyAll();
+    });
+    clrBtn?.addEventListener('click', () => {
+        srch.value = ''; state.q = '';
+        clrBtn.classList.remove('visible');
+        srch.focus(); applyAll();
+    });
+    document.querySelectorAll('.gb-filter-btn[data-pub]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.gb-filter-btn[data-pub]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.pub = btn.dataset.pub;
+            applyAll();
+        });
+    });
+    document.getElementById('gbSort')?.addEventListener('change', e => {
+        state.sort = e.target.value;
+        applyAll();
+    });
+    applyAll();
+})();
+</script>
 @endsection

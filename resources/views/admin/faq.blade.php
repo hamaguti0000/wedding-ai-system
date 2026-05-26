@@ -16,6 +16,23 @@
 .add-card { background: #fff; border-radius: 12px; padding: 22px 24px; box-shadow: 0 3px 12px rgba(0,0,0,0.07); margin-bottom: 28px; border: 2px dashed #e8d5b7; }
 .add-card h3 { font-size: 0.78rem; font-weight: 700; color: #b38b59; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
 .inactive-toggle { font-size: 0.78rem; color: #9b8573; display: flex; align-items: center; gap: 6px; }
+/* ── 検索・フィルター ── */
+.faq-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 14px; margin-bottom: 10px;
+    background: #fff; border-radius: 10px; border: 1px solid #f0ebe3;
+}
+.faq-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 300px; }
+.faq-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
+.faq-search { width: 100%; padding: 8px 28px 8px 30px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.85rem; background: #fffdf9; box-sizing: border-box; }
+.faq-search:focus { border-color: #b38b59; outline: none; }
+.faq-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
+.faq-clear.visible { display: block; }
+.faq-filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.faq-filter-btn.active, .faq-filter-btn:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+.faq-result-count { font-size: 0.82rem; color: #999; margin-bottom: 8px; }
+.faq-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
+.faq-no-results.visible { display: block; }
 </style>
 @endpush
 
@@ -51,18 +68,31 @@
     </div>
 
     {{-- 一覧 --}}
-    <div style="margin-bottom:8px;font-size:0.82rem;color:#999;">
-        {{ $faqs->count() }}件
-    </div>
-
     @if ($faqs->isEmpty())
     <div class="empty-state">
         <div class="empty-state__icon">❓</div>
         <p class="empty-state__title">まだ Q&amp;A がありません</p>
     </div>
     @else
+    {{-- ツールバー --}}
+    <div class="faq-toolbar">
+        <div class="faq-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="faqSearch" class="faq-search" placeholder="質問・回答で検索" autocomplete="off">
+            <button type="button" id="faqClear" class="faq-clear" aria-label="クリア">✕</button>
+        </div>
+        <button class="faq-filter-btn active" data-active="all">すべて</button>
+        <button class="faq-filter-btn" data-active="1">表示中</button>
+        <button class="faq-filter-btn" data-active="0">非表示</button>
+    </div>
+    <div class="faq-result-count" id="faqCount"><strong>{{ $faqs->count() }}</strong>件</div>
+    <div id="faqList">
     @foreach ($faqs as $faq)
-    <div class="faq-admin-item {{ $faq->is_active ? '' : 'inactive' }}">
+    <div class="faq-admin-item {{ $faq->is_active ? '' : 'inactive' }}"
+         data-question="{{ strtolower($faq->question) }}"
+         data-answer="{{ strtolower(mb_substr($faq->answer, 0, 200)) }}"
+         data-active="{{ $faq->is_active ? '1' : '0' }}"
+         data-id="{{ $faq->id }}">
         <div class="faq-admin-q">
             <span class="faq-admin-q-badge">Q</span>
             {{ $faq->question }}
@@ -117,10 +147,65 @@
         </form>
     </div>
     @endforeach
+    </div>{{-- #faqList --}}
+    <div class="faq-no-results" id="faqNoResults">
+        <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+        <p style="font-weight:600;color:#888;">該当するQ&Aが見つかりません</p>
+    </div>
     @endif
 </div>
 
 <script>
+// ── FAQ検索・フィルター ──────────────────────────────────
+(function () {
+    const state  = { q: '', active: 'all' };
+    const list   = document.getElementById('faqList');
+    const srch   = document.getElementById('faqSearch');
+    const clrBtn = document.getElementById('faqClear');
+    const countEl= document.getElementById('faqCount');
+    const noRes  = document.getElementById('faqNoResults');
+    if (!list) return;
+
+    const getItems = () => Array.from(list.querySelectorAll('.faq-admin-item'));
+
+    function applyAll() {
+        const items = getItems();
+        let visible = 0;
+        items.forEach(item => {
+            const d = item.dataset;
+            let show = true;
+            if (state.q && !d.question.includes(state.q) && !d.answer.includes(state.q)) show = false;
+            if (state.active !== 'all' && d.active !== state.active) show = false;
+            item.style.display = show ? '' : 'none';
+            const editDiv = document.getElementById('faq-edit-' + d.id);
+            if (editDiv && !show) editDiv.style.display = 'none';
+            if (show) visible++;
+        });
+        if (countEl) countEl.innerHTML = `<strong>${visible}</strong>件`;
+        if (noRes)   noRes.classList.toggle('visible', visible === 0);
+    }
+
+    srch?.addEventListener('input', () => {
+        state.q = srch.value.toLowerCase().trim();
+        clrBtn?.classList.toggle('visible', state.q.length > 0);
+        applyAll();
+    });
+    clrBtn?.addEventListener('click', () => {
+        srch.value = ''; state.q = '';
+        clrBtn.classList.remove('visible');
+        srch.focus(); applyAll();
+    });
+    document.querySelectorAll('.faq-filter-btn[data-active]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.faq-filter-btn[data-active]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.active = btn.dataset.active;
+            applyAll();
+        });
+    });
+    applyAll();
+})();
+
 function toggleFaqEdit(id) {
     const el = document.getElementById('faq-edit-' + id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';

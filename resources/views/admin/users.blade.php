@@ -48,6 +48,28 @@
 }
 .btn-bulk-del:disabled { opacity: .45; cursor: not-allowed; }
 
+/* ── 検索・フィルター・ソート ── */
+.user-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 14px 16px; margin-bottom: 14px;
+    background: #fff; border-radius: 10px; border: 1px solid #f0ebe3;
+}
+.user-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+.user-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
+.user-search-input { width: 100%; padding: 8px 28px 8px 30px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.85rem; background: #fffdf9; box-sizing: border-box; }
+.user-search-input:focus { border-color: #b38b59; outline: none; }
+.user-search-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
+.user-search-clear.visible { display: block; }
+.user-filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.user-filter-btn.active, .user-filter-btn:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+th.user-sortable { cursor: pointer; user-select: none; }
+th.user-sortable:hover { background: #f5ede0; }
+.user-sort-icon { display: inline-block; margin-left: 4px; font-size: 0.74rem; color: #c0b0a0; }
+th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b38b59; }
+.user-result-count { font-size: 0.82rem; color: #999; padding: 0 16px 8px; }
+.user-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
+.user-no-results.visible { display: block; }
+
 @media (max-width: 767px) {
     .card { padding: 16px; }
     .fg-2, .fg-3, .fg-4 { grid-template-columns: 1fr; }
@@ -219,7 +241,7 @@
 
     {{-- ── ユーザー一覧 ── --}}
     <div class="user-table-wrap">
-        <p class="card-title">登録済みユーザー（{{ $users->count() }}名）</p>
+        <p class="card-title">登録済みユーザー</p>
 
         @if ($users->isEmpty())
         <div class="empty-state">まだユーザーが登録されていません</div>
@@ -228,6 +250,27 @@
               onsubmit="return confirmBulkDelete()" style="display:none;">
             @csrf @method('DELETE')
         </form>
+        {{-- ツールバー --}}
+        <div class="user-toolbar">
+            <div class="user-search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="userSearch" class="user-search-input"
+                       placeholder="ユーザー名・氏名・メールで検索" autocomplete="off">
+                <button type="button" id="userSearchClear" class="user-search-clear" aria-label="クリア">✕</button>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                <button class="user-filter-btn active" data-role="all">全員</button>
+                <button class="user-filter-btn" data-role="guest">ゲスト</button>
+                <button class="user-filter-btn" data-role="admin">管理者</button>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                <button class="user-filter-btn active" data-rsvp="all">出欠: 全</button>
+                <button class="user-filter-btn" data-rsvp="attending">出席</button>
+                <button class="user-filter-btn" data-rsvp="declining">欠席</button>
+                <button class="user-filter-btn" data-rsvp="pending">未回答</button>
+            </div>
+        </div>
+        <div class="user-result-count" id="userResultCount"></div>
         <div class="bulk-toolbar">
             <div class="bulk-toolbar__left">
                 <span class="bulk-toolbar__count"><span id="selectedUserCount">0</span>名選択中</span>
@@ -238,27 +281,35 @@
             </button>
         </div>
         <div class="table-scroll">
-        <table>
+        <table id="userTable">
             <thead>
                 <tr>
                     <th class="select-col">
                         <input type="checkbox" id="selectAllUsers" class="user-select" aria-label="全員を選択">
                     </th>
-                    <th>ユーザー名</th>
-                    <th>氏名</th>
+                    <th class="user-sortable" data-col="username">ユーザー名 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="user-sortable" data-col="name">氏名 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="col-md-hide">メール</th>
-                    <th class="col-md-hide">ロール</th>
-                    <th class="col-md-hide">出欠</th>
+                    <th class="col-md-hide user-sortable" data-col="role">ロール <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="col-md-hide user-sortable" data-col="rsvp">出欠 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th>操作</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="userTbody">
                 @foreach ($users as $user)
                 @php
                     $p = $user->guestProfile;
                     $status = $p?->participation ?? 'pending';
+                    $fullName = $p ? trim(($p->last_name ?? '') . ' ' . ($p->first_name ?? '')) : '';
+                    $furigana = $p?->furigana() ?? '';
                 @endphp
-                <tr>
+                <tr data-id="{{ $user->id }}"
+                    data-username="{{ strtolower($user->username) }}"
+                    data-name="{{ strtolower($fullName ?: $user->username) }}"
+                    data-furigana="{{ $furigana }}"
+                    data-email="{{ strtolower($user->email ?? '') }}"
+                    data-role="{{ $user->role }}"
+                    data-rsvp="{{ $status }}">
                     <td class="select-col">
                         @if ($user->id !== auth()->id())
                             <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
@@ -359,12 +410,138 @@
             </tbody>
         </table>
         </div>
+        <div class="user-no-results" id="userNoResults">
+            <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+            <p style="font-weight:600;color:#888;">該当するユーザーが見つかりません</p>
+        </div>
         @endif
     </div>
 
 </div>
 
 <script>
+// ── ユーザー検索・フィルター・ソート ───────────────────────
+(function () {
+    const state  = { q: '', role: 'all', rsvp: 'all', col: null, dir: 'asc' };
+    const tbody  = document.getElementById('userTbody');
+    const srch   = document.getElementById('userSearch');
+    const clrBtn = document.getElementById('userSearchClear');
+    const countEl= document.getElementById('userResultCount');
+    const noRes  = document.getElementById('userNoResults');
+    if (!tbody) return;
+
+    const getRows = () => Array.from(tbody.querySelectorAll('tr[data-id]'));
+
+    function matches(row) {
+        const d = row.dataset;
+        if (state.q) {
+            const q = state.q;
+            if (!d.username.includes(q) && !d.name.includes(q) && !d.furigana.includes(q) && !d.email.includes(q)) return false;
+        }
+        if (state.role !== 'all' && d.role !== state.role) return false;
+        if (state.rsvp !== 'all') {
+            // 管理者は出欠フィルター対象外
+            if (d.role === 'admin') return false;
+            if (d.rsvp !== state.rsvp) return false;
+        }
+        return true;
+    }
+
+    const rsvpOrder = { attending: 0, declining: 1, pending: 2 };
+    function compare(a, b) {
+        const da = a.dataset, db = b.dataset;
+        let va, vb;
+        switch (state.col) {
+            case 'username': va = da.username; vb = db.username; break;
+            case 'name':     va = da.name;     vb = db.name;     break;
+            case 'role':     va = da.role;     vb = db.role;     break;
+            case 'rsvp':     va = rsvpOrder[da.rsvp] ?? 3; vb = rsvpOrder[db.rsvp] ?? 3; break;
+            default: return 0;
+        }
+        if (va < vb) return state.dir === 'asc' ? -1 :  1;
+        if (va > vb) return state.dir === 'asc' ?  1 : -1;
+        return 0;
+    }
+
+    function updateIcons() {
+        document.querySelectorAll('#userTable th.user-sortable').forEach(th => {
+            th.classList.remove('user-sort-asc', 'user-sort-desc');
+            const icon = th.querySelector('.user-sort-icon i');
+            if (icon) icon.className = 'fa-solid fa-sort';
+            if (th.dataset.col === state.col) {
+                th.classList.add('user-sort-' + state.dir);
+                if (icon) icon.className = state.dir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+            }
+        });
+    }
+
+    function applyAll() {
+        const rows = getRows();
+        let visible = 0;
+        rows.forEach(row => {
+            const show = matches(row);
+            row.style.display = show ? '' : 'none';
+            const pwRow = document.getElementById('pw-row-' + row.dataset.id);
+            if (pwRow && !show) { pwRow.classList.remove('open'); pwRow.style.display = 'none'; }
+            if (show) visible++;
+        });
+        if (state.col) {
+            rows.filter(r => r.style.display !== 'none').sort(compare).forEach(r => {
+                tbody.appendChild(r);
+                const pwRow = document.getElementById('pw-row-' + r.dataset.id);
+                if (pwRow) tbody.appendChild(pwRow);
+            });
+        }
+        if (countEl) countEl.textContent = `${visible}名 表示中`;
+        if (noRes)   noRes.classList.toggle('visible', visible === 0);
+        updateBulkDeleteState();
+    }
+
+    // ソート
+    document.querySelectorAll('#userTable th.user-sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.col;
+            state.dir = state.col === col ? (state.dir === 'asc' ? 'desc' : 'asc') : 'asc';
+            state.col = col;
+            updateIcons(); applyAll();
+        });
+    });
+
+    // ロールフィルター
+    document.querySelectorAll('.user-filter-btn[data-role]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.user-filter-btn[data-role]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.role = btn.dataset.role;
+            applyAll();
+        });
+    });
+
+    // 出欠フィルター
+    document.querySelectorAll('.user-filter-btn[data-rsvp]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.user-filter-btn[data-rsvp]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.rsvp = btn.dataset.rsvp;
+            applyAll();
+        });
+    });
+
+    // 検索
+    srch?.addEventListener('input', () => {
+        state.q = srch.value.toLowerCase().trim();
+        clrBtn?.classList.toggle('visible', state.q.length > 0);
+        applyAll();
+    });
+    clrBtn?.addEventListener('click', () => {
+        srch.value = ''; state.q = '';
+        clrBtn.classList.remove('visible');
+        srch.focus(); applyAll();
+    });
+
+    applyAll();
+})();
+
 function togglePw(id) {
     const row = document.getElementById('pw-row-' + id);
     row.classList.toggle('open');

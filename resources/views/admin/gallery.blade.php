@@ -58,6 +58,24 @@
 .btn-reject  { background: #fff; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; cursor: pointer; transition: all .15s; }
 .btn-reject:hover { background: #fef2f2; }
 
+/* ── 検索・フィルター ── */
+.gl-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 14px; margin-bottom: 10px;
+    background: #fff; border-radius: 10px; border: 1px solid #f0ebe3;
+}
+.gl-search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 260px; }
+.gl-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
+.gl-search { width: 100%; padding: 8px 28px 8px 30px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.85rem; background: #fffdf9; box-sizing: border-box; }
+.gl-search:focus { border-color: #b38b59; outline: none; }
+.gl-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
+.gl-clear.visible { display: block; }
+.gl-filter-btn { padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.gl-filter-btn.active, .gl-filter-btn:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+.gl-result-count { font-size: 0.82rem; color: #999; margin-bottom: 8px; }
+.gl-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
+.gl-no-results.visible { display: block; }
+
 /* 承認済み/却下済みゲスト投稿 */
 .guest-history-section { margin-bottom: 32px; }
 .guest-history-section summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #7a6a5a; padding: 10px 0; user-select: none; }
@@ -136,9 +154,8 @@
     </div>
 
     {{-- 公式写真一覧 --}}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <span style="font-size:0.88rem;font-weight:600;color:#3d2f25;">公式写真</span>
-        <span style="font-size:0.82rem;color:#999;">{{ $photos->count() }}枚</span>
     </div>
 
     @if ($photos->isEmpty())
@@ -148,9 +165,24 @@
         <p class="empty-state__desc">上のフォームからアップロードしてください</p>
     </div>
     @else
-    <div class="gl-admin-grid">
+    {{-- ツールバー --}}
+    <div class="gl-toolbar">
+        <div class="gl-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="glSearch" class="gl-search" placeholder="キャプションで検索" autocomplete="off">
+            <button type="button" id="glClear" class="gl-clear" aria-label="クリア">✕</button>
+        </div>
+        <button class="gl-filter-btn active" data-active="all">すべて</button>
+        <button class="gl-filter-btn" data-active="1">表示中</button>
+        <button class="gl-filter-btn" data-active="0">非表示</button>
+    </div>
+    <div class="gl-result-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚</div>
+    <div class="gl-admin-grid" id="galleryGrid">
         @foreach ($photos as $photo)
-        <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}">
+        <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
+             data-caption="{{ strtolower($photo->caption ?? '') }}"
+             data-active="{{ $photo->is_active ? '1' : '0' }}"
+             data-id="{{ $photo->id }}">
             <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
             <div class="gl-admin-item__body">
                 <p class="gl-admin-item__caption" title="{{ $photo->caption }}">{{ $photo->caption ?: '—' }}</p>
@@ -177,6 +209,10 @@
             </div>
         </div>
         @endforeach
+    </div>{{-- #galleryGrid --}}
+    <div class="gl-no-results" id="glNoResults">
+        <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+        <p style="font-weight:600;color:#888;">該当する写真が見つかりません</p>
     </div>
     @endif
 
@@ -210,6 +246,54 @@
 </div>
 
 <script>
+// ── ギャラリー検索・フィルター ────────────────────────────
+(function () {
+    const state  = { q: '', active: 'all' };
+    const grid   = document.getElementById('galleryGrid');
+    const srch   = document.getElementById('glSearch');
+    const clrBtn = document.getElementById('glClear');
+    const countEl= document.getElementById('glCount');
+    const noRes  = document.getElementById('glNoResults');
+    if (!grid) return;
+
+    const getItems = () => Array.from(grid.querySelectorAll('.gl-admin-item'));
+
+    function applyAll() {
+        const items = getItems();
+        let visible = 0;
+        items.forEach(item => {
+            const d = item.dataset;
+            let show = true;
+            if (state.q && !d.caption.includes(state.q)) show = false;
+            if (state.active !== 'all' && d.active !== state.active) show = false;
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (countEl) countEl.innerHTML = `<strong>${visible}</strong>枚`;
+        if (noRes)   noRes.classList.toggle('visible', visible === 0);
+    }
+
+    srch?.addEventListener('input', () => {
+        state.q = srch.value.toLowerCase().trim();
+        clrBtn?.classList.toggle('visible', state.q.length > 0);
+        applyAll();
+    });
+    clrBtn?.addEventListener('click', () => {
+        srch.value = ''; state.q = '';
+        clrBtn.classList.remove('visible');
+        srch.focus(); applyAll();
+    });
+    document.querySelectorAll('.gl-filter-btn[data-active]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.gl-filter-btn[data-active]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.active = btn.dataset.active;
+            applyAll();
+        });
+    });
+    applyAll();
+})();
+
 function toggleEdit(id) {
     const el = document.getElementById('edit-' + id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';

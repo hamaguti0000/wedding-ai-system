@@ -111,6 +111,11 @@
 .lh-table-wrap { overflow: hidden; }
 .lh-table-head { padding: 14px 20px; font-size: 0.8rem; color: #999; border-bottom: 1px solid #f5f0ea; }
 .lh-table-head strong { color: #3d2f25; }
+/* 列ソート */
+th.lh-sortable { cursor: pointer; user-select: none; }
+th.lh-sortable:hover { background: #f5ede0; }
+.lh-sort-icon { display: inline-block; margin-left: 4px; font-size: 0.74rem; color: #c0b0a0; }
+th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
 .lh-wrap table { min-width: 620px; }
 .ua-text { font-size: 0.74rem; color: #888; word-break: break-all; max-width: 240px; }
 .empty-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.35; }
@@ -294,17 +299,19 @@
         <table>
             <thead>
                 <tr>
-                    <th>日時</th>
-                    <th>ユーザー名</th>
-                    <th>状態</th>
+                    <th class="lh-sortable" data-col="datetime">日時 <span class="lh-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="lh-sortable" data-col="username">ユーザー名 <span class="lh-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="lh-sortable" data-col="status">状態 <span class="lh-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th>ロール / お立場</th>
                     <th>IPアドレス</th>
                     <th>ブラウザ</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="lhTbody">
                 @foreach ($histories as $h)
-                <tr>
+                <tr data-datetime="{{ $h->created_at->timestamp }}"
+                    data-username="{{ $h->username }}"
+                    data-status="{{ $h->status }}">
                     <td style="white-space:nowrap;">
                         <span style="font-size:0.82rem;">{{ $h->created_at->format('Y/m/d') }}</span>
                         <br><strong style="font-size:0.88rem;">{{ $h->created_at->format('H:i:s') }}</strong>
@@ -372,6 +379,51 @@
 </div>
 
 <script>
+// ── 列ソート ────────────────────────────────────────────
+(function () {
+    const state  = { col: null, dir: 'asc' };
+    const tbody  = document.getElementById('lhTbody');
+    if (!tbody) return;
+
+    const statusOrder = { success: 0, failed: 1 };
+
+    function compare(a, b) {
+        const da = a.dataset, db = b.dataset;
+        let va, vb;
+        switch (state.col) {
+            case 'datetime': va = parseInt(da.datetime) || 0; vb = parseInt(db.datetime) || 0; break;
+            case 'username': va = da.username || ''; vb = db.username || ''; break;
+            case 'status':   va = statusOrder[da.status] ?? 1; vb = statusOrder[db.status] ?? 1; break;
+            default: return 0;
+        }
+        if (va < vb) return state.dir === 'asc' ? -1 :  1;
+        if (va > vb) return state.dir === 'asc' ?  1 : -1;
+        return 0;
+    }
+
+    function updateIcons() {
+        document.querySelectorAll('th.lh-sortable').forEach(th => {
+            th.classList.remove('lh-sort-asc', 'lh-sort-desc');
+            const icon = th.querySelector('.lh-sort-icon i');
+            if (icon) icon.className = 'fa-solid fa-sort';
+            if (th.dataset.col === state.col) {
+                th.classList.add('lh-sort-' + state.dir);
+                if (icon) icon.className = state.dir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+            }
+        });
+    }
+
+    document.querySelectorAll('th.lh-sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.col;
+            state.dir = state.col === col ? (state.dir === 'asc' ? 'desc' : 'asc') : 'asc';
+            state.col = col;
+            updateIcons();
+            Array.from(tbody.querySelectorAll('tr')).sort(compare).forEach(r => tbody.appendChild(r));
+        });
+    });
+})();
+
 (function() {
     const from = document.getElementById('fromDate');
     const to   = document.getElementById('toDate');

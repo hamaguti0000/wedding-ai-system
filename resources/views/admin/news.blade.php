@@ -71,7 +71,28 @@
 
 @media (max-width: 767px) {
     .layout-grid { grid-template-columns: repeat(3, 1fr); }
+    .news-toolbar { flex-direction: column; align-items: flex-start; }
+    .news-search-wrap { max-width: 100%; }
 }
+/* ── 検索・フィルター ── */
+.news-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 14px; margin-bottom: 10px;
+    background: #fff; border-radius: 10px; border: 1px solid #f0ebe3;
+}
+.news-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+.news-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
+.news-search { width: 100%; padding: 8px 28px 8px 30px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.85rem; background: #fffdf9; box-sizing: border-box; }
+.news-search:focus { border-color: #b38b59; outline: none; }
+.news-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
+.news-clear.visible { display: block; }
+.news-filter-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.news-filter-btn.active, .news-filter-btn:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
+.news-sort-select { padding: 7px 10px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.82rem; color: #7a6a5a; background: #fffdf9; cursor: pointer; }
+.news-sort-select:focus { border-color: #b38b59; outline: none; }
+.news-result-count { font-size: 0.82rem; color: #999; margin-bottom: 8px; }
+.news-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
+.news-no-results.visible { display: block; }
 </style>
 @endpush
 
@@ -171,16 +192,40 @@
     </div>
 
     {{-- ══ 一覧 ══ --}}
-    <div style="margin-bottom:8px;font-size:0.82rem;color:#999;">{{ $news->count() }}件</div>
-
     @if ($news->isEmpty())
     <div class="empty-state">
         <div class="empty-state__icon">📢</div>
         <p class="empty-state__title">まだお知らせがありません</p>
     </div>
     @else
+    {{-- ツールバー --}}
+    <div class="news-toolbar">
+        <div class="news-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="newsSearch" class="news-search" placeholder="タイトル・本文・タグで検索" autocomplete="off">
+            <button type="button" id="newsClear" class="news-clear" aria-label="クリア">✕</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <button class="news-filter-btn active" data-active="all">すべて</button>
+            <button class="news-filter-btn" data-active="1">表示中</button>
+            <button class="news-filter-btn" data-active="0">非表示</button>
+            <select id="newsSort" class="news-sort-select">
+                <option value="order">表示順</option>
+                <option value="date-desc">日付（新しい順）</option>
+                <option value="date-asc">日付（古い順）</option>
+            </select>
+        </div>
+    </div>
+    <div class="news-result-count" id="newsCount"><strong>{{ $news->count() }}</strong>件</div>
+    <div id="newsList">
     @foreach ($news as $item)
-    <div class="news-item {{ $item->is_active ? '' : 'inactive' }}">
+    <div class="news-item {{ $item->is_active ? '' : 'inactive' }}"
+         data-title="{{ strtolower($item->title ?? '') }}"
+         data-body="{{ strtolower(mb_substr($item->body, 0, 200)) }}"
+         data-tag="{{ strtolower($item->tag ?? '') }}"
+         data-active="{{ $item->is_active ? '1' : '0' }}"
+         data-date="{{ $item->published_date->format('Y-m-d') }}"
+         data-id="{{ $item->id }}">
         <div class="news-item__head">
             <span class="news-item__date">{{ $item->published_date->format('Y.m.d') }}</span>
             <span class="news-item__layout-badge">{{ ['text'=>'テキスト','top'=>'画像縦','left'=>'画像左','right'=>'画像右','hero'=>'フルイメージ','card'=>'カード'][$item->layout ?? 'text'] }}</span>
@@ -304,6 +349,11 @@
         </form>
     </div>
     @endforeach
+    </div>{{-- #newsList --}}
+    <div class="news-no-results" id="newsNoResults">
+        <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+        <p style="font-weight:600;color:#888;">該当するお知らせが見つかりません</p>
+    </div>
     @endif
 </div>
 
@@ -331,6 +381,72 @@ function clearImage(input, previewId, wrapId) {
     document.getElementById(previewId).src = '';
     document.getElementById(wrapId).style.display = 'none';
 }
+
+// ── お知らせ検索・フィルター・ソート ──────────────────────
+(function () {
+    const state  = { q: '', active: 'all', sort: 'order' };
+    const list   = document.getElementById('newsList');
+    const srch   = document.getElementById('newsSearch');
+    const clrBtn = document.getElementById('newsClear');
+    const countEl= document.getElementById('newsCount');
+    const noRes  = document.getElementById('newsNoResults');
+    if (!list) return;
+
+    const getItems = () => Array.from(list.querySelectorAll('.news-item'));
+
+    function applyAll() {
+        const items = getItems();
+        let visible = 0;
+        items.forEach(item => {
+            const d = item.dataset;
+            let show = true;
+            if (state.q) {
+                const q = state.q;
+                if (!d.title.includes(q) && !d.body.includes(q) && !d.tag.includes(q)) show = false;
+            }
+            if (state.active !== 'all' && d.active !== state.active) show = false;
+            item.style.display = show ? '' : 'none';
+            // 編集フォームも非表示に
+            const editDiv = document.getElementById('edit-' + d.id);
+            if (editDiv && !show) editDiv.style.display = 'none';
+            if (show) visible++;
+        });
+        if (state.sort !== 'order') {
+            items.filter(i => i.style.display !== 'none')
+                 .sort((a, b) => {
+                     const da = a.dataset.date || '', db = b.dataset.date || '';
+                     return state.sort === 'date-desc' ? db.localeCompare(da) : da.localeCompare(db);
+                 })
+                 .forEach(item => list.appendChild(item));
+        }
+        if (countEl) countEl.innerHTML = `<strong>${visible}</strong>件`;
+        if (noRes)   noRes.classList.toggle('visible', visible === 0);
+    }
+
+    srch?.addEventListener('input', () => {
+        state.q = srch.value.toLowerCase().trim();
+        clrBtn?.classList.toggle('visible', state.q.length > 0);
+        applyAll();
+    });
+    clrBtn?.addEventListener('click', () => {
+        srch.value = ''; state.q = '';
+        clrBtn.classList.remove('visible');
+        srch.focus(); applyAll();
+    });
+    document.querySelectorAll('.news-filter-btn[data-active]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.news-filter-btn[data-active]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.active = btn.dataset.active;
+            applyAll();
+        });
+    });
+    document.getElementById('newsSort')?.addEventListener('change', e => {
+        state.sort = e.target.value;
+        applyAll();
+    });
+    applyAll();
+})();
 
 // テキストのみのとき画像フィールドを非表示（追加フォーム）
 document.querySelectorAll('input[name="layout"]').forEach(r => {
