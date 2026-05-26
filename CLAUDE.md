@@ -199,7 +199,7 @@ ssh -i ~/.ssh/wedding_deploy root@133.117.74.212 "
 > **テストを通さずデプロイしない。** 過去に本番でエラーが発生した教訓から。
 
 ### SSH鍵
-- ローカルの鍵: `~/.ssh/wedding_deploy`
+- ローカルの鍵: `~/.ssh/vps_key`
 - VPSユーザー: `root`
 - アプリパス: `/var/www/wedding-ai-system`
 - PHPコマンド: `php8.4`（バージョン固定）
