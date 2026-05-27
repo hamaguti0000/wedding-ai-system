@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Mail\EmailVerificationMail;
+use App\Mail\PasswordResetMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -73,6 +74,16 @@ class User extends Authenticatable
         }
 
         return !blank($this->email) && is_null($this->email_verified_at);
+    }
+
+    /** Laravelのデフォルト英語通知の代わりに日本語カスタムメールを送る */
+    public function sendPasswordResetNotification($token): void
+    {
+        try {
+            Mail::to($this->email)->send(new PasswordResetMail($this, $token));
+        } catch (\Throwable) {
+            // SES未設定時もリセットフローを妨げない
+        }
     }
 
     /** トークンを生成してメールを送信する。一定時間内の再送は拒否。 */
