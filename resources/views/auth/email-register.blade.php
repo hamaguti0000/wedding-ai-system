@@ -81,7 +81,7 @@
 
             <div class="form-group">
                 <label for="email">メールアドレス</label>
-                <input id="email" type="email" name="email" value="{{ $formEmail }}" required autofocus autocomplete="email" placeholder="example@example.com" data-current-email="{{ $user->email }}">
+                <input id="email" type="email" name="email" value="{{ $formEmail }}" required autofocus autocomplete="email" data-current-email="{{ $user->email }}">
             </div>
 
             <button type="submit" class="btn-submit" data-submit-button @disabled($isWaitingForResend)>

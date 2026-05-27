@@ -34,7 +34,7 @@
 
             <div class="form-group">
                 <label for="email">メールアドレス</label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email" placeholder="example@example.com">
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email">
             </div>
 
             <button type="submit" class="btn-submit">再設定メールを送信</button>

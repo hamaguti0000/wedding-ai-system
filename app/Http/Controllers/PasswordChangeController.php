@@ -18,11 +18,11 @@ class PasswordChangeController extends Controller
     {
         $request->validate([
             'current_password' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
+            'password' => ['required', 'string', 'min:6', 'max:255', 'confirmed'],
         ], [
             'current_password.required' => '現在のパスワードを入力してください',
             'password.required' => '新しいパスワードを入力してください',
-            'password.min' => 'パスワードは8文字以上にしてください',
+            'password.min' => 'パスワードは6文字以上にしてください',
             'password.confirmed' => '確認用パスワードが一致しません',
         ]);
 

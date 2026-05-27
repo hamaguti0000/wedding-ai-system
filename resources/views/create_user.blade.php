@@ -63,7 +63,6 @@
                         <span>姓 <em>*</em></span>
                         <input type="text" name="last_name"
                             value="{{ old('last_name') }}"
-                            placeholder="例：山田"
                             required>
                     </label>
 
@@ -71,24 +70,37 @@
                         <span>名 <em>*</em></span>
                         <input type="text" name="first_name"
                             value="{{ old('first_name') }}"
-                            placeholder="例：太郎"
                             required>
                     </label>
 
                     <label>
-                        <span>パスワード <em>*</em></span>
-                        <input type="password" name="password"
-                            placeholder="8文字以上"
-                            minlength="8"
-                            required>
+                        <span>パスワード <em>*</em>（6文字以上）</span>
+                        <div class="password-field">
+                            <input id="reg_password" type="password" name="password"
+                                minlength="6"
+                                required>
+                            <button type="button" class="password-toggle" data-password-toggle="reg_password" aria-label="パスワードを表示" aria-pressed="false">
+                                <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
                     </label>
 
                     <label>
                         <span>パスワード（確認） <em>*</em></span>
-                        <input type="password" name="password_confirmation"
-                            placeholder="もう一度入力"
-                            minlength="8"
-                            required>
+                        <div class="password-field">
+                            <input id="reg_password_confirmation" type="password" name="password_confirmation"
+                                minlength="6"
+                                required>
+                            <button type="button" class="password-toggle" data-password-toggle="reg_password_confirmation" aria-label="パスワードを表示" aria-pressed="false">
+                                <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
                     </label>
 
                     <div class="form-navigation">
@@ -104,7 +116,6 @@
                         <span>メールアドレス <em>*</em></span>
                         <input type="email" name="email"
                             value="{{ old('email') }}"
-                            placeholder="例：taro@example.com"
                             required>
                     </label>
 

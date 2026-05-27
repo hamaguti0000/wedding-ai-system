@@ -42,15 +42,21 @@
                 <label for="username">ユーザー名</label>
                 <input id="username" type="text" name="username"
                     value="{{ old('username') }}"
-                    placeholder="username"
                     autofocus required autocomplete="username">
             </div>
 
             <div class="form-group">
                 <label for="password">パスワード</label>
-                <input id="password" type="password" name="password"
-                    placeholder="••••••••"
-                    required autocomplete="current-password">
+                <div class="password-field">
+                    <input id="password" type="password" name="password"
+                        required autocomplete="current-password">
+                    <button type="button" class="password-toggle" data-password-toggle="password" aria-label="パスワードを表示" aria-pressed="false">
+                        <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn-submit" data-login-button>ログイン</button>
@@ -64,6 +70,18 @@
     </div>
 
     <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.passwordToggle);
+                if (!input) return;
+                const willShow = input.type === 'password';
+                input.type = willShow ? 'text' : 'password';
+                button.setAttribute('aria-pressed', willShow ? 'true' : 'false');
+                button.setAttribute('aria-label', willShow ? 'パスワードを隠す' : 'パスワードを表示');
+                button.classList.toggle('is-visible', willShow);
+            });
+        });
+
         (() => {
             const form = document.querySelector('[data-login-form]');
             const button = document.querySelector('[data-login-button]');

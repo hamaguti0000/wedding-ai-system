@@ -31,7 +31,7 @@ class AccountController extends Controller
             'last_name'             => 'required|string|max:50',
             'first_name'            => 'required|string|max:50',
             'email'                 => 'required|string|email:rfc,filter|max:255|unique:users,email',
-            'password'              => 'required|string|min:8|max:255|confirmed',
+            'password'              => 'required|string|min:6|max:255|confirmed',
             'password_confirmation' => 'required|string',
         ], [
             'last_name.required'             => '姓は必須です',
@@ -43,7 +43,7 @@ class AccountController extends Controller
             'email.max'                      => 'メールアドレスは255文字以内で入力してください',
             'email.unique'                   => 'このメールアドレスは既に登録されています',
             'password.required'              => 'パスワードは必須です',
-            'password.min'                   => 'パスワードは8文字以上で入力してください',
+            'password.min'                   => 'パスワードは6文字以上で入力してください',
             'password.max'                   => 'パスワードは255文字以内で入力してください',
             'password.confirmed'             => 'パスワードが一致しません',
             'password_confirmation.required' => '確認用パスワードは必須です',

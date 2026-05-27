@@ -45,7 +45,7 @@
 
             <div class="form-group">
                 <label for="username">ユーザー名</label>
-                <input id="username" type="text" name="username" value="{{ old('username') }}" required autofocus autocomplete="username" placeholder="username">
+                <input id="username" type="text" name="username" value="{{ old('username') }}" required autofocus autocomplete="username">
             </div>
 
             <button type="submit" class="btn-submit">登録メールを確認</button>

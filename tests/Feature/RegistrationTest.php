@@ -123,29 +123,29 @@ it('メールアドレスは大文字小文字を区別しない重複チェッ�
 // 3. パスワード強度チェック
 // ─────────────────────────────────────────────
 
-it('7文字パスワードは拒否される', function () {
+it('5文字パスワードは拒否される', function () {
     $res = $this->post('/register', [
         'last_name'             => '山田',
         'first_name'            => '太郎',
         'email'                 => 'taro@example.com',
-        'password'              => 'Short1',
-        'password_confirmation' => 'Short1',
+        'password'              => 'Ab1cd',
+        'password_confirmation' => 'Ab1cd',
     ]);
 
     $res->assertSessionHasErrors('password');
     expect(session('errors')->first('password'))
-        ->toBe('パスワードは8文字以上で入力してください');
+        ->toBe('パスワードは6文字以上で入力してください');
 });
 
-it('8文字ちょうどのパスワードは許可される', function () {
+it('6文字ちょうどのパスワードは許可される', function () {
     Mail::fake();
 
     $res = $this->post('/register', [
         'last_name'             => '山田',
         'first_name'            => '太郎',
         'email'                 => 'taro@example.com',
-        'password'              => 'Secure01',
-        'password_confirmation' => 'Secure01',
+        'password'              => 'Abc123',
+        'password_confirmation' => 'Abc123',
     ]);
 
     $res->assertRedirect(route('email.register'));

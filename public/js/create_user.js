@@ -76,4 +76,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     updateSlider();
+
+    // パスワード表示切替
+    document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const input = document.getElementById(button.dataset.passwordToggle);
+            if (!input) return;
+            const willShow = input.type === 'password';
+            input.type = willShow ? 'text' : 'password';
+            button.setAttribute('aria-pressed', willShow ? 'true' : 'false');
+            button.setAttribute('aria-label', willShow ? 'パスワードを隠す' : 'パスワードを表示');
+            button.classList.toggle('is-visible', willShow);
+        });
+    });
 });

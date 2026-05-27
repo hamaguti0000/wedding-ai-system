@@ -229,7 +229,7 @@
         <section class="confirm-bar">
             <div>
                 <label>初期パスワード <span class="req">*</span></label>
-                <input type="text" name="initial_password" value="{{ old('initial_password') }}" placeholder="8文字以上" autocomplete="off">
+                <input type="text" name="initial_password" value="{{ old('initial_password') }}" placeholder="6文字以上" autocomplete="off">
                 @error('initial_password')<span class="field-error">{{ $message }}</span>@enderror
                 <p class="confirm-help">登録されたゲストは初回ログイン後にパスワード変更が必要になります。</p>
             </div>

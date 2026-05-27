@@ -39,17 +39,41 @@
 
             <div class="form-group">
                 <label for="current_password">現在のパスワード</label>
-                <input id="current_password" type="password" name="current_password" required autocomplete="current-password" placeholder="••••••••">
+                <div class="password-field">
+                    <input id="current_password" type="password" name="current_password" required autocomplete="current-password">
+                    <button type="button" class="password-toggle" data-password-toggle="current_password" aria-label="パスワードを表示" aria-pressed="false">
+                        <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="password">新しいパスワード</label>
-                <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="8文字以上">
+                <label for="password">新しいパスワード（6文字以上）</label>
+                <div class="password-field">
+                    <input id="password" type="password" name="password" required autocomplete="new-password">
+                    <button type="button" class="password-toggle" data-password-toggle="password" aria-label="パスワードを表示" aria-pressed="false">
+                        <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="password_confirmation">新しいパスワード（確認）</label>
-                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="もう一度入力">
+                <div class="password-field">
+                    <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password">
+                    <button type="button" class="password-toggle" data-password-toggle="password_confirmation" aria-label="パスワードを表示" aria-pressed="false">
+                        <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn-submit">パスワードを変更して進む</button>
@@ -64,5 +88,18 @@
             </form>
         </div>
     </div>
+    <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.passwordToggle);
+                if (!input) return;
+                const willShow = input.type === 'password';
+                input.type = willShow ? 'text' : 'password';
+                button.setAttribute('aria-pressed', willShow ? 'true' : 'false');
+                button.setAttribute('aria-label', willShow ? 'パスワードを隠す' : 'パスワードを表示');
+                button.classList.toggle('is-visible', willShow);
+            });
+        });
+    </script>
 </body>
 </html>

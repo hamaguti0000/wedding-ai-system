@@ -33,7 +33,7 @@
             <div class="form-group">
                 <label for="password">新しいパスワード</label>
                 <div class="password-field">
-                    <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="••••••••">
+                    <input id="password" type="password" name="password" required autocomplete="new-password">
                     <button type="button" class="password-toggle" data-password-toggle="password" aria-label="パスワードを表示" aria-pressed="false">
                         <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
@@ -46,7 +46,7 @@
             <div class="form-group">
                 <label for="password_confirmation">新しいパスワード（確認）</label>
                 <div class="password-field">
-                    <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••">
+                    <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password">
                     <button type="button" class="password-toggle" data-password-toggle="password_confirmation" aria-label="確認用パスワードを表示" aria-pressed="false">
                         <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
