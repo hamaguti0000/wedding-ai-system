@@ -186,6 +186,56 @@ th.sort-desc .sort-icon { color: #b38b59; }
 .btn-lh { background: #f0edff; color: #6c3fd9; border: 1px solid #d9cef5; font-size: 0.75rem; }
 .btn-lh:hover { background: #e4deff; border-color: #6c3fd9; color: #5530c8; }
 @media (max-width: 767px) { .btn-lh-label { display: none; } }
+
+/* ── 行クリックで回答内容を表示 ── */
+#guestTbody tr[data-id] { cursor: pointer; }
+
+/* ── 回答内容 詳細モーダル ── */
+.detail-modal-overlay {
+    position: fixed; inset: 0; background: rgba(30,18,6,0.45);
+    z-index: 500; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    padding: 16px;
+}
+.detail-modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.detail-modal {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+    width: 100%; max-width: 560px; max-height: 90vh;
+    overflow-y: auto; padding: 28px;
+    transform: translateY(16px); transition: transform 0.2s;
+}
+.detail-modal-overlay.open .detail-modal { transform: translateY(0); }
+
+.dm-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0ebe3;
+}
+.dm-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #3d2f25; font-weight: 400; }
+.dm-subtitle { font-size: 0.8rem; color: #9b8573; margin-top: 2px; }
+.dm-close {
+    background: none; border: none; font-size: 1.2rem; cursor: pointer;
+    color: #9b8573; padding: 4px; line-height: 1; flex-shrink: 0;
+    transition: color 0.15s;
+}
+.dm-close:hover { color: #3d2f25; }
+
+.dm-section { margin-bottom: 18px; }
+.dm-section-title {
+    font-size: 0.7rem; font-weight: 700; color: #b38b59;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;
+}
+.dm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dm-item dt { font-size: 0.72rem; color: #b0a090; margin-bottom: 2px; }
+.dm-item dd { font-size: 0.9rem; color: #3d2f25; margin: 0; line-height: 1.5; }
+.dm-full { grid-column: 1 / -1; }
+.dm-item dd.dm-pre { white-space: pre-wrap; background: #fafaf8; border-radius: 6px; padding: 8px 10px; font-size: 0.86rem; }
+
+@media (max-width: 767px) {
+    .detail-modal { padding: 20px 16px; }
+    .dm-grid { grid-template-columns: 1fr; }
+}
 </style>
 @endpush
 
@@ -349,7 +399,20 @@ th.sort-desc .sort-icon { color: #b38b59; }
                     data-count="{{ $p?->isAttending() ? ($p->attending_count ?? 0) : 0 }}"
                     data-email="{{ $guest->email ? '1' : '0' }}"
                     data-login="{{ $hasLogin ? $lastOk->created_at->timestamp : '0' }}"
-                    data-responded="{{ $p?->responded_at?->timestamp ?? '0' }}">
+                    data-responded="{{ $p?->responded_at?->timestamp ?? '0' }}"
+                    data-display-name="{{ $fullName ?: $guest->username }}"
+                    data-status-label="{{ ['attending'=>'出席','declining'=>'欠席','pending'=>'未回答'][$rsvp] }}"
+                    data-children="{{ $p?->children_count ?? 0 }}"
+                    data-side-label="{{ $p?->guestSideLabel() ?? '—' }}"
+                    data-rel="{{ $p?->relationshipLabel() ?? '—' }}"
+                    data-rel-detail="{{ $p?->relationship_detail ?? '' }}"
+                    data-allergy="{{ $p?->has_allergy ? 'あり' : ($p ? 'なし' : '') }}"
+                    data-allergy-notes="{{ $p?->allergy_notes ?? '' }}"
+                    data-phone="{{ $p?->phone ?? '' }}"
+                    data-postal="{{ $p?->postal_code ?? '' }}"
+                    data-address="{{ $p?->address ?? '' }}"
+                    data-notes="{{ $p?->notes ?? '' }}"
+                    onclick="openDetail(this)">
 
                     {{-- 氏名 --}}
                     <td>
@@ -452,7 +515,7 @@ th.sort-desc .sort-icon { color: #b38b59; }
                     <td style="text-align:right;white-space:nowrap;">
                         <button type="button"
                             class="btn-sm btn-lh"
-                            onclick="toggleLh({{ $guest->id }}, this)"
+                            onclick="event.stopPropagation(); toggleLh({{ $guest->id }}, this)"
                             aria-expanded="false"
                             title="{{ $guest->username }} のログイン履歴">
                             <i class="fa-solid fa-clock-rotate-left"></i>
@@ -511,6 +574,98 @@ th.sort-desc .sort-icon { color: #b38b59; }
         </div>
 
         @endif
+    </div>
+</div>
+
+{{-- 回答内容 詳細モーダル --}}
+<div class="detail-modal-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+    <div class="detail-modal" id="detailModal">
+        <div class="dm-header">
+            <div>
+                <p class="dm-title" id="dmName">—</p>
+                <p class="dm-subtitle" id="dmUsername">—</p>
+            </div>
+            <button class="dm-close" onclick="closeDetail()" aria-label="閉じる">✕</button>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">出欠・参加情報</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>出欠</dt>
+                    <dd id="dmStatus">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>出席人数（合計）</dt>
+                    <dd id="dmCount">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>うちお子様</dt>
+                    <dd id="dmChildren">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>回答日時</dt>
+                    <dd id="dmResponded">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">お立場・ご関係</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>お立場</dt>
+                    <dd id="dmSide">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>ご関係</dt>
+                    <dd id="dmRel">—</dd>
+                </dl>
+                <dl class="dm-item dm-full">
+                    <dt>ご関係の詳細</dt>
+                    <dd id="dmRelDetail">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">食物アレルギー</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>アレルギー</dt>
+                    <dd id="dmAllergy">—</dd>
+                </dl>
+                <dl class="dm-item dm-full">
+                    <dt>アレルギー詳細</dt>
+                    <dd id="dmAllergyNotes">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">連絡先</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>電話番号</dt>
+                    <dd id="dmPhone">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>郵便番号</dt>
+                    <dd id="dmPostal">—</dd>
+                </dl>
+                <dl class="dm-item dm-full">
+                    <dt>住所</dt>
+                    <dd id="dmAddress">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">メッセージ</p>
+            <dl class="dm-item">
+                <dd id="dmNotes" class="dm-pre">—</dd>
+            </dl>
+        </div>
     </div>
 </div>
 
@@ -672,5 +827,36 @@ function toggleLh(id, btn) {
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     btn.style.background = open ? '#d6ccff' : '';
 }
+
+// ── 回答内容 詳細モーダル ────────────────────────────────
+function openDetail(row) {
+    const d = row.dataset;
+    document.getElementById('dmName').textContent       = d.displayName || '—';
+    document.getElementById('dmUsername').textContent   = '@' + (d.username || '—');
+    document.getElementById('dmStatus').innerHTML       = statusBadge(d.rsvp, d.statusLabel);
+    document.getElementById('dmCount').textContent      = d.count > 0 ? d.count + '名' : '—';
+    document.getElementById('dmChildren').textContent   = d.children > 0 ? d.children + '名' : '—';
+    document.getElementById('dmResponded').textContent  = d.responded && d.responded !== '0' ? new Date(parseInt(d.responded) * 1000).toLocaleString('ja-JP') : '—';
+    document.getElementById('dmSide').textContent       = d.sideLabel || '—';
+    document.getElementById('dmRel').textContent        = d.rel || '—';
+    document.getElementById('dmRelDetail').textContent  = d.relDetail || '—';
+    document.getElementById('dmAllergy').textContent    = d.allergy || '—';
+    document.getElementById('dmAllergyNotes').textContent = d.allergyNotes || '—';
+    document.getElementById('dmPhone').textContent      = d.phone || '—';
+    document.getElementById('dmPostal').textContent     = d.postal || '—';
+    document.getElementById('dmAddress').textContent    = d.address || '—';
+    document.getElementById('dmNotes').textContent      = d.notes || '—';
+    document.getElementById('detailOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeDetail() {
+    document.getElementById('detailOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function statusBadge(status, label) {
+    const cls = { attending: 'attending', declining: 'declining', pending: 'pending' }[status] || 'pending';
+    return `<span class="badge ${cls}">${label}</span>`;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 </script>
 @endsection
