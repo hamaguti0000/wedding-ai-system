@@ -2,7 +2,7 @@
 @section('title', '席次表 | ' . ($setting?->groom_name ?? '') . ' & ' . ($setting?->bride_name ?? ''))
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/seating-guest.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/seating-guest.css') }}">
 @endpush
 
 @section('content')

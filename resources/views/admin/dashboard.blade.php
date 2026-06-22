@@ -3,8 +3,10 @@
 
 @push('styles')
 <style>
-/* ── 列の表示制御 ── */
-@media (max-width: 767px) {
+/* ── 列の表示制御 ──
+   サイドバー分で実際の表示幅が縮むため、ビューポート幅ではなく
+   .guest-table-wrap の実際の幅(コンテナクエリ)で切り替える */
+@container (max-width: 950px) {
     .col-side, .col-date, .col-email { display: none; }
 }
 
@@ -167,7 +169,7 @@ th.sort-desc .sort-icon { color: #b38b59; }
 }
 .btn-csv:hover { background: #1e8449; color: #fff; }
 
-@media (max-width: 767px) {
+@container (max-width: 950px) {
     .col-allergy { display: none; }
 }
 

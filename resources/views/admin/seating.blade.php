@@ -2,7 +2,7 @@
 @section('title', '席次表管理 | Admin')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/seating.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/seating.css') }}">
 @endpush
 
 @section('content')

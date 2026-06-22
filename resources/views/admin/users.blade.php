@@ -74,10 +74,15 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
     .card { padding: 16px; }
     .fg-2, .fg-3, .fg-4 { grid-template-columns: 1fr; }
     .user-table-wrap .card-title { padding: 14px 14px 0; }
-    .col-md-hide { display: none; }
     .users-wrap table { min-width: 360px; }
     .pw-form input { width: 120px; }
     .bulk-toolbar { align-items: flex-start; flex-direction: column; margin: 12px 12px 0; }
+}
+
+/* サイドバー分で実際の表示幅が縮むため、ビューポート幅ではなく
+   .user-table-wrap の実際の幅(コンテナクエリ)で切り替える */
+@container (max-width: 950px) {
+    .col-md-hide { display: none; }
 }
 @media (min-width: 768px) {
     .fg-2 { grid-template-columns: 1fr 1fr; }

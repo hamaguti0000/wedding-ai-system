@@ -8,11 +8,11 @@
     <title>@yield('title', '結婚式招待ページ | Kakeru＆Mirai')</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/design-system.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/common.css') }}">
+    <link rel="stylesheet" href="{{ css_asset('css/design-system.css') }}">
+    <link rel="stylesheet" href="{{ css_asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ css_asset('css/common.css') }}">
     @if (Auth::user()?->isAdmin())
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ css_asset('css/admin.css') }}">
     @endif
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 

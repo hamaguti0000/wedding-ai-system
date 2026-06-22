@@ -2,7 +2,7 @@
 @section('title', ($item->title ?: Str::limit($item->body, 30)) . ' | お知らせ')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/home.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/home.css') }}">
 <style>
 main { padding: 0; text-align: initial; }
 

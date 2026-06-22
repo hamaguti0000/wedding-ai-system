@@ -2,7 +2,7 @@
 @section('title', 'お知らせ一覧 | Wedding')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/home.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/home.css') }}">
 <style>
 main { padding: 0; text-align: initial; }
 

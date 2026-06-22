@@ -2,7 +2,7 @@
 @section('title', 'ホーム | ' . ($setting?->groom_name ?? '') . ' & ' . ($setting?->bride_name ?? '') . ' Wedding')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/home.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/home.css') }}">
 @endpush
 
 @section('content')

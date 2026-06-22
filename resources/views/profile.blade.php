@@ -2,7 +2,7 @@
 @section('title', 'プロフィール | Kakeru & Mirai Wedding')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/profile.css') }}">
 @endpush
 
 @section('content')

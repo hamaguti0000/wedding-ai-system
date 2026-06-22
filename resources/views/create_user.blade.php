@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>ユーザー登録</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ asset('css/create_user.css') }}">
+    <link rel="stylesheet" href="{{ css_asset('css/create_user.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
 </head>
 

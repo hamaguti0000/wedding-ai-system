@@ -2,7 +2,7 @@
 @section('title', '招待状 | Kakeru & Mirai Wedding')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/invitation.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/invitation.css') }}">
 @endpush
 
 @section('content')
