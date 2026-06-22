@@ -50,12 +50,6 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.rsvp') }}"
-                   class="{{ request()->routeIs('admin.rsvp*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>回答状況
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('admin.users') }}"
                    class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
                     <i class="fa-solid fa-user-pen" aria-hidden="true"></i>ユーザー管理

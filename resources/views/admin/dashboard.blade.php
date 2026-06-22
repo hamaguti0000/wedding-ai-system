@@ -154,6 +154,23 @@ th.sort-desc .sort-icon { color: #b38b59; }
 .badge-email-ok  { background: #eafaf1; color: #1e8449; }
 .badge-email-no  { background: #fdf2f2; color: #c0392b; }
 
+.allergy-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+.allergy-yes { background: #fff3cd; color: #856404; }
+.allergy-no  { background: #f0f0f0; color: #888; }
+
+/* ── CSV出力 ── */
+.btn-csv {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 500;
+    background: #27ae60; color: #fff; text-decoration: none; white-space: nowrap;
+    border: none; transition: background 0.2s; flex-shrink: 0;
+}
+.btn-csv:hover { background: #1e8449; color: #fff; }
+
+@media (max-width: 767px) {
+    .col-allergy { display: none; }
+}
+
 /* ── ログイン履歴展開行 ── */
 .lh-row { display: none; background: #fafaf7; }
 .lh-row.open { display: table-row; }
@@ -252,6 +269,9 @@ th.sort-desc .sort-icon { color: #b38b59; }
                 <span class="result-count" id="resultCount">
                     <strong>{{ $guests->count() }}</strong> 名表示中
                 </span>
+                <a href="{{ route('admin.rsvp.export') }}" class="btn-csv">
+                    <i class="fa-solid fa-file-csv"></i> CSV出力
+                </a>
             </div>
 
             <div class="filter-rows">
@@ -296,6 +316,7 @@ th.sort-desc .sort-icon { color: #b38b59; }
                     <th class="sortable" data-col="count">
                         人数 <span class="sort-icon"><i class="fa-solid fa-sort"></i></span>
                     </th>
+                    <th class="col-allergy">アレルギー</th>
                     <th class="sortable col-email" data-col="email">
                         メール <span class="sort-icon"><i class="fa-solid fa-sort"></i></span>
                     </th>
@@ -378,6 +399,17 @@ th.sort-desc .sort-icon { color: #b38b59; }
                         @endif
                     </td>
 
+                    {{-- アレルギー --}}
+                    <td class="col-allergy">
+                        @if ($p?->has_allergy)
+                            <span class="allergy-badge allergy-yes">あり</span>
+                        @elseif ($p)
+                            <span class="allergy-badge allergy-no">なし</span>
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
+                    </td>
+
                     {{-- メール --}}
                     <td class="col-email">
                         @if ($guest->email)
@@ -431,7 +463,7 @@ th.sort-desc .sort-icon { color: #b38b59; }
 
                 {{-- ログイン履歴 展開行 --}}
                 <tr class="lh-row" id="lh-row-{{ $guest->id }}">
-                    <td colspan="8">
+                    <td colspan="9">
                         <div class="lh-inner">
                             <div class="lh-inner-title">
                                 <i class="fa-solid fa-clock-rotate-left"></i>

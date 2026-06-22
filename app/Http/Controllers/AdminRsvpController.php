@@ -70,32 +70,4 @@ class AdminRsvpController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
-
-    public function index(Request $request)
-    {
-        $guests = User::where('role', 'guest')
-            ->with('guestProfile')
-            ->orderBy('created_at')
-            ->get();
-
-        $summary = [
-            'total'     => $guests->count(),
-            'attending' => $guests->filter(fn($u) => $u->guestProfile?->participation === 'attending')->count(),
-            'declining' => $guests->filter(fn($u) => $u->guestProfile?->participation === 'declining')->count(),
-            'pending'   => $guests->filter(fn($u) => !$u->guestProfile || $u->guestProfile->participation === 'pending')->count(),
-        ];
-
-        // 出席者の合計人数（大人＋子供）— ビューで全件渡してクライアント側フィルター
-        $totalAttending = $guests
-            ->filter(fn($u) => $u->guestProfile?->participation === 'attending')
-            ->sum(fn($u) => $u->guestProfile->attending_count ?? 0);
-
-        $totalChildren = $guests
-            ->filter(fn($u) => $u->guestProfile?->participation === 'attending')
-            ->sum(fn($u) => $u->guestProfile->children_count ?? 0);
-
-        return view('admin.rsvp', compact(
-            'guests', 'summary', 'totalAttending', 'totalChildren'
-        ));
-    }
 }

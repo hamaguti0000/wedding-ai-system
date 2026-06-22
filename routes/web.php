@@ -116,7 +116,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/ops/live',      [AdminOperationsController::class, 'metrics'])->name('ops.live');
     Route::get('/audit/check-in',[AdminAuditController::class, 'index'])->name('audit.checkin');
     Route::get('/audit/email', [AdminEmailAuditController::class, 'index'])->name('audit.email');
-    Route::get('/rsvp',          [AdminRsvpController::class, 'index']) ->name('rsvp');
     Route::get('/rsvp/export',   [AdminRsvpController::class, 'export'])->name('rsvp.export');
     Route::get('/login-history', [AdminLoginHistoryController::class,'index'])->name('login-history');
     Route::get('/settings', [AdminSettingController::class, 'edit'])  ->name('settings');
