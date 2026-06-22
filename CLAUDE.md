@@ -184,7 +184,7 @@ vendor/bin/sail artisan test
 git push origin main
 
 # 3. VPSへデプロイ
-ssh -i ~/.ssh/wedding_deploy root@133.117.74.212 "
+ssh -i ~/.ssh/vps_key root@133.117.74.212 "
   cd /var/www/wedding-ai-system
   git fetch origin main && git reset --hard FETCH_HEAD
   composer install --no-dev --optimize-autoloader --quiet
