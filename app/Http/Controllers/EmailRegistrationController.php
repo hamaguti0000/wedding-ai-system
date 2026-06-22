@@ -25,7 +25,6 @@ class EmailRegistrationController extends Controller
             'email' => [
                 'required',
                 'string',
-                'lowercase',
                 'email:rfc,filter',
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
