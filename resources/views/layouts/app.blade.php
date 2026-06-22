@@ -19,9 +19,16 @@
     @stack('styles')
 </head>
 
-<body>
+@php
+    $__isAdmin = Auth::user()?->isAdmin();
+@endphp
+<body @class(['has-admin-sidebar' => $__isAdmin])>
 
     @include('layouts.header')
+
+    @if ($__isAdmin)
+        @include('layouts.admin-sidebar')
+    @endif
 
     <main>
         @yield('content')
