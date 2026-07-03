@@ -24,7 +24,9 @@
         maxWidth: 900,
         minHeight: 400,
         maxHeight: 1200,
-        showCover: false,
+        // 表紙(1ページ目)だけを単独表示にし、そこから見開きが始まるようにする。
+        // false だと最初から1・2ページ目が横並びになり、本というより資料めくりに見える。
+        showCover: true,
         maxShadowOpacity: 0.5,
         // 軽快にめくれるよう、デフォルト(1000ms)より短めに設定
         flippingTime: 500,
