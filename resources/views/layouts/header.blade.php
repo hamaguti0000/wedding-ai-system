@@ -297,6 +297,12 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.profile-book') }}"
+                   class="{{ request()->routeIs('admin.profile-book*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-book-open" aria-hidden="true"></i>プロフィールブック
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.settings') }}"
                    class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                     <i class="fa-solid fa-gear" aria-hidden="true"></i>設定
