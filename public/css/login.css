@@ -2,6 +2,7 @@
 
 body {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -295,7 +296,7 @@ body {
 
 /* ── レスポンシブ ─────────────────────────── */
 @media (max-width: 480px) {
-    body { align-items: flex-start; padding: 16px 0; }
+    body { padding: 16px 0; }
     .login-card { padding: 34px 18px 30px; max-width: calc(100vw - 24px); }
     .monogram   { font-size: 2.1rem; }
     .ornament { margin-bottom: 28px; }

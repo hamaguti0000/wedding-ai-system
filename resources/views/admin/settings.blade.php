@@ -33,6 +33,16 @@
 .toggle-label { font-size: 0.9rem; color: #3d2f25; }
 .toggle-note { font-size: 0.78rem; color: #b0a090; margin-top: 6px; }
 
+/* 日付クリアボタン */
+.date-clear-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.date-clear-row input[type="date"] { width: auto; flex: 1; min-width: 160px; }
+.btn-clear-date {
+    padding: 10px 14px; border: 1px solid #e2d0bc; border-radius: 2px;
+    background: #fffdf9; color: #7a6555; font-size: 0.82rem;
+    cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s;
+}
+.btn-clear-date:hover { background: #f5eadc; color: #7a5c30; }
+
 @media (max-width: 767px) {
     .btn-save { width: 100%; }
 }
@@ -200,8 +210,11 @@
                 <h2>出欠回答</h2>
                 <div class="form-group">
                     <label>締め切り日</label>
-                    <input type="date" name="rsvp_deadline"
-                        value="{{ old('rsvp_deadline', $setting->rsvp_deadline?->format('Y-m-d')) }}">
+                    <div class="date-clear-row">
+                        <input type="date" name="rsvp_deadline" id="rsvp_deadline"
+                            value="{{ old('rsvp_deadline', $setting->rsvp_deadline?->format('Y-m-d')) }}">
+                        <button type="button" class="btn-clear-date" data-clear-target="rsvp_deadline">未設定にする</button>
+                    </div>
                     <p class="field-note">設定した日の翌日から招待状フォームへの送信ができなくなります。空欄の場合は制限なし。</p>
                     @error('rsvp_deadline')<span class="field-error">{{ $message }}</span>@enderror
                 </div>
@@ -267,4 +280,15 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.querySelectorAll('[data-clear-target]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.clearTarget);
+        if (input) input.value = '';
+    });
+});
+</script>
+@endpush
 @endsection
