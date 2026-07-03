@@ -26,7 +26,10 @@
     };
 @endphp
 
-<script>window.SEAT_TYPE_CONFIG = @json($typeConfig);</script>
+<script>
+    window.SEAT_TYPE_CONFIG = @json($typeConfig);
+    window.SUMMARY_TOTAL_GUESTS = {{ $summary['total'] }};
+</script>
 
 <div class="st-app" id="stApp" data-preview="false">
 

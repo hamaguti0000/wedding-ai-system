@@ -26,6 +26,16 @@ describe('GET /admin/seating 画面表示', function () {
             ->assertSee('山田 太郎')
             ->assertSee('data-guest-allergy-notes="えび"', false);
     });
+
+    it('出席予定ゲストの総数を window.SUMMARY_TOTAL_GUESTS としてJSへ渡す', function () {
+        makeGuest('attending');
+        makeGuest('attending');
+        makeGuest('declining');
+
+        $this->actingAs(makeAdmin())
+            ->get('/admin/seating')
+            ->assertSee('window.SUMMARY_TOTAL_GUESTS = 2;', false);
+    });
 });
 
 // ─── テーブル作成 ─────────────────────────────────────────

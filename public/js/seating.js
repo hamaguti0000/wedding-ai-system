@@ -15,10 +15,14 @@
     const TABLE_GAP_X = 220;
     const TABLE_GAP_Y = 230;
 
-    const CSRF     = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-    const TYPE_CFG = window.SEAT_TYPE_CONFIG ?? {};
-    const canvas   = document.getElementById('seatingCanvas');
-    const pool     = document.getElementById('unassignedPool');
+    const CSRF        = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const TYPE_CFG    = window.SEAT_TYPE_CONFIG ?? {};
+    // 出席予定ゲストの総数。テーブル/席の追加・削除では変わらない値なので、
+    // ページロード時に一度だけ受け取る（存在しない #summaryTotal 要素からの
+    // 再取得を試みると updateProgress() のたびに 0 にリセットされてしまう）。
+    const TOTAL_GUESTS = window.SUMMARY_TOTAL_GUESTS ?? 0;
+    const canvas      = document.getElementById('seatingCanvas');
+    const pool        = document.getElementById('unassignedPool');
     if (!canvas || !pool) return;
 
     /* ── スケール管理 ────────────────────────────────────────── */
@@ -131,8 +135,7 @@
 
     /* ── 進捗バー更新 ─────────────────────────────────────────── */
     function updateProgress() {
-        const totalEl    = document.getElementById('summaryTotal');
-        const total      = totalEl ? parseInt(totalEl.dataset.total ?? totalEl.textContent) : 0;
+        const total      = TOTAL_GUESTS;
         const assigned   = canvas.querySelectorAll('.canvas-seat.is-occupied').length;
         const unassigned = pool.querySelectorAll('.st-guest-card').length;
         const pct = total > 0 ? Math.round(assigned / total * 100) : 0;
@@ -823,9 +826,6 @@
     /* ================================================================
        初期化
     ================================================================ */
-    const totalEl = document.getElementById('summaryTotal');
-    if (totalEl) totalEl.dataset.total = totalEl.textContent;
-
     // 初回スケール適用
     applyScale();
     updateProgress();
