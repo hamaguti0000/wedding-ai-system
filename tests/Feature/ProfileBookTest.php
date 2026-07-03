@@ -162,6 +162,17 @@ describe('GET /profile-book ゲスト向け表示', function () {
             ->assertRedirect(route('dashboard'));
     });
 
+    it('is_profile_book_public が false でも管理者はプレビューできる', function () {
+        Storage::fake('public');
+        Storage::disk('public')->put('profile-book/a.jpg', 'a');
+        makeWeddingSetting(['is_profile_book_public' => false]);
+        ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+
+        $this->actingAs(makeAdmin())
+            ->get('/profile-book')
+            ->assertOk();
+    });
+
     it('is_profile_book_public が true の場合は表示される', function () {
         Storage::fake('public');
         Storage::disk('public')->put('profile-book/a.jpg', 'a');

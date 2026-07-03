@@ -39,13 +39,19 @@
         @endforeach
     </div>
 
-    <form method="POST" action="{{ route('admin.profile-book.destroy') }}" onsubmit="return confirm('プロフィールブックを削除しますか？');" style="margin-bottom:28px;">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="btn-sm" style="background:#fdf2f2;color:#c0392b;border:1px solid #f5c6c6;">
-            <i class="fa-solid fa-trash"></i> 削除する
-        </button>
-    </form>
+    <div style="display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;">
+        <a href="{{ route('profile-book') }}" target="_blank" rel="noopener" class="btn-sm" style="background:#f3e6cf;color:#8a6a3a;border:1px solid #e2c99a; text-decoration:none;">
+            <i class="fa-solid fa-book-open"></i> ページめくりをプレビュー
+        </a>
+        <form method="POST" action="{{ route('admin.profile-book.destroy') }}" onsubmit="return confirm('プロフィールブックを削除しますか？');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn-sm" style="background:#fdf2f2;color:#c0392b;border:1px solid #f5c6c6;">
+                <i class="fa-solid fa-trash"></i> 削除する
+            </button>
+        </form>
+    </div>
+    <p class="field-note" style="margin-top:-18px; margin-bottom:28px;">「設定」ページの公開トグルがオフの間でも、管理者はこのプレビューでゲストと同じ見た目を確認できます。</p>
     @endif
 
     <form method="POST" action="{{ route('admin.profile-book.upload') }}" enctype="multipart/form-data">
