@@ -173,7 +173,7 @@
     canvas.addEventListener('pointerdown', e => {
         if (state.guestDnD || state.seatDrag.active || state.isPreview) return;
         const handle = e.target.closest('[data-drag-handle]');
-        if (!handle || e.target.closest('button') || e.target.closest('.canvas-seat')) return;
+        if (!handle || e.target.closest('button') || e.target.closest('.canvas-seat') || e.target.closest('.ct-name')) return;
         const el = handle.closest('.canvas-table');
         if (!el) return;
         e.preventDefault();
@@ -422,6 +422,46 @@
         if (delBtn) delBtn.dataset.seatId = seatEl.dataset.seatId;
     }
 
+    /* ================================================================
+       ゲスト詳細情報モーダル
+    ================================================================ */
+    function openGuestDetail(seatEl) {
+        const d = seatEl.dataset;
+        const tableName = seatEl.closest('.canvas-table')?.querySelector('.ct-name')?.textContent ?? '';
+
+        document.getElementById('gdName').textContent          = d.guestName || '—';
+        document.getElementById('gdTable').textContent         = tableName ? `${tableName}` : '—';
+        document.getElementById('gdCount').textContent         = d.guestCount ? d.guestCount + '名' : '—';
+        document.getElementById('gdChildren').textContent      = d.guestChildren ? d.guestChildren + '名' : '—';
+        document.getElementById('gdSide').textContent          = SIDE_LABELS[d.guestSide] ?? '—';
+        document.getElementById('gdRel').textContent           = REL_LABELS[d.guestRel] ?? '—';
+        document.getElementById('gdRelDetail').textContent     = d.guestRelDetail || '—';
+        document.getElementById('gdAllergy').textContent       = d.guestAllergy || '—';
+        document.getElementById('gdAllergyNotes').textContent  = d.guestAllergyNotes || '—';
+        document.getElementById('gdPhone').textContent         = d.guestPhone || '—';
+        document.getElementById('gdPostal').textContent        = d.guestPostal || '—';
+        document.getElementById('gdAddress').textContent       = d.guestAddress || '—';
+        document.getElementById('gdNotes').textContent         = d.guestNotes || '—';
+
+        document.getElementById('guestDetailOverlay')?.classList.add('is-open');
+        document.getElementById('guestDetailOverlay')?.setAttribute('aria-hidden', 'false');
+    }
+    function closeGuestDetail() {
+        document.getElementById('guestDetailOverlay')?.classList.remove('is-open');
+        document.getElementById('guestDetailOverlay')?.setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('propsGuestDetail')?.addEventListener('click', () => {
+        if (state.selectedSeat) openGuestDetail(state.selectedSeat);
+    });
+    document.getElementById('guestDetailClose')?.addEventListener('click', closeGuestDetail);
+    document.getElementById('guestDetailOverlay')?.addEventListener('click', e => {
+        if (e.target.id === 'guestDetailOverlay') closeGuestDetail();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeGuestDetail();
+    });
+
     document.getElementById('propsClose')?.addEventListener('click', closePropsPanel);
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
@@ -456,10 +496,11 @@
         if (!seat || !userId) return;
         const tableId = seat.closest('.canvas-table__body')?.dataset.tableId;
 
-        const { ok } = await api.del(`/admin/seating/unassign/${userId}`);
+        const { ok, data } = await api.del(`/admin/seating/unassign/${userId}`);
         if (ok) {
             setSeatEmpty(seat);
             removeAssignedItem(userId);
+            if (data.guest) addUnassignedCard(data.guest);
             updateTableMeta(tableId);
             updateProgress();
             refreshPropsPanel(seat);
@@ -474,10 +515,14 @@
         const seatEl  = document.getElementById(`seat-${seatId}`);
         const tableId = seatEl?.closest('.canvas-table__body')?.dataset.tableId;
         if (!seatId) return;
+        if (!confirm('この席を削除しますか？')) return;
 
         const { ok, data } = await api.del(`/admin/seating/seats/${seatId}`);
         if (ok) {
-            if (data.freed_user_id) removeAssignedItem(data.freed_user_id);
+            if (data.freed_guest) {
+                removeAssignedItem(data.freed_guest.user_id);
+                addUnassignedCard(data.freed_guest);
+            }
             seatEl?.remove();
             closePropsPanel();
             refreshHint(tableId);
@@ -507,6 +552,40 @@
 
     function removeAssignedItem(userId) {
         document.querySelector(`#assignedList [data-user-id="${userId}"]`)?.remove();
+    }
+
+    /* ================================================================
+       未配置プール管理（配置解除・席削除でゲストが戻ってくる）
+    ================================================================ */
+    const SIDE_LABELS = { groom: '新郎側', bride: '新婦側' };
+    const REL_LABELS  = { friend: '友人', family: '親族', colleague: '職場', other: 'その他' };
+
+    function addUnassignedCard(guest) {
+        document.getElementById('poolEmpty')?.remove();
+        if (document.querySelector(`#unassignedPool [data-user-id="${guest.user_id}"]`)) return;
+
+        const sideLabel = SIDE_LABELS[guest.side] ?? '';
+        const relLabel  = REL_LABELS[guest.rel] ?? '';
+
+        const div = document.createElement('div');
+        div.className = 'st-guest-card';
+        div.dataset.userId = guest.user_id;
+        div.dataset.name   = guest.name;
+        div.dataset.side   = guest.side ?? '';
+        div.dataset.rel    = guest.rel ?? '';
+        div.draggable = true;
+        div.innerHTML = `
+            <div class="st-guest-card__avatar st-guest-card__avatar--${guest.side ?? 'none'}">${esc(guest.initial)}</div>
+            <div class="st-guest-card__info">
+                <p class="st-guest-card__name">${esc(guest.name)}</p>
+                <div class="st-guest-card__tags">
+                    ${sideLabel ? `<span class="st-tag st-tag--${guest.side}">${sideLabel}</span>` : ''}
+                    ${relLabel ? `<span class="st-tag st-tag--rel">${relLabel}</span>` : ''}
+                </div>
+            </div>
+            <i class="fa-solid fa-grip-dots st-guest-card__grip"></i>`;
+        pool.appendChild(div);
+        applyFilters();
     }
 
     /* ================================================================
@@ -550,6 +629,26 @@
             toast('削除に失敗しました', 'error');
             location.reload();
         }
+    });
+
+    /* ================================================================
+       テーブル名編集（名前クリック）
+    ================================================================ */
+    canvas.addEventListener('click', async e => {
+        const nameEl = e.target.closest('.ct-name');
+        if (!nameEl) return;
+        const tableId = nameEl.dataset.tableId;
+        const current = nameEl.textContent;
+        const next = prompt('テーブル名を入力してください', current);
+        if (next === null) return;
+        const trimmed = next.trim();
+        if (!trimmed || trimmed === current) return;
+
+        const { ok, data } = await api.patch(`/admin/seating/tables/${tableId}`, { name: trimmed });
+        if (!ok) { toast(data.message ?? '名前の変更に失敗しました', 'error'); return; }
+
+        nameEl.textContent = trimmed;
+        toast('テーブル名を変更しました', 'success');
     });
 
     function showCanvasEmpty() {
@@ -644,8 +743,14 @@
         div.innerHTML = `
             <div class="canvas-table__handle" data-drag-handle>
                 <i class="fa-solid fa-grip-dots ct-grip"></i>
-                <span class="ct-name" title="${esc(t.name)}">${esc(t.name)}</span>
+                <span class="ct-name" data-table-id="${t.id}" title="クリックして名前を変更">${esc(t.name)}</span>
                 <span class="ct-count" id="ct-meta-${t.id}">0/${seats.length}</span>
+                <button type="button" class="ct-btn ct-btn--add" data-table-id="${t.id}" title="席を追加">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ct-btn ct-btn--del" data-table-id="${t.id}" title="テーブルを削除">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                </button>
             </div>
             <div class="canvas-table__body" id="ct-body-${t.id}" data-table-id="${t.id}">
                 <p class="ct-hint" id="ct-hint-${t.id}">＋ を押して席を追加</p>

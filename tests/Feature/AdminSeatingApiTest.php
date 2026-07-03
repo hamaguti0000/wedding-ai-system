@@ -1,8 +1,32 @@
 <?php
 
+use App\Models\GuestProfile;
 use App\Models\Seat;
 use App\Models\SeatAssignment;
 use App\Models\SeatingTable;
+
+// ─── 管理画面表示 ─────────────────────────────────────────
+
+describe('GET /admin/seating 画面表示', function () {
+
+    it('配置済みゲストがいても正常にレンダリングされる（詳細情報 data 属性を含む）', function () {
+        $guest = makeGuest('attending');
+        GuestProfile::where('user_id', $guest->id)->update([
+            'last_name' => '山田', 'first_name' => '太郎',
+            'guest_side' => 'groom', 'relationship' => 'friend',
+            'phone' => '090-1234-5678', 'has_allergy' => true, 'allergy_notes' => 'えび',
+        ]);
+        $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+        $seat  = Seat::create(['seating_table_id' => $table->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
+        SeatAssignment::create(['seat_id' => $seat->id, 'user_id' => $guest->id]);
+
+        $this->actingAs(makeAdmin())
+            ->get('/admin/seating')
+            ->assertOk()
+            ->assertSee('山田 太郎')
+            ->assertSee('data-guest-allergy-notes="えび"', false);
+    });
+});
 
 // ─── テーブル作成 ─────────────────────────────────────────
 
@@ -50,6 +74,20 @@ describe('POST /admin/seating/tables テーブル作成', function () {
         $this->actingAs(makeGuest())
             ->postJson('/admin/seating/tables', ['name' => 'A卓'])
             ->assertStatus(403);
+    });
+
+    it('既存テーブルと重ならない位置に配置される', function () {
+        // ユーザーがドラッグで同じ位置に集めた状況を再現
+        SeatingTable::create(['name' => '既存1', 'display_order' => 1, 'pos_x' => 24, 'pos_y' => 24]);
+        SeatingTable::create(['name' => '既存2', 'display_order' => 2, 'pos_x' => 24, 'pos_y' => 24]);
+
+        $response = $this->actingAs(makeAdmin())
+            ->postJson('/admin/seating/tables', ['name' => '新規'])
+            ->assertStatus(200);
+
+        $new = $response->json('table');
+        $overlapsExisting = ($new['pos_x'] == 24 && $new['pos_y'] == 24);
+        expect($overlapsExisting)->toBeFalse();
     });
 });
 
@@ -106,6 +144,43 @@ describe('PATCH /admin/seating/tables/{id}/position 位置更新', function () {
         $this->actingAs(makeAdmin())
             ->patchJson("/admin/seating/tables/{$table->id}/position", [])
             ->assertStatus(422);
+    });
+});
+
+// ─── テーブル名更新 ────────────────────────────────────────
+
+describe('PATCH /admin/seating/tables/{id} 名前更新', function () {
+
+    it('テーブル名を更新できる', function () {
+        $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+
+        $this->actingAs(makeAdmin())
+            ->patchJson("/admin/seating/tables/{$table->id}", ['name' => '友人1'])
+            ->assertJson(['success' => true]);
+
+        expect($table->refresh()->name)->toBe('友人1');
+    });
+
+    it('name 未入力はバリデーションエラー', function () {
+        $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+
+        $this->actingAs(makeAdmin())
+            ->patchJson("/admin/seating/tables/{$table->id}", [])
+            ->assertStatus(422);
+    });
+
+    it('存在しないテーブルは 404', function () {
+        $this->actingAs(makeAdmin())
+            ->patchJson('/admin/seating/tables/999', ['name' => '友人1'])
+            ->assertStatus(404);
+    });
+
+    it('ゲストは 403', function () {
+        $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+
+        $this->actingAs(makeGuest())
+            ->patchJson("/admin/seating/tables/{$table->id}", ['name' => '友人1'])
+            ->assertStatus(403);
     });
 });
 
@@ -192,15 +267,17 @@ describe('DELETE /admin/seating/seats/{id} 席削除', function () {
         expect(Seat::find($seat->id))->toBeNull();
     });
 
-    it('配置済みゲストの freed_user_id がレスポンスに含まれる', function () {
+    it('配置済みゲストの freed_guest がレスポンスに含まれる', function () {
         $guest = makeGuest('attending');
         $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
         $seat  = Seat::create(['seating_table_id' => $table->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
         SeatAssignment::create(['seat_id' => $seat->id, 'user_id' => $guest->id]);
 
-        $this->actingAs(makeAdmin())
+        $response = $this->actingAs(makeAdmin())
             ->deleteJson("/admin/seating/seats/{$seat->id}")
-            ->assertJson(['freed_user_id' => $guest->id]);
+            ->assertJsonStructure(['success', 'freed_guest' => ['user_id', 'name', 'initial', 'side', 'rel']]);
+
+        expect($response->json('freed_guest.user_id'))->toBe($guest->id);
     });
 
     it('席削除で配置情報も削除される', function () {
@@ -215,13 +292,13 @@ describe('DELETE /admin/seating/seats/{id} 席削除', function () {
         expect(SeatAssignment::where('user_id', $guest->id)->exists())->toBeFalse();
     });
 
-    it('空席の場合 freed_user_id は null', function () {
+    it('空席の場合 freed_guest は null', function () {
         $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
         $seat  = Seat::create(['seating_table_id' => $table->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
 
         $this->actingAs(makeAdmin())
             ->deleteJson("/admin/seating/seats/{$seat->id}")
-            ->assertJson(['freed_user_id' => null]);
+            ->assertJson(['freed_guest' => null]);
     });
 });
 
@@ -309,5 +386,18 @@ describe('DELETE /admin/seating/unassign/{userId} 配置解除', function () {
         $this->actingAs(makeAdmin())
             ->deleteJson("/admin/seating/unassign/{$guest->id}")
             ->assertJson(['success' => true]);
+    });
+
+    it('レスポンスに未配置プール復帰用の guest 情報が含まれる', function () {
+        $guest = makeGuest('attending');
+        $table = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+        $seat  = Seat::create(['seating_table_id' => $table->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
+        SeatAssignment::create(['seat_id' => $seat->id, 'user_id' => $guest->id]);
+
+        $response = $this->actingAs(makeAdmin())
+            ->deleteJson("/admin/seating/unassign/{$guest->id}")
+            ->assertJsonStructure(['success', 'guest' => ['user_id', 'name', 'initial', 'side', 'rel']]);
+
+        expect($response->json('guest.user_id'))->toBe($guest->id);
     });
 });

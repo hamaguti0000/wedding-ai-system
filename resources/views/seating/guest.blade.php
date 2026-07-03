@@ -16,12 +16,6 @@
     $tableCount = $tables->count();
     $seatCount = $tables->sum(fn($table) => $table->seats->count());
     $assignedCount = $tables->sum(fn($table) => $table->seats->filter(fn($seat) => $seat->assignment !== null)->count());
-    $tableSlots = collect(range(1, 32))->map(function ($slot) use ($tables) {
-        return [
-            'slot' => $slot,
-            'table' => $tables->firstWhere('display_order', $slot),
-        ];
-    });
 @endphp
 
 <script>window.SEAT_TYPE_CONFIG = @json($typeConfig);</script>
@@ -88,18 +82,15 @@
         {{-- ── テーブルグリッド ── --}}
         <section class="gs-sheet">
             <main class="gs-grid" id="gsGrid">
-                @foreach ($tableSlots as $slotInfo)
+                @foreach ($tables as $table)
                 @php
-                    $table = $slotInfo['table'];
-                    $isEmpty = $table === null;
-                    $isMyTable  = $table && $myTableId && $table->id === $myTableId;
-                    $totalSeats = $table?->seats->count() ?? 0;
-                    $occupied   = $table ? $table->seats->filter(fn($s) => $s->assignment !== null)->count() : 0;
+                    $isMyTable  = $myTableId && $table->id === $myTableId;
+                    $totalSeats = $table->seats->count();
+                    $occupied   = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
                 @endphp
-                <article class="gs-table {{ $isMyTable ? 'gs-table--mine' : '' }} {{ $isEmpty ? 'gs-table--empty' : '' }}"
-                     id="{{ $table ? 'gst-' . $table->id : 'gst-empty-' . $slotInfo['slot'] }}"
-                     style="animation-delay: {{ ($slotInfo['slot'] - 1) * 24 }}ms">
-                    @if ($table)
+                <article class="gs-table {{ $isMyTable ? 'gs-table--mine' : '' }}"
+                     id="gst-{{ $table->id }}"
+                     style="animation-delay: {{ $loop->index * 24 }}ms">
                     <div class="gs-table__head">
                         <h2 class="gs-table__name">{{ $table->name }}</h2>
                         <div class="gs-table__count">{{ $occupied }} / {{ $totalSeats }}</div>
@@ -124,12 +115,6 @@
                             @endforelse
                         </div>
                     </div>
-                    @else
-                    <div class="gs-table__ghost">
-                        <span class="gs-table__ghost-slot">-</span>
-                    </div>
-                    @endif
-
                 </article>
                 @endforeach
             </main>

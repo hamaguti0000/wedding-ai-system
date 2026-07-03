@@ -3,7 +3,7 @@
    - 1800×1100 仮想キャンバス
    - CSS transform scale でビューポートにフィット
    - .is-preview クラスで編集/印刷プレビューを分離
-   - @media print で A4横 直接印刷対応
+   - @media print で A3横 直接印刷対応
    ================================================================ */
 
 /* ================================================================
@@ -531,7 +531,9 @@ main { padding-top: 60px; text-align: initial; }
 }
 .canvas-seat.is-occupied:hover .canvas-seat__tooltip { opacity: 1; }
 
-/* ── プレビュー・印刷時：名前を常時表示 ── */
+/* ── プレビュー・印刷時：名前を常時表示 ──
+   席の横間隔は60px（AdminSeatingController::seatSlots() 参照）。
+   ラベル幅をそれより狭くして隣の席の名前と重ならないようにする。 */
 .is-preview .canvas-seat__tooltip {
     position: absolute;
     top: calc(100% + 1px); bottom: auto;
@@ -541,10 +543,11 @@ main { padding-top: 60px; text-align: initial; }
     padding: 0; white-space: normal;
     font-weight: 600; z-index: 5;
     width: max-content;
-    max-width: 78px;
+    max-width: 54px;
     text-align: center;
     line-height: 1.18;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
+    word-break: keep-all;
 }
 /* 空席はプレビュー時に薄く */
 .is-preview .canvas-table:not(:has(.canvas-seat.is-occupied)) { display: none; }
@@ -755,7 +758,7 @@ main { padding-top: 60px; text-align: initial; }
 .req { color: #c0392b; font-size: 0.76rem; }
 
 /* ================================================================
-   印刷スタイル（A4横・そのまま配布できる品質）
+   印刷スタイル（A3横・そのまま配布できる品質）
    ================================================================ */
 /* ================================================================
    モバイル  (< 768px)
@@ -851,8 +854,8 @@ main { padding-top: 60px; text-align: initial; }
 
 @media print {
     @page {
-        size: A4 landscape;
-        margin: 10mm;
+        size: A3 landscape;
+        margin: 12mm;
     }
 
     /* アプリのリセット */
@@ -1225,4 +1228,57 @@ main { padding-top: 60px; text-align: initial; }
     background: linear-gradient(135deg, #2e2316 0%, #3a2c1a 100%);
     border: 1px solid rgba(179,139,89,0.3);
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* ================================================================
+   ゲスト詳細情報モーダル（admin/dashboard.blade.php の回答内容モーダルと統一デザイン）
+   ================================================================ */
+.detail-modal-overlay {
+    position: fixed; inset: 0; background: rgba(30,18,6,0.45);
+    z-index: 500; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    padding: 16px;
+}
+.detail-modal-overlay.is-open { opacity: 1; pointer-events: all; }
+
+.detail-modal {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+    width: 100%; max-width: 560px; max-height: 90vh;
+    overflow-y: auto; padding: 28px;
+    transform: translateY(16px); transition: transform 0.2s;
+}
+.detail-modal-overlay.is-open .detail-modal { transform: translateY(0); }
+
+.dm-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0ebe3;
+}
+.dm-title { font-family: var(--ds-font-display); font-size: 1.3rem; color: #3d2f25; font-weight: 400; }
+.dm-subtitle { font-size: 0.8rem; color: #9b8573; margin-top: 2px; }
+.dm-close {
+    background: none; border: none; font-size: 1.2rem; cursor: pointer;
+    color: #9b8573; padding: 4px; line-height: 1; flex-shrink: 0;
+    transition: color 0.15s;
+}
+.dm-close:hover { color: #3d2f25; }
+
+.dm-section { margin-bottom: 18px; }
+.dm-section-title {
+    font-size: 0.7rem; font-weight: 700; color: #b38b59;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;
+}
+.dm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dm-item dt { font-size: 0.72rem; color: #b0a090; margin-bottom: 2px; }
+.dm-item dd { font-size: 0.9rem; color: #3d2f25; margin: 0; line-height: 1.5; }
+.dm-full { grid-column: 1 / -1; }
+.dm-item dd.dm-pre { white-space: pre-wrap; background: #fafaf8; border-radius: 6px; padding: 8px 10px; font-size: 0.86rem; }
+
+@media (max-width: 767px) {
+    .detail-modal { padding: 20px 16px; }
+    .dm-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+    .detail-modal-overlay { display: none !important; }
 }

@@ -80,6 +80,20 @@ describe('GuestSeatingController isPublished', function () {
         expect($data['isPublished'])->toBeTrue();
     });
 
+    it('少数のテーブルしか無くても32卓分の空マスは表示されない（固定グリッド廃止の確認）', function () {
+        $tableA = SeatingTable::create(['name' => 'A卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+        $tableB = SeatingTable::create(['name' => 'B卓', 'display_order' => 2, 'pos_x' => 0, 'pos_y' => 0]);
+        Seat::create(['seating_table_id' => $tableA->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
+        Seat::create(['seating_table_id' => $tableB->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
+
+        $this->actingAs(makeGuest('attending'))
+            ->get('/seating')
+            ->assertSee('A卓')
+            ->assertSee('B卓')
+            ->assertDontSee('gs-table--empty', false)
+            ->assertDontSee('gs-table__ghost', false);
+    });
+
     it('未公開時はビューに準備中メッセージが含まれる', function () {
         $this->actingAs(makeGuest('attending'))
             ->get('/seating')

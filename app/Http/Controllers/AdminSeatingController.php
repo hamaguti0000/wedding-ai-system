@@ -13,13 +13,10 @@ use Illuminate\Http\Request;
 class AdminSeatingController extends Controller
 {
     private const MAX_SEATS_PER_TABLE = 8;
-    private const DEFAULT_TABLE_COUNT = 32;
     private const TABLE_COLUMNS = 8;
 
     public function index()
     {
-        $this->ensureDefaultGrid();
-
         // ── Display data: View に渡す Collection ───────────────────────────
         // *Guests suffix → Collection<User> であることを名前で保証する
 
@@ -69,11 +66,8 @@ class AdminSeatingController extends Controller
             'seat_count.max' => '1テーブルの最大席数は8席です',
         ]);
 
-        $count  = SeatingTable::count();
-        $col    = $count % self::TABLE_COLUMNS;
-        $row    = (int) floor($count / self::TABLE_COLUMNS);
-        $posX   = 24 + $col * 220;
-        $posY   = 24 + $row * 230;
+        $count    = SeatingTable::count();
+        [$posX, $posY] = $this->findFreeTablePosition();
 
         $table = SeatingTable::create([
             'name'          => $request->name,
@@ -121,6 +115,20 @@ class AdminSeatingController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function updateTable(Request $request, int $tableId): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:50',
+        ], [
+            'name.required' => 'テーブル名を入力してください',
+        ]);
+
+        $table = SeatingTable::findOrFail($tableId);
+        $table->update(['name' => $request->name]);
+
+        return response()->json(['success' => true, 'table' => $table]);
     }
 
     // ── 席 ──────────────────────────────────────────────────
@@ -177,11 +185,11 @@ class AdminSeatingController extends Controller
     /** 席を削除（配置済みゲストは未配置へ戻る）*/
     public function destroySeat(int $seatId): JsonResponse
     {
-        $seat = Seat::findOrFail($seatId);
-        $userId = $seat->assignment?->user_id;
+        $seat = Seat::with('assignment.user.guestProfile')->findOrFail($seatId);
+        $freedGuest = $seat->assignment?->user ? $this->serializeGuest($seat->assignment->user) : null;
         $seat->delete(); // cascade で seat_assignments も削除
 
-        return response()->json(['success' => true, 'freed_user_id' => $userId]);
+        return response()->json(['success' => true, 'freed_guest' => $freedGuest]);
     }
 
     // ── 配置 ────────────────────────────────────────────────
@@ -215,71 +223,87 @@ class AdminSeatingController extends Controller
     /** 配置を解除 */
     public function unassign(int $userId): JsonResponse
     {
+        $user = User::with('guestProfile')->find($userId);
         SeatAssignment::where('user_id', $userId)->delete();
-        return response()->json(['success' => true]);
+
+        return response()->json([
+            'success' => true,
+            'guest'   => $user ? $this->serializeGuest($user) : null,
+        ]);
     }
 
-    private static function seatSlots(): array
+    /** ゲストカードの表示に必要な情報だけを抜き出す（未配置プールへの復帰表示に使う） */
+    private function serializeGuest(User $user): array
     {
+        $p    = $user->guestProfile;
+        $name = $p ? trim($p->last_name.' '.$p->first_name) : $user->name;
+
         return [
-            ['x' => 12,  'y' => 10],
-            ['x' => 54,  'y' => 10],
-            ['x' => 96,  'y' => 10],
-            ['x' => 138, 'y' => 10],
-            ['x' => 12,  'y' => 64],
-            ['x' => 54,  'y' => 64],
-            ['x' => 96,  'y' => 64],
-            ['x' => 138, 'y' => 64],
+            'user_id' => $user->id,
+            'name'    => $name,
+            'initial' => mb_substr($name, 0, 1, 'UTF-8'),
+            'side'    => $p?->guest_side,
+            'rel'     => $p?->relationship,
         ];
     }
 
-    private function ensureDefaultGrid(): void
+    /**
+     * 新規テーブルを既存テーブルと重ならない位置に配置する。
+     * テーブルは最大4列×2行・8席（横60px間隔・縦78px間隔、ヘッダー込みで
+     * おおよそ240×220px）になり得るため、それを1マスとしたグリッドを走査し、
+     * 既存テーブルの矩形と重ならない最初の空きマスを返す。
+     * ドラッグで自由に動かした後でも、新規追加時に自動で衝突を避けられる。
+     *
+     * @return array{0: int, 1: int}
+     */
+    private function findFreeTablePosition(): array
     {
-        $tables = SeatingTable::orderBy('display_order')->orderBy('id')->get();
-        $existingCount = $tables->count();
+        $cellW  = 240;
+        $cellH  = 220;
+        $margin = 24;
+        $maxCols = self::TABLE_COLUMNS;
 
-        for ($i = $existingCount; $i < self::DEFAULT_TABLE_COUNT; $i++) {
-            $tables->push(SeatingTable::create([
-                'name'          => $this->defaultTableName($i),
-                'display_order' => $i + 1,
-                'pos_x'         => 0,
-                'pos_y'         => 0,
-            ]));
-        }
+        $existing = SeatingTable::query()->get(['pos_x', 'pos_y']);
 
-        $seatSlots = self::seatSlots();
-        foreach ($tables->take(self::DEFAULT_TABLE_COUNT)->values() as $i => $table) {
-            $col = $i % self::TABLE_COLUMNS;
-            $row = (int) floor($i / self::TABLE_COLUMNS);
+        for ($row = 0; $row < 100; $row++) {
+            for ($col = 0; $col < $maxCols; $col++) {
+                $x = $margin + $col * $cellW;
+                $y = $margin + $row * $cellH;
 
-            $table->update([
-                'display_order' => $i + 1,
-                'pos_x'         => 24 + $col * 220,
-                'pos_y'         => 24 + $row * 230,
-            ]);
+                $overlaps = $existing->contains(
+                    fn (SeatingTable $t): bool => abs((int) $t->pos_x - $x) < $cellW
+                        && abs((int) $t->pos_y - $y) < $cellH
+                );
 
-            $existingSeats = $table->seats()->orderBy('id')->get();
-            foreach ($existingSeats->take(self::MAX_SEATS_PER_TABLE)->values() as $j => $seat) {
-                $seat->update([
-                    'pos_x' => $seatSlots[$j]['x'],
-                    'pos_y' => $seatSlots[$j]['y'],
-                ]);
-            }
-
-            $seatCount = $existingSeats->count();
-            for ($j = $seatCount; $j < self::MAX_SEATS_PER_TABLE; $j++) {
-                Seat::create([
-                    'seating_table_id' => $table->id,
-                    'type'             => 'normal',
-                    'pos_x'            => $seatSlots[$j]['x'],
-                    'pos_y'            => $seatSlots[$j]['y'],
-                ]);
+                if (! $overlaps) {
+                    return [$x, $y];
+                }
             }
         }
+
+        // 理論上ほぼ到達しないが、念のため既存テーブル数ベースの位置にフォールバック
+        $count = $existing->count();
+
+        return [$margin + ($count % $maxCols) * $cellW, $margin + intdiv($count, $maxCols) * $cellH];
     }
 
-    private function defaultTableName(int $index): string
+    /**
+     * 1テーブル最大8席（4列×2行）の相対座標。
+     * 横60px・縦78px間隔（席の丸34px＋氏名ラベル分の余白）を確保し、
+     * 印刷・プレビュー表示で隣の席の名前ラベルと重ならないようにしている。
+     */
+    private static function seatSlots(): array
     {
-        return ($index + 1) . '卓';
+        return [
+            ['x' => 14,  'y' => 12],
+            ['x' => 74,  'y' => 12],
+            ['x' => 134, 'y' => 12],
+            ['x' => 194, 'y' => 12],
+            ['x' => 14,  'y' => 90],
+            ['x' => 74,  'y' => 90],
+            ['x' => 134, 'y' => 90],
+            ['x' => 194, 'y' => 90],
+        ];
     }
+
 }

@@ -204,8 +204,14 @@
 
                     <div class="canvas-table__handle" data-drag-handle>
                         <i class="fa-solid fa-grip-dots ct-grip"></i>
-                        <span class="ct-name" title="{{ $table->name }}">{{ $table->name }}</span>
+                        <span class="ct-name" data-table-id="{{ $table->id }}" title="クリックして名前を変更">{{ $table->name }}</span>
                         <span class="ct-count" id="ct-meta-{{ $table->id }}">{{ $assignedCount }}/{{ $seatCount }}</span>
+                        <button type="button" class="ct-btn ct-btn--add" data-table-id="{{ $table->id }}" title="席を追加">
+                            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="ct-btn ct-btn--del" data-table-id="{{ $table->id }}" title="テーブルを削除">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                        </button>
                     </div>
 
                     <div class="canvas-table__body"
@@ -217,6 +223,7 @@
                         @php
                             $user     = $seat->assignment?->user;
                             $occupied = $user !== null;
+                            $p2       = $occupied ? $user->guestProfile : null;
                             $initial  = $occupied ? $guestInit($user) : '';
                             $fullName = $occupied ? $guestName($user) : '';
                             $userId   = $occupied ? $user->id : '';
@@ -226,6 +233,20 @@
                              data-seat-id="{{ $seat->id }}"
                              data-type="{{ $seat->type }}"
                              data-user-id="{{ $userId }}"
+                             @if ($occupied)
+                             data-guest-name="{{ $fullName }}"
+                             data-guest-side="{{ $guestSide($p2) }}"
+                             data-guest-rel="{{ $guestRel($p2) }}"
+                             data-guest-rel-detail="{{ $p2?->relationship_detail ?? '' }}"
+                             data-guest-phone="{{ $p2?->phone ?? '' }}"
+                             data-guest-postal="{{ $p2?->postal_code ?? '' }}"
+                             data-guest-address="{{ $p2?->address ?? '' }}"
+                             data-guest-allergy="{{ $p2?->has_allergy ? 'あり' : ($p2 ? 'なし' : '') }}"
+                             data-guest-allergy-notes="{{ $p2?->allergy_notes ?? '' }}"
+                             data-guest-count="{{ $p2?->attending_count ?? '' }}"
+                             data-guest-children="{{ $p2?->children_count ?? '' }}"
+                             data-guest-notes="{{ $p2?->notes ?? '' }}"
+                             @endif
                              style="left:{{ $seat->pos_x }}px; top:{{ $seat->pos_y }}px;">
                             <div class="canvas-seat__circle">
                                 <span class="canvas-seat__initial">{{ $initial }}</span>
@@ -248,6 +269,11 @@
 
             </div>{{-- /.st-canvas --}}
             </div>{{-- /.st-canvas-scaler --}}
+
+            <button type="button" class="st-fab" id="fabAddTable">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span>テーブルを追加</span>
+            </button>
 
         </div>{{-- /.st-canvas-area --}}
 
@@ -300,6 +326,9 @@
                     <p class="sp-guest-tags" id="propsGuestTags"></p>
                 </div>
             </div>
+            <button class="sp-btn sp-btn--ghost" id="propsGuestDetail">
+                <i class="fa-solid fa-circle-info"></i>詳細情報を見る
+            </button>
             <button class="sp-btn sp-btn--ghost" id="propsUnassign">
                 <i class="fa-solid fa-rotate-left"></i>配置を解除
             </button>
@@ -310,6 +339,126 @@
             <p class="sp-empty-hint">ゲストリストからドラッグして<br>この席に配置できます</p>
         </div>
 
+        {{-- 席の削除 --}}
+        <div class="sp-section">
+            <button class="sp-btn sp-btn--danger" id="propsDeleteSeat">
+                <i class="fa-solid fa-trash"></i>この席を削除
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{{-- ── テーブル追加モーダル ── --}}
+<div class="st-modal-overlay" id="addTableModal" aria-hidden="true">
+    <div class="st-modal">
+        <div class="st-modal__header">
+            <h3 class="st-modal__title">テーブルを追加</h3>
+            <button type="button" class="st-modal__close" id="modalClose" aria-label="閉じる">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="st-modal__body">
+            <div class="st-modal__field">
+                <label class="st-modal__label" for="newTableName">テーブル名</label>
+                <input type="text" class="st-modal__input" id="newTableName" placeholder="例: 友人1" maxlength="50">
+            </div>
+            <div class="st-modal__field">
+                <label class="st-modal__label" for="newTableSeats">席数</label>
+                <input type="number" class="st-modal__input st-modal__input--sm" id="newTableSeats" value="4" min="0" max="8">
+                <p class="st-modal__hint">1テーブルの最大席数は8席です。あとから「＋」ボタンで増やすこともできます。</p>
+            </div>
+        </div>
+        <div class="st-modal__footer">
+            <button type="button" class="st-modal__cancel" id="modalCancel">キャンセル</button>
+            <button type="button" class="st-modal__submit" id="modalSubmit">追加する</button>
+        </div>
+    </div>
+</div>
+
+{{-- ── ゲスト詳細情報モーダル ── --}}
+<div class="detail-modal-overlay" id="guestDetailOverlay" aria-hidden="true">
+    <div class="detail-modal">
+        <div class="dm-header">
+            <div>
+                <p class="dm-title" id="gdName">—</p>
+                <p class="dm-subtitle" id="gdTable">—</p>
+            </div>
+            <button type="button" class="dm-close" id="guestDetailClose" aria-label="閉じる">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">出席人数</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>出席人数（合計）</dt>
+                    <dd id="gdCount">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>うちお子様</dt>
+                    <dd id="gdChildren">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">お立場・ご関係</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>お立場</dt>
+                    <dd id="gdSide">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>ご関係</dt>
+                    <dd id="gdRel">—</dd>
+                </dl>
+                <dl class="dm-item dm-full">
+                    <dt>ご関係の詳細</dt>
+                    <dd id="gdRelDetail">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">食物アレルギー</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>アレルギー</dt>
+                    <dd id="gdAllergy">—</dd>
+                </dl>
+                <dl class="dm-item dm-full">
+                    <dt>アレルギー詳細</dt>
+                    <dd id="gdAllergyNotes">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">連絡先</p>
+            <div class="dm-grid">
+                <dl class="dm-item">
+                    <dt>電話番号</dt>
+                    <dd id="gdPhone">—</dd>
+                </dl>
+                <dl class="dm-item">
+                    <dt>郵便番号</dt>
+                    <dd id="gdPostal">—</dd>
+                </dl>
+                <dl class="dm-item dm-full">
+                    <dt>住所</dt>
+                    <dd id="gdAddress">—</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="dm-section">
+            <p class="dm-section-title">メッセージ</p>
+            <dl class="dm-item">
+                <dd id="gdNotes" class="dm-pre">—</dd>
+            </dl>
+        </div>
     </div>
 </div>
 
