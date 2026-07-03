@@ -28,6 +28,8 @@ use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\AdminTaskController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\AdminGalleryController;
+use App\Http\Controllers\ProfileBookController;
+use App\Http\Controllers\AdminProfileBookController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\GuestbookController;
 use App\Http\Controllers\AdminGuestbookController;
@@ -98,6 +100,7 @@ Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () 
     Route::get('/profiles',          [CoupleProfileController::class, 'index'])->name('profiles.index');
     Route::get('/profiles/{person}', [CoupleProfileController::class, 'show']) ->name('profiles.show')
          ->where('person', 'groom|bride');
+    Route::get('/profile-book', [ProfileBookController::class, 'index'])->name('profile-book');
     // ギャラリー・ニュース一覧・ゲストブック
     Route::get('/gallery',              [GalleryController::class,   'index'])->name('gallery');
     Route::get('/gallery/upload',       [GalleryController::class,   'uploadForm'])->name('gallery.upload');
@@ -150,6 +153,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/gallery/{id}/move-down',  [AdminGalleryController::class, 'moveDown']) ->name('gallery.move-down');
     Route::post('/gallery/{id}/approve',     [AdminGalleryController::class, 'approve'])  ->name('gallery.approve');
     Route::post('/gallery/{id}/reject',      [AdminGalleryController::class, 'reject'])   ->name('gallery.reject');
+
+    // プロフィールブック管理
+    Route::get('/profile-book',    [AdminProfileBookController::class, 'edit'])   ->name('profile-book');
+    Route::post('/profile-book',   [AdminProfileBookController::class, 'upload']) ->name('profile-book.upload');
+    Route::delete('/profile-book', [AdminProfileBookController::class, 'destroy'])->name('profile-book.destroy');
 
     // リマインダーメール管理
     Route::get('/reminders',              [AdminReminderController::class, 'index'])   ->name('reminders');

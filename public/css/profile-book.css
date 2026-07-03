@@ -1,0 +1,58 @@
+/* ================================================================
+   profile-book.css — 見開きページめくりビューア
+   ================================================================ */
+main { padding: 0; text-align: initial; }
+
+.pb-wrap { max-width: 1100px; margin: 0 auto; padding: 60px 20px 80px; }
+
+.pb-intro { text-align: center; margin-bottom: 40px; }
+.pb-section-en {
+    display: block; font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase;
+    color: #b38b59; margin-bottom: 6px; font-family: 'Noto Sans JP', sans-serif;
+}
+.pb-section-ja {
+    font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 400;
+    color: #3d2f25; margin: 0 0 14px;
+}
+.pb-rule { width: 40px; height: 1px; background: #b38b59; margin: 0 auto; }
+
+.pb-empty { text-align: center; color: #9b8573; font-size: 0.9rem; padding: 60px 0; }
+
+.pb-book-area {
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+
+.pb-book {
+    width: 100%;
+    max-width: 900px;
+    /* PageFlip が transform/絶対配置で内部レイアウトを制御するため、
+       コンテナ自体には最低限のサイズ確保だけを与える */
+    margin: 0 auto;
+    background: #efe6d8;
+    border-radius: 4px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+}
+
+.pb-controls {
+    display: flex; align-items: center; gap: 18px;
+}
+.pb-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid #e2d0bc; background: #fffdf9; color: #7a6555;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; transition: background 0.15s, color 0.15s;
+}
+.pb-btn:hover { background: #f5eadc; color: #7a5c30; }
+
+.pb-page-indicator {
+    font-size: 0.82rem; color: #9b8573; min-width: 70px; text-align: center;
+}
+
+.pb-hint {
+    font-size: 0.78rem; color: #b0a090; text-align: center;
+}
+
+@media (max-width: 767px) {
+    .pb-wrap { padding: 40px 12px 60px; }
+    .pb-section-ja { font-size: 1.4rem; }
+}

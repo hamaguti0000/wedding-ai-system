@@ -100,6 +100,12 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.profile-book') }}"
+                   class="{{ request()->routeIs('admin.profile-book*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-book-open" aria-hidden="true"></i>プロフィールブック
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.guestbook') }}"
                    class="{{ request()->routeIs('admin.guestbook*') ? 'active' : '' }}">
                     <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>ゲストブック

@@ -77,7 +77,7 @@
                 {{-- ギャラリー・お知らせ・ゲストブック --}}
                 <li class="header__nav-item">
                     <a href="{{ route('gallery') }}"
-                       class="{{ request()->routeIs('gallery','gallery.upload','news.index','guestbook') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('gallery','gallery.upload','news.index','guestbook','profile-book') ? 'active' : '' }}">
                         <i class="fa-solid fa-heart" aria-hidden="true"></i>楽しむ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -92,6 +92,12 @@
                             <a href="{{ route('gallery.upload') }}"
                                class="{{ request()->routeIs('gallery.upload') ? 'active' : '' }}">
                                 <i class="fa-solid fa-camera"></i>写真を投稿
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('profile-book') }}"
+                               class="{{ request()->routeIs('profile-book') ? 'active' : '' }}">
+                                <i class="fa-solid fa-book-open"></i>プロフィールブック
                             </a>
                         </li>
                         <li>
@@ -350,6 +356,12 @@
                 <a href="{{ route('gallery.upload') }}"
                    class="{{ request()->routeIs('gallery.upload') ? 'active' : '' }}">
                     <i class="fa-solid fa-camera" aria-hidden="true"></i>写真を投稿
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('profile-book') }}"
+                   class="{{ request()->routeIs('profile-book') ? 'active' : '' }}">
+                    <i class="fa-solid fa-book-open" aria-hidden="true"></i>プロフィールブック
                 </a>
             </li>
             <li>
