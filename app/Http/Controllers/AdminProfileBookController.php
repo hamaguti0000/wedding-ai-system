@@ -20,45 +20,46 @@ class AdminProfileBookController extends Controller
         return view('admin.profile-book', compact('pages'));
     }
 
+    /**
+     * 1つ以上のPDFをアップロードし、各PDFのページを画像化して
+     * 既存ページの末尾に追記する（既存ページは消さない）。
+     */
     public function upload(Request $request, PdfToImagesConverter $converter)
     {
         $request->validate([
-            'pdf' => 'required|file|mimes:pdf|max:20480',
+            'pdfs'   => 'required|array|max:10',
+            'pdfs.*' => 'file|mimes:pdf|max:20480',
         ], [
-            'pdf.required' => 'PDFファイルを選択してください',
-            'pdf.mimes'    => 'PDFファイルを選択してください',
-            'pdf.max'      => 'ファイルサイズは20MB以内にしてください',
+            'pdfs.required' => 'PDFファイルを選択してください',
+            'pdfs.max'      => '一度に最大10ファイルまでアップロードできます',
+            'pdfs.*.mimes'  => 'PDFファイルを選択してください',
+            'pdfs.*.max'    => '1ファイル20MB以内にしてください',
         ]);
 
         $tmpDir = storage_path('app/tmp/profile-book-'.Str::random(12));
+        $nextPageNumber = (ProfileBookPage::max('page_number') ?? 0) + 1;
 
         try {
-            $images = $converter->convert($request->file('pdf')->getRealPath(), $tmpDir);
-
             $newRecords = [];
-            foreach ($images as $index => $localPath) {
-                $storedPath = 'profile-book/'.Str::random(20).'.jpg';
-                Storage::disk('public')->put($storedPath, file_get_contents($localPath));
-                $newRecords[] = ['page_number' => $index + 1, 'image_path' => $storedPath];
+
+            foreach ($request->file('pdfs') as $pdf) {
+                $images = $converter->convert($pdf->getRealPath(), $tmpDir.'-'.Str::random(8));
+
+                foreach ($images as $localPath) {
+                    $storedPath = 'profile-book/'.Str::random(20).'.jpg';
+                    Storage::disk('public')->put($storedPath, file_get_contents($localPath));
+                    $newRecords[] = ['page_number' => $nextPageNumber, 'image_path' => $storedPath];
+                    $nextPageNumber++;
+                }
             }
 
-            $oldPages = ProfileBookPage::all();
-
-            // DB側は「古いページを全消し→新ページ作成」をトランザクションで一貫させる。
-            // 画像ファイル自体はこの前段で既に生成済みなので、ここが失敗しても
-            // 既存のプロフィールブックの表示は壊れない（新しい画像が孤立するだけ）。
             DB::transaction(function () use ($newRecords): void {
-                ProfileBookPage::query()->delete();
                 foreach ($newRecords as $record) {
                     ProfileBookPage::create($record);
                 }
             });
 
-            foreach ($oldPages as $old) {
-                Storage::disk('public')->delete($old->image_path);
-            }
-
-            return back()->with('success', count($newRecords).'ページのプロフィールブックを更新しました');
+            return back()->with('success', count($newRecords).'ページを追加しました');
         } catch (Throwable $e) {
             report($e);
 
@@ -68,6 +69,21 @@ class AdminProfileBookController extends Controller
         }
     }
 
+    /** ページを1件削除し、残りのページ番号を詰め直す */
+    public function destroyPage(int $id)
+    {
+        $page = ProfileBookPage::findOrFail($id);
+        Storage::disk('public')->delete($page->image_path);
+        $page->delete();
+
+        ProfileBookPage::orderBy('page_number')->get()
+            ->values()
+            ->each(fn (ProfileBookPage $p, int $i) => $p->update(['page_number' => $i + 1]));
+
+        return back()->with('success', 'ページを削除しました');
+    }
+
+    /** プロフィールブック全体を削除する */
     public function destroy()
     {
         $pages = ProfileBookPage::all();
@@ -79,5 +95,35 @@ class AdminProfileBookController extends Controller
         ProfileBookPage::query()->delete();
 
         return back()->with('success', 'プロフィールブックを削除しました');
+    }
+
+    public function moveUp(int $id)
+    {
+        $page = ProfileBookPage::findOrFail($id);
+        $prev = ProfileBookPage::where('page_number', '<', $page->page_number)
+            ->orderByDesc('page_number')->first();
+
+        if ($prev) {
+            [$page->page_number, $prev->page_number] = [$prev->page_number, $page->page_number];
+            $page->save();
+            $prev->save();
+        }
+
+        return back();
+    }
+
+    public function moveDown(int $id)
+    {
+        $page = ProfileBookPage::findOrFail($id);
+        $next = ProfileBookPage::where('page_number', '>', $page->page_number)
+            ->orderBy('page_number')->first();
+
+        if ($next) {
+            [$page->page_number, $next->page_number] = [$next->page_number, $page->page_number];
+            $page->save();
+            $next->save();
+        }
+
+        return back();
     }
 }

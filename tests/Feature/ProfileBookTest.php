@@ -51,7 +51,7 @@ describe('POST /admin/profile-book PDFアップロード', function () {
         $pdf = UploadedFile::fake()->create('profile.pdf', 100, 'application/pdf');
 
         $this->actingAs(makeAdmin())
-            ->post('/admin/profile-book', ['pdf' => $pdf])
+            ->post('/admin/profile-book', ['pdfs' => [$pdf]])
             ->assertRedirect();
 
         expect(ProfileBookPage::count())->toBe(2);
@@ -59,7 +59,30 @@ describe('POST /admin/profile-book PDFアップロード', function () {
         expect(ProfileBookPage::where('page_number', 2)->exists())->toBeTrue();
     });
 
-    it('再アップロードすると古いページは削除され新しいページに置き換わる', function () {
+    it('複数PDFを一度にアップロードすると、順番通りに全ページが追加される', function () {
+        Storage::fake('public');
+
+        $tmpImgA = tempnam(sys_get_temp_dir(), 'pbtest').'.jpg';
+        $tmpImgB = tempnam(sys_get_temp_dir(), 'pbtest').'.jpg';
+        file_put_contents($tmpImgA, 'fake-image-a');
+        file_put_contents($tmpImgB, 'fake-image-b');
+
+        $this->mock(PdfToImagesConverter::class, function ($mock) use ($tmpImgA, $tmpImgB) {
+            $mock->shouldReceive('convert')->once()->andReturn([$tmpImgA]);
+            $mock->shouldReceive('convert')->once()->andReturn([$tmpImgB]);
+        });
+
+        $pdfA = UploadedFile::fake()->create('a.pdf', 100, 'application/pdf');
+        $pdfB = UploadedFile::fake()->create('b.pdf', 100, 'application/pdf');
+
+        $this->actingAs(makeAdmin())
+            ->post('/admin/profile-book', ['pdfs' => [$pdfA, $pdfB]])
+            ->assertRedirect();
+
+        expect(ProfileBookPage::count())->toBe(2);
+    });
+
+    it('既存ページがある状態でアップロードすると、末尾に追加される（置き換わらない）', function () {
         Storage::fake('public');
 
         $tmpImg = tempnam(sys_get_temp_dir(), 'pbtest').'.jpg';
@@ -76,25 +99,26 @@ describe('POST /admin/profile-book PDFアップロード', function () {
         $pdf = UploadedFile::fake()->create('profile.pdf', 100, 'application/pdf');
 
         $this->actingAs(makeAdmin())
-            ->post('/admin/profile-book', ['pdf' => $pdf]);
+            ->post('/admin/profile-book', ['pdfs' => [$pdf]]);
 
-        expect(ProfileBookPage::count())->toBe(1);
-        Storage::disk('public')->assertMissing('profile-book/old.jpg');
+        expect(ProfileBookPage::count())->toBe(3);
+        Storage::disk('public')->assertExists('profile-book/old.jpg');
+        expect(ProfileBookPage::where('page_number', 3)->exists())->toBeTrue();
     });
 
     it('PDF以外のファイルはバリデーションエラー', function () {
         $file = UploadedFile::fake()->create('photo.jpg', 10, 'image/jpeg');
 
         $this->actingAs(makeAdmin())
-            ->post('/admin/profile-book', ['pdf' => $file])
-            ->assertSessionHasErrors('pdf');
+            ->post('/admin/profile-book', ['pdfs' => [$file]])
+            ->assertSessionHasErrors('pdfs.0');
     });
 
     it('ゲストは403', function () {
         $pdf = UploadedFile::fake()->create('profile.pdf', 100, 'application/pdf');
 
         $this->actingAs(makeGuest())
-            ->post('/admin/profile-book', ['pdf' => $pdf])
+            ->post('/admin/profile-book', ['pdfs' => [$pdf]])
             ->assertStatus(403);
     });
 
@@ -110,7 +134,7 @@ describe('POST /admin/profile-book PDFアップロード', function () {
         $pdf = UploadedFile::fake()->create('profile.pdf', 100, 'application/pdf');
 
         $this->actingAs(makeAdmin())
-            ->post('/admin/profile-book', ['pdf' => $pdf])
+            ->post('/admin/profile-book', ['pdfs' => [$pdf]])
             ->assertSessionHas('error');
 
         expect(ProfileBookPage::count())->toBe(1);
@@ -118,7 +142,7 @@ describe('POST /admin/profile-book PDFアップロード', function () {
     });
 });
 
-describe('DELETE /admin/profile-book 削除', function () {
+describe('DELETE /admin/profile-book 全削除', function () {
 
     it('全ページを削除できる', function () {
         Storage::fake('public');
@@ -131,6 +155,65 @@ describe('DELETE /admin/profile-book 削除', function () {
 
         expect(ProfileBookPage::count())->toBe(0);
         Storage::disk('public')->assertMissing('profile-book/a.jpg');
+    });
+});
+
+describe('DELETE /admin/profile-book/{id} 個別ページ削除', function () {
+
+    it('指定したページだけ削除され、残りの番号が詰め直される', function () {
+        Storage::fake('public');
+        Storage::disk('public')->put('profile-book/a.jpg', 'a');
+        Storage::disk('public')->put('profile-book/b.jpg', 'b');
+        Storage::disk('public')->put('profile-book/c.jpg', 'c');
+        $a = ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+        $b = ProfileBookPage::create(['page_number' => 2, 'image_path' => 'profile-book/b.jpg']);
+        $c = ProfileBookPage::create(['page_number' => 3, 'image_path' => 'profile-book/c.jpg']);
+
+        $this->actingAs(makeAdmin())
+            ->delete("/admin/profile-book/{$b->id}")
+            ->assertRedirect();
+
+        expect(ProfileBookPage::count())->toBe(2);
+        Storage::disk('public')->assertMissing('profile-book/b.jpg');
+        expect($a->fresh()->page_number)->toBe(1);
+        expect($c->fresh()->page_number)->toBe(2);
+    });
+});
+
+describe('PATCH /admin/profile-book/{id}/move-up, move-down 並び替え', function () {
+
+    it('move-up で1つ前のページと入れ替わる', function () {
+        $a = ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+        $b = ProfileBookPage::create(['page_number' => 2, 'image_path' => 'profile-book/b.jpg']);
+
+        $this->actingAs(makeAdmin())
+            ->patch("/admin/profile-book/{$b->id}/move-up")
+            ->assertRedirect();
+
+        expect($a->fresh()->page_number)->toBe(2);
+        expect($b->fresh()->page_number)->toBe(1);
+    });
+
+    it('move-down で1つ後ろのページと入れ替わる', function () {
+        $a = ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+        $b = ProfileBookPage::create(['page_number' => 2, 'image_path' => 'profile-book/b.jpg']);
+
+        $this->actingAs(makeAdmin())
+            ->patch("/admin/profile-book/{$a->id}/move-down")
+            ->assertRedirect();
+
+        expect($a->fresh()->page_number)->toBe(2);
+        expect($b->fresh()->page_number)->toBe(1);
+    });
+
+    it('先頭ページで move-up しても何も起きない', function () {
+        $a = ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+
+        $this->actingAs(makeAdmin())
+            ->patch("/admin/profile-book/{$a->id}/move-up")
+            ->assertRedirect();
+
+        expect($a->fresh()->page_number)->toBe(1);
     });
 });
 

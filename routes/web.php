@@ -155,9 +155,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/gallery/{id}/reject',      [AdminGalleryController::class, 'reject'])   ->name('gallery.reject');
 
     // プロフィールブック管理
-    Route::get('/profile-book',    [AdminProfileBookController::class, 'edit'])   ->name('profile-book');
-    Route::post('/profile-book',   [AdminProfileBookController::class, 'upload']) ->name('profile-book.upload');
-    Route::delete('/profile-book', [AdminProfileBookController::class, 'destroy'])->name('profile-book.destroy');
+    Route::get('/profile-book',                  [AdminProfileBookController::class, 'edit'])       ->name('profile-book');
+    Route::post('/profile-book',                 [AdminProfileBookController::class, 'upload'])     ->name('profile-book.upload');
+    Route::delete('/profile-book',                [AdminProfileBookController::class, 'destroy'])    ->name('profile-book.destroy');
+    Route::delete('/profile-book/{id}',           [AdminProfileBookController::class, 'destroyPage'])->name('profile-book.destroy-page');
+    Route::patch('/profile-book/{id}/move-up',    [AdminProfileBookController::class, 'moveUp'])     ->name('profile-book.move-up');
+    Route::patch('/profile-book/{id}/move-down',  [AdminProfileBookController::class, 'moveDown'])   ->name('profile-book.move-down');
 
     // リマインダーメール管理
     Route::get('/reminders',              [AdminReminderController::class, 'index'])   ->name('reminders');
