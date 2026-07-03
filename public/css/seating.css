@@ -901,19 +901,25 @@ main { padding-top: 60px; text-align: initial; }
         page-break-after: avoid;
     }
 
-    /* スケーラーをリセットして等倍印刷 */
+    /* 仮想キャンバス(1800x1100px)をA3横の印刷可能領域(約1497x1032px @96dpi)に
+       収まるよう縮小する。テーブル・席は絶対px座標（1800px基準）で配置されて
+       いるため、width:100%指定では実際の描画幅と座標系がずれてテーブルが
+       用紙からはみ出てしまう。scale(0.82)で仮想キャンバス全体を物理的に
+       縮小することで、座標系を保ったまま用紙に収める。 */
     .st-canvas-scaler {
-        transform: none !important;
-        margin: 0 !important;
-        width: 100% !important;
-        height: auto !important;
+        transform: scale(0.82) !important;
+        transform-origin: top left !important;
+        width: 1800px !important;
+        height: 1100px !important;
+        /* transform はレイアウト上の占有スペースを変えないため、縮小した分だけ
+           負のマージンで詰めないと右・下に大きな余白ページができてしまう。 */
+        margin: 0 -324px -198px 0 !important;
     }
 
     /* キャンバス本体 */
     .st-canvas {
-        width: 100% !important;
-        height: auto !important;
-        min-height: 120mm !important;
+        width: 1800px !important;
+        height: 1100px !important;
         background: #fff !important;
         background-image: none !important;
         border: none !important;
