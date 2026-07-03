@@ -73,6 +73,7 @@ class AdminSettingController extends Controller
                 'venue_map_embed'       => $request->venue_map_embed ?: null,
                 'message'               => $request->message,
                 'is_seating_public'     => $request->boolean('is_seating_public'),
+                'is_profile_book_public' => $request->boolean('is_profile_book_public'),
                 'rsvp_deadline'         => $request->rsvp_deadline ?: null,
                 'shuttle_bus_enabled'   => $request->boolean('shuttle_bus_enabled'),
                 'shuttle_bus_departure' => $request->shuttle_bus_departure ?: null,

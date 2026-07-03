@@ -1,9 +1,23 @@
 <?php
 
 use App\Models\ProfileBookPage;
+use App\Models\WeddingSetting;
 use App\Services\PdfToImagesConverter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+
+function makeWeddingSetting(array $overrides = []): WeddingSetting
+{
+    return WeddingSetting::create(array_merge([
+        'groom_name'     => '新郎',
+        'bride_name'     => '新婦',
+        'ceremony_date'  => '2026-07-19',
+        'ceremony_time'  => '12:00:00',
+        'reception_time' => '13:00:00',
+        'venue_name'     => 'テスト会場',
+        'venue_address'  => '東京都渋谷区1-1-1',
+    ], $overrides));
+}
 
 describe('GET /admin/profile-book 管理画面表示', function () {
 
@@ -137,5 +151,41 @@ describe('GET /profile-book ゲスト向け表示', function () {
             ->get('/profile-book')
             ->assertOk()
             ->assertSee('pbBook', false);
+    });
+
+    it('is_profile_book_public が false の場合はホームへリダイレクト', function () {
+        makeWeddingSetting(['is_profile_book_public' => false]);
+        ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+
+        $this->actingAs(makeGuest())
+            ->get('/profile-book')
+            ->assertRedirect(route('dashboard'));
+    });
+
+    it('is_profile_book_public が true の場合は表示される', function () {
+        Storage::fake('public');
+        Storage::disk('public')->put('profile-book/a.jpg', 'a');
+        makeWeddingSetting(['is_profile_book_public' => true]);
+        ProfileBookPage::create(['page_number' => 1, 'image_path' => 'profile-book/a.jpg']);
+
+        $this->actingAs(makeGuest())
+            ->get('/profile-book')
+            ->assertOk();
+    });
+
+    it('公開設定がオフのときヘッダーメニューにリンクが表示されない', function () {
+        makeWeddingSetting(['is_profile_book_public' => false]);
+
+        $this->actingAs(makeGuest('attending'))
+            ->get('/gallery')
+            ->assertDontSee('プロフィールブック');
+    });
+
+    it('公開設定がオンのときヘッダーメニューにリンクが表示される', function () {
+        makeWeddingSetting(['is_profile_book_public' => true]);
+
+        $this->actingAs(makeGuest('attending'))
+            ->get('/gallery')
+            ->assertSee('プロフィールブック');
     });
 });

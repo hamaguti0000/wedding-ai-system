@@ -11,6 +11,7 @@
     $userAvatarBorderWidth = $currentUser?->avatarBorderWidth() ?? 3;
     $userAvatarImageUrl = $currentUser?->avatarImageUrl();
     $isAttending    = !$isAdmin && Auth::user()?->guestProfile?->participation === 'attending';
+    $isProfileBookPublic = \App\Models\WeddingSetting::first()?->is_profile_book_public ?? false;
 @endphp
 
 {{-- ══ ヘッダー ══════════════════════════════════════════ --}}
@@ -94,12 +95,14 @@
                                 <i class="fa-solid fa-camera"></i>写真を投稿
                             </a>
                         </li>
+                        @if ($isProfileBookPublic)
                         <li>
                             <a href="{{ route('profile-book') }}"
                                class="{{ request()->routeIs('profile-book') ? 'active' : '' }}">
                                 <i class="fa-solid fa-book-open"></i>プロフィールブック
                             </a>
                         </li>
+                        @endif
                         <li>
                             <a href="{{ route('news.index') }}"
                                class="{{ request()->routeIs('news.index') ? 'active' : '' }}">
@@ -358,12 +361,14 @@
                     <i class="fa-solid fa-camera" aria-hidden="true"></i>写真を投稿
                 </a>
             </li>
+            @if ($isProfileBookPublic)
             <li>
                 <a href="{{ route('profile-book') }}"
                    class="{{ request()->routeIs('profile-book') ? 'active' : '' }}">
                     <i class="fa-solid fa-book-open" aria-hidden="true"></i>プロフィールブック
                 </a>
             </li>
+            @endif
             <li>
                 <a href="{{ route('news.index') }}"
                    class="{{ request()->routeIs('news.index') ? 'active' : '' }}">

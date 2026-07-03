@@ -24,6 +24,7 @@ class WeddingSetting extends Model
         'venue_map_embed',
         'message',
         'is_seating_public',
+        'is_profile_book_public',
         'rsvp_deadline',
         'groom_photo',
         'groom_bio',
@@ -43,9 +44,10 @@ class WeddingSetting extends Model
     protected function casts(): array
     {
         return [
-            'ceremony_date'       => 'date',
-            'is_seating_public'   => 'boolean',
-            'rsvp_deadline'       => 'date',
+            'ceremony_date'          => 'date',
+            'is_seating_public'      => 'boolean',
+            'is_profile_book_public' => 'boolean',
+            'rsvp_deadline'          => 'date',
             'shuttle_bus_enabled' => 'boolean',
             'image_display_modes' => 'array',
         ];

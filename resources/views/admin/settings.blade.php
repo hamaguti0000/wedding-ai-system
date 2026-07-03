@@ -275,6 +275,20 @@
                 <p class="toggle-note">オフの場合、ゲストが /seating にアクセスするとホームへリダイレクトされます。</p>
             </div>
 
+            {{-- ── プロフィールブック公開設定 ── --}}
+            <div class="settings-section">
+                <h2>プロフィールブック</h2>
+                <div class="toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="is_profile_book_public" value="1"
+                            {{ old('is_profile_book_public', $setting->is_profile_book_public ?? false) ? 'checked' : '' }}>
+                        <span class="toggle-track"></span>
+                    </label>
+                    <span class="toggle-label">ゲストにプロフィールブックを公開する</span>
+                </div>
+                <p class="toggle-note">オフの場合、ナビゲーションに表示されず、ゲストが /profile-book にアクセスするとホームへリダイレクトされます。管理画面からはいつでも編集できます。</p>
+            </div>
+
             <button type="submit" class="btn-save">保存する</button>
 
         </form>
