@@ -252,6 +252,7 @@ main { padding: 0; text-align: initial; }
 }
 .pf-mail-status__action .pf-btn {
     width: 100%;
+    box-sizing: border-box;
     min-height: 42px;
     padding: 10px 14px;
     font-size: .82rem;
