@@ -172,7 +172,7 @@ main { padding: 0; text-align: initial; }
         <a href="{{ route('profiles.show', 'groom') }}" class="pf-card">
             <div class="pf-card__photo-wrap">
                 @if ($setting?->groom_photo)
-                    <img src="{{ asset('storage/' . $setting->groom_photo) }}" alt="新郎">
+                    <img src="{{ asset('storage/' . $setting->groom_photo) }}?v={{ $setting->updated_at?->timestamp }}" alt="新郎">
                 @else
                     <span class="pf-card__photo-placeholder">
                         <i class="fa-solid fa-user"></i>
@@ -191,7 +191,7 @@ main { padding: 0; text-align: initial; }
         <a href="{{ route('profiles.show', 'bride') }}" class="pf-card">
             <div class="pf-card__photo-wrap">
                 @if ($setting?->bride_photo)
-                    <img src="{{ asset('storage/' . $setting->bride_photo) }}" alt="新婦">
+                    <img src="{{ asset('storage/' . $setting->bride_photo) }}?v={{ $setting->updated_at?->timestamp }}" alt="新婦">
                 @else
                     <span class="pf-card__photo-placeholder">
                         <i class="fa-solid fa-user"></i>

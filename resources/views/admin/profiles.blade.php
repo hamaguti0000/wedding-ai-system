@@ -87,7 +87,7 @@
 
                 {{-- 現在の写真 --}}
                 @if ($setting->groom_photo)
-                    <img src="{{ asset('storage/' . $setting->groom_photo) }}"
+                    <img src="{{ asset('storage/' . $setting->groom_photo) }}?v={{ $setting->updated_at?->timestamp }}"
                          alt="新郎" class="pf-photo-preview" id="groomPreview">
                 @else
                     <div class="pf-photo-placeholder" id="groomPlaceholder">
@@ -118,7 +118,7 @@
                 <h2><i class="fa-solid fa-user"></i>新婦プロフィール</h2>
 
                 @if ($setting->bride_photo)
-                    <img src="{{ asset('storage/' . $setting->bride_photo) }}"
+                    <img src="{{ asset('storage/' . $setting->bride_photo) }}?v={{ $setting->updated_at?->timestamp }}"
                          alt="新婦" class="pf-photo-preview" id="bridePreview">
                 @else
                     <div class="pf-photo-placeholder" id="bridePlaceholder">
