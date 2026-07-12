@@ -23,10 +23,12 @@ class AdminProfileController extends Controller
             'groom_photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'bride_photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ], [
-            'groom_photo.image' => '新郎の写真は画像ファイルを選択してください',
-            'groom_photo.max'   => '新郎の写真は5MB以下にしてください',
-            'bride_photo.image' => '新婦の写真は画像ファイルを選択してください',
-            'bride_photo.max'   => '新婦の写真は5MB以下にしてください',
+            'groom_photo.image'    => '新郎の写真は画像ファイルを選択してください',
+            'groom_photo.max'      => '新郎の写真は5MB以下にしてください',
+            'groom_photo.uploaded' => '新郎の写真のアップロードに失敗しました。ファイルサイズが大きすぎる可能性があります。時間をおいて再度お試しください',
+            'bride_photo.image'    => '新婦の写真は画像ファイルを選択してください',
+            'bride_photo.max'      => '新婦の写真は5MB以下にしてください',
+            'bride_photo.uploaded' => '新婦の写真のアップロードに失敗しました。ファイルサイズが大きすぎる可能性があります。時間をおいて再度お試しください',
         ]);
 
         $data = [
