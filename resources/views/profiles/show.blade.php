@@ -9,7 +9,7 @@
     $roleJa   = $isGroom ? '新郎' : '新婦';
     $photo    = $isGroom ? $setting?->groom_photo : $setting?->bride_photo;
     $bio      = $isGroom ? $setting?->groom_bio   : $setting?->bride_bio;
-    $photoUrl = $photo ? asset('storage/' . $photo) : asset('img/チャペル.jpg');
+    $photoUrl = $photo ? asset('storage/' . $photo) . '?v=' . $setting?->updated_at?->timestamp : asset('img/チャペル.jpg');
     $otherPerson = $isGroom ? 'bride' : 'groom';
 @endphp
 @section('title', $nameEn . ' | プロフィール')
@@ -220,7 +220,7 @@ main { padding: 0; text-align: initial; }
         {{-- 写真 --}}
         <div class="pfshow-photo-col">
             @if ($photo)
-                <img src="{{ asset('storage/' . $photo) }}" alt="{{ $nameEn }}" class="pfshow-photo">
+                <img src="{{ $photoUrl }}" alt="{{ $nameEn }}" class="pfshow-photo">
             @else
                 <div class="pfshow-photo-placeholder">
                     <i class="fa-solid fa-user"></i>
