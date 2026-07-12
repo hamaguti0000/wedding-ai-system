@@ -69,6 +69,7 @@ class ProfileController extends Controller
             'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
             'avatar_image.mimes'    => '写真はJPEG・PNG・WEBP・GIF・HEIC形式のいずれかを選択してください',
             'avatar_image.max'      => '写真は5MB以下にしてください',
+            'avatar_image.uploaded' => '写真のアップロードに失敗しました。ファイルサイズが大きすぎる可能性があります。時間をおいて再度お試しください',
             'avatar_bg_color.regex' => '背景色の形式が正しくありません',
             'avatar_border_color.regex' => '枠線色の形式が正しくありません',
             'avatar_border_width.integer' => '枠線の太さは数値で入力してください',
