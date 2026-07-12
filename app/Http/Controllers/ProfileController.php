@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\WeddingSetting;
+use App\Services\AvatarUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use RuntimeException;
 
 class ProfileController extends Controller
 {
@@ -57,15 +59,15 @@ class ProfileController extends Controller
             'avatar_image' => [
                 Rule::requiredIf(fn () => $request->input('avatar_type') === User::AVATAR_PHOTO && ! $user->avatar_image_path),
                 'nullable',
-                'image',
-                'mimes:jpeg,jpg,png,webp,gif',
+                'file',
+                'mimes:jpeg,jpg,png,webp,gif,heic,heif',
                 'max:5120',
             ],
         ], [
             'avatar_emoji.required' => '絵文字アイコンを選択してください',
             'avatar_emoji.in'       => '選択された絵文字アイコンは利用できません',
             'avatar_image.required' => '写真アイコンを使う場合は画像を選択してください',
-            'avatar_image.image'    => '写真は画像ファイルを選択してください',
+            'avatar_image.mimes'    => '写真はJPEG・PNG・WEBP・GIF・HEIC形式のいずれかを選択してください',
             'avatar_image.max'      => '写真は5MB以下にしてください',
             'avatar_bg_color.regex' => '背景色の形式が正しくありません',
             'avatar_border_color.regex' => '枠線色の形式が正しくありません',
@@ -84,10 +86,15 @@ class ProfileController extends Controller
 
             if ($avatarType === User::AVATAR_PHOTO) {
                 if ($request->hasFile('avatar_image')) {
+                    try {
+                        $newPath = app(AvatarUploadService::class)->store($request->file('avatar_image'));
+                    } catch (RuntimeException $e) {
+                        return back()->withErrors(['avatar_image' => $e->getMessage()]);
+                    }
                     if ($currentPath) {
                         Storage::disk('public')->delete($currentPath);
                     }
-                    $data['avatar_image_path'] = $request->file('avatar_image')->store('avatars', 'public');
+                    $data['avatar_image_path'] = $newPath;
                 } elseif ($currentPath) {
                     $data['avatar_image_path'] = $currentPath;
                 }

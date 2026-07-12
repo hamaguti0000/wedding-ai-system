@@ -120,6 +120,60 @@ describe('ユーザーアイコン', function () {
         expect($user->avatarBorderColor())->toBe('#f0e4d0');
         expect($user->avatarBorderWidth())->toBe(3);
     });
+
+    it('プロフィールから既存の写真アイコンを別の写真に差し替えできる', function () {
+        Storage::fake('public');
+        $user = makeGuest();
+
+        $firstPhoto = UploadedFile::fake()->createWithContent(
+            'first.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3Z4X0AAAAASUVORK5CYII=')
+        );
+        $this->actingAs($user)->patch(route('profile.update'), [
+            'avatar_type' => User::AVATAR_PHOTO,
+            'avatar_image' => $firstPhoto,
+        ])->assertRedirect(route('profile.edit'));
+
+        $firstPath = $user->refresh()->avatar_image_path;
+
+        $secondPhoto = UploadedFile::fake()->createWithContent(
+            'second.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3Z4X0AAAAASUVORK5CYII=')
+        );
+        $this->actingAs($user)->patch(route('profile.update'), [
+            'avatar_type' => User::AVATAR_PHOTO,
+            'avatar_image' => $secondPhoto,
+        ])->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+        expect($user->avatar_image_path)->not->toBe($firstPath);
+        Storage::disk('public')->assertExists($user->avatar_image_path);
+        Storage::disk('public')->assertMissing($firstPath);
+    });
+
+    it('拡張子.heicのファイルはmimesバリデーションを通過する（iPhone写真を弾かない）', function () {
+        Storage::fake('public');
+        $user = makeGuest();
+
+        // このテスト環境のImageMagickはHEICのデコードのみ対応（エンコード不可）のため、
+        // 正常な変換までは検証できない。ここではバリデーションで即座に弾かれないこと
+        // （= .heicが許可mimesに含まれていること）と、変換失敗時に分かりやすい
+        // エラーメッセージへフォールバックすることを確認する。
+        $heicPhoto = UploadedFile::fake()->createWithContent('photo.heic', 'not a real heic image');
+
+        $response = $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'avatar_type' => User::AVATAR_PHOTO,
+                'avatar_image' => $heicPhoto,
+            ]);
+
+        // mimesバリデーション自体は通過し、Imagickでの変換に失敗した場合は
+        // 分かりやすい日本語エラーとともに元の画面へ戻る（500エラーにならない）
+        $response->assertSessionHasErrors(['avatar_image' => 'この画像形式（HEIC）を処理できません。JPEGまたはPNG形式でお試しください。']);
+
+        $user->refresh();
+        expect($user->avatar_type)->not->toBe(User::AVATAR_PHOTO);
+    });
 });
 
 describe('受付QR表示', function () {
