@@ -2,73 +2,57 @@
 @section('title', '席次表管理 | Admin')
 
 @push('styles')
-<link rel="stylesheet" href="{{ css_asset('css/seating.css') }}">
+<link rel="stylesheet" href="{{ css_asset('css/seating-table.css') }}">
 @endpush
 
 @section('content')
 
 @php
-    // $summary['assigned'] / $summary['total'] は int のみ（Collection ではない）
-    $pct = $summary['total'] > 0
-        ? round($summary['assigned'] / $summary['total'] * 100)
-        : 0;
+    $pct = $summary['total'] > 0 ? round($summary['assigned'] / $summary['total'] * 100) : 0;
 
-    // グローバル関数宣言を避けるためクロージャを使用
-    // （同一リクエスト内で同じ view が複数回レンダリングされても再宣言エラーが起きない）
-    $guestSide  = fn($p) => match($p?->guest_side) { 'groom' => '新郎側', 'bride' => '新婦側', default => '' };
-    $guestRel   = fn($p) => match($p?->relationship) {
+    $guestSide = fn($p) => match($p?->guest_side) { 'groom' => '新郎側', 'bride' => '新婦側', default => '' };
+    $guestRel  = fn($p) => match($p?->relationship) {
         'friend' => '友人', 'family' => '親族', 'colleague' => '職場', 'other' => 'その他', default => ''
     };
-    $guestInit  = fn($user) => mb_substr($user->guestProfile?->last_name ?? $user->name, 0, 1, 'UTF-8');
-    $guestName  = function ($user) {
+    $guestName = function ($user) {
         $p = $user->guestProfile;
-        return $p ? $p->last_name . ' ' . $p->first_name : $user->name;
+        return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
+
+    $allGuestsJson = $allGuests->map(function ($u) use ($guestName, $guestSide, $guestRel) {
+        return [
+            'id'    => $u->id,
+            'name'  => $guestName($u),
+            'tag'   => trim($guestSide($u->guestProfile) . $guestRel($u->guestProfile)),
+            'table' => $u->seatAssignment?->seat?->seatingTable?->name,
+        ];
+    })->values();
 @endphp
 
 <script>
     window.SEAT_TYPE_CONFIG = @json($typeConfig);
+    window.ALL_GUESTS = @json($allGuestsJson);
     window.SUMMARY_TOTAL_GUESTS = {{ $summary['total'] }};
 </script>
 
-<div class="st-app" id="stApp" data-preview="false">
+<div class="sx-app" id="sxApp">
 
-    {{-- ── トップバー ── --}}
-    <header class="st-topbar">
-        <div class="st-topbar__left">
-            <a href="{{ route('admin.dashboard') }}" class="st-back">
-                <i class="fa-solid fa-chevron-left"></i>管理
-            </a>
-            <span class="st-topbar__divider"></span>
-            <span class="st-topbar__title">
-                <i class="fa-solid fa-chair"></i>席次表
-            </span>
+    <header class="sx-topbar">
+        <div class="sx-topbar__left">
+            <a href="{{ route('admin.dashboard') }}" class="sx-back"><i class="fa-solid fa-chevron-left"></i>管理</a>
+            <span class="sx-topbar__divider"></span>
+            <span class="sx-topbar__title"><i class="fa-solid fa-table"></i>席次表</span>
         </div>
-
-        <div class="st-topbar__center">
-            <div class="st-progress">
-                <div class="st-progress__bar">
-                    <div class="st-progress__fill" id="progressFill" style="width:{{ $pct }}%"></div>
-                </div>
-                <span class="st-progress__label" id="progressLabel">
-                    {{ $summary['assigned'] }} / {{ $summary['total'] }} 名配置済み
-                </span>
+        <div class="sx-topbar__center">
+            <div class="sx-progress">
+                <div class="sx-progress__bar"><div class="sx-progress__fill" id="progressFill" style="width:{{ $pct }}%"></div></div>
+                <span class="sx-progress__label" id="progressLabel">{{ $summary['assigned'] }} / {{ $summary['total'] }} 名配置済み</span>
             </div>
         </div>
-
-        <div class="st-topbar__right">
-            <span class="st-save-status is-saved" id="saveStatus">
-                <i class="fa-solid fa-check"></i>自動保存済み
-            </span>
-            <span class="st-topbar__divider"></span>
-            <button class="st-btn-preview" id="previewToggle" title="印刷プレビューを表示">
-                <i class="fa-solid fa-eye" aria-hidden="true"></i>プレビュー
-            </button>
-            <button class="st-btn-print" id="printBtn" title="印刷">
-                <i class="fa-solid fa-print" aria-hidden="true"></i>印刷
-            </button>
-            <span class="st-topbar__divider" id="previewDivider"></span>
-            <nav class="st-topbar-nav">
+        <div class="sx-topbar__right">
+            <span class="sx-save-status is-saved" id="saveStatus"><i class="fa-solid fa-check"></i>自動保存済み</span>
+            <a href="{{ route('admin.seating.print') }}" target="_blank" class="sx-btn-print"><i class="fa-solid fa-print"></i>印刷用ページ</a>
+            <nav class="sx-topbar-nav">
                 <a href="{{ route('admin.dashboard') }}">RSVP管理</a>
                 <a href="{{ route('admin.seating') }}" class="active">席次表</a>
                 <a href="{{ route('admin.settings') }}">設定</a>
@@ -76,307 +60,134 @@
         </div>
     </header>
 
-    {{-- ── メインエリア ── --}}
-    <div class="st-body">
+    <div class="sx-body">
 
-        {{-- ── 左サイドバー：ゲストリスト ── --}}
-        <aside class="st-sidebar">
-
-            {{-- 検索・フィルター --}}
-            <div class="st-sidebar__search-wrap">
-                <div class="st-search">
-                    <i class="fa-solid fa-magnifying-glass st-search__icon"></i>
-                    <input class="st-search__input" id="guestSearch"
-                           type="text" placeholder="名前で検索..." autocomplete="off">
-                </div>
-                <div class="st-filter-tabs" id="sideFilterSide">
-                    <button class="st-filter-tab active" data-filter="all">全員</button>
-                    <button class="st-filter-tab" data-filter="groom">新郎側</button>
-                    <button class="st-filter-tab" data-filter="bride">新婦側</button>
-                </div>
+        {{-- ── 左サイドバー：未配置ゲスト ── --}}
+        <aside class="sx-sidebar">
+            <div class="sx-sidebar__search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="guestSearch" type="text" placeholder="名前で検索..." autocomplete="off">
             </div>
-
-            {{-- 未配置ゲスト --}}
-            <div class="st-sidebar__section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
-                <div class="st-sidebar__section-head">
-                    <span class="st-sidebar__section-title">未配置</span>
-                    <span class="st-sidebar__section-count" id="unassignedCount">{{ $summary['unassigned'] }}名</span>
-                </div>
-                <div class="st-guest-list" id="unassignedPool">
-                    @forelse ($unassignedGuests as $guest)
-                    @php $p = $guest->guestProfile; @endphp
-                    <div class="st-guest-card"
-                         data-user-id="{{ $guest->id }}"
-                         data-name="{{ $guestName($guest) }}"
-                         data-side="{{ $p?->guest_side ?? '' }}"
-                         data-rel="{{ $p?->relationship ?? '' }}"
-                         draggable="true">
-                        <div class="st-guest-card__avatar st-guest-card__avatar--{{ $p?->guest_side ?? 'none' }}">
-                            {{ $guestInit($guest) }}
-                        </div>
-                        <div class="st-guest-card__info">
-                            <p class="st-guest-card__name">{{ $guestName($guest) }}</p>
-                            <div class="st-guest-card__tags">
-                                @if ($p?->guest_side)
-                                <span class="st-tag st-tag--{{ $p->guest_side }}">{{ $guestSide($p) }}</span>
-                                @endif
-                                @if ($p?->relationship)
-                                <span class="st-tag st-tag--rel">{{ $guestRel($p) }}</span>
-                                @endif
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-grip-dots st-guest-card__grip"></i>
-                    </div>
-                    @empty
-                    <div class="st-guest-list__empty" id="poolEmpty">
-                        <i class="fa-solid fa-circle-check" style="color:var(--ds-attending-text);font-size:1.4rem;"></i>
-                        <p>全員配置済みです</p>
-                    </div>
-                    @endforelse
-                </div>
+            <div class="sx-sidebar__head">
+                <span>未配置ゲスト</span>
+                <span class="sx-sidebar__count" id="unassignedCount">{{ $summary['unassigned'] }}名</span>
             </div>
-
-            {{-- 配置済みゲスト（コンパクト）--}}
-            <div class="st-sidebar__section st-sidebar__section--assigned">
-                <div class="st-sidebar__section-head">
-                    <span class="st-sidebar__section-title">配置済み</span>
-                    <span class="st-sidebar__section-count" id="assignedCount">{{ $summary['assigned'] }}名</span>
-                </div>
-                <div class="st-assigned-list" id="assignedList">
-                    @foreach ($assignedGuests as $guest)
-                    @php
-                        $p   = $guest->guestProfile;
-                        $tbl = $guest->seatAssignment?->seat?->seatingTable?->name ?? '—';
-                    @endphp
-                    <div class="st-assigned-item"
-                         data-user-id="{{ $guest->id }}"
-                         data-table="{{ $tbl }}">
-                        <div class="st-assigned-item__dot st-guest-card__avatar--{{ $p?->guest_side ?? 'none' }}"></div>
-                        <span class="st-assigned-item__name">{{ $guestName($guest) }}</span>
-                        <span class="st-assigned-item__table">{{ $tbl }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
+            <ul class="sx-unassigned-list" id="unassignedList">
+                @forelse ($unassignedGuests as $guest)
+                @php $p = $guest->guestProfile; @endphp
+                <li data-user-id="{{ $guest->id }}" data-name="{{ $guestName($guest) }}">
+                    <span class="sx-unassigned-list__name">{{ $guestName($guest) }}</span>
+                    <span class="sx-unassigned-list__tag">{{ trim($guestSide($p).$guestRel($p)) }}</span>
+                </li>
+                @empty
+                <li class="sx-unassigned-list__empty" id="unassignedEmpty">全員配置済みです</li>
+                @endforelse
+            </ul>
         </aside>
 
-        {{-- ── キャンバス ── --}}
-        <div class="st-canvas-area" id="canvasArea">
-
-            {{-- 印刷プレビューヘッダー（プレビュー・印刷時のみ表示）--}}
-            <div class="st-print-header" id="stPrintHeader">
-                <p class="st-print-header__title">席 次 表</p>
-                @if($setting?->groom_name || $setting?->bride_name)
-                <p class="st-print-header__couple">{{ $setting?->groom_name ?? '' }} ＆ {{ $setting?->bride_name ?? '' }}</p>
-                @endif
-                @if($setting?->ceremony_date)
-                <p class="st-print-header__meta">
-                    {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y年n月j日') }}
-                    @if($setting?->venue_name) ・{{ $setting->venue_name }}@endif
-                </p>
-                @endif
-            </div>
-
-            {{-- 1800×1100 仮想キャンバス（JS が transform:scale でスケール）--}}
-            <div class="st-canvas-scaler" id="canvasScaler">
-            <div class="st-canvas" id="seatingCanvas">
-
-                @if ($tables->isEmpty())
-                <div class="st-canvas__empty" id="canvasEmpty">
-                    <i class="fa-solid fa-chair" style="font-size:2.5rem;opacity:0.3;"></i>
-                    <p>テーブルがありません</p>
-                </div>
-                @endif
-
-                @foreach ($tables as $i => $table)
-                @php
-                    $x = $table->pos_x ?: (24 + ($i % 8) * 220);
-                    $y = $table->pos_y ?: (24 + (int)floor($i / 8) * 230);
-                    $seatCount     = $table->seats->count();
-                    $assignedCount = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
-                    $maxPosX = $table->seats->max('pos_x') ?? 0;
-                    $maxPosY = $table->seats->max('pos_y') ?? 0;
-                    $bodyMinW = max(180, intval($maxPosX) + 54);
-                    $bodyMinH = max(126, intval($maxPosY) + 76);
-                @endphp
-                <div class="canvas-table"
-                     id="ct-{{ $table->id }}"
-                     data-table-id="{{ $table->id }}"
-                     style="left:{{ $x }}px; top:{{ $y }}px;">
-
-                    <div class="canvas-table__handle" data-drag-handle>
-                        <i class="fa-solid fa-grip-dots ct-grip"></i>
-                        <span class="ct-name" data-table-id="{{ $table->id }}" title="クリックして名前を変更">{{ $table->name }}</span>
-                        <span class="ct-count" id="ct-meta-{{ $table->id }}">{{ $assignedCount }}/{{ $seatCount }}</span>
-                        <button type="button" class="ct-btn ct-btn--add" data-table-id="{{ $table->id }}" title="席を追加">
-                            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                        </button>
-                        <button type="button" class="ct-btn ct-btn--del" data-table-id="{{ $table->id }}" title="テーブルを削除">
-                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                        </button>
-                    </div>
-
-                    <div class="canvas-table__body"
-                         id="ct-body-{{ $table->id }}"
-                         data-table-id="{{ $table->id }}"
-                         style="min-width:{{ $bodyMinW }}px; min-height:{{ $bodyMinH }}px;">
-
-                        @foreach ($table->seats as $seat)
-                        @php
-                            $user     = $seat->assignment?->user;
-                            $occupied = $user !== null;
-                            $p2       = $occupied ? $user->guestProfile : null;
-                            $initial  = $occupied ? $guestInit($user) : '';
-                            $fullName = $occupied ? $guestName($user) : '';
-                            $userId   = $occupied ? $user->id : '';
-                        @endphp
-                        <div class="canvas-seat {{ $occupied ? 'is-occupied' : '' }}"
-                             id="seat-{{ $seat->id }}"
-                             data-seat-id="{{ $seat->id }}"
-                             data-type="{{ $seat->type }}"
-                             data-user-id="{{ $userId }}"
-                             @if ($occupied)
-                             data-guest-name="{{ $fullName }}"
-                             data-guest-side="{{ $guestSide($p2) }}"
-                             data-guest-rel="{{ $guestRel($p2) }}"
-                             data-guest-rel-detail="{{ $p2?->relationship_detail ?? '' }}"
-                             data-guest-phone="{{ $p2?->phone ?? '' }}"
-                             data-guest-postal="{{ $p2?->postal_code ?? '' }}"
-                             data-guest-address="{{ $p2?->address ?? '' }}"
-                             data-guest-allergy="{{ $p2?->has_allergy ? 'あり' : ($p2 ? 'なし' : '') }}"
-                             data-guest-allergy-notes="{{ $p2?->allergy_notes ?? '' }}"
-                             data-guest-count="{{ $p2?->attending_count ?? '' }}"
-                             data-guest-children="{{ $p2?->children_count ?? '' }}"
-                             data-guest-notes="{{ $p2?->notes ?? '' }}"
-                             @endif
-                             style="left:{{ $seat->pos_x }}px; top:{{ $seat->pos_y }}px;">
-                            <div class="canvas-seat__circle">
-                                <span class="canvas-seat__initial">{{ $initial }}</span>
-                                <span class="canvas-seat__plus" aria-hidden="true">+</span>
-                            </div>
-                            @if ($occupied)
-                            <div class="canvas-seat__tooltip">{{ $fullName }}</div>
+        {{-- ── メイン：表形式エディタ ── --}}
+        <main class="sx-main">
+            <table class="sx-table" id="sxTable">
+                <thead>
+                    <tr>
+                        <th class="sx-col-table">テーブル</th>
+                        <th class="sx-col-num">#</th>
+                        <th class="sx-col-type">タイプ</th>
+                        <th class="sx-col-guest">ゲスト</th>
+                        <th class="sx-col-action"></th>
+                    </tr>
+                </thead>
+                <tbody id="sxBody">
+                    @foreach ($tables as $table)
+                        @php $seatCount = $table->seats->count(); @endphp
+                        @forelse ($table->seats as $i => $seat)
+                        <tr data-seat-id="{{ $seat->id }}" data-table-id="{{ $table->id }}" class="sx-row {{ $loop->first ? 'sx-row--first' : '' }}">
+                            @if ($loop->first)
+                            <td class="sx-cell-table" rowspan="{{ $seatCount }}" data-table-id="{{ $table->id }}">
+                                @include('admin.partials.seating-table-cell', ['table' => $table])
+                            </td>
                             @endif
-                        </div>
-                        @endforeach
+                            <td class="sx-cell-num">{{ $i + 1 }}</td>
+                            <td class="sx-cell-type">
+                                <select class="sx-type" data-seat-id="{{ $seat->id }}">
+                                    @foreach ($typeConfig as $key => $cfg)
+                                    <option value="{{ $key }}" @selected($seat->type === $key)>{{ $cfg['label'] }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="sx-cell-guest">
+                                <div class="sx-guest-wrap">
+                                    <select class="sx-guest" data-seat-id="{{ $seat->id }}" data-current-user="{{ $seat->assignment?->user_id }}">
+                                        <option value="">— 未配置 —</option>
+                                        @foreach ($allGuests as $g)
+                                        <option value="{{ $g->id }}" @selected($seat->assignment?->user_id === $g->id)>
+                                            {{ $guestName($g) }}@if($g->seatAssignment && $g->seatAssignment->seat->seating_table_id !== $table->id) （{{ $g->seatAssignment->seat->seatingTable->name }}に配置中）@endif
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @if ($seat->assignment)
+                                    @php $p2 = $seat->assignment->user->guestProfile; @endphp
+                                    <button type="button" class="sx-guest-detail{{ $p2?->has_allergy ? ' has-allergy' : '' }}"
+                                        title="詳細情報を見る"
+                                        data-guest-name="{{ $guestName($seat->assignment->user) }}"
+                                        data-guest-side="{{ $guestSide($p2) }}"
+                                        data-guest-rel="{{ $guestRel($p2) }}"
+                                        data-guest-rel-detail="{{ $p2?->relationship_detail ?? '' }}"
+                                        data-guest-phone="{{ $p2?->phone ?? '' }}"
+                                        data-guest-postal="{{ $p2?->postal_code ?? '' }}"
+                                        data-guest-address="{{ $p2?->address ?? '' }}"
+                                        data-guest-allergy="{{ $p2?->has_allergy ? 'あり' : ($p2 ? 'なし' : '') }}"
+                                        data-guest-allergy-notes="{{ $p2?->allergy_notes ?? '' }}"
+                                        data-guest-count="{{ $p2?->attending_count ?? '' }}"
+                                        data-guest-children="{{ $p2?->children_count ?? '' }}"
+                                        data-guest-notes="{{ $p2?->notes ?? '' }}"
+                                        data-table-name="{{ $table->name }}">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="sx-cell-action">
+                                <button type="button" class="sx-del-seat" data-seat-id="{{ $seat->id }}" title="この席を削除">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr data-table-id="{{ $table->id }}" class="sx-row sx-row--first">
+                            <td class="sx-cell-table" rowspan="1" data-table-id="{{ $table->id }}">
+                                @include('admin.partials.seating-table-cell', ['table' => $table])
+                            </td>
+                            <td class="sx-cell-empty" colspan="4">席がありません。「+席」で追加してください</td>
+                        </tr>
+                        @endforelse
+                    @endforeach
+                </tbody>
+            </table>
 
-                        @if ($seatCount === 0)
-                        <p class="ct-hint" id="ct-hint-{{ $table->id }}">
-                            ＋ を押して席を追加
-                        </p>
-                        @endif
-                    </div>
-                </div>
-                @endforeach
+            @if ($tables->isEmpty())
+            <p class="sx-no-tables">テーブルがまだありません。下のフォームから追加してください</p>
+            @endif
 
-            </div>{{-- /.st-canvas --}}
-            </div>{{-- /.st-canvas-scaler --}}
+            <div class="sx-add-table">
+                <input type="text" id="newTableName" placeholder="新しいテーブル名（例: 友人1）" maxlength="50">
+                <input type="number" id="newTableSeats" value="4" min="0" max="8" title="席数">
+                <button type="button" id="addTableBtn"><i class="fa-solid fa-plus"></i>テーブルを追加</button>
+            </div>
+        </main>
 
-            <button type="button" class="st-fab" id="fabAddTable">
-                <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                <span>テーブルを追加</span>
-            </button>
+    </div>
 
-        </div>{{-- /.st-canvas-area --}}
-
-    </div>{{-- /.st-body --}}
-
-    {{-- ── 凡例バー ── --}}
-    <footer class="st-legend">
-        <span class="st-legend__label">席タイプ:</span>
+    {{-- ── 凡例 ── --}}
+    <footer class="sx-legend">
+        <span class="sx-legend__label">席タイプ:</span>
         @foreach ($typeConfig as $key => $cfg)
-        <span class="st-legend__item">
-            <span class="st-legend__dot" style="background:{{ $cfg['color'] }};"></span>
-            {{ $cfg['label'] }}
+        <span class="sx-legend__item">
+            <span class="sx-legend__dot" style="background:{{ $cfg['color'] }};"></span>{{ $cfg['label'] }}
         </span>
         @endforeach
     </footer>
 
-</div>{{-- /.st-app --}}
-
-{{-- ── 右プロパティパネル（席選択時に表示）── --}}
-<div class="st-props" id="seatProps" aria-hidden="true">
-    <div class="st-props__header">
-        <span class="st-props__title">席のプロパティ</span>
-        <button class="st-props__close" id="propsClose" aria-label="閉じる">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-    <div class="st-props__body">
-
-        {{-- 席タイプ選択 --}}
-        <div class="sp-section">
-            <p class="sp-section__title">席タイプ</p>
-            <div class="sp-type-grid" id="propsTypeGrid">
-                @foreach ($typeConfig as $key => $cfg)
-                <label class="sp-type-option" data-type="{{ $key }}">
-                    <input type="radio" name="seatType" value="{{ $key }}" class="sp-type-radio">
-                    <span class="sp-type-dot" style="background:{{ $cfg['color'] }};"></span>
-                    <span class="sp-type-label">{{ $cfg['label'] }}</span>
-                </label>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- 配置ゲスト情報 --}}
-        <div class="sp-section" id="propsGuestSection" style="display:none;">
-            <p class="sp-section__title">配置ゲスト</p>
-            <div class="sp-guest-info" id="propsGuestInfo">
-                <div class="sp-guest-avatar" id="propsGuestAvatar"></div>
-                <div>
-                    <p class="sp-guest-name" id="propsGuestName"></p>
-                    <p class="sp-guest-tags" id="propsGuestTags"></p>
-                </div>
-            </div>
-            <button class="sp-btn sp-btn--ghost" id="propsGuestDetail">
-                <i class="fa-solid fa-circle-info"></i>詳細情報を見る
-            </button>
-            <button class="sp-btn sp-btn--ghost" id="propsUnassign">
-                <i class="fa-solid fa-rotate-left"></i>配置を解除
-            </button>
-        </div>
-
-        {{-- 空席メッセージ --}}
-        <div class="sp-section" id="propsEmptySection">
-            <p class="sp-empty-hint">ゲストリストからドラッグして<br>この席に配置できます</p>
-        </div>
-
-        {{-- 席の削除 --}}
-        <div class="sp-section">
-            <button class="sp-btn sp-btn--danger" id="propsDeleteSeat">
-                <i class="fa-solid fa-trash"></i>この席を削除
-            </button>
-        </div>
-
-    </div>
-</div>
-
-{{-- ── テーブル追加モーダル ── --}}
-<div class="st-modal-overlay" id="addTableModal" aria-hidden="true">
-    <div class="st-modal">
-        <div class="st-modal__header">
-            <h3 class="st-modal__title">テーブルを追加</h3>
-            <button type="button" class="st-modal__close" id="modalClose" aria-label="閉じる">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="st-modal__body">
-            <div class="st-modal__field">
-                <label class="st-modal__label" for="newTableName">テーブル名</label>
-                <input type="text" class="st-modal__input" id="newTableName" placeholder="例: 友人1" maxlength="50">
-            </div>
-            <div class="st-modal__field">
-                <label class="st-modal__label" for="newTableSeats">席数</label>
-                <input type="number" class="st-modal__input st-modal__input--sm" id="newTableSeats" value="4" min="0" max="8">
-                <p class="st-modal__hint">1テーブルの最大席数は8席です。あとから「＋」ボタンで増やすこともできます。</p>
-            </div>
-        </div>
-        <div class="st-modal__footer">
-            <button type="button" class="st-modal__cancel" id="modalCancel">キャンセル</button>
-            <button type="button" class="st-modal__submit" id="modalSubmit">追加する</button>
-        </div>
-    </div>
 </div>
 
 {{-- ── ゲスト詳細情報モーダル ── --}}
@@ -395,72 +206,40 @@
         <div class="dm-section">
             <p class="dm-section-title">出席人数</p>
             <div class="dm-grid">
-                <dl class="dm-item">
-                    <dt>出席人数（合計）</dt>
-                    <dd id="gdCount">—</dd>
-                </dl>
-                <dl class="dm-item">
-                    <dt>うちお子様</dt>
-                    <dd id="gdChildren">—</dd>
-                </dl>
+                <dl class="dm-item"><dt>出席人数（合計）</dt><dd id="gdCount">—</dd></dl>
+                <dl class="dm-item"><dt>うちお子様</dt><dd id="gdChildren">—</dd></dl>
             </div>
         </div>
 
         <div class="dm-section">
             <p class="dm-section-title">お立場・ご関係</p>
             <div class="dm-grid">
-                <dl class="dm-item">
-                    <dt>お立場</dt>
-                    <dd id="gdSide">—</dd>
-                </dl>
-                <dl class="dm-item">
-                    <dt>ご関係</dt>
-                    <dd id="gdRel">—</dd>
-                </dl>
-                <dl class="dm-item dm-full">
-                    <dt>ご関係の詳細</dt>
-                    <dd id="gdRelDetail">—</dd>
-                </dl>
+                <dl class="dm-item"><dt>お立場</dt><dd id="gdSide">—</dd></dl>
+                <dl class="dm-item"><dt>ご関係</dt><dd id="gdRel">—</dd></dl>
+                <dl class="dm-item dm-full"><dt>ご関係の詳細</dt><dd id="gdRelDetail">—</dd></dl>
             </div>
         </div>
 
         <div class="dm-section">
             <p class="dm-section-title">食物アレルギー</p>
             <div class="dm-grid">
-                <dl class="dm-item">
-                    <dt>アレルギー</dt>
-                    <dd id="gdAllergy">—</dd>
-                </dl>
-                <dl class="dm-item dm-full">
-                    <dt>アレルギー詳細</dt>
-                    <dd id="gdAllergyNotes">—</dd>
-                </dl>
+                <dl class="dm-item"><dt>アレルギー</dt><dd id="gdAllergy">—</dd></dl>
+                <dl class="dm-item dm-full"><dt>アレルギー詳細</dt><dd id="gdAllergyNotes">—</dd></dl>
             </div>
         </div>
 
         <div class="dm-section">
             <p class="dm-section-title">連絡先</p>
             <div class="dm-grid">
-                <dl class="dm-item">
-                    <dt>電話番号</dt>
-                    <dd id="gdPhone">—</dd>
-                </dl>
-                <dl class="dm-item">
-                    <dt>郵便番号</dt>
-                    <dd id="gdPostal">—</dd>
-                </dl>
-                <dl class="dm-item dm-full">
-                    <dt>住所</dt>
-                    <dd id="gdAddress">—</dd>
-                </dl>
+                <dl class="dm-item"><dt>電話番号</dt><dd id="gdPhone">—</dd></dl>
+                <dl class="dm-item"><dt>郵便番号</dt><dd id="gdPostal">—</dd></dl>
+                <dl class="dm-item dm-full"><dt>住所</dt><dd id="gdAddress">—</dd></dl>
             </div>
         </div>
 
         <div class="dm-section">
             <p class="dm-section-title">メッセージ</p>
-            <dl class="dm-item">
-                <dd id="gdNotes" class="dm-pre">—</dd>
-            </dl>
+            <dl class="dm-item"><dd id="gdNotes" class="dm-pre">—</dd></dl>
         </div>
     </div>
 </div>
@@ -468,5 +247,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/seating.js') }}"></script>
+<script src="{{ asset('js/seating-table.js') }}"></script>
 @endpush

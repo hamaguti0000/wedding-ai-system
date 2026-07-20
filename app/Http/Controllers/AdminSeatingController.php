@@ -33,6 +33,12 @@ class AdminSeatingController extends Controller
         $assignedGuests   = $attendingAll->filter(fn($u) => $u->seatAssignment !== null)->values();
         $unassignedGuests = $attendingAll->filter(fn($u) => $u->seatAssignment === null)->values();
 
+        // 席の「ゲストを選ぶ」セレクトに使う、名前順の全出席者一覧
+        $allGuests = $attendingAll->sortBy(function (User $u) {
+            $p = $u->guestProfile;
+            return $p ? $p->last_name.$p->first_name : $u->name;
+        })->values();
+
         // ── Aggregate data: int のみ、Collection を含まない ────────────────
         $summary = [
             'total'      => $attendingAll->count(),      // int
@@ -47,11 +53,24 @@ class AdminSeatingController extends Controller
         //   $tables           → EloquentCollection<SeatingTable>
         //   $assignedGuests   → Collection<User>  (配置済み出席者)
         //   $unassignedGuests → Collection<User>  (未配置出席者)
+        //   $allGuests        → Collection<User>  (氏名順の全出席者、席選択セレクト用)
         //   $summary          → array<string, int> (集計値のみ)
         //   $typeConfig       → array<string, array> (席タイプ設定)
         return view('admin.seating', compact(
-            'tables', 'assignedGuests', 'unassignedGuests', 'summary', 'typeConfig', 'setting'
+            'tables', 'assignedGuests', 'unassignedGuests', 'allGuests', 'summary', 'typeConfig', 'setting'
         ));
+    }
+
+    /** 印刷・共有用の読み取り専用ページ（優雅な一覧表示）*/
+    public function print()
+    {
+        $tables = SeatingTable::with([
+            'seats.assignment.user.guestProfile',
+        ])->orderBy('display_order')->get();
+
+        $setting = WeddingSetting::first();
+
+        return view('admin.seating-print', compact('tables', 'setting'));
     }
 
     // ── テーブル ────────────────────────────────────────────
