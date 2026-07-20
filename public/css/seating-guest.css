@@ -245,19 +245,12 @@
 }
 
 .gs-guest {
-    padding: 10px 2px;
+    padding: 12px 2px;
     border-top: 1px solid #f1eadd;
     text-align: center;
 }
 
 .gs-col__list .gs-guest:first-child { border-top: none; }
-
-.gs-guest__label {
-    margin: 0 0 3px;
-    font-size: 0.6rem;
-    color: var(--gs-muted);
-    letter-spacing: 0.04em;
-}
 
 .gs-guest__name {
     margin: 0;

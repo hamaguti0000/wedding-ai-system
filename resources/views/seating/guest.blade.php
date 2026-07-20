@@ -12,10 +12,6 @@
         $p = $user->guestProfile;
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
-    $guestSide = fn($p) => match($p?->guest_side) { 'groom' => '新郎', 'bride' => '新婦', default => '' };
-    $guestRel  = fn($p) => match($p?->relationship) {
-        'friend' => '友人', 'family' => '親族', 'colleague' => '職場', 'other' => 'その他', default => ''
-    };
     $tableCount = $tables->count();
     $seatCount = $tables->sum(fn($table) => $table->seats->count());
     $assignedCount = $tables->sum(fn($table) => $table->seats->filter(fn($seat) => $seat->assignment !== null)->count());
@@ -111,14 +107,9 @@
                         @forelse ($occupiedSeats as $seat)
                         @php
                             $assignedUser = $seat->assignment->user;
-                            $p            = $assignedUser->guestProfile;
                             $isMe         = $mySeat && $seat->id === $mySeat->id;
-                            $label        = trim($guestSide($p) . $guestRel($p));
                         @endphp
                         <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-                            @if ($label)
-                            <p class="gs-guest__label">{{ $label }}</p>
-                            @endif
                             <p class="gs-guest__name">
                                 @if ($isMe)<span class="gs-guest__mark">&#10022;</span>@endif
                                 {{ $guestName($assignedUser) }}
