@@ -1288,3 +1288,85 @@ main { padding-top: 60px; text-align: initial; }
 @media print {
     .detail-modal-overlay { display: none !important; }
 }
+
+/* ================================================================
+   洗練パス2 — キャンバスエディタの意匠仕上げ
+   座席・テーブルの座標系・サイズ（position/width/height）は変更しない。
+   配色・タイポグラフィ・影・角丸のみを調整する。
+   ================================================================ */
+
+/* ── トップバー ── */
+.st-topbar__title {
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+}
+.st-topbar__title i { color: var(--ds-gold); }
+
+/* ── サイドバー：セクション見出し ── */
+.st-sidebar__section-title { color: #9a7447; }
+
+/* ── ゲストカード：アバターに縁取り ── */
+.st-guest-card__avatar {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(179,139,89,0.16);
+}
+
+/* ── タグをピル化 ── */
+.st-tag { border-radius: 999px; }
+
+/* ── テーブルヘッダー：卓名を主役に ── */
+.ct-name {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #6a4f28;
+}
+.canvas-table__handle {
+    padding: 9px 11px;
+    gap: 8px;
+}
+
+/* ── 追加・削除ボタンを丸いアイコンボタンに ── */
+.ct-btn { width: 22px; height: 22px; border-radius: 50%; }
+.ct-btn--add {
+    color: var(--ds-gold-dark);
+    background: rgba(179,139,89,0.08);
+}
+.ct-btn--add:hover { background: rgba(179,139,89,0.2); }
+.ct-btn--del:hover { background: #fce6e6; }
+
+/* ── 席の丸に一段の深み ── */
+.canvas-seat__circle {
+    box-shadow: var(--st-shadow-seat-empty), inset 0 -2px 3px rgba(0,0,0,0.03);
+}
+.canvas-seat.is-occupied .canvas-seat__circle {
+    box-shadow: var(--st-shadow-seat-full), inset 0 -2px 3px rgba(0,0,0,0.06);
+}
+
+/* ── 凡例バーをピル化（折り返し可）── */
+.st-legend {
+    height: auto;
+    min-height: 34px;
+    padding: 7px 20px;
+    gap: 8px 10px;
+    flex-wrap: wrap;
+}
+.st-legend__item {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #faf6ef;
+    border: 1px solid rgba(212,184,150,0.35);
+}
+.st-legend__dot {
+    box-shadow: 0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* ── FABボタン ── */
+.st-fab { box-shadow: 0 6px 20px rgba(179,139,89,0.45); }
+.st-fab:hover { box-shadow: 0 8px 24px rgba(179,139,89,0.55); }
+
+/* ── 右プロパティパネル：席タイプ選択 ── */
+.sp-type-dot { box-shadow: 0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,0.12); }
+.sp-guest-avatar { box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(179,139,89,0.18); }
+
+@media (max-width: 767px) {
+    .st-legend { padding: 6px 14px; }
+}
