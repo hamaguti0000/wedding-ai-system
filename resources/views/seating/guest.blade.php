@@ -12,13 +12,14 @@
         $p = $user->guestProfile;
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
-    $guestInit = fn($user) => mb_substr($user->guestProfile?->last_name ?? $user->name, 0, 1, 'UTF-8');
+    $guestSide = fn($p) => match($p?->guest_side) { 'groom' => '新郎', 'bride' => '新婦', default => '' };
+    $guestRel  = fn($p) => match($p?->relationship) {
+        'friend' => '友人', 'family' => '親族', 'colleague' => '職場', 'other' => 'その他', default => ''
+    };
     $tableCount = $tables->count();
     $seatCount = $tables->sum(fn($table) => $table->seats->count());
     $assignedCount = $tables->sum(fn($table) => $table->seats->filter(fn($seat) => $seat->assignment !== null)->count());
 @endphp
-
-<script>window.SEAT_TYPE_CONFIG = @json($typeConfig);</script>
 
 <div class="gs-page">
 
@@ -41,24 +42,34 @@
         @endphp
 
         <header class="gs-hero">
-            <div class="gs-hero__copy">
-                <p class="gs-hero__eyebrow">Seating Chart</p>
-                <h1 class="gs-hero__title">席次表</h1>
-                <p class="gs-hero__meta">
-                    @if ($setting?->ceremony_date)
-                        {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y年n月j日') }}
-                        @if ($setting?->venue_name) ・{{ $setting->venue_name }}@endif
-                    @elseif ($setting?->venue_name)
-                        {{ $setting->venue_name }}
+            <div class="gs-hero__sparkle" aria-hidden="true"></div>
+            <p class="gs-hero__eyebrow">Seating Chart</p>
+            <div class="gs-hero__frame">
+                <div class="gs-hero__frame-inner">
+                    @if ($setting?->groom_name || $setting?->bride_name)
+                    <p class="gs-hero__role">新郎　　　　新婦</p>
                     @endif
-                </p>
+                    <h1 class="gs-hero__title">
+                        <span>{{ $setting?->groom_name ?? '　' }}</span>
+                        <span class="gs-hero__amp">&amp;</span>
+                        <span>{{ $setting?->bride_name ?? '　' }}</span>
+                    </h1>
+                </div>
             </div>
+            <p class="gs-hero__meta">
+                @if ($setting?->ceremony_date)
+                    {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y年n月j日') }}
+                    @if ($setting?->venue_name) ・{{ $setting->venue_name }}@endif
+                @elseif ($setting?->venue_name)
+                    {{ $setting->venue_name }}
+                @endif
+            </p>
         </header>
 
         @if ($myTable)
         <section class="gs-focus" id="gsBanner">
             <div class="gs-focus__inner">
-                <div class="gs-focus__badge"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></div>
+                <span class="gs-focus__star">&#10022;</span>
                 <div class="gs-focus__copy">
                     <p class="gs-focus__label">あなたの席</p>
                     <p class="gs-focus__value">{{ $myTable->name }}</p>
@@ -69,7 +80,7 @@
         @else
         <section class="gs-focus gs-focus--pending">
             <div class="gs-focus__inner">
-                <div class="gs-focus__badge"><i class="fa-solid fa-circle-info" aria-hidden="true"></i></div>
+                <span class="gs-focus__star">&#10022;</span>
                 <div class="gs-focus__copy">
                     <p class="gs-focus__label">あなたの席</p>
                     <p class="gs-focus__value">未配置</p>
@@ -79,65 +90,50 @@
         </section>
         @endif
 
-        {{-- ── テーブルグリッド ── --}}
+        {{-- ── テーブル一覧 ── --}}
         <section class="gs-sheet">
-            <main class="gs-grid" id="gsGrid">
+            <main class="gs-columns" id="gsGrid">
                 @foreach ($tables as $table)
                 @php
-                    $isMyTable  = $myTableId && $table->id === $myTableId;
-                    $totalSeats = $table->seats->count();
-                    $occupied   = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
+                    $isMyTable = $myTableId && $table->id === $myTableId;
+                    $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
                 @endphp
-                <article class="gs-table {{ $isMyTable ? 'gs-table--mine' : '' }}"
+                <article class="gs-col {{ $isMyTable ? 'gs-col--mine' : '' }}"
                      id="gst-{{ $table->id }}"
-                     style="animation-delay: {{ $loop->index * 24 }}ms">
-                    <div class="gs-table__head">
-                        <h2 class="gs-table__name">{{ $table->name }}</h2>
-                        <div class="gs-table__count">{{ $occupied }}名</div>
+                     style="animation-delay: {{ $loop->index * 26 }}ms">
+
+                    <div class="gs-col__badge">
+                        <span class="gs-col__badge-moon">&#9789;</span>
+                        <span class="gs-col__badge-name">{{ $table->name }}</span>
                     </div>
 
-                    <div class="gs-table__surface">
-                        <div class="gs-table__seats">
-                            @forelse ($table->seats as $seat)
-                            @php
-                                $assignedUser = $seat->assignment?->user;
-                                $isOccupied   = $assignedUser !== null;
-                                $isMe         = $mySeat && $seat->id === $mySeat->id;
-                                $fullName     = $isOccupied ? $guestName($assignedUser) : '';
-                                $seatClass    = $isMe ? 'is-mine' : ($isOccupied ? 'is-occupied' : 'is-empty');
-                            @endphp
-                            <div class="gs-seat {{ $seatClass }}"
-                                 data-type="{{ $seat->type }}">
-                                <p class="gs-seat__name">{{ $isOccupied ? $fullName : '' }}</p>
-                            </div>
-                            @empty
-                            <div class="gs-table__empty">席が登録されていません</div>
-                            @endforelse
+                    <div class="gs-col__list">
+                        @forelse ($occupiedSeats as $seat)
+                        @php
+                            $assignedUser = $seat->assignment->user;
+                            $p            = $assignedUser->guestProfile;
+                            $isMe         = $mySeat && $seat->id === $mySeat->id;
+                            $label        = trim($guestSide($p) . $guestRel($p));
+                        @endphp
+                        <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
+                            @if ($label)
+                            <p class="gs-guest__label">{{ $label }}</p>
+                            @endif
+                            <p class="gs-guest__name">
+                                @if ($isMe)<span class="gs-guest__mark">&#10022;</span>@endif
+                                {{ $guestName($assignedUser) }}
+                            </p>
                         </div>
+                        @empty
+                        <p class="gs-col__empty">まだ配置がありません</p>
+                        @endforelse
                     </div>
                 </article>
                 @endforeach
             </main>
-
-            {{-- ── 凡例 ── --}}
-            <footer class="gs-legend">
-                <div class="gs-legend__inner">
-                    @if ($myTable)
-                    <div class="gs-legend__mine">
-                        <span class="gs-legend__mine-dot"></span>あなたの席
-                    </div>
-                    <span class="gs-legend__sep"></span>
-                    @endif
-                    <span class="gs-legend__label">席タイプ:</span>
-                    @foreach ($typeConfig as $key => $cfg)
-                    <div class="gs-legend__item">
-                        <span class="gs-legend__dot" style="background:{{ $cfg['color'] }};"></span>
-                        <span>{{ $cfg['label'] }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </footer>
         </section>
+
+        <p class="gs-footnote">ご来場を心よりお待ちしております</p>
 
     @endif
 
@@ -148,24 +144,12 @@
 @push('scripts')
 <script>
 (function () {
-    const cfg      = window.SEAT_TYPE_CONFIG || {};
-    const myTable  = document.querySelector('.gs-table--mine');
+    const myTable = document.querySelector('.gs-col--mine');
 
-    // 席タイプ別カラーを CSS カスタムプロパティで適用
-    document.querySelectorAll('.gs-seat[data-type]').forEach(function (el) {
-        const c = cfg[el.dataset.type];
-        if (c) {
-            el.style.setProperty('--sc', c.color);
-            el.style.setProperty('--sb', c.bg);
-        }
-    });
-
-    // 「確認する」ボタン → 自席テーブルカードにスクロール
     document.getElementById('scrollToMyTable')?.addEventListener('click', function () {
         myTable?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 
-    // ページロード時に自席カードへ自動スクロール
     if (myTable) {
         setTimeout(function () {
             myTable.scrollIntoView({ behavior: 'smooth', block: 'center' });
