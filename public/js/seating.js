@@ -37,7 +37,8 @@
         const padY = isPreview ? 72 : 48;
         const scaleX = (area.clientWidth  - padX) / CANVAS_W;
         const scaleY = (area.clientHeight - padY) / CANVAS_H;
-        return Math.min(1, Math.max(0.35, isPreview ? Math.min(scaleX, scaleY) : scaleX));
+        // プレビュー時は名前ラベルが読める最小倍率を確保する（横に収まりきらない分はスクロールで見る）
+        return Math.min(1, Math.max(isPreview ? 0.5 : 0.35, isPreview ? Math.min(scaleX, scaleY) : scaleX));
     }
 
     function applyScale() {

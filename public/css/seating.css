@@ -533,19 +533,20 @@ main { padding-top: 60px; text-align: initial; }
 
 /* ── プレビュー・印刷時：名前を常時表示 ──
    席の横間隔は60px（AdminSeatingController::seatSlots() 参照）。
-   ラベル幅をそれより狭くして隣の席の名前と重ならないようにする。 */
+   ラベル幅をそれより狭くして隣の席の名前と重ならないようにする。
+   縮小表示される前提のため、実寸のフォントサイズは大きめに確保する。 */
 .is-preview .canvas-seat__tooltip {
     position: absolute;
     top: calc(100% + 1px); bottom: auto;
     left: 50%; transform: translateX(-50%);
     opacity: 1; background: none;
-    color: var(--st-text); font-size: 0.6rem;
+    color: var(--st-text); font-size: 0.66rem;
     padding: 0; white-space: normal;
-    font-weight: 600; z-index: 5;
+    font-weight: 700; z-index: 5;
     width: max-content;
-    max-width: 54px;
+    max-width: 56px;
     text-align: center;
-    line-height: 1.18;
+    line-height: 1.15;
     overflow-wrap: break-word;
     word-break: keep-all;
 }
@@ -1369,4 +1370,12 @@ main { padding-top: 60px; text-align: initial; }
 
 @media (max-width: 767px) {
     .st-legend { padding: 6px 14px; }
+
+    /* プレビュー時：中央寄せだと左右が均等に画面外へ切れて分かりにくいため、
+       左上基準でスクロールして見られるようにする */
+    .is-preview .st-canvas-area {
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 20px 16px;
+    }
 }
