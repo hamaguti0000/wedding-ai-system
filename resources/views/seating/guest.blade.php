@@ -93,7 +93,7 @@
                      style="animation-delay: {{ $loop->index * 24 }}ms">
                     <div class="gs-table__head">
                         <h2 class="gs-table__name">{{ $table->name }}</h2>
-                        <div class="gs-table__count">{{ $occupied }} / {{ $totalSeats }}</div>
+                        <div class="gs-table__count">{{ $occupied }}名</div>
                     </div>
 
                     <div class="gs-table__surface">
