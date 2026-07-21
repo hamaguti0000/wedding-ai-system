@@ -74,6 +74,8 @@
         </p>
     </header>
 
+    @include('partials.seating-floor-plan', ['tables' => $tables])
+
     <section class="gs-sheet">
         <main class="gs-columns">
             @foreach ($tables as $table)

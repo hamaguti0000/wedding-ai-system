@@ -422,5 +422,61 @@
         if (e.key === 'Escape') closeGuestDetail();
     });
 
+    /* ── 表示切り替え（表 / 配置図） ─────────────────────────── */
+    const viewTable     = document.getElementById('sxViewTable');
+    const viewFloorplan = document.getElementById('sxViewFloorplan');
+    document.getElementById('viewTabs')?.addEventListener('click', (e) => {
+        const tab = e.target.closest('.sx-view-tab');
+        if (!tab) return;
+        document.querySelectorAll('.sx-view-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const isFloorplan = tab.dataset.view === 'floorplan';
+        if (viewTable)     viewTable.hidden = isFloorplan;
+        if (viewFloorplan) viewFloorplan.hidden = !isFloorplan;
+    });
+
+    /* ── 配置図：テーブルのドラッグ移動 ─────────────────────── */
+    const fpRoom = document.getElementById('sxFpRoom');
+    if (fpRoom) {
+        let drag = null;
+
+        fpRoom.addEventListener('pointerdown', (e) => {
+            const el = e.target.closest('.sx-fp-table');
+            if (!el) return;
+            el.setPointerCapture(e.pointerId);
+            drag = {
+                el,
+                startX: e.clientX,
+                startY: e.clientY,
+                origLeft: parseFloat(el.style.left) || 0,
+                origTop: parseFloat(el.style.top) || 0,
+            };
+            el.classList.add('is-dragging');
+        });
+
+        fpRoom.addEventListener('pointermove', (e) => {
+            if (!drag) return;
+            const dx = e.clientX - drag.startX;
+            const dy = e.clientY - drag.startY;
+            const newLeft = Math.max(0, drag.origLeft + dx);
+            const newTop  = Math.max(0, drag.origTop + dy);
+            drag.el.style.left = newLeft + 'px';
+            drag.el.style.top  = newTop + 'px';
+        });
+
+        const endDrag = async (e) => {
+            if (!drag) return;
+            const el = drag.el;
+            el.classList.remove('is-dragging');
+            const tableId = el.dataset.tableId;
+            const x = Math.round(parseFloat(el.style.left) || 0);
+            const y = Math.round(parseFloat(el.style.top) || 0);
+            drag = null;
+            await api('PATCH', `${BASE}/tables/${tableId}/position`, { x, y });
+        };
+        fpRoom.addEventListener('pointerup', endDrag);
+        fpRoom.addEventListener('pointercancel', endDrag);
+    }
+
     updateProgress();
 })();

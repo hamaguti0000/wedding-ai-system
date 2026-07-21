@@ -338,3 +338,61 @@ main { padding-top: 60px; text-align: initial; }
     .sx-cell-table { width: 150px; }
     .sx-table { font-size: 0.78rem; }
 }
+
+/* ── 表示切り替え（[hidden] 属性が display:flex 指定に負けないよう明示）── */
+#sxViewTable[hidden], #sxViewFloorplan[hidden] { display: none !important; }
+
+/* ── 表示切り替えタブ ── */
+.sx-view-tabs { display: flex; gap: 2px; margin-left: 4px; }
+.sx-view-tab {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border: 1px solid var(--sx-border-light);
+    background: #fff; color: var(--sx-mid);
+    font-size: 0.76rem; font-weight: 600; cursor: pointer;
+    border-radius: 6px;
+}
+.sx-view-tab.active { background: var(--sx-gold); border-color: var(--sx-gold); color: #fff; }
+.sx-view-tab:not(.active):hover { border-color: var(--sx-gold-light); color: var(--sx-gold-dark); }
+
+/* ── 配置図ビュー ── */
+.sx-fp-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.sx-fp-hint {
+    display: flex; align-items: center; gap: 6px;
+    margin: 0; padding: 8px 20px;
+    font-size: 0.78rem; color: var(--sx-muted);
+    background: #fbf7ee; border-bottom: 1px solid var(--sx-border-light);
+    flex-shrink: 0;
+}
+.sx-fp-scroll { flex: 1; overflow: auto; padding: 24px; }
+.sx-fp-room {
+    position: relative;
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(179,139,89,0.06) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(179,139,89,0.06) 40px);
+    border: 1px solid var(--sx-border-light);
+    border-radius: 4px;
+}
+.sx-fp-table {
+    position: absolute;
+    width: 170px;
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid var(--sx-border);
+    border-radius: 6px;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+.sx-fp-table:hover { border-color: var(--sx-gold); }
+.sx-fp-table.is-dragging { cursor: grabbing; z-index: 20; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border-color: var(--sx-gold); }
+.sx-fp-table__name {
+    font-family: 'Playfair Display', 'Noto Sans JP', serif;
+    font-size: 0.78rem; font-weight: 600; color: var(--sx-ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sx-fp-table__count {
+    flex-shrink: 0; font-size: 0.66rem; color: var(--sx-muted);
+    background: var(--sx-row-alt); border-radius: 8px; padding: 1px 6px;
+}

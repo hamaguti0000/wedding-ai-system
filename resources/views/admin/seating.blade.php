@@ -42,6 +42,10 @@
             <a href="{{ route('admin.dashboard') }}" class="sx-back"><i class="fa-solid fa-chevron-left"></i>管理</a>
             <span class="sx-topbar__divider"></span>
             <span class="sx-topbar__title"><i class="fa-solid fa-table"></i>席次表</span>
+            <div class="sx-view-tabs" id="viewTabs">
+                <button type="button" class="sx-view-tab active" data-view="table"><i class="fa-solid fa-table-list"></i>表</button>
+                <button type="button" class="sx-view-tab" data-view="floorplan"><i class="fa-solid fa-map"></i>配置図</button>
+            </div>
         </div>
         <div class="sx-topbar__center">
             <div class="sx-progress">
@@ -60,7 +64,7 @@
         </div>
     </header>
 
-    <div class="sx-body">
+    <div class="sx-body" id="sxViewTable">
 
         {{-- ── 左サイドバー：未配置ゲスト ── --}}
         <aside class="sx-sidebar">
@@ -176,6 +180,23 @@
             </div>
         </main>
 
+    </div>
+
+    {{-- ── 配置図ビュー（会場内のテーブル配置。ドラッグで移動）── --}}
+    <div class="sx-fp-wrap" id="sxViewFloorplan" hidden>
+        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>テーブルをドラッグして会場内の位置を調整できます</p>
+        <div class="sx-fp-scroll">
+            <div class="sx-fp-room" id="sxFpRoom" style="width:1700px; height:760px;">
+                @foreach ($tables as $table)
+                @php $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count(); @endphp
+                <div class="sx-fp-table" data-table-id="{{ $table->id }}"
+                     style="left:{{ $table->pos_x }}px; top:{{ $table->pos_y }}px;">
+                    <span class="sx-fp-table__name">{{ $table->name }}</span>
+                    <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
     </div>
 
     {{-- ── 凡例 ── --}}

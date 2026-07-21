@@ -86,6 +86,9 @@
         </section>
         @endif
 
+        {{-- ── 会場配置図 ── --}}
+        @include('partials.seating-floor-plan', ['tables' => $tables, 'myTableId' => $myTableId])
+
         {{-- ── テーブル一覧 ── --}}
         <section class="gs-sheet">
             <main class="gs-columns" id="gsGrid">
