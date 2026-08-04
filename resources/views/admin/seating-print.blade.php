@@ -65,7 +65,7 @@
                 </div>
                 <div class="spc-card__seats">
                     @foreach ($group['seats'] as $seat)
-                    <div class="spc-seat">{{ $guestName($seat->assignment->user) }}</div>
+                    <div class="spc-seat">{{ $guestName($seat->assignment->user) }} 様</div>
                     @endforeach
                 </div>
             </article>
