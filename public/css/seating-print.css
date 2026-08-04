@@ -231,8 +231,9 @@
 }
 
 @media print {
-    .header, .header-drawer, .header-overlay, .spc-toolbar { display: none !important; }
+    .header, .header-drawer, .header-overlay, .admin-sidebar, .spc-toolbar, body > footer { display: none !important; }
     main { padding-top: 0 !important; }
+    body.has-admin-sidebar main { margin-left: 0 !important; }
 
     @page { size: A3 landscape; margin: 12mm; }
 
