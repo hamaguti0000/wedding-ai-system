@@ -53,13 +53,6 @@
             @endif
         </header>
 
-        @if ($tables->isNotEmpty())
-        <div class="spc-floorplan">
-            <p class="spc-floorplan__label">Floor Plan</p>
-            @include('partials.seating-floor-plan', ['tables' => $tables])
-        </div>
-        @endif
-
         @if ($tableGroups->isEmpty())
         <p class="spc-empty">配置済みのゲストがいません。編集画面で席の配置を行ってください。</p>
         @else
