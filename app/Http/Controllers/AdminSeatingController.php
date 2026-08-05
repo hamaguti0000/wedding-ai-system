@@ -73,6 +73,43 @@ class AdminSeatingController extends Controller
         return view('admin.seating-print', compact('tables', 'setting'));
     }
 
+    /** エスコートカード印刷用ページ（出席者ごとに1枚、氏名順） */
+    public function escortCards()
+    {
+        $attendingAll = User::where('role', 'guest')
+            ->whereHas('guestProfile', fn($q) => $q->where('participation', 'attending'))
+            ->with(['guestProfile', 'seatAssignment.seat.seatingTable'])
+            ->get();
+
+        $guestName = function (User $user) {
+            $p = $user->guestProfile;
+            return $p ? trim($p->last_name.' '.$p->first_name) : $user->name;
+        };
+
+        $cards = $attendingAll
+            ->filter(fn(User $u) => $u->seatAssignment !== null)
+            ->map(function (User $u) {
+                $p = $u->guestProfile;
+                return [
+                    'table_name' => $u->seatAssignment->seat->seatingTable->name,
+                    'family'     => $p?->last_name ?? '',
+                    'given'      => $p?->first_name ?? $u->name,
+                ];
+            })
+            ->sortBy(fn(array $c) => $c['family'].$c['given'])
+            ->values();
+
+        $unassignedNames = $attendingAll
+            ->filter(fn(User $u) => $u->seatAssignment === null)
+            ->map($guestName)
+            ->sort()
+            ->values();
+
+        $setting = WeddingSetting::first();
+
+        return view('admin.seating-escort-cards', compact('cards', 'unassignedNames', 'setting'));
+    }
+
     // ── テーブル ────────────────────────────────────────────
 
     public function storeTable(Request $request): JsonResponse

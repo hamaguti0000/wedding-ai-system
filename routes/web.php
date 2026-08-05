@@ -234,6 +234,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // 席次表管理
     Route::get('/seating',                             [AdminSeatingController::class, 'index'])         ->name('seating');
     Route::get('/seating/print',                       [AdminSeatingController::class, 'print'])         ->name('seating.print');
+    Route::get('/seating/escort-cards',                [AdminSeatingController::class, 'escortCards'])   ->name('seating.escort-cards');
     Route::post('/seating/tables',                     [AdminSeatingController::class, 'storeTable'])    ->name('seating.tables.store');
     Route::delete('/seating/tables/{tableId}',         [AdminSeatingController::class, 'destroyTable'])  ->name('seating.tables.destroy');
     Route::patch('/seating/tables/{tableId}/position', [AdminSeatingController::class, 'updatePosition'])->name('seating.tables.position');
