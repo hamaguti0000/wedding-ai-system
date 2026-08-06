@@ -34,7 +34,10 @@
     </div>
     @endif
 
-    <p class="ec-meta">{{ $cards->count() }}枚のエスコートカード（氏名順・1シート4枚 / A6サイズ）</p>
+    <p class="ec-meta">
+        {{ $cards->count() }}枚のエスコートカード（氏名順・1シート2枚 / A6サイズ）<br>
+        印刷時は「背景のグラフィック」を有効にしてください（花柄が印刷されます）
+    </p>
 
     <div class="ec-grid">
         @foreach ($cards as $card)
