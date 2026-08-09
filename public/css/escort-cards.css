@@ -1,4 +1,4 @@
-/* Escort cards print page */
+/* Escort cards print page - A4 business card sheet */
 .ec-page,
 .ec-page * {
     box-sizing: border-box;
@@ -12,7 +12,7 @@ main {
 .ec-page {
     --ec-navy: #263e61;
     --ec-gold: #b58739;
-    --ec-paper: #f7f5ef;
+    --ec-paper: #f8f6ef;
     --ec-muted: #7a7168;
     min-height: calc(100vh - 60px);
     padding: 22px;
@@ -55,145 +55,154 @@ main {
     font: 800 .84rem 'Noto Sans JP', system-ui, sans-serif;
 }
 
-.ec-sheet {
-    width: min(1180px, 100%);
-    margin: 0 auto;
+.ec-sheets {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-    gap: 18px;
+    gap: 24px;
+    justify-content: center;
+}
+
+.ec-print-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 11mm 14mm;
+    display: grid;
+    grid-template-columns: repeat(2, 91mm);
+    grid-template-rows: repeat(5, 55mm);
+    gap: 0;
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(37,45,58,.16);
 }
 
 .ec-card {
     position: relative;
-    width: 100%;
-    aspect-ratio: 100 / 148;
-    min-height: 400px;
+    width: 91mm;
+    height: 55mm;
     overflow: hidden;
-    padding: 26px 30px;
-    border: 1px solid rgba(38,62,97,.18);
+    padding: 6.8mm 7.4mm;
+    border: 1px solid rgba(38,62,97,.15);
     background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,.72), transparent 24%),
-        repeating-linear-gradient(10deg, transparent 0 9px, rgba(63,52,41,.035) 10px 11px, transparent 12px 24px),
+        radial-gradient(circle at 14% 18%, rgba(255,255,255,.74), transparent 25%),
+        repeating-linear-gradient(10deg, transparent 0 8px, rgba(63,52,41,.028) 9px 10px, transparent 11px 21px),
         var(--ec-paper);
-    box-shadow: 0 18px 36px rgba(37,45,58,.14);
-    page-break-after: always;
 }
 .ec-card::after {
     content: "";
     position: absolute;
-    right: 34px;
-    top: 46%;
-    width: 1.4px;
-    height: 42%;
+    right: 7.4mm;
+    top: 35%;
+    width: .35mm;
+    height: 48%;
     background: var(--ec-navy);
-    opacity: .86;
+    opacity: .8;
 }
 
 .ec-card__header {
     position: relative;
     z-index: 1;
+    width: 44mm;
 }
 .ec-card__couple,
 .ec-card__script {
     margin: 0;
     color: var(--ec-gold);
     font-family: 'Brush Script MT', 'Segoe Script', cursive;
-    font-size: 1.08rem;
-    line-height: 1.2;
+    font-size: 10pt;
+    line-height: 1.15;
+    white-space: nowrap;
 }
 .ec-card__date {
-    margin: 6px 0 0;
+    margin: 1.3mm 0 0;
     color: var(--ec-gold);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1rem;
+    font-size: 8pt;
     letter-spacing: .04em;
 }
 
 .ec-table {
     position: absolute;
-    top: 86px;
-    right: 54px;
-    width: 150px;
-    height: 190px;
+    top: 9mm;
+    right: 10mm;
+    width: 25mm;
+    height: 25mm;
     display: grid;
     place-items: center;
 }
 .ec-table__label {
     position: absolute;
     top: 0;
-    left: 4px;
+    left: 0;
     color: var(--ec-navy);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1.15rem;
+    font-size: 8pt;
     letter-spacing: .18em;
     transform: rotate(-38deg);
 }
 .ec-table__mark {
     color: var(--ec-navy);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(6rem, 18vw, 8.4rem);
+    font-size: 44pt;
     line-height: .9;
 }
 
 .ec-guest {
     position: absolute;
-    left: 32px;
-    right: 72px;
-    top: 46%;
-    transform: translateY(-16%);
+    left: 9mm;
+    right: 31mm;
+    top: 22mm;
     z-index: 1;
 }
 .ec-guest__kana {
-    margin: 0 0 6px;
+    margin: 0 0 1.4mm;
     color: var(--ec-muted);
-    font: 700 .72rem 'Noto Sans JP', system-ui, sans-serif;
-    letter-spacing: .12em;
+    font: 700 6.5pt 'Noto Sans JP', system-ui, sans-serif;
+    letter-spacing: .1em;
+    white-space: nowrap;
 }
 .ec-guest__name {
     margin: 0;
     color: var(--ec-navy);
     font-family: Georgia, 'Noto Serif JP', serif;
-    font-size: clamp(2.35rem, 8vw, 3.9rem);
+    font-size: 19pt;
     font-weight: 500;
-    line-height: 1.08;
-    letter-spacing: .03em;
+    line-height: 1.1;
+    letter-spacing: .02em;
+    white-space: nowrap;
 }
-.ec-guest__suffix {
-    margin: 8px 0 0;
-    color: var(--ec-navy);
-    font-size: 1.05rem;
+.ec-guest__name span {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 9pt;
 }
 
 .ec-card__footer {
     position: absolute;
-    left: 34%;
-    right: 46px;
-    bottom: 42px;
+    left: 35mm;
+    right: 11mm;
+    bottom: 6.8mm;
     z-index: 1;
     color: var(--ec-gold);
     text-align: center;
 }
 .ec-card__footer p:last-child {
-    margin: 6px 0 0;
-    font-size: .78rem;
+    margin: 1.2mm 0 0;
+    font-size: 6.4pt;
 }
 
 .ec-flower {
     position: absolute;
-    width: 210px;
-    height: 170px;
-    opacity: .9;
+    width: 42mm;
+    height: 31mm;
+    opacity: .86;
 }
 .ec-flower::before,
 .ec-flower::after {
     content: "";
     position: absolute;
-    border: 1.4px solid var(--ec-navy);
-    opacity: .9;
+    border: .35mm solid var(--ec-navy);
+    opacity: .86;
 }
 .ec-flower::before {
-    width: 124px;
-    height: 124px;
+    width: 25mm;
+    height: 25mm;
     border-radius: 56% 44% 58% 42%;
     background:
         radial-gradient(ellipse at 50% 16%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%),
@@ -201,19 +210,19 @@ main {
         radial-gradient(ellipse at 78% 50%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%);
 }
 .ec-flower::after {
-    width: 92px;
-    height: 30px;
+    width: 18mm;
+    height: 6mm;
     border-radius: 999px 20px 999px 20px;
     transform: rotate(-24deg);
 }
 .ec-flower--top {
-    top: -18px;
-    right: -18px;
+    top: -5mm;
+    right: -4mm;
     transform: rotate(16deg);
 }
 .ec-flower--bottom {
-    left: -26px;
-    bottom: -20px;
+    left: -7mm;
+    bottom: -6mm;
     transform: rotate(198deg);
 }
 
@@ -233,14 +242,15 @@ main {
         top: 56px;
         flex-wrap: wrap;
     }
-    .ec-sheet {
-        grid-template-columns: 1fr;
+    .ec-sheets {
+        justify-content: start;
+        overflow-x: auto;
     }
 }
 
 @media print {
     @page {
-        size: 100mm 148mm;
+        size: A4 portrait;
         margin: 0;
     }
     body {
@@ -260,19 +270,19 @@ main {
         padding: 0;
         background: #fff !important;
     }
-    .ec-sheet {
+    .ec-sheets {
         display: block;
-        width: 100%;
-        margin: 0;
     }
-    .ec-card {
-        width: 100mm;
-        height: 148mm;
+    .ec-print-sheet {
+        width: 210mm;
+        height: 297mm;
         min-height: 0;
-        aspect-ratio: auto;
-        border: 0;
+        padding: 11mm 14mm;
         box-shadow: none;
         break-after: page;
         page-break-after: always;
+    }
+    .ec-card {
+        border: 0;
     }
 }

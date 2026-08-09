@@ -21,7 +21,7 @@
 <div class="ec-page">
     <div class="ec-toolbar">
         <a href="{{ route('admin.seating') }}">&larr; 席次表に戻る</a>
-        <span>{{ $guests->count() }}枚</span>
+        <span>{{ $guests->count() }}枚 / A4名刺10面</span>
         <button type="button" onclick="window.print()">印刷する</button>
     </div>
 
@@ -31,42 +31,45 @@
         <p>出席で、席が配置済みのゲストが対象です。</p>
     </section>
     @else
-    <section class="ec-sheet" aria-label="エスコートカード一覧">
-        @foreach ($guests as $guest)
-        @php
-            $table = $guest->seatAssignment?->seat?->seatingTable;
-            $tableMark = $table ? ($tableMarks[$table->id] ?? '') : '';
-            $furigana = $guestFurigana($guest);
-        @endphp
-        <article class="ec-card">
-            <div class="ec-flower ec-flower--top" aria-hidden="true"></div>
-            <div class="ec-flower ec-flower--bottom" aria-hidden="true"></div>
+    <section class="ec-sheets" aria-label="エスコートカード一覧">
+        @foreach ($guests->chunk(10) as $chunk)
+        <div class="ec-print-sheet">
+            @foreach ($chunk as $guest)
+            @php
+                $table = $guest->seatAssignment?->seat?->seatingTable;
+                $tableMark = $table ? ($tableMarks[$table->id] ?? '') : '';
+                $furigana = $guestFurigana($guest);
+            @endphp
+            <article class="ec-card">
+                <div class="ec-flower ec-flower--top" aria-hidden="true"></div>
+                <div class="ec-flower ec-flower--bottom" aria-hidden="true"></div>
 
-            <header class="ec-card__header">
-                <p class="ec-card__couple">{{ $couple }}</p>
-                @if ($setting?->ceremony_date)
-                <p class="ec-card__date">{{ \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y') }}</p>
-                @endif
-            </header>
+                <header class="ec-card__header">
+                    <p class="ec-card__couple">{{ $couple }}</p>
+                    @if ($setting?->ceremony_date)
+                    <p class="ec-card__date">{{ \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y') }}</p>
+                    @endif
+                </header>
 
-            <div class="ec-table">
-                <span class="ec-table__label">TABLE</span>
-                <span class="ec-table__mark">{{ $tableMark }}</span>
-            </div>
+                <div class="ec-table">
+                    <span class="ec-table__label">TABLE</span>
+                    <span class="ec-table__mark">{{ $tableMark }}</span>
+                </div>
 
-            <div class="ec-guest">
-                @if ($furigana)
-                <p class="ec-guest__kana">{{ $furigana }}</p>
-                @endif
-                <h2 class="ec-guest__name">{{ $guestName($guest) }}</h2>
-                <p class="ec-guest__suffix">様</p>
-            </div>
+                <div class="ec-guest">
+                    @if ($furigana)
+                    <p class="ec-guest__kana">{{ $furigana }}</p>
+                    @endif
+                    <h2 class="ec-guest__name">{{ $guestName($guest) }} <span>様</span></h2>
+                </div>
 
-            <footer class="ec-card__footer">
-                <p class="ec-card__script">Welcome to our wedding!</p>
-                <p>本日はごゆっくりお過ごしください</p>
-            </footer>
-        </article>
+                <footer class="ec-card__footer">
+                    <p class="ec-card__script">Welcome to our wedding!</p>
+                    <p>本日はごゆっくりお過ごしください</p>
+                </footer>
+            </article>
+            @endforeach
+        </div>
         @endforeach
     </section>
     @endif
