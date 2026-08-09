@@ -201,18 +201,55 @@
     cursor: pointer;
 }
 
+.gs-view-tools {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 14px;
+}
+.gs-view-tools button {
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid rgba(157,113,66,.42);
+    background: rgba(255,248,240,.78);
+    color: var(--gs-gold);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.gs-view-tools button.is-active {
+    background: var(--gs-gold);
+    color: #fff;
+}
+
 .gs-board-scroll {
     position: relative;
     z-index: 1;
-    overflow: auto;
+    overflow: hidden;
     padding: 6px 2px 16px;
+}
+.gs-board-scroll.is-reading {
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-color: var(--gs-gold) rgba(255,255,255,.4);
 }
+.gs-board-scale {
+    --gs-board-scale: 1;
+    width: 100%;
+    min-height: 1px;
+}
 .gs-board {
-    width: 1380px;
+    width: 1680px;
     margin: 0 auto;
     padding: 12px 4px 0;
+    transform: scale(var(--gs-board-scale));
+    transform-origin: top left;
+}
+.gs-board-scale.is-fit .gs-board {
+    margin-inline: 0;
 }
 
 .gs-stage {
@@ -237,20 +274,38 @@
     font-size: .9rem;
 }
 
-.gs-table-grid {
+.gs-table-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 50px;
-    row-gap: 44px;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 32px;
+}
+.gs-table-row--eight {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+.gs-table-row--seven {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    padding-inline: calc((100% / 8) / 2);
+}
+.gs-table-row--edge {
+    grid-template-columns: 2fr 4fr 2fr;
+}
+.gs-edge-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+.gs-edge-gap {
+    min-height: 1px;
 }
 
 .gs-table {
     position: relative;
-    min-height: 190px;
+    min-height: 156px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
     align-items: center;
-    column-gap: 18px;
+    column-gap: 8px;
     scroll-margin: 140px;
 }
 .gs-table--mine {
@@ -267,15 +322,15 @@
     background: rgba(255,243,244,.92);
     color: var(--gs-red);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
-    font-size: .72rem;
+    font-size: .62rem;
     font-weight: 800;
     letter-spacing: .08em;
 }
 
 .gs-table__wreath {
     position: relative;
-    width: 96px;
-    height: 96px;
+    width: 58px;
+    height: 58px;
     display: grid;
     place-items: center;
     border: 2px solid var(--gs-green);
@@ -287,8 +342,8 @@
 .gs-table__wreath::after {
     content: "";
     position: absolute;
-    width: 26px;
-    height: 46px;
+    width: 16px;
+    height: 28px;
     border-radius: 999px;
     background:
         radial-gradient(ellipse at 42% 18%, var(--gs-green-soft) 0 20%, transparent 21%),
@@ -296,27 +351,27 @@
         radial-gradient(ellipse at 42% 70%, var(--gs-green-soft) 0 17%, transparent 18%);
 }
 .gs-table__wreath::before {
-    left: -12px;
-    top: 23px;
+    left: -8px;
+    top: 15px;
     transform: rotate(-23deg);
 }
 .gs-table__wreath::after {
-    right: -12px;
-    top: 23px;
+    right: -8px;
+    top: 15px;
     transform: scaleX(-1) rotate(-23deg);
 }
 .gs-table__mark {
     color: var(--gs-green);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 2.45rem;
+    font-size: 1.55rem;
     line-height: 1;
 }
 .gs-table__name {
     position: absolute;
-    bottom: -23px;
+    bottom: -18px;
     left: 50%;
     transform: translateX(-50%);
-    max-width: 150px;
+    max-width: 118px;
     color: var(--gs-gold);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
     font-size: .72rem;
@@ -326,7 +381,7 @@
 
 .gs-table__guests {
     display: grid;
-    gap: 12px;
+    gap: 7px;
 }
 .gs-table__guests--left {
     text-align: right;
@@ -342,14 +397,14 @@
     margin: 0 0 2px;
     color: var(--gs-muted);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
-    font-size: .75rem;
+    font-size: .52rem;
     font-weight: 600;
     line-height: 1.25;
 }
 .gs-guest__name {
     margin: 0;
     color: var(--gs-ink);
-    font-size: 1.05rem;
+    font-size: .72rem;
     font-weight: 700;
     line-height: 1.35;
     letter-spacing: .02em;
@@ -411,20 +466,20 @@
 @media (max-width: 767px) {
     .gs-page {
         min-height: calc(100vh - 56px);
-        padding: 10px 0 24px;
+        padding: 8px 0 22px;
     }
     .gs-paper-shell {
         width: 100%;
     }
     .gs-paper {
         min-height: calc(100vh - 78px);
-        padding: 28px 14px 24px;
+        padding: 24px 10px 22px;
         border-inline: 0;
     }
     .gs-corner {
-        width: 82px;
-        height: 82px;
-        opacity: .72;
+        width: 72px;
+        height: 72px;
+        opacity: .62;
     }
     .gs-corner--tl,
     .gs-corner--tr { top: 8px; }
@@ -437,7 +492,7 @@
 
     .gs-hero {
         display: block;
-        margin-bottom: 18px;
+        margin-bottom: 14px;
         text-align: center;
     }
     .gs-hero__family {
@@ -447,75 +502,60 @@
         min-width: 0;
     }
     .gs-hero__eyebrow {
-        font-size: .64rem;
+        font-size: .62rem;
     }
     .gs-hero__title {
-        font-size: clamp(1.9rem, 9vw, 2.7rem);
+        font-size: clamp(1.75rem, 8vw, 2.35rem);
         white-space: normal;
     }
     .gs-hero__script {
-        font-size: 1.02rem;
+        font-size: .96rem;
     }
     .gs-hero__meta {
-        margin-top: 10px;
+        margin-top: 8px;
         text-align: center;
-        font-size: .86rem;
+        font-size: .8rem;
     }
 
     .gs-focus {
         width: calc(100% - 18px);
-        margin-bottom: 18px;
-        padding: 11px 12px;
+        margin-bottom: 14px;
+        padding: 10px 12px;
     }
     .gs-focus__value {
-        font-size: 1.02rem;
+        font-size: 1rem;
     }
     .gs-focus__btn {
-        min-height: 36px;
+        min-height: 34px;
         padding: 0 12px;
     }
 
+    .gs-view-tools {
+        margin-bottom: 10px;
+    }
+    .gs-view-tools button {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: .78rem;
+    }
     .gs-board-scroll {
-        margin-inline: -14px;
-        padding: 4px 10px 14px;
+        margin-inline: -10px;
+        padding: 2px 10px 10px;
     }
     .gs-board {
-        width: 1180px;
-        padding-inline: 8px;
+        width: 1680px;
     }
-    .gs-stage--head {
-        margin-bottom: 22px;
+    .gs-table-row {
+        gap: 12px;
+        margin-bottom: 28px;
     }
-    .gs-table-grid {
-        grid-template-columns: repeat(3, 1fr);
-        column-gap: 34px;
-        row-gap: 36px;
-    }
-    .gs-table {
-        min-height: 174px;
-        grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1fr);
-        column-gap: 12px;
-    }
-    .gs-table__wreath {
-        width: 82px;
-        height: 82px;
-    }
-    .gs-table__mark {
-        font-size: 2.04rem;
-    }
-    .gs-table__guests {
-        gap: 9px;
-    }
-    .gs-guest__meta {
-        font-size: .66rem;
-    }
-    .gs-guest__name {
-        font-size: .92rem;
+    .gs-edge-group {
+        gap: 12px;
     }
     .gs-footnote {
-        margin-top: 22px;
+        margin-top: 18px;
         padding-inline: 10px;
-        font-size: .78rem;
+        font-size: .76rem;
         line-height: 1.8;
     }
 }

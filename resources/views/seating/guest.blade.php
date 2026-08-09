@@ -31,6 +31,12 @@
 
         @php
             $myTable = $myTableId ? $tables->firstWhere('id', $myTableId) : null;
+            $printRows = [
+                ['type' => 'eight', 'tables' => $tables->slice(0, 8)->values()],
+                ['type' => 'eight', 'tables' => $tables->slice(8, 8)->values()],
+                ['type' => 'seven', 'tables' => $tables->slice(16, 7)->values()],
+            ];
+            $edgeRows = $tables->slice(23)->values()->chunk(4);
         @endphp
 
         <section class="gs-paper-shell" aria-label="結婚式席次表">
@@ -87,62 +93,62 @@
                 </section>
                 @endif
 
+                <div class="gs-view-tools" aria-label="表示切替">
+                    <button type="button" class="is-active" data-gs-view="fit">全体表示</button>
+                    <button type="button" data-gs-view="read">拡大して読む</button>
+                </div>
+
                 <div class="gs-board-scroll" id="gsGrid">
-                    <div class="gs-board">
-                        <div class="gs-stage gs-stage--head">
-                            <span>高砂</span>
-                        </div>
+                    <div class="gs-board-scale" id="gsBoardScale">
+                        <div class="gs-board" id="gsBoard">
+                            <div class="gs-stage gs-stage--head">
+                                <span>高砂</span>
+                            </div>
 
-                        <div class="gs-table-grid">
-                            @foreach ($tables as $table)
-                            @php
-                                $isMyTable = $myTableId && $table->id === $myTableId;
-                                $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
-                                $leftSeats = $occupiedSeats->slice(0, (int) ceil(max($occupiedSeats->count(), 1) / 2))->values();
-                                $rightSeats = $occupiedSeats->slice($leftSeats->count())->values();
-                                $tableMark = trim($table->name ?? '') !== '' ? mb_substr(trim($table->name), 0, 1) : 'T';
-                            @endphp
-                            <article class="gs-table {{ $isMyTable ? 'gs-table--mine' : '' }}" id="gst-{{ $table->id }}">
-                                <div class="gs-table__guests gs-table__guests--left">
-                                    @foreach ($leftSeats as $seat)
-                                    @php
-                                        $assignedUser = $seat->assignment->user;
-                                        $assignedProfile = $assignedUser->guestProfile;
-                                        $isMe = $mySeat && $seat->id === $mySeat->id;
-                                        $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' ' . ($assignedProfile?->relationshipLabel() ?? ''));
-                                    @endphp
-                                    <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-                                        @if ($guestMeta)<p class="gs-guest__meta">{{ $guestMeta }}</p>@endif
-                                        <p class="gs-guest__name">{{ $guestName($assignedUser) }} 様</p>
-                                    </div>
-                                    @endforeach
-                                </div>
-
-                                <div class="gs-table__wreath" aria-label="{{ $table->name }}">
-                                    <span class="gs-table__mark">{{ $tableMark }}</span>
-                                    <span class="gs-table__name">{{ $table->name }}</span>
-                                </div>
-
-                                <div class="gs-table__guests gs-table__guests--right">
-                                    @foreach ($rightSeats as $seat)
-                                    @php
-                                        $assignedUser = $seat->assignment->user;
-                                        $assignedProfile = $assignedUser->guestProfile;
-                                        $isMe = $mySeat && $seat->id === $mySeat->id;
-                                        $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' ' . ($assignedProfile?->relationshipLabel() ?? ''));
-                                    @endphp
-                                    <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-                                        @if ($guestMeta)<p class="gs-guest__meta">{{ $guestMeta }}</p>@endif
-                                        <p class="gs-guest__name">{{ $guestName($assignedUser) }} 様</p>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </article>
+                            @foreach ($printRows as $printRow)
+                            @if ($printRow['tables']->isNotEmpty())
+                            <div class="gs-table-row gs-table-row--{{ $printRow['type'] }}">
+                                @foreach ($printRow['tables'] as $table)
+                                @include('seating.partials.guest-table', [
+                                    'table' => $table,
+                                    'guestName' => $guestName,
+                                    'myTableId' => $myTableId,
+                                    'mySeat' => $mySeat,
+                                ])
+                                @endforeach
+                            </div>
+                            @endif
                             @endforeach
-                        </div>
 
-                        <div class="gs-stage gs-stage--entrance">
-                            <span>受付・入口</span>
+                            @foreach ($edgeRows as $rowTables)
+                            <div class="gs-table-row gs-table-row--edge">
+                                <div class="gs-edge-group">
+                                    @foreach ($rowTables->slice(0, 2) as $table)
+                                    @include('seating.partials.guest-table', [
+                                        'table' => $table,
+                                        'guestName' => $guestName,
+                                        'myTableId' => $myTableId,
+                                        'mySeat' => $mySeat,
+                                    ])
+                                    @endforeach
+                                </div>
+                                <div class="gs-edge-gap" aria-hidden="true"></div>
+                                <div class="gs-edge-group">
+                                    @foreach ($rowTables->slice(2, 2) as $table)
+                                    @include('seating.partials.guest-table', [
+                                        'table' => $table,
+                                        'guestName' => $guestName,
+                                        'myTableId' => $myTableId,
+                                        'mySeat' => $mySeat,
+                                    ])
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endforeach
+
+                            <div class="gs-stage gs-stage--entrance">
+                                <span>受付・入口</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -162,16 +168,36 @@
 (function () {
     const myTable = document.querySelector('.gs-table--mine');
     const scroller = document.getElementById('gsGrid');
+    const scaleShell = document.getElementById('gsBoardScale');
+    const board = document.getElementById('gsBoard');
+    const viewButtons = document.querySelectorAll('[data-gs-view]');
 
-    document.getElementById('scrollToMyTable')?.addEventListener('click', function () {
-        myTable?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    function setBoardView(mode) {
+        if (!scroller || !scaleShell || !board) return;
+        const fitScale = Math.min(1, (scroller.clientWidth - 8) / board.offsetWidth);
+        const scale = mode === 'read' ? 1 : fitScale;
+        scaleShell.style.setProperty('--gs-board-scale', scale.toFixed(3));
+        scaleShell.style.height = `${board.offsetHeight * scale}px`;
+        scaleShell.classList.toggle('is-fit', mode !== 'read');
+        scroller.classList.toggle('is-reading', mode === 'read');
+        if (mode !== 'read') scroller.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+        viewButtons.forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.gsView === mode);
+        });
+    }
+
+    viewButtons.forEach((button) => {
+        button.addEventListener('click', () => setBoardView(button.dataset.gsView));
     });
 
-    if (myTable && scroller) {
-        setTimeout(function () {
-            myTable.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }, 700);
-    }
+    document.getElementById('scrollToMyTable')?.addEventListener('click', function () {
+        setBoardView('read');
+        setTimeout(() => myTable?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }), 80);
+    });
+
+    window.addEventListener('resize', () => setBoardView(document.querySelector('[data-gs-view].is-active')?.dataset.gsView || 'fit'));
+    window.addEventListener('load', () => setBoardView('fit'));
+    setBoardView('fit');
 })();
 </script>
 @endpush
