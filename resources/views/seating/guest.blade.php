@@ -12,16 +12,13 @@
         $p = $user->guestProfile;
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
-    $tableCount = $tables->count();
-    $seatCount = $tables->sum(fn($table) => $table->seats->count());
-    $assignedCount = $tables->sum(fn($table) => $table->seats->filter(fn($seat) => $seat->assignment !== null)->count());
+    $coupleNames = trim(($setting?->groom_name ?? '') . ' & ' . ($setting?->bride_name ?? ''));
 @endphp
 
 <div class="gs-page">
 
     @if (!$isPublished)
 
-        {{-- ── 未公開 ── --}}
         <div class="gs-empty">
             <div class="gs-empty__panel">
                 <div class="gs-empty__icon"><i class="fa-regular fa-clock"></i></div>
@@ -32,126 +29,127 @@
 
     @else
 
-        {{-- ── 自席バナー ── --}}
         @php
             $myTable = $myTableId ? $tables->firstWhere('id', $myTableId) : null;
         @endphp
 
-        <header class="gs-hero">
-            <div class="gs-hero__sparkle" aria-hidden="true"></div>
-            <p class="gs-hero__eyebrow">Seating Chart</p>
-            <div class="gs-hero__frame">
-                <div class="gs-hero__frame-inner">
-                    @if ($setting?->groom_name || $setting?->bride_name)
-                    <p class="gs-hero__role">新郎　　　　新婦</p>
-                    @endif
-                    <h1 class="gs-hero__title">
-                        <span>{{ $setting?->groom_name ?? '　' }}</span>
-                        <span class="gs-hero__amp">&amp;</span>
-                        <span>{{ $setting?->bride_name ?? '　' }}</span>
-                    </h1>
-                </div>
-            </div>
-            <p class="gs-hero__meta">
-                @if ($setting?->ceremony_date)
-                    {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y年n月j日') }}
-                    @if ($setting?->venue_name) ・{{ $setting->venue_name }}@endif
-                @elseif ($setting?->venue_name)
-                    {{ $setting->venue_name }}
+        <section class="gs-paper-shell" aria-label="結婚式席次表">
+            <div class="gs-paper">
+                <span class="gs-corner gs-corner--tl" aria-hidden="true"></span>
+                <span class="gs-corner gs-corner--tr" aria-hidden="true"></span>
+                <span class="gs-corner gs-corner--bl" aria-hidden="true"></span>
+                <span class="gs-corner gs-corner--br" aria-hidden="true"></span>
+
+                <header class="gs-hero">
+                    <div class="gs-hero__family">
+                        <span>{{ $setting?->groom_name ? mb_substr($setting->groom_name, 0, 1) : 'K' }}</span>
+                        <span>{{ $setting?->bride_name ? mb_substr($setting->bride_name, 0, 1) : 'M' }}</span>
+                        <small>Wedding Reception Seating Chart</small>
+                    </div>
+
+                    <div class="gs-hero__center">
+                        <p class="gs-hero__eyebrow">Seating Chart</p>
+                        <h1 class="gs-hero__title">
+                            <span>{{ $setting?->groom_name ?? '新郎' }}</span>
+                            <span class="gs-hero__amp">&amp;</span>
+                            <span>{{ $setting?->bride_name ?? '新婦' }}</span>
+                        </h1>
+                        @if ($coupleNames)
+                        <p class="gs-hero__script">{{ $coupleNames }}</p>
+                        @endif
+                    </div>
+
+                    <p class="gs-hero__meta">
+                        @if ($setting?->ceremony_date)
+                            {{ \Carbon\Carbon::parse($setting->ceremony_date)->format('Y.n.j') }}
+                        @endif
+                        @if ($setting?->venue_name)
+                            <span>於 {{ $setting->venue_name }}</span>
+                        @endif
+                    </p>
+                </header>
+
+                @if ($myTable)
+                <section class="gs-focus" id="gsBanner">
+                    <div>
+                        <p class="gs-focus__label">Your Seat</p>
+                        <p class="gs-focus__value">{{ $myTable->name }}</p>
+                    </div>
+                    <button class="gs-focus__btn" id="scrollToMyTable" type="button">自分の席へ</button>
+                </section>
+                @else
+                <section class="gs-focus gs-focus--pending">
+                    <div>
+                        <p class="gs-focus__label">Your Seat</p>
+                        <p class="gs-focus__value">未配置</p>
+                    </div>
+                    <p class="gs-focus__note">席はまだ確定していません。</p>
+                </section>
                 @endif
-            </p>
-        </header>
 
-        @if ($myTable)
-        <section class="gs-focus" id="gsBanner">
-            <div class="gs-focus__inner">
-                <span class="gs-focus__star">&#10022;</span>
-                <div class="gs-focus__copy">
-                    <p class="gs-focus__label">あなたの席</p>
-                    <p class="gs-focus__value">{{ $myTable->name }}</p>
-                </div>
-            </div>
-            <button class="gs-focus__btn" id="scrollToMyTable" type="button">席を見る</button>
-        </section>
-        @else
-        <section class="gs-focus gs-focus--pending">
-            <div class="gs-focus__inner">
-                <span class="gs-focus__star">&#10022;</span>
-                <div class="gs-focus__copy">
-                    <p class="gs-focus__label">あなたの席</p>
-                    <p class="gs-focus__value">未配置</p>
-                </div>
-            </div>
-            <p class="gs-focus__note">席はまだ確定していません。確定次第ご案内します。</p>
-        </section>
-        @endif
+                <div class="gs-board-scroll" id="gsGrid">
+                    <div class="gs-board">
+                        <div class="gs-stage gs-stage--head">
+                            <span>高砂</span>
+                        </div>
 
-        {{-- ── ゲスト向け全体席次表 ── --}}
-        <section class="gs-overview" aria-label="会場全体の席次表">
-            <div class="gs-overview__head">
-                <div>
-                    <p class="gs-overview__eyebrow">Reception Hall</p>
-                    <h2 class="gs-overview__title">会場全体の席次表</h2>
-                </div>
-                <p class="gs-overview__hint">横に動かすとすべての卓を確認できます</p>
-            </div>
-
-            <div class="gs-board-scroll" id="gsGrid">
-                <div class="gs-board">
-                    <div class="gs-stage gs-stage--head">
-                        <span class="gs-stage__sub">Main Table</span>
-                        <span class="gs-stage__title">高砂</span>
-                    </div>
-
-                    <div class="gs-table-grid">
-                        @foreach ($tables as $table)
-                        @php
-                            $isMyTable = $myTableId && $table->id === $myTableId;
-                            $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
-                        @endphp
-                        <article class="gs-col {{ $isMyTable ? 'gs-col--mine' : '' }}"
-                             id="gst-{{ $table->id }}"
-                             style="animation-delay: {{ $loop->index * 26 }}ms">
-
-                            <div class="gs-col__badge">
-                                <span class="gs-col__badge-moon">{{ $table->name }}</span>
-                                <span class="gs-col__badge-name">{{ $occupiedSeats->count() }}名</span>
-                            </div>
-
-                            <div class="gs-col__list">
-                                @forelse ($occupiedSeats as $seat)
-                                @php
-                                    $assignedUser = $seat->assignment->user;
-                                    $assignedProfile = $assignedUser->guestProfile;
-                                    $isMe = $mySeat && $seat->id === $mySeat->id;
-                                    $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' / ' . ($assignedProfile?->relationshipLabel() ?? ''), ' /');
-                                @endphp
-                                <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-                                    <p class="gs-guest__name">
-                                        @if ($isMe)<span class="gs-guest__mark">&#10022;</span>@endif
-                                        {{ $guestName($assignedUser) }}
-                                    </p>
-                                    @if ($guestMeta)
-                                    <p class="gs-guest__meta">{{ $guestMeta }}</p>
-                                    @endif
+                        <div class="gs-table-grid">
+                            @foreach ($tables as $table)
+                            @php
+                                $isMyTable = $myTableId && $table->id === $myTableId;
+                                $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
+                                $leftSeats = $occupiedSeats->slice(0, (int) ceil(max($occupiedSeats->count(), 1) / 2))->values();
+                                $rightSeats = $occupiedSeats->slice($leftSeats->count())->values();
+                                $tableMark = trim($table->name ?? '') !== '' ? mb_substr(trim($table->name), 0, 1) : 'T';
+                            @endphp
+                            <article class="gs-table {{ $isMyTable ? 'gs-table--mine' : '' }}" id="gst-{{ $table->id }}">
+                                <div class="gs-table__guests gs-table__guests--left">
+                                    @foreach ($leftSeats as $seat)
+                                    @php
+                                        $assignedUser = $seat->assignment->user;
+                                        $assignedProfile = $assignedUser->guestProfile;
+                                        $isMe = $mySeat && $seat->id === $mySeat->id;
+                                        $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' ' . ($assignedProfile?->relationshipLabel() ?? ''));
+                                    @endphp
+                                    <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
+                                        @if ($guestMeta)<p class="gs-guest__meta">{{ $guestMeta }}</p>@endif
+                                        <p class="gs-guest__name">{{ $guestName($assignedUser) }} 様</p>
+                                    </div>
+                                    @endforeach
                                 </div>
-                                @empty
-                                <p class="gs-col__empty">まだ配置がありません</p>
-                                @endforelse
-                            </div>
-                        </article>
-                        @endforeach
-                    </div>
 
-                    <div class="gs-stage gs-stage--entrance">
-                        <span class="gs-stage__sub">Entrance</span>
-                        <span class="gs-stage__title">受付・入口</span>
+                                <div class="gs-table__wreath" aria-label="{{ $table->name }}">
+                                    <span class="gs-table__mark">{{ $tableMark }}</span>
+                                    <span class="gs-table__name">{{ $table->name }}</span>
+                                </div>
+
+                                <div class="gs-table__guests gs-table__guests--right">
+                                    @foreach ($rightSeats as $seat)
+                                    @php
+                                        $assignedUser = $seat->assignment->user;
+                                        $assignedProfile = $assignedUser->guestProfile;
+                                        $isMe = $mySeat && $seat->id === $mySeat->id;
+                                        $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' ' . ($assignedProfile?->relationshipLabel() ?? ''));
+                                    @endphp
+                                    <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
+                                        @if ($guestMeta)<p class="gs-guest__meta">{{ $guestMeta }}</p>@endif
+                                        <p class="gs-guest__name">{{ $guestName($assignedUser) }} 様</p>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </article>
+                            @endforeach
+                        </div>
+
+                        <div class="gs-stage gs-stage--entrance">
+                            <span>受付・入口</span>
+                        </div>
                     </div>
                 </div>
+
+                <p class="gs-footnote">御席の不順、ご芳名に誤字がございましたら深くお詫び申し上げます</p>
             </div>
         </section>
-
-        <p class="gs-footnote">ご来場を心よりお待ちしております</p>
 
     @endif
 
@@ -162,16 +160,17 @@
 @push('scripts')
 <script>
 (function () {
-    const myTable = document.querySelector('.gs-col--mine');
+    const myTable = document.querySelector('.gs-table--mine');
+    const scroller = document.getElementById('gsGrid');
 
     document.getElementById('scrollToMyTable')?.addEventListener('click', function () {
-        myTable?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        myTable?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     });
 
-    if (myTable) {
+    if (myTable && scroller) {
         setTimeout(function () {
-            myTable.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 500);
+            myTable.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }, 700);
     }
 })();
 </script>
