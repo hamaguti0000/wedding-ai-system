@@ -2,7 +2,7 @@
 @section('title', '席次表（印刷用） | Admin')
 
 @push('styles')
-<link rel="stylesheet" href="{{ css_asset('css/seating-guest.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('css/seating-print.css') }}">
 <style>
     .sxp-toolbar {
         display: flex;
@@ -77,7 +77,7 @@
     @include('partials.seating-floor-plan', ['tables' => $tables])
 
     <section class="gs-sheet">
-        <main class="gs-columns">
+        <div class="gs-columns">
             @foreach ($tables as $table)
             @php $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values(); @endphp
             @if ($occupiedSeats->isNotEmpty())
@@ -96,7 +96,7 @@
             </article>
             @endif
             @endforeach
-        </main>
+        </div>
     </section>
 </div>
 

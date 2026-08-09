@@ -1,0 +1,276 @@
+/* A3 print preview for admin seating chart */
+.gs-page,
+.gs-page * {
+    box-sizing: border-box;
+}
+
+main {
+    padding-top: 60px;
+    text-align: initial;
+}
+
+.gs-page {
+    --sxp-ink: #1f242b;
+    --sxp-muted: #6f6a63;
+    --sxp-gold: #b38b59;
+    --sxp-line: #d8c9b6;
+    width: 100%;
+    min-height: calc(100vh - 60px);
+    padding: 34px 22px 48px;
+    color: var(--sxp-ink);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    background: #fffdf8;
+}
+
+.gs-hero {
+    width: min(1180px, 100%);
+    margin: 0 auto 22px;
+    padding: 28px 12px 24px;
+    text-align: center;
+    border-bottom: 1px solid rgba(179,139,89,.22);
+}
+
+.gs-hero__sparkle,
+.gs-hero__frame,
+.gs-hero__frame-inner {
+    display: contents;
+}
+
+.gs-hero__eyebrow {
+    margin: 0 0 10px;
+    color: var(--sxp-gold);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+}
+
+.gs-hero__role {
+    margin: 0 0 6px;
+    color: var(--sxp-muted);
+    font-size: .78rem;
+    letter-spacing: .28em;
+}
+
+.gs-hero__title {
+    margin: 0;
+    color: var(--sxp-ink);
+    font-family: 'Noto Serif JP', 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.7rem);
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.gs-hero__amp {
+    margin: 0 .24em;
+    color: var(--sxp-gold);
+    font-style: italic;
+}
+
+.gs-hero__meta {
+    margin: 12px 0 0;
+    color: var(--sxp-muted);
+    font-size: .95rem;
+    line-height: 1.6;
+}
+
+.fp-scroll {
+    width: min(1180px, 100%);
+    margin: 0 auto 28px;
+    padding: 16px;
+    overflow: auto;
+    border: 1px solid var(--sxp-line);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(31,36,43,.08);
+    -webkit-overflow-scrolling: touch;
+}
+
+.fp-room {
+    position: relative;
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(179,139,89,.08) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(179,139,89,.08) 80px),
+        #fffefb;
+    border: 1px solid #d6d6d6;
+}
+
+.fp-table {
+    position: absolute;
+    width: 154px;
+    min-height: 46px;
+    display: grid;
+    place-items: center;
+    padding: 7px 9px;
+    border: 1.3px solid #1f2933;
+    background: #fff;
+    text-align: center;
+}
+
+.fp-table__name {
+    color: #111827;
+    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
+    font-size: .86rem;
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.gs-sheet {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+
+.gs-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.gs-col {
+    padding: 10px;
+    border: 1px solid var(--sxp-line);
+    background: #fff;
+}
+
+.gs-col__badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 7px;
+    margin-bottom: 7px;
+    border-bottom: 1px solid #eee3d4;
+}
+
+.gs-col__badge-moon {
+    display: none;
+}
+
+.gs-col__badge-name {
+    color: #111827;
+    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
+    font-size: .94rem;
+    font-weight: 800;
+}
+
+.gs-col__list {
+    display: grid;
+    gap: 4px;
+}
+
+.gs-guest {
+    padding: 3px 0;
+}
+
+.gs-guest__name {
+    margin: 0;
+    color: #111827;
+    font-size: .84rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+@media (max-width: 767px) {
+    .gs-page {
+        padding: 18px 0 36px;
+    }
+
+    .gs-hero {
+        width: calc(100% - 24px);
+        padding-top: 18px;
+    }
+
+    .fp-scroll,
+    .gs-sheet {
+        width: calc(100% - 16px);
+    }
+}
+
+@media print {
+    body {
+        background: #fff !important;
+    }
+
+    main {
+        padding-top: 0 !important;
+    }
+
+    .gs-page {
+        min-height: auto;
+        padding: 0;
+        background: #fff !important;
+    }
+
+    .gs-hero {
+        width: 100%;
+        margin-bottom: 8mm;
+        padding: 0 0 5mm;
+    }
+
+    .gs-hero__eyebrow {
+        font-size: 8pt;
+    }
+
+    .gs-hero__title {
+        font-size: 24pt;
+    }
+
+    .gs-hero__meta {
+        font-size: 9pt;
+    }
+
+    .fp-scroll {
+        width: 100%;
+        margin-bottom: 7mm;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .fp-room {
+        width: 390mm !important;
+        height: 165mm !important;
+        transform: scale(.68);
+        transform-origin: top left;
+        page-break-inside: avoid;
+    }
+
+    .fp-table {
+        border-width: .7pt;
+    }
+
+    .fp-table__name {
+        font-size: 7pt;
+    }
+
+    .gs-sheet {
+        width: 100%;
+        margin-top: -52mm;
+    }
+
+    .gs-columns {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 3mm;
+    }
+
+    .gs-col {
+        padding: 2.5mm;
+        page-break-inside: avoid;
+    }
+
+    .gs-col__badge-name {
+        font-size: 8pt;
+    }
+
+    .gs-guest__name {
+        font-size: 7pt;
+    }
+
+    @page {
+        size: A3 landscape;
+        margin: 10mm;
+    }
+}
