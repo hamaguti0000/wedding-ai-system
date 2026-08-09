@@ -45,8 +45,18 @@
 
 <div class="sxp-toolbar">
     <a href="{{ route('admin.seating') }}" class="ghost">&larr; 編集画面に戻る</a>
+    <label class="sxp-toolbar__search">
+        <span>検索</span>
+        <input type="search" id="sxpSearch" placeholder="名前・卓名" autocomplete="off">
+        <em id="sxpSearchCount"></em>
+    </label>
+    <label class="sxp-toolbar__toggle">
+        <input type="checkbox" id="sxpHideEmpty">
+        <span>空席を隠す</span>
+    </label>
     <div class="sxp-toolbar__zoom" aria-label="表示倍率">
-        <button type="button" data-sxp-zoom="0.7">全体</button>
+        <button type="button" data-sxp-zoom="0.45">全体</button>
+        <button type="button" data-sxp-zoom="0.7">70%</button>
         <button type="button" data-sxp-zoom="0.85">85%</button>
         <button type="button" data-sxp-zoom="1">100%</button>
         <button type="button" data-sxp-zoom="1.2">120%</button>
@@ -54,7 +64,7 @@
     <button type="button" onclick="window.print()">印刷する</button>
 </div>
 
-<div class="gs-page">
+<div class="gs-page" id="sxpPage">
     <header class="gs-hero">
         <div class="gs-hero__sparkle" aria-hidden="true"></div>
         <p class="gs-hero__eyebrow">Seating Chart</p>
@@ -143,12 +153,21 @@
 @push('scripts')
 <script>
 (function () {
+    const page = document.getElementById('sxpPage');
     const shell = document.getElementById('sxpZoomShell');
     const buttons = document.querySelectorAll('[data-sxp-zoom]');
+    const search = document.getElementById('sxpSearch');
+    const count = document.getElementById('sxpSearchCount');
+    const hideEmpty = document.getElementById('sxpHideEmpty');
+    const cards = Array.from(document.querySelectorAll('.sxp-table-card'));
     if (!shell || buttons.length === 0) return;
 
-    const fallback = window.matchMedia('(max-width: 767px)').matches ? '0.7' : '0.85';
+    const fallback = window.matchMedia('(max-width: 767px)').matches ? '0.45' : '0.85';
     const saved = localStorage.getItem('seatingPrintZoom') || fallback;
+
+    function normalize(value) {
+        return String(value || '').trim().toLowerCase();
+    }
 
     function setZoom(value) {
         shell.style.setProperty('--sxp-zoom', value);
@@ -158,11 +177,46 @@
         });
     }
 
+    function applySearch() {
+        const q = normalize(search?.value);
+        let matchedCards = 0;
+        let matchedSeats = 0;
+
+        cards.forEach((card) => {
+            const tableName = normalize(card.querySelector('.sxp-table-card__name')?.textContent);
+            let cardHasMatch = q && tableName.includes(q);
+
+            card.querySelectorAll('.sxp-seat').forEach((seat) => {
+                const name = normalize(seat.textContent);
+                const hit = q && name.includes(q);
+                seat.classList.toggle('is-search-hit', Boolean(hit));
+                if (hit) {
+                    cardHasMatch = true;
+                    matchedSeats += 1;
+                }
+            });
+
+            card.classList.toggle('is-search-muted', Boolean(q && !cardHasMatch));
+            card.classList.toggle('is-search-card-hit', Boolean(q && cardHasMatch));
+            if (cardHasMatch) matchedCards += 1;
+        });
+
+        if (count) {
+            count.textContent = q ? `${matchedCards}卓 / ${matchedSeats}席` : '';
+        }
+    }
+
     buttons.forEach((button) => {
         button.addEventListener('click', () => setZoom(button.dataset.sxpZoom));
     });
 
+    search?.addEventListener('input', applySearch);
+    hideEmpty?.addEventListener('change', () => {
+        page?.classList.toggle('sxp-hide-empty', hideEmpty.checked);
+    });
+
     setZoom(saved);
+    applySearch();
 })();
 </script>
 @endpush
