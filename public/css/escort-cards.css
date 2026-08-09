@@ -1,4 +1,4 @@
-/* Escort cards print page - A4 business card sheet */
+/* Escort cards print page - template-like A4 business card sheet */
 .ec-page,
 .ec-page * {
     box-sizing: border-box;
@@ -12,7 +12,7 @@ main {
 .ec-page {
     --ec-navy: #263e61;
     --ec-gold: #b58739;
-    --ec-paper: #f8f6ef;
+    --ec-paper: #f7f5ef;
     --ec-muted: #7a7168;
     min-height: calc(100vh - 60px);
     padding: 22px;
@@ -78,83 +78,88 @@ main {
     width: 91mm;
     height: 55mm;
     overflow: hidden;
-    padding: 6.8mm 7.4mm;
-    border: 1px solid rgba(38,62,97,.15);
+    padding: 5.6mm 6.3mm;
+    border: 1px solid rgba(38,62,97,.12);
     background:
-        radial-gradient(circle at 14% 18%, rgba(255,255,255,.74), transparent 25%),
-        repeating-linear-gradient(10deg, transparent 0 8px, rgba(63,52,41,.028) 9px 10px, transparent 11px 21px),
+        radial-gradient(circle at 16% 18%, rgba(255,255,255,.76), transparent 26%),
+        repeating-linear-gradient(12deg, transparent 0 8px, rgba(63,52,41,.026) 9px 10px, transparent 11px 22px),
         var(--ec-paper);
 }
 .ec-card::after {
     content: "";
     position: absolute;
-    right: 7.4mm;
-    top: 35%;
-    width: .35mm;
-    height: 48%;
+    right: 8.2mm;
+    top: 34%;
+    width: .32mm;
+    height: 52%;
     background: var(--ec-navy);
-    opacity: .8;
+    opacity: .82;
 }
 
 .ec-card__header {
-    position: relative;
-    z-index: 1;
-    width: 44mm;
+    position: absolute;
+    left: 6.3mm;
+    top: 5.4mm;
+    z-index: 2;
+    width: 34mm;
 }
 .ec-card__couple,
 .ec-card__script {
     margin: 0;
     color: var(--ec-gold);
     font-family: 'Brush Script MT', 'Segoe Script', cursive;
-    font-size: 10pt;
-    line-height: 1.15;
+    font-size: 9pt;
+    line-height: 1.05;
     white-space: nowrap;
 }
 .ec-card__date {
-    margin: 1.3mm 0 0;
+    margin: 1.1mm 0 0;
     color: var(--ec-gold);
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 8pt;
-    letter-spacing: .04em;
+    letter-spacing: .035em;
 }
 
 .ec-table {
     position: absolute;
     top: 9mm;
-    right: 10mm;
-    width: 25mm;
+    right: 13.2mm;
+    width: 24mm;
     height: 25mm;
     display: grid;
     place-items: center;
+    z-index: 2;
 }
 .ec-table__label {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 1mm;
     color: var(--ec-navy);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 8pt;
-    letter-spacing: .18em;
+    font-size: 8.4pt;
+    letter-spacing: .2em;
     transform: rotate(-38deg);
+    transform-origin: center;
 }
 .ec-table__mark {
     color: var(--ec-navy);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 44pt;
+    font-size: 43pt;
+    font-weight: 400;
     line-height: .9;
 }
 
 .ec-guest {
     position: absolute;
-    left: 9mm;
-    right: 31mm;
-    top: 22mm;
-    z-index: 1;
+    left: 9.4mm;
+    right: 36mm;
+    top: 25.8mm;
+    z-index: 2;
 }
 .ec-guest__kana {
-    margin: 0 0 1.4mm;
+    margin: 0 0 1.2mm;
     color: var(--ec-muted);
-    font: 700 6.5pt 'Noto Sans JP', system-ui, sans-serif;
+    font: 700 6pt 'Noto Sans JP', system-ui, sans-serif;
     letter-spacing: .1em;
     white-space: nowrap;
 }
@@ -162,52 +167,49 @@ main {
     margin: 0;
     color: var(--ec-navy);
     font-family: Georgia, 'Noto Serif JP', serif;
-    font-size: 19pt;
+    font-size: 18pt;
     font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: .02em;
+    line-height: 1.08;
+    letter-spacing: .035em;
     white-space: nowrap;
-}
-.ec-guest__name span {
-    font-family: 'Noto Serif JP', serif;
-    font-size: 9pt;
 }
 
 .ec-card__footer {
     position: absolute;
     left: 35mm;
-    right: 11mm;
-    bottom: 6.8mm;
-    z-index: 1;
+    right: 12mm;
+    bottom: 6.1mm;
+    z-index: 2;
     color: var(--ec-gold);
     text-align: center;
 }
 .ec-card__footer p:last-child {
-    margin: 1.2mm 0 0;
-    font-size: 6.4pt;
+    margin: 1mm 0 0;
+    font-size: 6.2pt;
 }
 
 .ec-flower {
     position: absolute;
-    width: 42mm;
-    height: 31mm;
-    opacity: .86;
+    width: 40mm;
+    height: 29mm;
+    opacity: .88;
 }
 .ec-flower::before,
 .ec-flower::after {
     content: "";
     position: absolute;
-    border: .35mm solid var(--ec-navy);
-    opacity: .86;
+    border: .32mm solid var(--ec-navy);
+    opacity: .88;
 }
 .ec-flower::before {
-    width: 25mm;
-    height: 25mm;
+    width: 24mm;
+    height: 24mm;
     border-radius: 56% 44% 58% 42%;
     background:
         radial-gradient(ellipse at 50% 16%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%),
         radial-gradient(ellipse at 22% 50%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%),
-        radial-gradient(ellipse at 78% 50%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%);
+        radial-gradient(ellipse at 78% 50%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%),
+        radial-gradient(ellipse at 50% 82%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%);
 }
 .ec-flower::after {
     width: 18mm;
@@ -216,13 +218,13 @@ main {
     transform: rotate(-24deg);
 }
 .ec-flower--top {
-    top: -5mm;
+    top: -6mm;
     right: -4mm;
-    transform: rotate(16deg);
+    transform: rotate(14deg);
 }
 .ec-flower--bottom {
-    left: -7mm;
-    bottom: -6mm;
+    left: -8mm;
+    bottom: -7mm;
     transform: rotate(198deg);
 }
 

@@ -60,7 +60,7 @@
                     @if ($furigana)
                     <p class="ec-guest__kana">{{ $furigana }}</p>
                     @endif
-                    <h2 class="ec-guest__name">{{ $guestName($guest) }} <span>様</span></h2>
+                    <h2 class="ec-guest__name">{{ $guestName($guest) }}</h2>
                 </div>
 
                 <footer class="ec-card__footer">
