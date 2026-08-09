@@ -74,28 +74,43 @@
         </p>
     </header>
 
-    @include('partials.seating-floor-plan', ['tables' => $tables])
+    <section class="sxp-layout" aria-label="席とテーブルを統合した席次表">
+        <div class="sxp-main-table">
+            <span class="sxp-main-table__sub">Main Table</span>
+            <span class="sxp-main-table__title">高砂</span>
+        </div>
 
-    <section class="gs-sheet">
-        <div class="gs-columns">
+        <div class="sxp-grid">
             @foreach ($tables as $table)
-            @php $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values(); @endphp
-            @if ($occupiedSeats->isNotEmpty())
-            <article class="gs-col">
-                <div class="gs-col__badge">
-                    <span class="gs-col__badge-moon">&#9789;</span>
-                    <span class="gs-col__badge-name">{{ $table->name }}</span>
-                </div>
-                <div class="gs-col__list">
-                    @foreach ($occupiedSeats as $seat)
-                    <div class="gs-guest">
-                        <p class="gs-guest__name">{{ $guestName($seat->assignment->user) }}</p>
+            @php
+                $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
+                $seatTotal = max($table->seats->count(), $occupiedSeats->count());
+            @endphp
+            <article class="sxp-table-card">
+                <header class="sxp-table-card__head">
+                    <span class="sxp-table-card__name">{{ $table->name }}</span>
+                    <span class="sxp-table-card__count">{{ $occupiedSeats->count() }} / {{ $seatTotal }}名</span>
+                </header>
+                <div class="sxp-seat-list">
+                    @forelse ($table->seats as $seat)
+                    @php $assignedUser = $seat->assignment?->user; @endphp
+                    <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
+                        <span class="sxp-seat__num">{{ $loop->iteration }}</span>
+                        <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="sxp-seat is-empty">
+                        <span class="sxp-seat__num">-</span>
+                        <span class="sxp-seat__name">席未設定</span>
+                    </div>
+                    @endforelse
                 </div>
             </article>
-            @endif
             @endforeach
+        </div>
+
+        <div class="sxp-entrance">
+            <span>受付・入口</span>
         </div>
     </section>
 </div>

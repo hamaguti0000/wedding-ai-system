@@ -1,4 +1,4 @@
-/* A3 print preview for admin seating chart */
+/* Unified A3 print preview for admin seating chart */
 .gs-page,
 .gs-page * {
     box-sizing: border-box;
@@ -10,24 +10,31 @@ main {
 }
 
 .gs-page {
-    --sxp-ink: #1f242b;
-    --sxp-muted: #6f6a63;
-    --sxp-gold: #b38b59;
-    --sxp-line: #d8c9b6;
+    --sxp-ink: #18212b;
+    --sxp-muted: #6f675f;
+    --sxp-soft: #fffaf2;
+    --sxp-paper: #fffdf8;
+    --sxp-line: #dacbb8;
+    --sxp-gold: #ae8450;
+    --sxp-gold-dark: #765632;
+    --sxp-green: #516a5a;
     width: 100%;
     min-height: calc(100vh - 60px);
-    padding: 34px 22px 48px;
+    padding: 34px 18px 48px;
     color: var(--sxp-ink);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
-    background: #fffdf8;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,250,243,.94)),
+        radial-gradient(circle at 12% 8%, rgba(174,132,80,.10), transparent 28%),
+        #fffdf8;
 }
 
 .gs-hero {
-    width: min(1180px, 100%);
-    margin: 0 auto 22px;
-    padding: 28px 12px 24px;
+    width: min(1240px, 100%);
+    margin: 0 auto 18px;
+    padding: 22px 12px 20px;
     text-align: center;
-    border-bottom: 1px solid rgba(179,139,89,.22);
+    border-bottom: 1px solid rgba(174,132,80,.24);
 }
 
 .gs-hero__sparkle,
@@ -37,19 +44,19 @@ main {
 }
 
 .gs-hero__eyebrow {
-    margin: 0 0 10px;
-    color: var(--sxp-gold);
+    margin: 0 0 9px;
+    color: var(--sxp-gold-dark);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: .78rem;
+    font-size: .76rem;
     font-weight: 700;
-    letter-spacing: .32em;
+    letter-spacing: .34em;
     text-transform: uppercase;
 }
 
 .gs-hero__role {
-    margin: 0 0 6px;
+    margin: 0 0 5px;
     color: var(--sxp-muted);
-    font-size: .78rem;
+    font-size: .76rem;
     letter-spacing: .28em;
 }
 
@@ -57,9 +64,9 @@ main {
     margin: 0;
     color: var(--sxp-ink);
     font-family: 'Noto Serif JP', 'Playfair Display', serif;
-    font-size: clamp(2rem, 6vw, 3.7rem);
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.12;
 }
 
 .gs-hero__amp {
@@ -69,107 +76,151 @@ main {
 }
 
 .gs-hero__meta {
-    margin: 12px 0 0;
+    margin: 11px 0 0;
     color: var(--sxp-muted);
-    font-size: .95rem;
+    font-size: .94rem;
     line-height: 1.6;
 }
 
-.fp-scroll {
-    width: min(1180px, 100%);
-    margin: 0 auto 28px;
-    padding: 16px;
-    overflow: auto;
-    border: 1px solid var(--sxp-line);
-    border-radius: 10px;
-    background: #fff;
-    box-shadow: 0 10px 28px rgba(31,36,43,.08);
-    -webkit-overflow-scrolling: touch;
-}
-
-.fp-room {
-    position: relative;
+.sxp-layout {
+    width: min(1240px, 100%);
+    margin: 0 auto;
+    padding: 18px;
+    border: 1px solid rgba(174,132,80,.24);
+    border-radius: 18px;
     background:
-        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(179,139,89,.08) 80px),
-        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(179,139,89,.08) 80px),
-        #fffefb;
-    border: 1px solid #d6d6d6;
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,248,239,.92)),
+        var(--sxp-paper);
+    box-shadow: 0 20px 46px rgba(67, 49, 31, .10);
 }
 
-.fp-table {
-    position: absolute;
-    width: 154px;
-    min-height: 46px;
+.sxp-main-table,
+.sxp-entrance {
+    width: min(430px, 54%);
+    min-height: 56px;
+    margin: 0 auto 16px;
     display: grid;
     place-items: center;
-    padding: 7px 9px;
-    border: 1.3px solid #1f2933;
+    border: 1px solid rgba(174,132,80,.38);
+    border-radius: 14px;
     background: #fff;
-    text-align: center;
 }
 
-.fp-table__name {
-    color: #111827;
+.sxp-main-table__sub {
+    color: var(--sxp-gold-dark);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+}
+
+.sxp-main-table__title,
+.sxp-entrance span {
+    color: var(--sxp-ink);
     font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
-    font-size: .86rem;
+    font-size: 1.05rem;
     font-weight: 800;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
 }
 
-.gs-sheet {
-    width: min(1180px, 100%);
-    margin: 0 auto;
-}
-
-.gs-columns {
+.sxp-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(7, minmax(142px, 1fr));
     gap: 12px;
 }
 
-.gs-col {
+.sxp-table-card {
+    min-height: 162px;
     padding: 10px;
-    border: 1px solid var(--sxp-line);
-    background: #fff;
+    border: 1px solid rgba(174,132,80,.34);
+    border-radius: 13px;
+    background: rgba(255,255,255,.96);
+    box-shadow: 0 8px 18px rgba(67,49,31,.07);
+    page-break-inside: avoid;
 }
 
-.gs-col__badge {
+.sxp-table-card__head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
     padding-bottom: 7px;
     margin-bottom: 7px;
-    border-bottom: 1px solid #eee3d4;
+    border-bottom: 1px solid rgba(174,132,80,.20);
 }
 
-.gs-col__badge-moon {
-    display: none;
-}
-
-.gs-col__badge-name {
-    color: #111827;
+.sxp-table-card__name {
+    min-width: 0;
+    color: var(--sxp-ink);
     font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
-    font-size: .94rem;
+    font-size: .98rem;
+    font-weight: 900;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.sxp-table-card__count {
+    flex: 0 0 auto;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #f6ead8;
+    color: var(--sxp-gold-dark);
+    font-size: .68rem;
     font-weight: 800;
+    line-height: 1.4;
 }
 
-.gs-col__list {
+.sxp-seat-list {
     display: grid;
-    gap: 4px;
+    gap: 5px;
 }
 
-.gs-guest {
-    padding: 3px 0;
+.sxp-seat {
+    min-height: 28px;
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    background: #fff9ef;
 }
 
-.gs-guest__name {
-    margin: 0;
-    color: #111827;
-    font-size: .84rem;
+.sxp-seat__num {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--sxp-green);
+    color: #fff;
+    font-family: Georgia, serif;
+    font-size: .68rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1;
+}
+
+.sxp-seat__name {
+    min-width: 0;
+    color: var(--sxp-ink);
+    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
+    font-size: .84rem;
+    font-weight: 800;
+    line-height: 1.28;
+    overflow-wrap: anywhere;
+}
+
+.sxp-seat.is-empty {
+    opacity: .42;
+}
+
+.sxp-seat.is-empty .sxp-seat__num {
+    background: #b8aa99;
+}
+
+.sxp-entrance {
+    min-height: 48px;
+    margin: 16px auto 0;
 }
 
 @media (max-width: 767px) {
@@ -179,12 +230,24 @@ main {
 
     .gs-hero {
         width: calc(100% - 24px);
-        padding-top: 18px;
     }
 
-    .fp-scroll,
-    .gs-sheet {
-        width: calc(100% - 16px);
+    .sxp-layout {
+        width: calc(100% - 12px);
+        overflow-x: auto;
+        padding: 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sxp-main-table,
+    .sxp-entrance {
+        width: 330px;
+    }
+
+    .sxp-grid {
+        width: 1380px;
+        grid-template-columns: repeat(7, 186px);
+        gap: 10px;
     }
 }
 
@@ -205,8 +268,8 @@ main {
 
     .gs-hero {
         width: 100%;
-        margin-bottom: 8mm;
-        padding: 0 0 5mm;
+        margin-bottom: 5mm;
+        padding: 0 0 4mm;
     }
 
     .gs-hero__eyebrow {
@@ -221,52 +284,80 @@ main {
         font-size: 9pt;
     }
 
-    .fp-scroll {
+    .sxp-layout {
         width: 100%;
-        margin-bottom: 7mm;
-        padding: 0;
-        overflow: visible;
-        border: 0;
+        padding: 4mm;
+        border-radius: 0;
         box-shadow: none;
     }
 
-    .fp-room {
-        width: 390mm !important;
-        height: 165mm !important;
-        transform: scale(.68);
-        transform-origin: top left;
-        page-break-inside: avoid;
+    .sxp-main-table {
+        width: 95mm;
+        min-height: 12mm;
+        margin-bottom: 4mm;
     }
 
-    .fp-table {
-        border-width: .7pt;
+    .sxp-main-table__sub {
+        font-size: 5.5pt;
     }
 
-    .fp-table__name {
-        font-size: 7pt;
+    .sxp-main-table__title,
+    .sxp-entrance span {
+        font-size: 9pt;
     }
 
-    .gs-sheet {
-        width: 100%;
-        margin-top: -52mm;
+    .sxp-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2.3mm;
     }
 
-    .gs-columns {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 3mm;
+    .sxp-table-card {
+        min-height: 35mm;
+        padding: 2mm;
+        border-radius: 2mm;
+        box-shadow: none;
     }
 
-    .gs-col {
-        padding: 2.5mm;
-        page-break-inside: avoid;
+    .sxp-table-card__head {
+        padding-bottom: 1.3mm;
+        margin-bottom: 1.4mm;
     }
 
-    .gs-col__badge-name {
-        font-size: 8pt;
+    .sxp-table-card__name {
+        font-size: 7.5pt;
     }
 
-    .gs-guest__name {
-        font-size: 7pt;
+    .sxp-table-card__count {
+        font-size: 5.5pt;
+        padding: .3mm 1.4mm;
+    }
+
+    .sxp-seat-list {
+        gap: .9mm;
+    }
+
+    .sxp-seat {
+        min-height: 6mm;
+        grid-template-columns: 5mm 1fr;
+        gap: 1.2mm;
+        padding: .8mm 1mm;
+        border-radius: 1.4mm;
+    }
+
+    .sxp-seat__num {
+        width: 4.5mm;
+        height: 4.5mm;
+        font-size: 5pt;
+    }
+
+    .sxp-seat__name {
+        font-size: 6.5pt;
+    }
+
+    .sxp-entrance {
+        width: 95mm;
+        min-height: 10mm;
+        margin-top: 4mm;
     }
 
     @page {
