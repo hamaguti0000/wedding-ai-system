@@ -215,7 +215,7 @@
     z-index: 1;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 14px;
     margin: 0 auto 14px;
 }
 .gs-view-tools button {
@@ -251,7 +251,7 @@
     min-height: 1px;
 }
 .gs-board {
-    width: 1760px;
+    width: 1940px;
     margin: 0 auto;
     padding: 12px 4px 0;
     transform: scale(var(--gs-board-scale));
@@ -285,9 +285,9 @@
 
 .gs-table-row {
     display: grid;
-    gap: 18px;
+    gap: 28px;
     align-items: center;
-    margin-bottom: 34px;
+    margin-bottom: 48px;
 }
 .gs-table-row--eight {
     grid-template-columns: repeat(8, minmax(0, 1fr));
@@ -302,7 +302,7 @@
 .gs-edge-group {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    gap: 28px;
 }
 .gs-edge-gap {
     min-height: 1px;
@@ -310,11 +310,11 @@
 
 .gs-table {
     position: relative;
-    min-height: 170px;
+    min-height: 210px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr);
     align-items: center;
-    column-gap: 10px;
+    column-gap: 16px;
     scroll-margin: 140px;
 }
 .gs-table--mine {
@@ -449,9 +449,9 @@
 .gs-guest__name {
     margin: 0;
     color: #1f2530;
-    font-size: .84rem;
+    font-size: .9rem;
     font-weight: 700;
-    line-height: 1.42;
+    line-height: 1.55;
     letter-spacing: .02em;
     overflow-wrap: anywhere;
 }
@@ -587,14 +587,14 @@
         padding: 2px 10px 10px;
     }
     .gs-board {
-        width: 1680px;
+        width: 1940px;
     }
     .gs-table-row {
-        gap: 14px;
-        margin-bottom: 30px;
+        gap: 20px;
+        margin-bottom: 38px;
     }
     .gs-edge-group {
-        gap: 14px;
+        gap: 20px;
     }
     .gs-footnote {
         margin-top: 18px;
