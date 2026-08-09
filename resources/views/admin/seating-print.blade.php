@@ -45,6 +45,12 @@
 
 <div class="sxp-toolbar">
     <a href="{{ route('admin.seating') }}" class="ghost">&larr; 編集画面に戻る</a>
+    <div class="sxp-toolbar__zoom" aria-label="表示倍率">
+        <button type="button" data-sxp-zoom="0.7">全体</button>
+        <button type="button" data-sxp-zoom="0.85">85%</button>
+        <button type="button" data-sxp-zoom="1">100%</button>
+        <button type="button" data-sxp-zoom="1.2">120%</button>
+    </div>
     <button type="button" onclick="window.print()">印刷する</button>
 </div>
 
@@ -74,7 +80,9 @@
         </p>
     </header>
 
-    <section class="sxp-layout" aria-label="席とテーブルを統合した席次表">
+    <div class="sxp-viewport">
+        <div class="sxp-zoom-shell" id="sxpZoomShell">
+            <section class="sxp-layout" aria-label="席とテーブルを統合した席次表">
         <div class="sxp-main-table">
             <span class="sxp-main-table__sub">Main Table</span>
             <span class="sxp-main-table__title">高砂</span>
@@ -109,11 +117,6 @@
                         @endforelse
                     </div>
 
-                    <div class="sxp-table-core">
-                        <span class="sxp-table-core__label">TABLE</span>
-                        <span class="sxp-table-core__name">{{ $table->name }}</span>
-                    </div>
-
                     <div class="sxp-seat-rail sxp-seat-rail--right">
                         @foreach ($rightSeats as $seat)
                         @php $assignedUser = $seat->assignment?->user; @endphp
@@ -130,7 +133,36 @@
         <div class="sxp-entrance">
             <span>受付・入口</span>
         </div>
-    </section>
+            </section>
+        </div>
+    </div>
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const shell = document.getElementById('sxpZoomShell');
+    const buttons = document.querySelectorAll('[data-sxp-zoom]');
+    if (!shell || buttons.length === 0) return;
+
+    const fallback = window.matchMedia('(max-width: 767px)').matches ? '0.7' : '0.85';
+    const saved = localStorage.getItem('seatingPrintZoom') || fallback;
+
+    function setZoom(value) {
+        shell.style.setProperty('--sxp-zoom', value);
+        localStorage.setItem('seatingPrintZoom', value);
+        buttons.forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.sxpZoom === value);
+        });
+    }
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => setZoom(button.dataset.sxpZoom));
+    });
+
+    setZoom(saved);
+})();
+</script>
+@endpush

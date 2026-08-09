@@ -83,9 +83,24 @@ main {
     line-height: 1.6;
 }
 
-.sxp-layout {
-    width: min(1240px, 100%);
+.sxp-viewport {
+    width: min(1320px, 100%);
     margin: 0 auto;
+    overflow: auto;
+    padding: 0 0 14px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sxp-zoom-shell {
+    --sxp-zoom: 1;
+    width: calc(100% / var(--sxp-zoom));
+    transform: scale(var(--sxp-zoom));
+    transform-origin: top left;
+}
+
+.sxp-layout {
+    width: 100%;
+    margin: 0;
     padding: 18px;
     border: 1px solid rgba(178,135,82,.28);
     border-radius: 20px;
@@ -128,12 +143,12 @@ main {
 
 .sxp-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(142px, 1fr));
+    grid-template-columns: repeat(6, minmax(190px, 1fr));
     gap: 14px;
 }
 
 .sxp-table-card {
-    min-height: 168px;
+    min-height: 148px;
     padding: 12px;
     border: 1px solid rgba(181,139,85,.24);
     border-radius: 14px;
@@ -175,56 +190,45 @@ main {
 
 .sxp-seat-map {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 74px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: stretch;
     gap: 10px;
 }
 
 .sxp-seat-rail {
+    position: relative;
     display: grid;
     align-content: start;
     gap: 7px;
+    padding-top: 16px;
 }
 
-.sxp-table-core {
-    min-height: 108px;
-    display: grid;
-    align-content: center;
-    justify-items: center;
-    gap: 4px;
-    padding: 8px 5px;
-    border: 1px solid rgba(178,135,82,.46);
-    border-radius: 36px;
-    background:
-        linear-gradient(180deg, #fff, #fff5e7);
-    box-shadow: inset 0 0 0 4px rgba(255,255,255,.75);
-    text-align: center;
+.sxp-seat-rail::before {
+    position: absolute;
+    top: 0;
+    color: var(--sxp-muted);
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .08em;
 }
 
-.sxp-table-core__label {
-    color: var(--sxp-gold-dark);
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: .52rem;
-    font-weight: 700;
-    letter-spacing: .16em;
+.sxp-seat-rail--left::before {
+    content: "左側";
+    left: 2px;
 }
 
-.sxp-table-core__name {
-    color: var(--sxp-ink);
-    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
-    font-size: .72rem;
-    font-weight: 900;
-    line-height: 1.2;
-    overflow-wrap: anywhere;
+.sxp-seat-rail--right::before {
+    content: "右側";
+    right: 2px;
 }
 
 .sxp-seat {
-    min-height: 32px;
+    min-height: 34px;
     display: grid;
     align-items: center;
-    padding: 5px 7px;
-    border: 1px solid rgba(181,139,85,.16);
-    border-radius: 8px;
+    padding: 6px 8px;
+    border: 1px solid rgba(181,139,85,.14);
+    border-radius: 7px;
     background: #fffdfa;
 }
 
@@ -232,7 +236,7 @@ main {
     min-width: 0;
     color: var(--sxp-ink);
     font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
-    font-size: .92rem;
+    font-size: .98rem;
     font-weight: 800;
     line-height: 1.28;
     overflow-wrap: anywhere;
@@ -279,11 +283,13 @@ main {
         width: calc(100% - 24px);
     }
 
+    .sxp-viewport {
+        width: calc(100% - 10px);
+    }
+
     .sxp-layout {
-        width: calc(100% - 12px);
-        overflow-x: auto;
+        min-width: 1180px;
         padding: 12px;
-        -webkit-overflow-scrolling: touch;
     }
 
     .sxp-main-table,
@@ -292,8 +298,7 @@ main {
     }
 
     .sxp-grid {
-        width: 1380px;
-        grid-template-columns: repeat(7, 186px);
+        grid-template-columns: repeat(6, 185px);
         gap: 10px;
     }
 }
@@ -331,6 +336,17 @@ main {
         font-size: 9pt;
     }
 
+    .sxp-viewport {
+        width: 100%;
+        overflow: visible;
+        padding: 0;
+    }
+
+    .sxp-zoom-shell {
+        width: 100%;
+        transform: none !important;
+    }
+
     .sxp-layout {
         width: 100%;
         padding: 4mm;
@@ -354,7 +370,7 @@ main {
     }
 
     .sxp-grid {
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: 2.5mm;
     }
 
@@ -380,7 +396,7 @@ main {
     }
 
     .sxp-seat-map {
-        grid-template-columns: minmax(0, 1fr) 13mm minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 1.4mm;
     }
 
@@ -388,21 +404,8 @@ main {
         gap: .9mm;
     }
 
-    .sxp-table-core {
-        min-height: 23mm;
-        padding: 1.2mm;
-    }
-
-    .sxp-table-core__label {
-        font-size: 4.2pt;
-    }
-
-    .sxp-table-core__name {
-        font-size: 5.5pt;
-    }
-
     .sxp-seat {
-        min-height: 6.3mm;
+        min-height: 6.8mm;
         padding: .9mm 1mm;
         border-radius: 1.2mm;
     }
@@ -421,4 +424,32 @@ main {
         size: A3 landscape;
         margin: 10mm;
     }
+}
+
+
+.sxp-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    flex-wrap: wrap;
+}
+
+.sxp-toolbar__zoom {
+    display: inline-flex;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid #d8c6ad;
+    background: #fffaf2;
+}
+
+.sxp-toolbar .sxp-toolbar__zoom button {
+    padding: 6px 10px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #775734 !important;
+}
+
+.sxp-toolbar .sxp-toolbar__zoom button.is-active {
+    background: #775734 !important;
+    color: #fff !important;
 }
