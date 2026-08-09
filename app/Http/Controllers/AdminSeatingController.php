@@ -73,6 +73,34 @@ class AdminSeatingController extends Controller
         return view('admin.seating-print', compact('tables', 'setting'));
     }
 
+    /** ゲスト非公開のまま、管理者がゲスト向け席次表を確認するページ */
+    public function guestPreview()
+    {
+        $tables = SeatingTable::with([
+            'seats.assignment.user.guestProfile',
+        ])->orderBy('display_order')->get();
+
+        $setting = WeddingSetting::first();
+        $typeConfig = Seat::typeConfig();
+        $user = auth()->user();
+        $profile = null;
+        $mySeat = null;
+        $myTableId = null;
+        $isPublished = $tables->isNotEmpty()
+            && $tables->some(fn($t) => $t->seats->isNotEmpty());
+
+        return view('seating.guest', compact(
+            'tables',
+            'mySeat',
+            'myTableId',
+            'user',
+            'profile',
+            'setting',
+            'typeConfig',
+            'isPublished'
+        ));
+    }
+
     // ── テーブル ────────────────────────────────────────────
 
     public function storeTable(Request $request): JsonResponse
