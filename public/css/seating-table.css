@@ -396,3 +396,191 @@ main { padding-top: 60px; text-align: initial; }
     flex-shrink: 0; font-size: 0.66rem; color: var(--sx-muted);
     background: var(--sx-row-alt); border-radius: 8px; padding: 1px 6px;
 }
+
+
+/* ── 2026-08 readability pass: 管理者は編集しやすさを優先 ── */
+.sx-app {
+    background: #f7f3ec;
+}
+
+.sx-topbar {
+    min-height: 62px;
+    height: auto;
+    padding-block: 10px;
+    box-shadow: 0 8px 24px rgba(47, 36, 23, .06);
+}
+
+.sx-sidebar {
+    width: 300px;
+    background: #fffdf9;
+}
+
+.sx-sidebar__search {
+    margin: 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+.sx-unassigned-list {
+    gap: 7px;
+    padding-inline: 14px;
+}
+
+.sx-unassigned-list li {
+    min-height: 44px;
+    padding: 9px 11px;
+    border: 1px solid var(--sx-border-light);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.sx-main {
+    padding: 14px 16px 72px;
+}
+
+.sx-table {
+    min-width: 980px;
+    overflow: hidden;
+    border: 1px solid var(--sx-border-light);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 14px 34px rgba(47, 36, 23, .06);
+}
+
+.sx-table thead th {
+    top: 0;
+    padding: 11px 12px;
+    background: #f6eddf;
+}
+
+.sx-table tbody td {
+    padding: 9px 10px;
+}
+
+.sx-cell-table {
+    width: 260px;
+    background: #fffaf2;
+}
+
+.sx-table-name {
+    min-height: 38px;
+    padding: 7px 9px;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.sx-table-actions {
+    gap: 8px;
+}
+
+.sx-add-seat,
+.sx-del-table {
+    min-height: 32px;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: .78rem;
+}
+
+.sx-cell-num {
+    width: 46px;
+    font-size: .82rem;
+}
+
+.sx-cell-type {
+    width: 150px;
+}
+
+.sx-cell-type select,
+.sx-cell-guest select {
+    min-height: 38px;
+    border-radius: 8px;
+    font-size: .9rem;
+    padding: 7px 9px;
+}
+
+.sx-guest-wrap {
+    gap: 8px;
+}
+
+.sx-guest-detail {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+}
+
+.sx-del-seat {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+}
+
+.sx-add-table {
+    position: sticky;
+    left: 0;
+    bottom: 0;
+    z-index: 6;
+    max-width: 720px;
+    margin-top: 12px;
+    padding: 14px;
+    border: 1px solid var(--sx-border-light);
+    border-radius: 14px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 12px 30px rgba(47, 36, 23, .10);
+}
+
+.sx-add-table input[type="text"],
+.sx-add-table input[type="number"] {
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+
+.sx-add-table button {
+    min-height: 40px;
+    border-radius: 9px;
+}
+
+.sx-fp-scroll {
+    padding: 28px;
+}
+
+.sx-fp-room {
+    border-radius: 14px;
+    background-color: #fffdf9;
+}
+
+.sx-fp-table {
+    min-height: 48px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(47, 36, 23, .08);
+}
+
+@media (max-width: 900px) {
+    .sx-topbar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .sx-topbar__left,
+    .sx-topbar__right {
+        flex-wrap: wrap;
+    }
+
+    .sx-sidebar {
+        width: 100%;
+        max-height: 240px;
+    }
+
+    .sx-main {
+        padding: 12px 10px 72px;
+    }
+
+    .sx-table {
+        min-width: 900px;
+    }
+
+    .sx-add-table {
+        min-width: 520px;
+    }
+}

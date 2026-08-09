@@ -110,9 +110,14 @@
                         @forelse ($occupiedSeats as $seat)
                         @php
                             $assignedUser = $seat->assignment->user;
-                            $isMe         = $mySeat && $seat->id === $mySeat->id;
+                            $assignedProfile = $assignedUser->guestProfile;
+                            $isMe = $mySeat && $seat->id === $mySeat->id;
+                            $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' / ' . ($assignedProfile?->relationshipLabel() ?? ''), ' /');
                         @endphp
                         <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
+                            @if ($guestMeta)
+                            <p class="gs-guest__meta">{{ $guestMeta }}</p>
+                            @endif
                             <p class="gs-guest__name">
                                 @if ($isMe)<span class="gs-guest__mark">&#10022;</span>@endif
                                 {{ $guestName($assignedUser) }}
