@@ -268,5 +268,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/seating-table.js') }}"></script>
+<script src="{{ versioned_asset('js/seating-table.js') }}"></script>
 @endpush

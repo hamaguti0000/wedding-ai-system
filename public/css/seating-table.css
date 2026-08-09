@@ -584,3 +584,64 @@ main { padding-top: 60px; text-align: initial; }
         min-width: 520px;
     }
 }
+
+
+/* ── 2026-08操作性改善: 未配置ゲストをクリックして配置しやすくする ── */
+.sx-unassigned-list li {
+    cursor: pointer;
+}
+
+.sx-unassigned-list li:hover {
+    border-color: var(--sx-gold);
+    background: #fff9ef;
+    transform: translateY(-1px);
+}
+
+.sx-unassigned-list__name {
+    min-width: 0;
+    flex: 1;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sx-unassigned-list__action {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--sx-gold);
+    color: #fff;
+    font-size: .66rem;
+    font-weight: 800;
+}
+
+.sx-row--just-updated td {
+    background: #fff2d8 !important;
+    transition: background .3s ease;
+}
+
+.sx-cell-guest {
+    min-width: 360px;
+}
+
+.sx-cell-guest select {
+    font-weight: 700;
+}
+
+.sx-table tbody tr:hover .sx-cell-type,
+.sx-table tbody tr:hover .sx-cell-guest,
+.sx-table tbody tr:hover .sx-cell-num {
+    background: #fffaf0;
+}
+
+.sx-sidebar__head::after {
+    content: "未配置ゲストをクリックで空席へ配置";
+    display: block;
+    margin-top: 4px;
+    color: var(--sx-mid);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}

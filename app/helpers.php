@@ -1,5 +1,18 @@
 <?php
 
+if (! function_exists('versioned_asset')) {
+    /**
+     * CSS/JS のブラウザキャッシュをデプロイごとに確実に更新する。
+     */
+    function versioned_asset(string $path): string
+    {
+        $fullPath = public_path($path);
+        $version = is_file($fullPath) ? filemtime($fullPath) : time();
+
+        return asset($path) . '?v=' . $version;
+    }
+}
+
 if (! function_exists('css_asset')) {
     /**
      * デプロイ後にブラウザが古いCSSをキャッシュし続けてレイアウト崩れに
@@ -7,9 +20,6 @@ if (! function_exists('css_asset')) {
      */
     function css_asset(string $path): string
     {
-        $fullPath = public_path($path);
-        $version = is_file($fullPath) ? filemtime($fullPath) : time();
-
-        return asset($path) . '?v=' . $version;
+        return versioned_asset($path);
     }
 }

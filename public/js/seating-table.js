@@ -84,7 +84,9 @@
         items.forEach(g => {
             const li = document.createElement('li');
             li.dataset.userId = g.id;
-            li.innerHTML = `<span class="sx-unassigned-list__name"></span><span class="sx-unassigned-list__tag"></span>`;
+            li.dataset.guestName = g.name;
+            li.title = 'クリックで最初の空席へ配置';
+            li.innerHTML = `<span class="sx-unassigned-list__name"></span><span class="sx-unassigned-list__tag"></span><span class="sx-unassigned-list__action">配置</span>`;
             li.querySelector('.sx-unassigned-list__name').textContent = g.name;
             li.querySelector('.sx-unassigned-list__tag').textContent = g.tag;
             unassignedList.appendChild(li);
@@ -92,6 +94,26 @@
     }
 
     document.getElementById('guestSearch')?.addEventListener('input', renderUnassignedList);
+
+    async function assignUnassignedGuest(userId) {
+        const emptySeat = body.querySelector('select.sx-guest[data-current-user=""]');
+        if (!emptySeat) {
+            alert('空席がありません。先に「+席」で席を追加してください。');
+            return;
+        }
+        emptySeat.value = userId;
+        emptySeat.dispatchEvent(new Event('change', { bubbles: true }));
+        emptySeat.closest('tr')?.classList.add('sx-row--just-updated');
+        emptySeat.closest('tr')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => emptySeat.closest('tr')?.classList.remove('sx-row--just-updated'), 1400);
+    }
+
+    unassignedList?.addEventListener('click', (e) => {
+        const item = e.target.closest('li[data-user-id]');
+        if (!item) return;
+        assignUnassignedGuest(item.dataset.userId);
+    });
+
 
     function guestOptionsHtml(selectedId) {
         let html = `<option value="">— 未配置 —</option>`;
@@ -248,7 +270,7 @@
         newRow.innerHTML = `
             <td class="sx-cell-num">${isEmptyState ? 1 : seatIndex}</td>
             <td class="sx-cell-type"><select class="sx-type" data-seat-id="${seat.id}">${typeOptionsHtml('normal')}</select></td>
-            <td class="sx-cell-guest"><select class="sx-guest" data-seat-id="${seat.id}" data-current-user="">${guestOptionsHtml('')}</select></td>
+            <td class="sx-cell-guest"><div class="sx-guest-wrap"><select class="sx-guest" data-seat-id="${seat.id}" data-current-user="">${guestOptionsHtml('')}</select></div></td>
             <td class="sx-cell-action"><button type="button" class="sx-del-seat" data-seat-id="${seat.id}" title="この席を削除"><i class="fa-solid fa-xmark"></i></button></td>`;
 
         if (isEmptyState) {
@@ -364,7 +386,7 @@
                 html += `
                     <td class="sx-cell-num">${i + 1}</td>
                     <td class="sx-cell-type"><select class="sx-type" data-seat-id="${seat.id}">${typeOptionsHtml('normal')}</select></td>
-                    <td class="sx-cell-guest"><select class="sx-guest" data-seat-id="${seat.id}" data-current-user="">${guestOptionsHtml('')}</select></td>
+                    <td class="sx-cell-guest"><div class="sx-guest-wrap"><select class="sx-guest" data-seat-id="${seat.id}" data-current-user="">${guestOptionsHtml('')}</select></div></td>
                     <td class="sx-cell-action"><button type="button" class="sx-del-seat" data-seat-id="${seat.id}" title="この席を削除"><i class="fa-solid fa-xmark"></i></button></td>`;
                 row.innerHTML = html;
                 body.appendChild(row);
