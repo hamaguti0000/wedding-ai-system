@@ -1,7 +1,5 @@
 @php
     $seats = $table->seats->values();
-    $occupiedSeats = $seats->filter(fn($s) => $s->assignment !== null)->values();
-    $seatTotal = max($seats->count(), $occupiedSeats->count());
     $leftSeats = $seats->slice(0, (int) ceil(max($seats->count(), 1) / 2))->values();
     $rightSeats = $seats->slice($leftSeats->count())->values();
 @endphp
@@ -10,10 +8,7 @@
     <div class="sxp-table-content">
         <header class="sxp-table-card__head">
             <span class="sxp-table-card__name">{{ $table->name }}</span>
-            <span class="sxp-table-card__count">大人:{{ $occupiedSeats->count() }}</span>
         </header>
-        <div class="sxp-table-card__sub">{{ $occupiedSeats->count() }} / {{ $seatTotal }}名</div>
-
         <div class="sxp-seat-map">
             <div class="sxp-seat-rail sxp-seat-rail--left">
                 @forelse ($leftSeats as $seat)
@@ -23,11 +18,10 @@
                         <span>A</span><span></span><span></span>
                     </div>
                     <div class="sxp-seat__body">
-                        <span class="sxp-seat__meta">{{ $assignedUser ? $guestMeta($assignedUser) : '' }}</span>
                         <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
                     </div>
                     <div class="sxp-seat__side sxp-seat__side--right">
-                        <span>大人</span><span></span><span></span>
+                        <span></span><span></span><span></span>
                     </div>
                 </div>
                 @empty
@@ -47,11 +41,10 @@
                         <span>A</span><span></span><span></span>
                     </div>
                     <div class="sxp-seat__body">
-                        <span class="sxp-seat__meta">{{ $assignedUser ? $guestMeta($assignedUser) : '' }}</span>
                         <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
                     </div>
                     <div class="sxp-seat__side sxp-seat__side--right">
-                        <span>大人</span><span></span><span></span>
+                        <span></span><span></span><span></span>
                     </div>
                 </div>
                 @endforeach

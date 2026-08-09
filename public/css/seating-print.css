@@ -131,7 +131,7 @@ main {
 .sxp-entrance span {
     color: var(--sxp-ink);
     font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
-    font-size: 1rem;
+    font-size: 1.08rem;
     font-weight: 800;
 }
 
@@ -195,13 +195,13 @@ main {
 .sxp-table-content {
     min-width: 0;
     display: grid;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto 1fr;
 }
 
 .sxp-table-card__head {
     min-height: 34px;
     display: grid;
-    grid-template-columns: 1fr 82px;
+    grid-template-columns: 1fr;
     border-bottom: 1.05px solid var(--sxp-line);
 }
 
@@ -224,17 +224,6 @@ main {
     justify-content: center;
     border-left: 1.05px solid var(--sxp-line);
     font-size: .64rem;
-}
-
-.sxp-table-card__sub {
-    min-height: 30px;
-    display: grid;
-    align-items: center;
-    padding: 4px 8px;
-    border-bottom: 1.05px solid var(--sxp-line);
-    color: var(--sxp-ink);
-    font-size: .9rem;
-    font-weight: 700;
 }
 
 .sxp-seat-map {
@@ -301,20 +290,9 @@ main {
 .sxp-seat__body {
     min-width: 0;
     display: grid;
-    grid-template-rows: 17px 1fr;
-    align-items: center;
-    padding: 3px 5px 5px;
+    place-items: center;
+    padding: 6px 5px;
     text-align: center;
-}
-
-.sxp-seat__meta {
-    color: var(--sxp-ink);
-    font-size: .58rem;
-    font-weight: 800;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .sxp-seat__name {
@@ -456,7 +434,7 @@ main {
 
     .sxp-main-table__title,
     .sxp-entrance span {
-        font-size: 9pt;
+        font-size: 10pt;
     }
 
     .sxp-board {
@@ -498,7 +476,7 @@ main {
 
     .sxp-table-card__head {
         min-height: 7mm;
-        grid-template-columns: 1fr 18mm;
+        grid-template-columns: 1fr;
         border-bottom-width: .7pt;
     }
 
@@ -511,13 +489,6 @@ main {
         border-left-width: .7pt;
         font-size: 6.4pt;
         padding: 1mm;
-    }
-
-    .sxp-table-card__sub {
-        min-height: 6mm;
-        border-bottom-width: .7pt;
-        font-size: 6.8pt;
-        padding: 1mm 1.4mm;
     }
 
     .sxp-seat-map,
@@ -542,16 +513,11 @@ main {
     }
 
     .sxp-seat__body {
-        grid-template-rows: 3.2mm 1fr;
-        padding: .5mm .7mm .8mm;
-    }
-
-    .sxp-seat__meta {
-        font-size: 4.4pt;
+        padding: 1mm .7mm;
     }
 
     .sxp-seat__name {
-        font-size: 6.6pt;
+        font-size: 7.2pt;
     }
 
     .sxp-entrance {
@@ -585,10 +551,6 @@ main {
 
 .sxp-table-card__head {
     background: linear-gradient(180deg, #fff, #fffaf2);
-}
-
-.sxp-table-card__sub {
-    background: #fffdf8;
 }
 
 .sxp-seat:hover {

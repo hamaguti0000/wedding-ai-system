@@ -41,11 +41,6 @@
         $p = $user->guestProfile;
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
-    $guestMeta = function ($user) {
-        $p = $user?->guestProfile;
-        if (!$p) return '';
-        return trim(($p->guestSideLabel() ?? '') . ' ' . ($p->relationshipLabel() ?? ''));
-    };
     $tableMark = function ($table) {
         $name = trim($table->name ?? '');
         return $name !== '' ? mb_substr($name, 0, 1) : 'T';
@@ -104,7 +99,7 @@
             <section class="sxp-layout" aria-label="席とテーブルを統合した席次表">
         <div class="sxp-main-table">
             <span class="sxp-main-table__sub">Main Table</span>
-            <span class="sxp-main-table__title">高砂</span>
+            <span class="sxp-main-table__title">濵口翔　馬場弥礼</span>
         </div>
 
         @php
@@ -125,7 +120,6 @@
             @include('admin.partials.seating-print-table-card', [
                 'table' => $table,
                 'guestName' => $guestName,
-                'guestMeta' => $guestMeta,
                 'tableMark' => $tableMark,
             ])
             @endforeach
@@ -140,7 +134,6 @@
                     @include('admin.partials.seating-print-table-card', [
                         'table' => $table,
                         'guestName' => $guestName,
-                        'guestMeta' => $guestMeta,
                         'tableMark' => $tableMark,
                     ])
                     @endforeach
@@ -151,7 +144,6 @@
                     @include('admin.partials.seating-print-table-card', [
                         'table' => $table,
                         'guestName' => $guestName,
-                        'guestMeta' => $guestMeta,
                         'tableMark' => $tableMark,
                     ])
                     @endforeach
