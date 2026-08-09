@@ -101,6 +101,56 @@ class AdminSeatingController extends Controller
         ));
     }
 
+    /** 席配置済みゲストのエスコートカード印刷ページ */
+    public function escortCards()
+    {
+        $tables = SeatingTable::query()
+            ->orderBy('display_order')
+            ->get(['id', 'name']);
+
+        $tableMarks = $tables
+            ->values()
+            ->mapWithKeys(fn ($table, $index) => [
+                $table->id => $this->tableLetter($index),
+            ]);
+
+        $guests = User::query()
+            ->where('role', 'guest')
+            ->whereHas('guestProfile', fn ($q) => $q->where('participation', 'attending'))
+            ->whereHas('seatAssignment.seat.seatingTable')
+            ->with(['guestProfile', 'seatAssignment.seat.seatingTable'])
+            ->get()
+            ->sortBy(function (User $user) {
+                $profile = $user->guestProfile;
+
+                return sprintf(
+                    '%04d-%s-%s',
+                    $user->seatAssignment?->seat?->seatingTable?->display_order ?? 9999,
+                    $profile?->last_name ?? $user->name,
+                    $profile?->first_name ?? ''
+                );
+            })
+            ->values();
+
+        $setting = WeddingSetting::first();
+
+        return view('admin.escort-cards', compact('guests', 'setting', 'tableMarks'));
+    }
+
+    private function tableLetter(int $index): string
+    {
+        $letter = '';
+        $index += 1;
+
+        while ($index > 0) {
+            $index--;
+            $letter = chr(65 + ($index % 26)) . $letter;
+            $index = intdiv($index, 26);
+        }
+
+        return $letter;
+    }
+
     // ── テーブル ────────────────────────────────────────────
 
     public function storeTable(Request $request): JsonResponse

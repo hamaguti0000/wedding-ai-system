@@ -56,6 +56,7 @@
         <div class="sx-topbar__right">
             <span class="sx-save-status is-saved" id="saveStatus"><i class="fa-solid fa-check"></i>自動保存済み</span>
             <a href="{{ route('admin.seating.guest-preview') }}" target="_blank" class="sx-btn-print"><i class="fa-solid fa-eye"></i>ゲスト表示プレビュー</a>
+            <a href="{{ route('admin.seating.escort-cards') }}" target="_blank" class="sx-btn-print"><i class="fa-solid fa-address-card"></i>エスコートカード</a>
             <a href="{{ route('admin.seating.print') }}" target="_blank" class="sx-btn-print"><i class="fa-solid fa-print"></i>印刷用ページ</a>
             <nav class="sx-topbar-nav">
                 <a href="{{ route('admin.dashboard') }}">RSVP管理</a>

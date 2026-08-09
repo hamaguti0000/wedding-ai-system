@@ -1,0 +1,278 @@
+/* Escort cards print page */
+.ec-page,
+.ec-page * {
+    box-sizing: border-box;
+}
+
+main {
+    padding-top: 60px;
+    text-align: initial;
+}
+
+.ec-page {
+    --ec-navy: #263e61;
+    --ec-gold: #b58739;
+    --ec-paper: #f7f5ef;
+    --ec-muted: #7a7168;
+    min-height: calc(100vh - 60px);
+    padding: 22px;
+    background: #ece7dc;
+    color: var(--ec-navy);
+    font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+}
+
+.ec-toolbar {
+    position: sticky;
+    top: 60px;
+    z-index: 10;
+    width: min(1120px, 100%);
+    margin: 0 auto 18px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border: 1px solid rgba(38,62,97,.18);
+    background: rgba(255,255,255,.92);
+}
+.ec-toolbar a,
+.ec-toolbar button {
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid var(--ec-navy);
+    background: var(--ec-navy);
+    color: #fff;
+    font: 800 .84rem 'Noto Sans JP', system-ui, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+.ec-toolbar a {
+    background: transparent;
+    color: var(--ec-navy);
+}
+.ec-toolbar span {
+    color: var(--ec-muted);
+    font: 800 .84rem 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-sheet {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 18px;
+}
+
+.ec-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 100 / 148;
+    min-height: 400px;
+    overflow: hidden;
+    padding: 26px 30px;
+    border: 1px solid rgba(38,62,97,.18);
+    background:
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,.72), transparent 24%),
+        repeating-linear-gradient(10deg, transparent 0 9px, rgba(63,52,41,.035) 10px 11px, transparent 12px 24px),
+        var(--ec-paper);
+    box-shadow: 0 18px 36px rgba(37,45,58,.14);
+    page-break-after: always;
+}
+.ec-card::after {
+    content: "";
+    position: absolute;
+    right: 34px;
+    top: 46%;
+    width: 1.4px;
+    height: 42%;
+    background: var(--ec-navy);
+    opacity: .86;
+}
+
+.ec-card__header {
+    position: relative;
+    z-index: 1;
+}
+.ec-card__couple,
+.ec-card__script {
+    margin: 0;
+    color: var(--ec-gold);
+    font-family: 'Brush Script MT', 'Segoe Script', cursive;
+    font-size: 1.08rem;
+    line-height: 1.2;
+}
+.ec-card__date {
+    margin: 6px 0 0;
+    color: var(--ec-gold);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1rem;
+    letter-spacing: .04em;
+}
+
+.ec-table {
+    position: absolute;
+    top: 86px;
+    right: 54px;
+    width: 150px;
+    height: 190px;
+    display: grid;
+    place-items: center;
+}
+.ec-table__label {
+    position: absolute;
+    top: 0;
+    left: 4px;
+    color: var(--ec-navy);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.15rem;
+    letter-spacing: .18em;
+    transform: rotate(-38deg);
+}
+.ec-table__mark {
+    color: var(--ec-navy);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(6rem, 18vw, 8.4rem);
+    line-height: .9;
+}
+
+.ec-guest {
+    position: absolute;
+    left: 32px;
+    right: 72px;
+    top: 46%;
+    transform: translateY(-16%);
+    z-index: 1;
+}
+.ec-guest__kana {
+    margin: 0 0 6px;
+    color: var(--ec-muted);
+    font: 700 .72rem 'Noto Sans JP', system-ui, sans-serif;
+    letter-spacing: .12em;
+}
+.ec-guest__name {
+    margin: 0;
+    color: var(--ec-navy);
+    font-family: Georgia, 'Noto Serif JP', serif;
+    font-size: clamp(2.35rem, 8vw, 3.9rem);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: .03em;
+}
+.ec-guest__suffix {
+    margin: 8px 0 0;
+    color: var(--ec-navy);
+    font-size: 1.05rem;
+}
+
+.ec-card__footer {
+    position: absolute;
+    left: 34%;
+    right: 46px;
+    bottom: 42px;
+    z-index: 1;
+    color: var(--ec-gold);
+    text-align: center;
+}
+.ec-card__footer p:last-child {
+    margin: 6px 0 0;
+    font-size: .78rem;
+}
+
+.ec-flower {
+    position: absolute;
+    width: 210px;
+    height: 170px;
+    opacity: .9;
+}
+.ec-flower::before,
+.ec-flower::after {
+    content: "";
+    position: absolute;
+    border: 1.4px solid var(--ec-navy);
+    opacity: .9;
+}
+.ec-flower::before {
+    width: 124px;
+    height: 124px;
+    border-radius: 56% 44% 58% 42%;
+    background:
+        radial-gradient(ellipse at 50% 16%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%),
+        radial-gradient(ellipse at 22% 50%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%),
+        radial-gradient(ellipse at 78% 50%, transparent 0 54%, var(--ec-navy) 55% 56%, transparent 57%);
+}
+.ec-flower::after {
+    width: 92px;
+    height: 30px;
+    border-radius: 999px 20px 999px 20px;
+    transform: rotate(-24deg);
+}
+.ec-flower--top {
+    top: -18px;
+    right: -18px;
+    transform: rotate(16deg);
+}
+.ec-flower--bottom {
+    left: -26px;
+    bottom: -20px;
+    transform: rotate(198deg);
+}
+
+.ec-empty {
+    width: min(560px, calc(100% - 24px));
+    margin: 40px auto;
+    padding: 32px;
+    background: #fff;
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .ec-page {
+        padding: 14px 10px 28px;
+    }
+    .ec-toolbar {
+        top: 56px;
+        flex-wrap: wrap;
+    }
+    .ec-sheet {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    @page {
+        size: 100mm 148mm;
+        margin: 0;
+    }
+    body {
+        background: #fff !important;
+    }
+    main {
+        padding-top: 0 !important;
+    }
+    .header,
+    .header-drawer,
+    .header-overlay,
+    .ec-toolbar {
+        display: none !important;
+    }
+    .ec-page {
+        min-height: auto;
+        padding: 0;
+        background: #fff !important;
+    }
+    .ec-sheet {
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+    .ec-card {
+        width: 100mm;
+        height: 148mm;
+        min-height: 0;
+        aspect-ratio: auto;
+        border: 0;
+        box-shadow: none;
+        break-after: page;
+        page-break-after: always;
+    }
+}
