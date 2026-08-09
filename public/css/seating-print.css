@@ -130,7 +130,7 @@ main {
 }
 
 .sxp-table-card {
-    min-height: 162px;
+    min-height: 178px;
     padding: 10px;
     border: 1px solid rgba(174,132,80,.34);
     border-radius: 13px;
@@ -170,18 +170,57 @@ main {
     line-height: 1.4;
 }
 
-.sxp-seat-list {
+.sxp-seat-map {
     display: grid;
+    grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
+    align-items: stretch;
+    gap: 7px;
+}
+
+.sxp-seat-rail {
+    display: grid;
+    align-content: start;
     gap: 5px;
 }
 
-.sxp-seat {
-    min-height: 28px;
+.sxp-table-core {
+    min-height: 112px;
     display: grid;
-    grid-template-columns: 22px 1fr;
+    align-content: center;
+    justify-items: center;
+    gap: 4px;
+    padding: 8px 5px;
+    border: 1px solid rgba(174,132,80,.42);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #fff, #fff4e5);
+    text-align: center;
+}
+
+.sxp-table-core__label {
+    color: var(--sxp-gold-dark);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .52rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+}
+
+.sxp-table-core__name {
+    color: var(--sxp-ink);
+    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
+    font-size: .72rem;
+    font-weight: 900;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.sxp-seat {
+    min-height: 30px;
+    display: grid;
+    grid-template-columns: 20px 1fr;
     align-items: center;
-    gap: 6px;
-    padding: 4px 6px;
+    gap: 5px;
+    padding: 4px 5px;
+    border: 1px solid rgba(81,106,90,.16);
     border-radius: 8px;
     background: #fff9ef;
 }
@@ -312,8 +351,8 @@ main {
     }
 
     .sxp-table-card {
-        min-height: 35mm;
-        padding: 2mm;
+        min-height: 40mm;
+        padding: 1.8mm;
         border-radius: 2mm;
         box-shadow: none;
     }
@@ -332,15 +371,33 @@ main {
         padding: .3mm 1.4mm;
     }
 
-    .sxp-seat-list {
-        gap: .9mm;
+    .sxp-seat-map {
+        grid-template-columns: minmax(0, 1fr) 13mm minmax(0, 1fr);
+        gap: 1.2mm;
+    }
+
+    .sxp-seat-rail {
+        gap: .8mm;
+    }
+
+    .sxp-table-core {
+        min-height: 26mm;
+        padding: 1.2mm;
+    }
+
+    .sxp-table-core__label {
+        font-size: 4.2pt;
+    }
+
+    .sxp-table-core__name {
+        font-size: 5.5pt;
     }
 
     .sxp-seat {
         min-height: 6mm;
-        grid-template-columns: 5mm 1fr;
-        gap: 1.2mm;
-        padding: .8mm 1mm;
+        grid-template-columns: 4.8mm 1fr;
+        gap: .9mm;
+        padding: .7mm .8mm;
         border-radius: 1.4mm;
     }
 

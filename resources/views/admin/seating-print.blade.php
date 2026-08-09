@@ -83,27 +83,48 @@
         <div class="sxp-grid">
             @foreach ($tables as $table)
             @php
-                $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
-                $seatTotal = max($table->seats->count(), $occupiedSeats->count());
+                $seats = $table->seats->values();
+                $occupiedSeats = $seats->filter(fn($s) => $s->assignment !== null)->values();
+                $seatTotal = max($seats->count(), $occupiedSeats->count());
+                $leftSeats = $seats->slice(0, (int) ceil(max($seats->count(), 1) / 2))->values();
+                $rightSeats = $seats->slice($leftSeats->count())->values();
             @endphp
             <article class="sxp-table-card">
                 <header class="sxp-table-card__head">
                     <span class="sxp-table-card__name">{{ $table->name }}</span>
                     <span class="sxp-table-card__count">{{ $occupiedSeats->count() }} / {{ $seatTotal }}名</span>
                 </header>
-                <div class="sxp-seat-list">
-                    @forelse ($table->seats as $seat)
-                    @php $assignedUser = $seat->assignment?->user; @endphp
-                    <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                        <span class="sxp-seat__num">{{ $loop->iteration }}</span>
-                        <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
+
+                <div class="sxp-seat-map">
+                    <div class="sxp-seat-rail sxp-seat-rail--left">
+                        @forelse ($leftSeats as $seat)
+                        @php $assignedUser = $seat->assignment?->user; @endphp
+                        <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
+                            <span class="sxp-seat__num">{{ $loop->iteration }}</span>
+                            <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
+                        </div>
+                        @empty
+                        <div class="sxp-seat is-empty">
+                            <span class="sxp-seat__num">-</span>
+                            <span class="sxp-seat__name">席未設定</span>
+                        </div>
+                        @endforelse
                     </div>
-                    @empty
-                    <div class="sxp-seat is-empty">
-                        <span class="sxp-seat__num">-</span>
-                        <span class="sxp-seat__name">席未設定</span>
+
+                    <div class="sxp-table-core">
+                        <span class="sxp-table-core__label">TABLE</span>
+                        <span class="sxp-table-core__name">{{ $table->name }}</span>
                     </div>
-                    @endforelse
+
+                    <div class="sxp-seat-rail sxp-seat-rail--right">
+                        @foreach ($rightSeats as $seat)
+                        @php $assignedUser = $seat->assignment?->user; @endphp
+                        <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
+                            <span class="sxp-seat__num">{{ $leftSeats->count() + $loop->iteration }}</span>
+                            <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
             </article>
             @endforeach
