@@ -41,6 +41,15 @@
         $p = $user->guestProfile;
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
+    $guestMeta = function ($user) {
+        $p = $user?->guestProfile;
+        if (!$p) return '';
+        return trim(($p->guestSideLabel() ?? '') . ' ' . ($p->relationshipLabel() ?? ''));
+    };
+    $tableMark = function ($table) {
+        $name = trim($table->name ?? '');
+        return $name !== '' ? mb_substr($name, 0, 1) : 'T';
+    };
 @endphp
 
 <div class="sxp-toolbar">
@@ -98,45 +107,56 @@
             <span class="sxp-main-table__title">高砂</span>
         </div>
 
-        <div class="sxp-grid">
-            @foreach ($tables as $table)
-            @php
-                $seats = $table->seats->values();
-                $occupiedSeats = $seats->filter(fn($s) => $s->assignment !== null)->values();
-                $seatTotal = max($seats->count(), $occupiedSeats->count());
-                $leftSeats = $seats->slice(0, (int) ceil(max($seats->count(), 1) / 2))->values();
-                $rightSeats = $seats->slice($leftSeats->count())->values();
-            @endphp
-            <article class="sxp-table-card">
-                <header class="sxp-table-card__head">
-                    <span class="sxp-table-card__name">{{ $table->name }}</span>
-                    <span class="sxp-table-card__count">{{ $occupiedSeats->count() }} / {{ $seatTotal }}名</span>
-                </header>
+        @php
+            $printRows = [
+                ['type' => 'eight', 'tables' => $tables->slice(0, 8)->values()],
+                ['type' => 'eight', 'tables' => $tables->slice(8, 8)->values()],
+                ['type' => 'seven', 'tables' => $tables->slice(16, 7)->values()],
+            ];
+            $edgeRows = $tables->slice(23)->values()->chunk(4);
+        @endphp
 
-                <div class="sxp-seat-map">
-                    <div class="sxp-seat-rail sxp-seat-rail--left">
-                        @forelse ($leftSeats as $seat)
-                        @php $assignedUser = $seat->assignment?->user; @endphp
-                        <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                            <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
-                        </div>
-                        @empty
-                        <div class="sxp-seat is-empty">
-                            <span class="sxp-seat__name">席未設定</span>
-                        </div>
-                        @endforelse
-                    </div>
+        <div class="sxp-board">
+            @foreach ($printRows as $printRow)
+            @php $rowTables = $printRow['tables']; @endphp
+            @if ($rowTables->isNotEmpty())
+            <div class="sxp-row sxp-row--{{ $printRow['type'] }}">
+            @foreach ($rowTables as $table)
+            @include('admin.partials.seating-print-table-card', [
+                'table' => $table,
+                'guestName' => $guestName,
+                'guestMeta' => $guestMeta,
+                'tableMark' => $tableMark,
+            ])
+            @endforeach
+            </div>
+            @endif
+            @endforeach
 
-                    <div class="sxp-seat-rail sxp-seat-rail--right">
-                        @foreach ($rightSeats as $seat)
-                        @php $assignedUser = $seat->assignment?->user; @endphp
-                        <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                            <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
-                        </div>
-                        @endforeach
-                    </div>
+            @foreach ($edgeRows as $rowTables)
+            <div class="sxp-row sxp-row--edge">
+                <div class="sxp-edge-group">
+                    @foreach ($rowTables->slice(0, 2) as $table)
+                    @include('admin.partials.seating-print-table-card', [
+                        'table' => $table,
+                        'guestName' => $guestName,
+                        'guestMeta' => $guestMeta,
+                        'tableMark' => $tableMark,
+                    ])
+                    @endforeach
                 </div>
-            </article>
+                <div class="sxp-edge-gap" aria-hidden="true"></div>
+                <div class="sxp-edge-group">
+                    @foreach ($rowTables->slice(2, 2) as $table)
+                    @include('admin.partials.seating-print-table-card', [
+                        'table' => $table,
+                        'guestName' => $guestName,
+                        'guestMeta' => $guestMeta,
+                        'tableMark' => $tableMark,
+                    ])
+                    @endforeach
+                </div>
+            </div>
             @endforeach
         </div>
 
