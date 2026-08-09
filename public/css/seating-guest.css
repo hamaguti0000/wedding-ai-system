@@ -9,18 +9,23 @@
     --gs-muted: #5f5850;
     --gs-paper: #f8efe2;
     --gs-paper-deep: #ead9c3;
-    --gs-green: #0b5a47;
-    --gs-green-soft: #6f8f73;
+    --gs-green: #245944;
+    --gs-green-soft: #7f9d77;
     --gs-red: #c42b3d;
-    --gs-pink: #d58aa1;
-    --gs-gold: #9d7142;
+    --gs-pink: #c99ac7;
+    --gs-gold: #96704c;
+    --gs-hydrangea: #7b86c8;
+    --gs-hydrangea-deep: #5762a8;
+    --gs-hydrangea-soft: #d7dcff;
+    --gs-hydrangea-pale: #eef1ff;
     min-height: calc(100vh - 60px);
     padding: 26px 0 42px;
     color: var(--gs-ink);
     font-family: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
     background:
-        radial-gradient(circle at 22% 10%, rgba(255,255,255,.58), transparent 28%),
-        linear-gradient(180deg, #f7f0e6, #eadbc8);
+        radial-gradient(circle at 18% 8%, rgba(236,240,255,.42), transparent 26%),
+        radial-gradient(circle at 82% 16%, rgba(213,220,255,.30), transparent 28%),
+        linear-gradient(180deg, #f7f0e6, #e9dccb);
 }
 
 .gs-paper-shell {
@@ -33,14 +38,15 @@
     min-height: calc(100vh - 112px);
     padding: 46px 54px 34px;
     overflow: hidden;
-    border: 1px solid rgba(122,87,48,.18);
+    border: 1px solid rgba(111,94,124,.18);
     background:
         radial-gradient(circle at 14% 18%, rgba(255,255,255,.58), transparent 18%),
-        radial-gradient(circle at 70% 8%, rgba(255,255,255,.34), transparent 16%),
-        repeating-radial-gradient(circle at 30% 20%, rgba(72,55,40,.045) 0 1px, transparent 1px 5px),
-        linear-gradient(90deg, rgba(255,255,255,.22), transparent 24%, rgba(255,255,255,.16)),
+        radial-gradient(circle at 70% 8%, rgba(225,229,255,.30), transparent 16%),
+        radial-gradient(circle at 92% 74%, rgba(215,220,255,.22), transparent 18%),
+        repeating-radial-gradient(circle at 30% 20%, rgba(72,55,40,.04) 0 1px, transparent 1px 5px),
+        linear-gradient(90deg, rgba(255,255,255,.24), transparent 24%, rgba(255,255,255,.16)),
         var(--gs-paper);
-    box-shadow: 0 22px 60px rgba(68,47,28,.16);
+    box-shadow: 0 24px 66px rgba(68,47,28,.15);
 }
 
 .gs-corner {
@@ -62,10 +68,11 @@
     height: 28px;
     transform: rotate(-28deg);
     background:
-        radial-gradient(ellipse at 12% 52%, var(--gs-green-soft) 0 13%, transparent 14%),
-        radial-gradient(ellipse at 34% 44%, var(--gs-green) 0 14%, transparent 15%),
-        radial-gradient(ellipse at 58% 58%, var(--gs-green-soft) 0 12%, transparent 13%),
-        radial-gradient(circle at 84% 48%, var(--gs-red) 0 9%, transparent 10%);
+        radial-gradient(circle at 12% 48%, var(--gs-hydrangea-soft) 0 12%, transparent 13%),
+        radial-gradient(circle at 28% 38%, var(--gs-hydrangea) 0 12%, transparent 13%),
+        radial-gradient(circle at 42% 58%, #aeb8ee 0 12%, transparent 13%),
+        radial-gradient(ellipse at 68% 54%, var(--gs-green-soft) 0 13%, transparent 14%),
+        radial-gradient(ellipse at 86% 42%, var(--gs-green) 0 12%, transparent 13%);
 }
 .gs-corner::after {
     right: 28px;
@@ -329,42 +336,60 @@
 
 .gs-table__wreath {
     position: relative;
-    width: 58px;
-    height: 58px;
+    z-index: 0;
+    width: 64px;
+    height: 64px;
     display: grid;
     place-items: center;
-    border: 2px solid var(--gs-green);
+    border: 0;
     border-radius: 999px;
     background:
-        radial-gradient(circle, rgba(255,255,255,.34), rgba(255,255,255,.08));
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.94) 0 27%, transparent 28%),
+        radial-gradient(circle at 28% 24%, var(--gs-hydrangea-soft) 0 10%, transparent 11%),
+        radial-gradient(circle at 45% 18%, #b8c0f1 0 10%, transparent 11%),
+        radial-gradient(circle at 62% 25%, var(--gs-hydrangea) 0 10%, transparent 11%),
+        radial-gradient(circle at 75% 42%, #a4aedf 0 10%, transparent 11%),
+        radial-gradient(circle at 66% 64%, var(--gs-hydrangea-soft) 0 10%, transparent 11%),
+        radial-gradient(circle at 46% 75%, #c3c9f4 0 10%, transparent 11%),
+        radial-gradient(circle at 26% 62%, var(--gs-hydrangea) 0 10%, transparent 11%),
+        radial-gradient(circle at 17% 42%, #dfe3ff 0 10%, transparent 11%),
+        radial-gradient(circle at 50% 50%, rgba(123,134,200,.28) 0 53%, transparent 54%);
+    box-shadow:
+        inset 0 0 0 1px rgba(87,98,168,.22),
+        0 6px 14px rgba(87,98,168,.13);
 }
 .gs-table__wreath::before,
 .gs-table__wreath::after {
     content: "";
     position: absolute;
-    width: 16px;
-    height: 28px;
-    border-radius: 999px;
-    background:
-        radial-gradient(ellipse at 42% 18%, var(--gs-green-soft) 0 20%, transparent 21%),
-        radial-gradient(ellipse at 58% 42%, var(--gs-green) 0 18%, transparent 19%),
-        radial-gradient(ellipse at 42% 70%, var(--gs-green-soft) 0 17%, transparent 18%);
+    z-index: -1;
+    width: 30px;
+    height: 20px;
+    border-radius: 999px 8px 999px 8px;
+    background: linear-gradient(135deg, var(--gs-green-soft), var(--gs-green));
+    opacity: .92;
 }
 .gs-table__wreath::before {
-    left: -8px;
-    top: 15px;
-    transform: rotate(-23deg);
+    left: -14px;
+    bottom: 9px;
+    transform: rotate(-28deg);
 }
 .gs-table__wreath::after {
-    right: -8px;
-    top: 15px;
-    transform: scaleX(-1) rotate(-23deg);
+    right: -14px;
+    top: 10px;
+    transform: scaleX(-1) rotate(-28deg);
 }
+.gs-table__wreath .gs-table__mark {
+    position: relative;
+    z-index: 1;
+}
+
 .gs-table__mark {
-    color: var(--gs-green);
+    color: var(--gs-hydrangea-deep);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1.55rem;
+    font-size: 1.5rem;
     line-height: 1;
+    text-shadow: 0 1px 0 rgba(255,255,255,.85);
 }
 .gs-table__name {
     position: absolute;
@@ -372,9 +397,9 @@
     left: 50%;
     transform: translateX(-50%);
     max-width: 118px;
-    color: var(--gs-gold);
+    color: var(--gs-hydrangea-deep);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
-    font-size: .72rem;
+    font-size: .68rem;
     font-weight: 800;
     white-space: nowrap;
 }
@@ -395,7 +420,7 @@
 }
 .gs-guest__meta {
     margin: 0 0 2px;
-    color: var(--gs-muted);
+    color: #6e6780;
     font-family: 'Noto Sans JP', system-ui, sans-serif;
     font-size: .52rem;
     font-weight: 600;
@@ -403,8 +428,8 @@
 }
 .gs-guest__name {
     margin: 0;
-    color: var(--gs-ink);
-    font-size: .72rem;
+    color: #1f2530;
+    font-size: .73rem;
     font-weight: 700;
     line-height: 1.35;
     letter-spacing: .02em;
