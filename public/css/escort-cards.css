@@ -1,4 +1,4 @@
-/* Escort cards - uploaded PDF template */
+/* Escort cards - uploaded design fitted to business card sheet */
 .ec-page,
 .ec-page * {
     box-sizing: border-box;
@@ -13,10 +13,9 @@ main {
     --ec-navy: #253a5c;
     --ec-gold: #a98348;
     --ec-paper: #f7f4ed;
-    --ec-paper-soft: rgba(247, 244, 237, .97);
-    --ec-muted: #837767;
+    --ec-muted: #8a7d6c;
     min-height: calc(100vh - 60px);
-    padding: 24px;
+    padding: 22px;
     background: #ebe6dc;
     color: var(--ec-navy);
     font-family: 'Noto Serif JP', 'Yu Mincho', serif;
@@ -26,8 +25,8 @@ main {
     position: sticky;
     top: 60px;
     z-index: 10;
-    width: min(980px, 100%);
-    margin: 0 auto 20px;
+    width: min(1120px, 100%);
+    margin: 0 auto 18px;
     padding: 12px;
     display: flex;
     align-items: center;
@@ -62,65 +61,124 @@ main {
 
 .ec-sheets {
     display: grid;
-    gap: 26px;
+    gap: 24px;
     justify-content: center;
 }
 
-.ec-card {
-    position: relative;
-    width: 100mm;
-    height: 148mm;
-    overflow: hidden;
-    border: 1px solid rgba(37, 58, 92, .12);
-    background: var(--ec-paper) url('/images/escort-template.png') center / 100% 100% no-repeat;
-    box-shadow: 0 20px 48px rgba(37, 45, 58, .18);
+.ec-print-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 11mm 14mm;
+    display: grid;
+    grid-template-columns: repeat(2, 91mm);
+    grid-template-rows: repeat(5, 55mm);
+    gap: 0;
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(37, 45, 58, .16);
     break-after: page;
     page-break-after: always;
 }
 
-.ec-card__header {
-    position: absolute;
-    left: 9.5mm;
-    top: 8.7mm;
-    z-index: 2;
-    min-width: 39mm;
-    padding: 0 3mm 2mm 0;
-    background: var(--ec-paper-soft);
+.ec-card {
+    position: relative;
+    width: 91mm;
+    height: 55mm;
+    overflow: hidden;
+    border: .18mm solid rgba(37, 58, 92, .2);
+    background:
+        repeating-linear-gradient(12deg, transparent 0 7px, rgba(98, 88, 72, .018) 8px 9px, transparent 10px 20px),
+        var(--ec-paper);
 }
 
-.ec-card__couple {
+.ec-card::after {
+    content: "";
+    position: absolute;
+    right: 7.7mm;
+    top: 9mm;
+    width: .32mm;
+    height: 38mm;
+    background: var(--ec-navy);
+    opacity: .9;
+}
+
+.ec-card__flower {
+    position: absolute;
+    z-index: 1;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    opacity: .98;
+}
+
+.ec-card__flower--top {
+    top: -3.7mm;
+    right: -2.8mm;
+    width: 36mm;
+    height: auto;
+}
+
+.ec-card__flower--bottom {
+    left: -5.5mm;
+    bottom: -8mm;
+    width: 35mm;
+    height: auto;
+}
+
+.ec-card__header {
+    position: absolute;
+    left: 5.8mm;
+    top: 5.2mm;
+    z-index: 2;
+    max-width: 39mm;
+}
+
+.ec-card__couple,
+.ec-card__script {
     margin: 0;
     color: var(--ec-gold);
     font-family: 'Brush Script MT', 'Segoe Script', cursive;
-    font-size: 14.5pt;
-    line-height: 1.1;
+    font-size: 9.5pt;
+    line-height: 1.05;
     white-space: nowrap;
 }
 
 .ec-card__date {
-    margin: 3mm 0 0;
+    margin: 1.2mm 0 0;
     color: var(--ec-gold);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 13.5pt;
+    font-size: 8.8pt;
+    line-height: 1;
     letter-spacing: .035em;
     white-space: nowrap;
 }
 
 .ec-table {
     position: absolute;
-    top: 29mm;
-    right: 14mm;
+    top: 6.3mm;
+    right: 12.5mm;
     z-index: 2;
-    width: 34mm;
-    height: 38mm;
+    width: 25mm;
+    height: 28mm;
     display: grid;
     place-items: center;
+}
+
+.ec-table__label {
+    position: absolute;
+    top: .5mm;
+    left: -.5mm;
+    color: var(--ec-navy);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 8.6pt;
+    letter-spacing: .2em;
+    transform: rotate(-38deg);
+    transform-origin: center;
 }
 
 .ec-table__mark {
     color: var(--ec-navy);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 88pt;
+    font-size: 45pt;
     font-weight: 400;
     line-height: .9;
 }
@@ -128,19 +186,15 @@ main {
 .ec-guest {
     position: absolute;
     left: 10.5mm;
-    right: 20mm;
-    top: 72mm;
+    right: 36mm;
+    top: 24.5mm;
     z-index: 2;
-    min-height: 25mm;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
 .ec-guest__kana {
-    margin: 0 0 3.2mm;
+    margin: 0 0 1.3mm;
     color: var(--ec-muted);
-    font: 700 8.5pt 'Noto Sans JP', system-ui, sans-serif;
+    font: 700 5.8pt 'Noto Sans JP', system-ui, sans-serif;
     letter-spacing: .12em;
     white-space: nowrap;
 }
@@ -149,10 +203,28 @@ main {
     margin: 0;
     color: var(--ec-navy);
     font-family: Georgia, 'Noto Serif JP', 'Yu Mincho', serif;
-    font-size: 31pt;
+    font-size: 18pt;
     font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: .02em;
+    line-height: 1.04;
+    letter-spacing: .025em;
+    white-space: nowrap;
+}
+
+.ec-card__footer {
+    position: absolute;
+    left: 36mm;
+    right: 11mm;
+    bottom: 5.8mm;
+    z-index: 2;
+    color: var(--ec-gold);
+    text-align: center;
+}
+
+.ec-card__footer p:last-child {
+    margin: 1mm 0 0;
+    color: var(--ec-gold);
+    font-size: 5.8pt;
+    line-height: 1.1;
     white-space: nowrap;
 }
 
@@ -183,7 +255,7 @@ main {
 
 @media print {
     @page {
-        size: 100mm 148mm;
+        size: A4 portrait;
         margin: 0;
     }
 
@@ -212,10 +284,14 @@ main {
         display: block;
     }
 
-    .ec-card {
-        width: 100mm;
-        height: 148mm;
-        border: 0;
+    .ec-print-sheet {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 11mm 14mm;
         box-shadow: none;
+    }
+
+    .ec-card {
+        border-color: transparent;
     }
 }
