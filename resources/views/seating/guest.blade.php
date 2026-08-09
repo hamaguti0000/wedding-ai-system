@@ -86,50 +86,69 @@
         </section>
         @endif
 
-        {{-- ── 会場配置図 ── --}}
-        @include('partials.seating-floor-plan', ['tables' => $tables, 'myTableId' => $myTableId])
+        {{-- ── ゲスト向け全体席次表 ── --}}
+        <section class="gs-overview" aria-label="会場全体の席次表">
+            <div class="gs-overview__head">
+                <div>
+                    <p class="gs-overview__eyebrow">Reception Hall</p>
+                    <h2 class="gs-overview__title">会場全体の席次表</h2>
+                </div>
+                <p class="gs-overview__hint">横に動かすとすべての卓を確認できます</p>
+            </div>
 
-        {{-- ── テーブル一覧 ── --}}
-        <section class="gs-sheet">
-            <main class="gs-columns" id="gsGrid">
-                @foreach ($tables as $table)
-                @php
-                    $isMyTable = $myTableId && $table->id === $myTableId;
-                    $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
-                @endphp
-                <article class="gs-col {{ $isMyTable ? 'gs-col--mine' : '' }}"
-                     id="gst-{{ $table->id }}"
-                     style="animation-delay: {{ $loop->index * 26 }}ms">
-
-                    <div class="gs-col__badge">
-                        <span class="gs-col__badge-moon">&#9789;</span>
-                        <span class="gs-col__badge-name">{{ $table->name }}</span>
+            <div class="gs-board-scroll" id="gsGrid">
+                <div class="gs-board">
+                    <div class="gs-stage gs-stage--head">
+                        <span class="gs-stage__sub">Main Table</span>
+                        <span class="gs-stage__title">高砂</span>
                     </div>
 
-                    <div class="gs-col__list">
-                        @forelse ($occupiedSeats as $seat)
+                    <div class="gs-table-grid">
+                        @foreach ($tables as $table)
                         @php
-                            $assignedUser = $seat->assignment->user;
-                            $assignedProfile = $assignedUser->guestProfile;
-                            $isMe = $mySeat && $seat->id === $mySeat->id;
-                            $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' / ' . ($assignedProfile?->relationshipLabel() ?? ''), ' /');
+                            $isMyTable = $myTableId && $table->id === $myTableId;
+                            $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
                         @endphp
-                        <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-                            @if ($guestMeta)
-                            <p class="gs-guest__meta">{{ $guestMeta }}</p>
-                            @endif
-                            <p class="gs-guest__name">
-                                @if ($isMe)<span class="gs-guest__mark">&#10022;</span>@endif
-                                {{ $guestName($assignedUser) }}
-                            </p>
-                        </div>
-                        @empty
-                        <p class="gs-col__empty">まだ配置がありません</p>
-                        @endforelse
+                        <article class="gs-col {{ $isMyTable ? 'gs-col--mine' : '' }}"
+                             id="gst-{{ $table->id }}"
+                             style="animation-delay: {{ $loop->index * 26 }}ms">
+
+                            <div class="gs-col__badge">
+                                <span class="gs-col__badge-moon">{{ $table->name }}</span>
+                                <span class="gs-col__badge-name">{{ $occupiedSeats->count() }}名</span>
+                            </div>
+
+                            <div class="gs-col__list">
+                                @forelse ($occupiedSeats as $seat)
+                                @php
+                                    $assignedUser = $seat->assignment->user;
+                                    $assignedProfile = $assignedUser->guestProfile;
+                                    $isMe = $mySeat && $seat->id === $mySeat->id;
+                                    $guestMeta = trim(($assignedProfile?->guestSideLabel() ?? '') . ' / ' . ($assignedProfile?->relationshipLabel() ?? ''), ' /');
+                                @endphp
+                                <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
+                                    <p class="gs-guest__name">
+                                        @if ($isMe)<span class="gs-guest__mark">&#10022;</span>@endif
+                                        {{ $guestName($assignedUser) }}
+                                    </p>
+                                    @if ($guestMeta)
+                                    <p class="gs-guest__meta">{{ $guestMeta }}</p>
+                                    @endif
+                                </div>
+                                @empty
+                                <p class="gs-col__empty">まだ配置がありません</p>
+                                @endforelse
+                            </div>
+                        </article>
+                        @endforeach
                     </div>
-                </article>
-                @endforeach
-            </main>
+
+                    <div class="gs-stage gs-stage--entrance">
+                        <span class="gs-stage__sub">Entrance</span>
+                        <span class="gs-stage__title">受付・入口</span>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <p class="gs-footnote">ご来場を心よりお待ちしております</p>
