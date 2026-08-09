@@ -7,25 +7,26 @@
 .gs-page {
     --gs-ink: #20242a;
     --gs-muted: #5f5850;
-    --gs-paper: #f8efe2;
-    --gs-paper-deep: #ead9c3;
+    --gs-paper: #fbf7ef;
+    --gs-paper-deep: #eee4d7;
     --gs-green: #245944;
     --gs-green-soft: #7f9d77;
     --gs-red: #c42b3d;
     --gs-pink: #c99ac7;
     --gs-gold: #96704c;
-    --gs-hydrangea: #7b86c8;
-    --gs-hydrangea-deep: #5762a8;
-    --gs-hydrangea-soft: #d7dcff;
-    --gs-hydrangea-pale: #eef1ff;
+    --gs-hydrangea: #7f89cf;
+    --gs-hydrangea-deep: #4f5aa4;
+    --gs-hydrangea-soft: #cdd5ff;
+    --gs-hydrangea-pale: #f1f3ff;
+    --gs-paper-fiber: rgba(91,73,55,.045);
     min-height: calc(100vh - 60px);
     padding: 26px 0 42px;
     color: var(--gs-ink);
     font-family: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
     background:
-        radial-gradient(circle at 18% 8%, rgba(236,240,255,.42), transparent 26%),
-        radial-gradient(circle at 82% 16%, rgba(213,220,255,.30), transparent 28%),
-        linear-gradient(180deg, #f7f0e6, #e9dccb);
+        radial-gradient(circle at 18% 8%, rgba(236,240,255,.36), transparent 26%),
+        radial-gradient(circle at 82% 16%, rgba(213,220,255,.25), transparent 28%),
+        linear-gradient(180deg, #f8f2e9, #e9ddcf);
 }
 
 .gs-paper-shell {
@@ -40,13 +41,14 @@
     overflow: hidden;
     border: 1px solid rgba(111,94,124,.18);
     background:
-        radial-gradient(circle at 14% 18%, rgba(255,255,255,.58), transparent 18%),
-        radial-gradient(circle at 70% 8%, rgba(225,229,255,.30), transparent 16%),
-        radial-gradient(circle at 92% 74%, rgba(215,220,255,.22), transparent 18%),
-        repeating-radial-gradient(circle at 30% 20%, rgba(72,55,40,.04) 0 1px, transparent 1px 5px),
-        linear-gradient(90deg, rgba(255,255,255,.24), transparent 24%, rgba(255,255,255,.16)),
+        radial-gradient(circle at 14% 18%, rgba(255,255,255,.64), transparent 18%),
+        radial-gradient(circle at 70% 8%, rgba(225,229,255,.24), transparent 16%),
+        radial-gradient(circle at 92% 74%, rgba(215,220,255,.18), transparent 18%),
+        repeating-linear-gradient(8deg, transparent 0 9px, var(--gs-paper-fiber) 10px 11px, transparent 12px 23px),
+        repeating-linear-gradient(96deg, transparent 0 13px, rgba(255,255,255,.24) 14px 15px, transparent 16px 31px),
+        linear-gradient(90deg, rgba(255,255,255,.32), transparent 24%, rgba(255,255,255,.18)),
         var(--gs-paper);
-    box-shadow: 0 24px 66px rgba(68,47,28,.15);
+    box-shadow: 0 24px 66px rgba(68,47,28,.13);
 }
 
 .gs-corner {
@@ -109,7 +111,7 @@
     margin-top: 4px;
     color: var(--gs-muted);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
-    font-size: .68rem;
+    font-size: .66rem;
     letter-spacing: .12em;
 }
 
@@ -249,7 +251,7 @@
     min-height: 1px;
 }
 .gs-board {
-    width: 1680px;
+    width: 1760px;
     margin: 0 auto;
     padding: 12px 4px 0;
     transform: scale(var(--gs-board-scale));
@@ -283,9 +285,9 @@
 
 .gs-table-row {
     display: grid;
-    gap: 14px;
+    gap: 18px;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 34px;
 }
 .gs-table-row--eight {
     grid-template-columns: repeat(8, minmax(0, 1fr));
@@ -300,7 +302,7 @@
 .gs-edge-group {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 18px;
 }
 .gs-edge-gap {
     min-height: 1px;
@@ -308,11 +310,11 @@
 
 .gs-table {
     position: relative;
-    min-height: 156px;
+    min-height: 170px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
     align-items: center;
-    column-gap: 8px;
+    column-gap: 10px;
     scroll-margin: 140px;
 }
 .gs-table--mine {
@@ -337,76 +339,102 @@
 .gs-table__wreath {
     position: relative;
     z-index: 0;
-    width: 64px;
-    height: 64px;
+    width: 78px;
+    height: 78px;
     display: grid;
     place-items: center;
     border: 0;
     border-radius: 999px;
     background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,.94) 0 27%, transparent 28%),
-        radial-gradient(circle at 28% 24%, var(--gs-hydrangea-soft) 0 10%, transparent 11%),
-        radial-gradient(circle at 45% 18%, #b8c0f1 0 10%, transparent 11%),
-        radial-gradient(circle at 62% 25%, var(--gs-hydrangea) 0 10%, transparent 11%),
-        radial-gradient(circle at 75% 42%, #a4aedf 0 10%, transparent 11%),
-        radial-gradient(circle at 66% 64%, var(--gs-hydrangea-soft) 0 10%, transparent 11%),
-        radial-gradient(circle at 46% 75%, #c3c9f4 0 10%, transparent 11%),
-        radial-gradient(circle at 26% 62%, var(--gs-hydrangea) 0 10%, transparent 11%),
-        radial-gradient(circle at 17% 42%, #dfe3ff 0 10%, transparent 11%),
-        radial-gradient(circle at 50% 50%, rgba(123,134,200,.28) 0 53%, transparent 54%);
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.96) 0 24%, transparent 25%),
+        radial-gradient(circle at 27% 18%, #eff1ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 43% 14%, #c8d1ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 61% 18%, #aeb8f0 0 8%, transparent 8.8%),
+        radial-gradient(circle at 76% 34%, #8793d6 0 8%, transparent 8.8%),
+        radial-gradient(circle at 80% 53%, #cbd3ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 67% 70%, #e2e6ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 49% 79%, #aeb8f0 0 8%, transparent 8.8%),
+        radial-gradient(circle at 29% 70%, #c8d1ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 18% 51%, #8e9bdd 0 8%, transparent 8.8%),
+        radial-gradient(circle at 18% 33%, #dfe4ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 50% 50%, rgba(127,137,207,.22) 0 55%, transparent 56%);
     box-shadow:
-        inset 0 0 0 1px rgba(87,98,168,.22),
-        0 6px 14px rgba(87,98,168,.13);
+        inset 0 0 0 1px rgba(79,90,164,.18),
+        0 7px 16px rgba(79,90,164,.13);
 }
 .gs-table__wreath::before,
 .gs-table__wreath::after {
     content: "";
     position: absolute;
     z-index: -1;
-    width: 30px;
-    height: 20px;
-    border-radius: 999px 8px 999px 8px;
-    background: linear-gradient(135deg, var(--gs-green-soft), var(--gs-green));
+    width: 36px;
+    height: 24px;
+    border-radius: 999px 10px 999px 10px;
+    background: linear-gradient(135deg, #9eb58d, var(--gs-green));
     opacity: .92;
 }
 .gs-table__wreath::before {
-    left: -14px;
-    bottom: 9px;
-    transform: rotate(-28deg);
+    left: -16px;
+    bottom: 12px;
+    transform: rotate(-30deg);
 }
 .gs-table__wreath::after {
-    right: -14px;
-    top: 10px;
-    transform: scaleX(-1) rotate(-28deg);
+    right: -16px;
+    top: 13px;
+    transform: scaleX(-1) rotate(-30deg);
 }
 .gs-table__wreath .gs-table__mark {
     position: relative;
     z-index: 1;
 }
+.gs-table__wreath .gs-table__mark::before,
+.gs-table__wreath .gs-table__mark::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.74);
+    box-shadow:
+        14px -10px 0 rgba(255,255,255,.54),
+        -12px -8px 0 rgba(255,255,255,.50),
+        10px 12px 0 rgba(255,255,255,.46),
+        -14px 10px 0 rgba(255,255,255,.42);
+}
+.gs-table__wreath .gs-table__mark::before {
+    left: -18px;
+    top: -10px;
+}
+.gs-table__wreath .gs-table__mark::after {
+    right: -18px;
+    bottom: -10px;
+}
 
 .gs-table__mark {
+    position: relative;
+    z-index: 1;
     color: var(--gs-hydrangea-deep);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1.5rem;
+    font-size: 1.68rem;
     line-height: 1;
     text-shadow: 0 1px 0 rgba(255,255,255,.85);
 }
 .gs-table__name {
     position: absolute;
-    bottom: -18px;
+    bottom: -20px;
     left: 50%;
     transform: translateX(-50%);
     max-width: 118px;
     color: var(--gs-hydrangea-deep);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
-    font-size: .68rem;
+    font-size: .66rem;
     font-weight: 800;
     white-space: nowrap;
 }
 
 .gs-table__guests {
     display: grid;
-    gap: 7px;
+    gap: 8px;
 }
 .gs-table__guests--left {
     text-align: right;
@@ -418,24 +446,15 @@
 .gs-guest {
     min-width: 0;
 }
-.gs-guest__meta {
-    margin: 0 0 2px;
-    color: #6e6780;
-    font-family: 'Noto Sans JP', system-ui, sans-serif;
-    font-size: .52rem;
-    font-weight: 600;
-    line-height: 1.25;
-}
 .gs-guest__name {
     margin: 0;
     color: #1f2530;
-    font-size: .73rem;
+    font-size: .84rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.42;
     letter-spacing: .02em;
     overflow-wrap: anywhere;
 }
-.gs-guest.is-mine .gs-guest__meta,
 .gs-guest.is-mine .gs-guest__name {
     color: var(--gs-red);
 }
@@ -571,11 +590,11 @@
         width: 1680px;
     }
     .gs-table-row {
-        gap: 12px;
-        margin-bottom: 28px;
+        gap: 14px;
+        margin-bottom: 30px;
     }
     .gs-edge-group {
-        gap: 12px;
+        gap: 14px;
     }
     .gs-footnote {
         margin-top: 18px;

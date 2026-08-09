@@ -32,9 +32,9 @@
         @php
             $myTable = $myTableId ? $tables->firstWhere('id', $myTableId) : null;
             $printRows = [
-                ['type' => 'eight', 'tables' => $tables->slice(0, 8)->values()],
-                ['type' => 'eight', 'tables' => $tables->slice(8, 8)->values()],
-                ['type' => 'seven', 'tables' => $tables->slice(16, 7)->values()],
+                ['type' => 'eight', 'offset' => 0, 'tables' => $tables->slice(0, 8)->values()],
+                ['type' => 'eight', 'offset' => 8, 'tables' => $tables->slice(8, 8)->values()],
+                ['type' => 'seven', 'offset' => 16, 'tables' => $tables->slice(16, 7)->values()],
             ];
             $edgeRows = $tables->slice(23)->values()->chunk(4);
         @endphp
@@ -114,6 +114,7 @@
                                     'guestName' => $guestName,
                                     'myTableId' => $myTableId,
                                     'mySeat' => $mySeat,
+                                    'tableMark' => chr(65 + $printRow['offset'] + $loop->index),
                                 ])
                                 @endforeach
                             </div>
@@ -129,6 +130,7 @@
                                         'guestName' => $guestName,
                                         'myTableId' => $myTableId,
                                         'mySeat' => $mySeat,
+                                        'tableMark' => chr(65 + 23 + (($loop->parent->index * 4) + $loop->index)),
                                     ])
                                     @endforeach
                                 </div>
@@ -140,6 +142,7 @@
                                         'guestName' => $guestName,
                                         'myTableId' => $myTableId,
                                         'mySeat' => $mySeat,
+                                        'tableMark' => chr(65 + 23 + (($loop->parent->index * 4) + 2 + $loop->index)),
                                     ])
                                     @endforeach
                                 </div>
