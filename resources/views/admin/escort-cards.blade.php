@@ -21,7 +21,7 @@
 <div class="ec-page">
     <div class="ec-toolbar">
         <a href="{{ route('admin.seating') }}">&larr; 席次表に戻る</a>
-        <span>{{ $guests->count() }}枚 / A4名刺10面 91x55mm</span>
+        <span>{{ $guests->count() }}枚 / A4名刺10面・縦デザイン</span>
         <button type="button" onclick="window.print()">印刷する</button>
     </div>
 
@@ -41,32 +41,25 @@
                 $furigana = $guestFurigana($guest);
             @endphp
             <article class="ec-card">
-                <img class="ec-card__flower ec-card__flower--top" src="{{ asset('images/escort-flower-top.png') }}" alt="">
-                <img class="ec-card__flower ec-card__flower--bottom" src="{{ asset('images/escort-flower-bottom.png') }}" alt="">
+                <div class="ec-card__inner">
+                    <header class="ec-card__header">
+                        <p class="ec-card__couple">{{ $couple }}</p>
+                        @if ($setting?->ceremony_date)
+                        <p class="ec-card__date">{{ \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y') }}</p>
+                        @endif
+                    </header>
 
-                <header class="ec-card__header">
-                    <p class="ec-card__couple">{{ $couple }}</p>
-                    @if ($setting?->ceremony_date)
-                    <p class="ec-card__date">{{ \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y') }}</p>
-                    @endif
-                </header>
+                    <div class="ec-table" aria-label="テーブル {{ $tableMark }}">
+                        <span class="ec-table__mark">{{ $tableMark }}</span>
+                    </div>
 
-                <div class="ec-table" aria-label="テーブル {{ $tableMark }}">
-                    <span class="ec-table__label">TABLE</span>
-                    <span class="ec-table__mark">{{ $tableMark }}</span>
+                    <div class="ec-guest">
+                        @if ($furigana)
+                        <p class="ec-guest__kana">{{ $furigana }}</p>
+                        @endif
+                        <h2 class="ec-guest__name">{{ $guestName($guest) }}</h2>
+                    </div>
                 </div>
-
-                <div class="ec-guest">
-                    @if ($furigana)
-                    <p class="ec-guest__kana">{{ $furigana }}</p>
-                    @endif
-                    <h2 class="ec-guest__name">{{ $guestName($guest) }}</h2>
-                </div>
-
-                <footer class="ec-card__footer">
-                    <p class="ec-card__script">Welcome to our wedding!</p>
-                    <p>本日はごゆっくりお過ごしください</p>
-                </footer>
             </article>
             @endforeach
         </div>

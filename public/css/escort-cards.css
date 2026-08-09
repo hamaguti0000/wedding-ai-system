@@ -1,4 +1,4 @@
-/* Escort cards - uploaded design fitted to business card sheet */
+/* Escort cards - vertical uploaded design on business card sheet */
 .ec-page,
 .ec-page * {
     box-sizing: border-box;
@@ -13,7 +13,8 @@ main {
     --ec-navy: #253a5c;
     --ec-gold: #a98348;
     --ec-paper: #f7f4ed;
-    --ec-muted: #8a7d6c;
+    --ec-paper-soft: rgba(247, 244, 237, .97);
+    --ec-muted: #837767;
     min-height: calc(100vh - 60px);
     padding: 22px;
     background: #ebe6dc;
@@ -84,117 +85,84 @@ main {
     width: 91mm;
     height: 55mm;
     overflow: hidden;
-    border: .18mm solid rgba(37, 58, 92, .2);
-    background:
-        repeating-linear-gradient(12deg, transparent 0 7px, rgba(98, 88, 72, .018) 8px 9px, transparent 10px 20px),
-        var(--ec-paper);
+    background: #fff;
 }
 
-.ec-card::after {
-    content: "";
+.ec-card__inner {
     position: absolute;
-    right: 7.7mm;
-    top: 9mm;
-    width: .32mm;
-    height: 38mm;
-    background: var(--ec-navy);
-    opacity: .9;
-}
-
-.ec-card__flower {
-    position: absolute;
-    z-index: 1;
-    display: block;
-    pointer-events: none;
-    user-select: none;
-    opacity: .98;
-}
-
-.ec-card__flower--top {
-    top: -3.7mm;
-    right: -2.8mm;
-    width: 36mm;
-    height: auto;
-}
-
-.ec-card__flower--bottom {
-    left: -5.5mm;
-    bottom: -8mm;
-    width: 35mm;
-    height: auto;
+    left: 50%;
+    top: 50%;
+    width: 55mm;
+    height: 91mm;
+    overflow: hidden;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center;
+    background: var(--ec-paper) url('/images/escort-template.png') center / 100% 100% no-repeat;
 }
 
 .ec-card__header {
     position: absolute;
-    left: 5.8mm;
-    top: 5.2mm;
+    left: 5.2mm;
+    top: 5.4mm;
     z-index: 2;
-    max-width: 39mm;
+    min-width: 23mm;
+    padding: 0 2mm 1.2mm 0;
+    background: var(--ec-paper-soft);
 }
 
-.ec-card__couple,
-.ec-card__script {
+.ec-card__couple {
     margin: 0;
     color: var(--ec-gold);
     font-family: 'Brush Script MT', 'Segoe Script', cursive;
-    font-size: 9.5pt;
-    line-height: 1.05;
+    font-size: 8pt;
+    line-height: 1.08;
     white-space: nowrap;
 }
 
 .ec-card__date {
-    margin: 1.2mm 0 0;
+    margin: 1.8mm 0 0;
     color: var(--ec-gold);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 8.8pt;
-    line-height: 1;
+    font-size: 7.4pt;
     letter-spacing: .035em;
     white-space: nowrap;
 }
 
 .ec-table {
     position: absolute;
-    top: 6.3mm;
-    right: 12.5mm;
+    top: 18mm;
+    right: 7.2mm;
     z-index: 2;
-    width: 25mm;
-    height: 28mm;
+    width: 20mm;
+    height: 23mm;
     display: grid;
     place-items: center;
-}
-
-.ec-table__label {
-    position: absolute;
-    top: .5mm;
-    left: -.5mm;
-    color: var(--ec-navy);
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 8.6pt;
-    letter-spacing: .2em;
-    transform: rotate(-38deg);
-    transform-origin: center;
 }
 
 .ec-table__mark {
     color: var(--ec-navy);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 45pt;
+    font-size: 48pt;
     font-weight: 400;
     line-height: .9;
 }
 
 .ec-guest {
     position: absolute;
-    left: 10.5mm;
-    right: 36mm;
-    top: 24.5mm;
+    left: 6mm;
+    right: 12mm;
+    top: 44mm;
     z-index: 2;
+    min-height: 14mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .ec-guest__kana {
-    margin: 0 0 1.3mm;
+    margin: 0 0 1.8mm;
     color: var(--ec-muted);
-    font: 700 5.8pt 'Noto Sans JP', system-ui, sans-serif;
+    font: 700 5pt 'Noto Sans JP', system-ui, sans-serif;
     letter-spacing: .12em;
     white-space: nowrap;
 }
@@ -203,28 +171,10 @@ main {
     margin: 0;
     color: var(--ec-navy);
     font-family: Georgia, 'Noto Serif JP', 'Yu Mincho', serif;
-    font-size: 18pt;
+    font-size: 16.5pt;
     font-weight: 500;
-    line-height: 1.04;
-    letter-spacing: .025em;
-    white-space: nowrap;
-}
-
-.ec-card__footer {
-    position: absolute;
-    left: 36mm;
-    right: 11mm;
-    bottom: 5.8mm;
-    z-index: 2;
-    color: var(--ec-gold);
-    text-align: center;
-}
-
-.ec-card__footer p:last-child {
-    margin: 1mm 0 0;
-    color: var(--ec-gold);
-    font-size: 5.8pt;
-    line-height: 1.1;
+    line-height: 1.05;
+    letter-spacing: .02em;
     white-space: nowrap;
 }
 
@@ -289,9 +239,5 @@ main {
         min-height: 297mm;
         padding: 11mm 14mm;
         box-shadow: none;
-    }
-
-    .ec-card {
-        border-color: transparent;
     }
 }
