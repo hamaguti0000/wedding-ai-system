@@ -249,7 +249,7 @@ main {
 .sxp-seat {
     min-height: 58px;
     display: grid;
-    grid-template-columns: 24px 1fr 32px;
+    grid-template-columns: 1fr;
     border-bottom: 1.05px solid var(--sxp-line);
     background: #fff;
 }
@@ -258,40 +258,12 @@ main {
     border-bottom: 0;
 }
 
-.sxp-seat__side {
-    display: grid;
-    grid-template-rows: repeat(3, 1fr);
-    border-color: var(--sxp-line);
-    color: var(--sxp-ink);
-    font-size: .64rem;
-    font-weight: 800;
-    text-align: center;
-}
-
-.sxp-seat__side--left {
-    border-right: 1.05px solid var(--sxp-line);
-}
-
-.sxp-seat__side--right {
-    border-left: 1.05px solid var(--sxp-line);
-}
-
-.sxp-seat__side span {
-    display: grid;
-    place-items: center;
-    min-height: 22px;
-    border-bottom: 1.05px solid var(--sxp-line);
-}
-
-.sxp-seat__side span:last-child {
-    border-bottom: 0;
-}
 
 .sxp-seat__body {
     min-width: 0;
     display: grid;
     place-items: center;
-    padding: 6px 5px;
+    padding: 8px 7px;
     text-align: center;
 }
 
@@ -498,26 +470,17 @@ main {
 
     .sxp-seat {
         min-height: 13mm;
-        grid-template-columns: 4.8mm 1fr 6mm;
+        grid-template-columns: 1fr;
         border-bottom-width: .7pt;
     }
 
-    .sxp-seat__side--left,
-    .sxp-seat__side--right,
-    .sxp-seat__side span {
-        border-width: .7pt;
-    }
-
-    .sxp-seat__side {
-        font-size: 4.8pt;
-    }
 
     .sxp-seat__body {
-        padding: 1mm .7mm;
+        padding: 1.2mm .9mm;
     }
 
     .sxp-seat__name {
-        font-size: 7.2pt;
+        font-size: 7.6pt;
     }
 
     .sxp-entrance {

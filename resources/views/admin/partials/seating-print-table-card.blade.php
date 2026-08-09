@@ -14,21 +14,13 @@
                 @forelse ($leftSeats as $seat)
                 @php $assignedUser = $seat->assignment?->user; @endphp
                 <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                    <div class="sxp-seat__side sxp-seat__side--left">
-                        <span>A</span><span></span><span></span>
-                    </div>
                     <div class="sxp-seat__body">
                         <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
-                    </div>
-                    <div class="sxp-seat__side sxp-seat__side--right">
-                        <span></span><span></span><span></span>
                     </div>
                 </div>
                 @empty
                 <div class="sxp-seat is-empty">
-                    <div class="sxp-seat__side sxp-seat__side--left"><span></span><span></span><span></span></div>
                     <div class="sxp-seat__body"><span class="sxp-seat__name">席未設定</span></div>
-                    <div class="sxp-seat__side sxp-seat__side--right"><span></span><span></span><span></span></div>
                 </div>
                 @endforelse
             </div>
@@ -37,14 +29,8 @@
                 @foreach ($rightSeats as $seat)
                 @php $assignedUser = $seat->assignment?->user; @endphp
                 <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                    <div class="sxp-seat__side sxp-seat__side--left">
-                        <span>A</span><span></span><span></span>
-                    </div>
                     <div class="sxp-seat__body">
                         <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
-                    </div>
-                    <div class="sxp-seat__side sxp-seat__side--right">
-                        <span></span><span></span><span></span>
                     </div>
                 </div>
                 @endforeach
