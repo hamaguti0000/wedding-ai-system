@@ -10,14 +10,15 @@ main {
 }
 
 .gs-page {
-    --sxp-ink: #18212b;
+    --sxp-ink: #17212a;
     --sxp-muted: #6f675f;
-    --sxp-soft: #fffaf2;
+    --sxp-soft: #fff8ee;
     --sxp-paper: #fffdf8;
-    --sxp-line: #dacbb8;
-    --sxp-gold: #ae8450;
-    --sxp-gold-dark: #765632;
-    --sxp-green: #516a5a;
+    --sxp-line: #dcc9b1;
+    --sxp-gold: #b28752;
+    --sxp-gold-dark: #73512e;
+    --sxp-green: #53675a;
+    --sxp-rose: #9d4f58;
     width: 100%;
     min-height: calc(100vh - 60px);
     padding: 34px 18px 48px;
@@ -25,7 +26,8 @@ main {
     font-family: 'Noto Sans JP', system-ui, sans-serif;
     background:
         linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,250,243,.94)),
-        radial-gradient(circle at 12% 8%, rgba(174,132,80,.10), transparent 28%),
+        radial-gradient(circle at 14% 9%, rgba(178,135,82,.12), transparent 30%),
+        radial-gradient(circle at 86% 18%, rgba(83,103,90,.10), transparent 24%),
         #fffdf8;
 }
 
@@ -34,7 +36,8 @@ main {
     margin: 0 auto 18px;
     padding: 22px 12px 20px;
     text-align: center;
-    border-bottom: 1px solid rgba(174,132,80,.24);
+    border-top: 1px solid rgba(178,135,82,.20);
+    border-bottom: 1px solid rgba(178,135,82,.20);
 }
 
 .gs-hero__sparkle,
@@ -86,12 +89,13 @@ main {
     width: min(1240px, 100%);
     margin: 0 auto;
     padding: 18px;
-    border: 1px solid rgba(174,132,80,.24);
-    border-radius: 18px;
+    border: 1px solid rgba(178,135,82,.28);
+    border-radius: 20px;
     background:
-        linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,248,239,.92)),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,248,239,.92)),
+        repeating-linear-gradient(135deg, rgba(178,135,82,.035), rgba(178,135,82,.035) 1px, transparent 1px, transparent 12px),
         var(--sxp-paper);
-    box-shadow: 0 20px 46px rgba(67, 49, 31, .10);
+    box-shadow: 0 22px 54px rgba(67, 49, 31, .12);
 }
 
 .sxp-main-table,
@@ -101,9 +105,11 @@ main {
     margin: 0 auto 16px;
     display: grid;
     place-items: center;
-    border: 1px solid rgba(174,132,80,.38);
-    border-radius: 14px;
-    background: #fff;
+    border: 1px solid rgba(178,135,82,.42);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, #fff, #fff8ed);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.82), 0 8px 18px rgba(67,49,31,.06);
 }
 
 .sxp-main-table__sub {
@@ -126,16 +132,17 @@ main {
 .sxp-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(142px, 1fr));
-    gap: 12px;
+    gap: 14px;
 }
 
 .sxp-table-card {
-    min-height: 178px;
-    padding: 10px;
-    border: 1px solid rgba(174,132,80,.34);
-    border-radius: 13px;
-    background: rgba(255,255,255,.96);
-    box-shadow: 0 8px 18px rgba(67,49,31,.07);
+    min-height: 184px;
+    padding: 11px;
+    border: 1px solid rgba(178,135,82,.32);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,252,247,.96));
+    box-shadow: 0 10px 22px rgba(67,49,31,.08), inset 0 0 0 1px rgba(255,255,255,.82);
     page-break-inside: avoid;
 }
 
@@ -146,7 +153,7 @@ main {
     gap: 8px;
     padding-bottom: 7px;
     margin-bottom: 7px;
-    border-bottom: 1px solid rgba(174,132,80,.20);
+    border-bottom: 1px solid rgba(178,135,82,.22);
 }
 
 .sxp-table-card__name {
@@ -163,7 +170,7 @@ main {
     flex: 0 0 auto;
     padding: 2px 7px;
     border-radius: 999px;
-    background: #f6ead8;
+    background: #f5ead9;
     color: var(--sxp-gold-dark);
     font-size: .68rem;
     font-weight: 800;
@@ -172,9 +179,9 @@ main {
 
 .sxp-seat-map {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
     align-items: stretch;
-    gap: 7px;
+    gap: 8px;
 }
 
 .sxp-seat-rail {
@@ -184,15 +191,17 @@ main {
 }
 
 .sxp-table-core {
-    min-height: 112px;
+    min-height: 116px;
     display: grid;
     align-content: center;
     justify-items: center;
     gap: 4px;
     padding: 8px 5px;
-    border: 1px solid rgba(174,132,80,.42);
-    border-radius: 999px;
-    background: linear-gradient(180deg, #fff, #fff4e5);
+    border: 1px solid rgba(178,135,82,.46);
+    border-radius: 44px;
+    background:
+        linear-gradient(180deg, #fff, #fff5e7);
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.75);
     text-align: center;
 }
 
@@ -220,9 +229,10 @@ main {
     align-items: center;
     gap: 5px;
     padding: 4px 5px;
-    border: 1px solid rgba(81,106,90,.16);
-    border-radius: 8px;
-    background: #fff9ef;
+    border: 1px solid rgba(83,103,90,.18);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #fffdf8, #fff8ef);
+    box-shadow: 0 2px 5px rgba(67,49,31,.035);
 }
 
 .sxp-seat__num {
@@ -231,7 +241,7 @@ main {
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: var(--sxp-green);
+    background: linear-gradient(180deg, var(--sxp-green), #46584e);
     color: #fff;
     font-family: Georgia, serif;
     font-size: .68rem;
@@ -250,7 +260,7 @@ main {
 }
 
 .sxp-seat.is-empty {
-    opacity: .42;
+    opacity: .34;
 }
 
 .sxp-seat.is-empty .sxp-seat__num {
@@ -260,6 +270,29 @@ main {
 .sxp-entrance {
     min-height: 48px;
     margin: 16px auto 0;
+}
+
+
+
+.sxp-table-card__head::before,
+.sxp-table-card__head::after {
+    content: "";
+    flex: 0 0 12px;
+    height: 1px;
+    margin-top: .72rem;
+    background: rgba(178,135,82,.32);
+}
+
+.sxp-table-card__name {
+    text-align: center;
+}
+
+.sxp-seat-rail--left .sxp-seat {
+    border-left: 3px solid rgba(83,103,90,.36);
+}
+
+.sxp-seat-rail--right .sxp-seat {
+    border-right: 3px solid rgba(157,79,88,.26);
 }
 
 @media (max-width: 767px) {
@@ -347,13 +380,13 @@ main {
 
     .sxp-grid {
         grid-template-columns: repeat(7, 1fr);
-        gap: 2.3mm;
+        gap: 2.5mm;
     }
 
     .sxp-table-card {
         min-height: 40mm;
-        padding: 1.8mm;
-        border-radius: 2mm;
+        padding: 1.9mm;
+        border-radius: 2.2mm;
         box-shadow: none;
     }
 
@@ -372,7 +405,7 @@ main {
     }
 
     .sxp-seat-map {
-        grid-template-columns: minmax(0, 1fr) 13mm minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) 14mm minmax(0, 1fr);
         gap: 1.2mm;
     }
 
