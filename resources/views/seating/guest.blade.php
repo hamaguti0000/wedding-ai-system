@@ -13,6 +13,21 @@
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
     $coupleNames = trim(($setting?->groom_name ?? '') . ' & ' . ($setting?->bride_name ?? ''));
+    $tableMarkForIndex = function (int $index) {
+        if ($index < 26) {
+            return chr(65 + $index);
+        }
+
+        $index -= 26;
+        $letter = '';
+
+        do {
+            $letter = chr(97 + ($index % 26)) . $letter;
+            $index = intdiv($index, 26) - 1;
+        } while ($index >= 0);
+
+        return $letter;
+    };
 @endphp
 
 <div class="gs-page">
@@ -114,7 +129,7 @@
                                     'guestName' => $guestName,
                                     'myTableId' => $myTableId,
                                     'mySeat' => $mySeat,
-                                    'tableMark' => chr(65 + $printRow['offset'] + $loop->index),
+                                    'tableMark' => $tableMarkForIndex($printRow['offset'] + $loop->index),
                                 ])
                                 @endforeach
                             </div>
@@ -130,7 +145,7 @@
                                         'guestName' => $guestName,
                                         'myTableId' => $myTableId,
                                         'mySeat' => $mySeat,
-                                        'tableMark' => chr(65 + 23 + (($loop->parent->index * 4) + $loop->index)),
+                                        'tableMark' => $tableMarkForIndex(23 + (($loop->parent->index * 4) + $loop->index)),
                                     ])
                                     @endforeach
                                 </div>
@@ -142,7 +157,7 @@
                                         'guestName' => $guestName,
                                         'myTableId' => $myTableId,
                                         'mySeat' => $mySeat,
-                                        'tableMark' => chr(65 + 23 + (($loop->parent->index * 4) + 2 + $loop->index)),
+                                        'tableMark' => $tableMarkForIndex(23 + (($loop->parent->index * 4) + 2 + $loop->index)),
                                     ])
                                     @endforeach
                                 </div>

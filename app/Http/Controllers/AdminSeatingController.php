@@ -139,14 +139,17 @@ class AdminSeatingController extends Controller
 
     private function tableLetter(int $index): string
     {
-        $letter = '';
-        $index += 1;
-
-        while ($index > 0) {
-            $index--;
-            $letter = chr(65 + ($index % 26)) . $letter;
-            $index = intdiv($index, 26);
+        if ($index < 26) {
+            return chr(65 + $index);
         }
+
+        $index -= 26;
+        $letter = '';
+
+        do {
+            $letter = chr(97 + ($index % 26)) . $letter;
+            $index = intdiv($index, 26) - 1;
+        } while ($index >= 0);
 
         return $letter;
     }
