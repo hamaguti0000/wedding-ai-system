@@ -100,12 +100,10 @@
                         @forelse ($leftSeats as $seat)
                         @php $assignedUser = $seat->assignment?->user; @endphp
                         <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                            <span class="sxp-seat__num">{{ $loop->iteration }}</span>
                             <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
                         </div>
                         @empty
                         <div class="sxp-seat is-empty">
-                            <span class="sxp-seat__num">-</span>
                             <span class="sxp-seat__name">席未設定</span>
                         </div>
                         @endforelse
@@ -120,7 +118,6 @@
                         @foreach ($rightSeats as $seat)
                         @php $assignedUser = $seat->assignment?->user; @endphp
                         <div class="sxp-seat {{ $assignedUser ? '' : 'is-empty' }}">
-                            <span class="sxp-seat__num">{{ $leftSeats->count() + $loop->iteration }}</span>
                             <span class="sxp-seat__name">{{ $assignedUser ? $guestName($assignedUser) : '空席' }}</span>
                         </div>
                         @endforeach
