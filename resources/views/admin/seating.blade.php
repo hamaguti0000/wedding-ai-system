@@ -217,8 +217,18 @@
                         @php $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count(); @endphp
                         <div class="sx-fp-table" data-table-id="{{ $table->id }}"
                              style="left:{{ $table->pos_x }}px; top:{{ $table->pos_y }}px;">
-                            <span class="sx-fp-table__name">{{ $table->name }}</span>
-                            <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                            <div class="sx-fp-table__head">
+                                <span class="sx-fp-table__name">{{ $table->name }}</span>
+                                <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                            </div>
+                            <ul class="sx-fp-seats">
+                                @foreach ($table->seats as $seat)
+                                <li class="sx-fp-seat {{ $seat->assignment ? 'is-occupied' : 'is-empty' }}"
+                                    data-seat-id="{{ $seat->id }}" data-table-id="{{ $table->id }}">
+                                    {{ $seat->assignment ? $guestName($seat->assignment->user) : '空席' }}
+                                </li>
+                                @endforeach
+                            </ul>
                         </div>
                         @endforeach
                     </div>

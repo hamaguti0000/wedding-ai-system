@@ -407,21 +407,23 @@ main { padding-top: 60px; text-align: initial; }
 }
 .sx-fp-table {
     position: absolute;
-    width: 170px;
-    padding: 8px 10px;
+    width: 200px;
+    padding: 8px 10px 10px;
     background: #fff;
     border: 1px solid var(--sx-border);
     border-radius: 6px;
-    text-align: center;
     cursor: grab;
     user-select: none;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    display: flex; flex-direction: column; gap: 6px;
 }
 .sx-fp-table:hover { border-color: var(--sx-gold); }
 .sx-fp-table.is-dragging { cursor: grabbing; z-index: 20; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border-color: var(--sx-gold); }
-.sx-fp-table.is-drop-target { border-color: var(--sx-gold); background: #fbf3e4; box-shadow: 0 0 0 3px rgba(179,139,89,0.25); }
-.sx-fp-table.is-full { opacity: 0.55; }
+.sx-fp-table.is-full { opacity: 0.85; }
+.sx-fp-table__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--sx-border-light);
+}
 .sx-fp-table__name {
     font-family: 'Playfair Display', 'Noto Sans JP', serif;
     font-size: 0.78rem; font-weight: 600; color: var(--sx-ink);
@@ -431,6 +433,28 @@ main { padding-top: 60px; text-align: initial; }
     flex-shrink: 0; font-size: 0.66rem; color: var(--sx-muted);
     background: var(--sx-row-alt); border-radius: 8px; padding: 1px 6px;
 }
+.sx-fp-seats {
+    display: flex; flex-direction: column; gap: 3px;
+    list-style: none; margin: 0; padding: 0;
+    cursor: default;
+}
+.sx-fp-seat {
+    padding: 4px 7px;
+    border: 1px dashed var(--sx-border-light);
+    border-radius: 5px;
+    font-size: 0.7rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sx-fp-seat.is-empty {
+    color: var(--sx-muted); font-style: italic;
+}
+.sx-fp-seat.is-occupied {
+    border-style: solid; border-color: var(--sx-border);
+    background: var(--sx-row-alt); color: var(--sx-ink); font-weight: 600;
+    cursor: pointer;
+}
+.sx-fp-seat.is-occupied:hover { border-color: #c0392b; background: #fdf2f2; }
+.sx-fp-seat.is-drop-target { border-color: var(--sx-gold); background: #fbf3e4; box-shadow: 0 0 0 2px rgba(179,139,89,0.25); }
 
 
 /* ── 2026-08 readability pass: 管理者は編集しやすさを優先 ── */
