@@ -15,7 +15,6 @@
         $p = $user->guestProfile;
         return $p ? trim(($p->furigana_sei ?? '') . ' ' . ($p->furigana_mei ?? '')) : '';
     };
-    $couple = trim(($setting?->groom_name ?? 'Kakeru') . ' and ' . ($setting?->bride_name ?? 'Mirai'));
     $pdfUrl = route('admin.seating.escort-cards.pdf') . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
 @endphp
 
