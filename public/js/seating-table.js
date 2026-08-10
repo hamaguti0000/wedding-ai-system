@@ -69,27 +69,51 @@
     }
 
     /* ── 未配置ゲストリスト ─────────────────────────────────── */
+    const fpUnassignedList  = document.getElementById('fpUnassignedList');
+    const fpUnassignedCount = document.getElementById('fpUnassignedCount');
+
     function renderUnassignedList() {
         const q = (document.getElementById('guestSearch')?.value ?? '').trim();
         const items = ALL_GUESTS.filter(g => !g.table && (!q || g.name.includes(q)));
         unassignedList.innerHTML = '';
         if (ALL_GUESTS.every(g => g.table)) {
             unassignedList.innerHTML = '<li class="sx-unassigned-list__empty">全員配置済みです</li>';
-            return;
-        }
-        if (items.length === 0) {
+        } else if (items.length === 0) {
             unassignedList.innerHTML = '<li class="sx-unassigned-list__filtered-empty">該当なし</li>';
+        } else {
+            items.forEach(g => {
+                const li = document.createElement('li');
+                li.dataset.userId = g.id;
+                li.dataset.guestName = g.name;
+                li.title = 'クリックで最初の空席へ配置';
+                li.innerHTML = `<span class="sx-unassigned-list__name"></span><span class="sx-unassigned-list__tag"></span><span class="sx-unassigned-list__action">配置</span>`;
+                li.querySelector('.sx-unassigned-list__name').textContent = g.name;
+                li.querySelector('.sx-unassigned-list__tag').textContent = g.tag;
+                unassignedList.appendChild(li);
+            });
+        }
+        renderFpUnassignedList();
+    }
+
+    function renderFpUnassignedList() {
+        if (!fpUnassignedList) return;
+        const unassigned = ALL_GUESTS.filter(g => !g.table);
+        if (fpUnassignedCount) fpUnassignedCount.textContent = `${unassigned.length}名`;
+        fpUnassignedList.innerHTML = '';
+        if (unassigned.length === 0) {
+            fpUnassignedList.innerHTML = '<li class="sx-unassigned-list__empty">全員配置済みです</li>';
             return;
         }
-        items.forEach(g => {
+        unassigned.forEach(g => {
             const li = document.createElement('li');
             li.dataset.userId = g.id;
             li.dataset.guestName = g.name;
-            li.title = 'クリックで最初の空席へ配置';
-            li.innerHTML = `<span class="sx-unassigned-list__name"></span><span class="sx-unassigned-list__tag"></span><span class="sx-unassigned-list__action">配置</span>`;
+            li.draggable = true;
+            li.title = 'ドラッグしてテーブルに配置';
+            li.innerHTML = `<span class="sx-unassigned-list__name"></span><span class="sx-unassigned-list__tag"></span>`;
             li.querySelector('.sx-unassigned-list__name').textContent = g.name;
             li.querySelector('.sx-unassigned-list__tag').textContent = g.tag;
-            unassignedList.appendChild(li);
+            fpUnassignedList.appendChild(li);
         });
     }
 
@@ -108,10 +132,40 @@
         setTimeout(() => emptySeat.closest('tr')?.classList.remove('sx-row--just-updated'), 1400);
     }
 
+    async function assignGuestToTable(userId, tableId) {
+        const emptySeat = body.querySelector(`tr[data-table-id="${tableId}"] select.sx-guest[data-current-user=""]`);
+        if (!emptySeat) {
+            alert('このテーブルに空席がありません。');
+            return;
+        }
+        emptySeat.value = userId;
+        emptySeat.dispatchEvent(new Event('change', { bubbles: true }));
+        emptySeat.closest('tr')?.classList.add('sx-row--just-updated');
+        setTimeout(() => emptySeat.closest('tr')?.classList.remove('sx-row--just-updated'), 1400);
+    }
+
+    function syncFloorplanCount(tableId) {
+        const fpTable = document.querySelector(`.sx-fp-table[data-table-id="${tableId}"]`);
+        if (!fpTable) return;
+        const seats = body.querySelectorAll(`tr[data-table-id="${tableId}"] select.sx-guest`);
+        const total = seats.length;
+        const occupied = Array.from(seats).filter(s => s.dataset.currentUser).length;
+        const countEl = fpTable.querySelector('.sx-fp-table__count');
+        if (countEl) countEl.textContent = `${occupied}/${total}`;
+        fpTable.classList.toggle('is-full', total > 0 && occupied >= total);
+    }
+
     unassignedList?.addEventListener('click', (e) => {
         const item = e.target.closest('li[data-user-id]');
         if (!item) return;
         assignUnassignedGuest(item.dataset.userId);
+    });
+
+    fpUnassignedList?.addEventListener('dragstart', (e) => {
+        const item = e.target.closest('li[data-user-id]');
+        if (!item) return;
+        e.dataTransfer.setData('text/plain', 'guest:' + item.dataset.userId);
+        e.dataTransfer.effectAllowed = 'move';
     });
 
 
@@ -166,11 +220,14 @@
         }
 
         // 以前このゲストが別の席にいた場合、その席のセレクトを未配置に戻す
+        const affectedTableIds = new Set([tableId]);
         if (newUser) {
             body.querySelectorAll(`select.sx-guest[data-current-user="${newUser}"]`).forEach(other => {
                 if (other !== sel) {
                     other.dataset.currentUser = '';
                     other.value = '';
+                    const otherTableId = other.closest('tr')?.dataset.tableId;
+                    if (otherTableId) affectedTableIds.add(otherTableId);
                 }
             });
         }
@@ -189,6 +246,7 @@
         refreshAllGuestSelects();
         // refreshAllGuestSelects で value がリセットされるため選択状態を再適用
         body.querySelectorAll('select.sx-guest').forEach(s => { s.value = s.dataset.currentUser || ''; });
+        affectedTableIds.forEach(id => syncFloorplanCount(id));
     });
 
     /* ── 席を削除 ───────────────────────────────────────────── */
@@ -213,6 +271,7 @@
         removeSeatRow(row, tableId);
         updateProgress();
         renderUnassignedList();
+        syncFloorplanCount(tableId);
     });
 
     function removeSeatRow(row, tableId) {
@@ -285,6 +344,7 @@
             if (mergeCell) mergeCell.rowSpan = groupRows.length + 1;
             groupRows[groupRows.length - 1].after(newRow);
         }
+        syncFloorplanCount(tableId);
     });
 
     function typeOptionsHtml(selected) {
@@ -550,6 +610,30 @@
             });
             insertTableIntoListView(json.table, json.seats || []);
             appendFloorplanTable(json.table);
+        });
+    }
+
+    /* ── 配置図：未配置ゲストをドラッグしてテーブルに配置 ── */
+    if (fpRoom) {
+        fpRoom.addEventListener('dragenter', (e) => {
+            const tableEl = e.target.closest('.sx-fp-table');
+            if (tableEl) tableEl.classList.add('is-drop-target');
+        });
+
+        fpRoom.addEventListener('dragleave', (e) => {
+            const tableEl = e.target.closest('.sx-fp-table');
+            if (tableEl && !tableEl.contains(e.relatedTarget)) tableEl.classList.remove('is-drop-target');
+        });
+
+        fpRoom.addEventListener('drop', async (e) => {
+            const tableEl = e.target.closest('.sx-fp-table');
+            const data = e.dataTransfer.getData('text/plain');
+            if (!tableEl) return;
+            tableEl.classList.remove('is-drop-target');
+            if (!data.startsWith('guest:')) return;
+            e.preventDefault();
+            const userId = data.slice('guest:'.length);
+            await assignGuestToTable(userId, tableEl.dataset.tableId);
         });
     }
 

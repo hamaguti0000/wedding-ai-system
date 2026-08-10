@@ -186,22 +186,43 @@
 
     {{-- ── 配置図ビュー（会場内のテーブル配置。ドラッグで移動）── --}}
     <div class="sx-fp-wrap" id="sxViewFloorplan" hidden>
-        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>テーブルをドラッグして会場内の位置を調整できます</p>
-        <div class="sx-fp-palette">
-            <div class="sx-fp-new-table" id="sxFpNewTable" draggable="true">
-                <i class="fa-solid fa-plus"></i>ここをドラッグして新しいテーブルを配置
-            </div>
-        </div>
-        <div class="sx-fp-scroll">
-            <div class="sx-fp-room" id="sxFpRoom" style="width:1700px; height:760px;">
-                @foreach ($tables as $table)
-                @php $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count(); @endphp
-                <div class="sx-fp-table" data-table-id="{{ $table->id }}"
-                     style="left:{{ $table->pos_x }}px; top:{{ $table->pos_y }}px;">
-                    <span class="sx-fp-table__name">{{ $table->name }}</span>
-                    <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>テーブルをドラッグして会場内の位置を調整、ゲストをテーブルにドラッグして配置できます</p>
+        <div class="sx-fp-body">
+            <aside class="sx-fp-sidebar">
+                <div class="sx-sidebar__head">
+                    <span>未配置ゲスト</span>
+                    <span class="sx-sidebar__count" id="fpUnassignedCount">{{ $summary['unassigned'] }}名</span>
                 </div>
-                @endforeach
+                <ul class="sx-unassigned-list sx-fp-unassigned-list" id="fpUnassignedList">
+                    @forelse ($unassignedGuests as $guest)
+                    @php $p = $guest->guestProfile; @endphp
+                    <li data-user-id="{{ $guest->id }}" data-name="{{ $guestName($guest) }}" draggable="true">
+                        <span class="sx-unassigned-list__name">{{ $guestName($guest) }}</span>
+                        <span class="sx-unassigned-list__tag">{{ trim($guestSide($p).$guestRel($p)) }}</span>
+                    </li>
+                    @empty
+                    <li class="sx-unassigned-list__empty">全員配置済みです</li>
+                    @endforelse
+                </ul>
+            </aside>
+            <div class="sx-fp-main">
+                <div class="sx-fp-palette">
+                    <div class="sx-fp-new-table" id="sxFpNewTable" draggable="true">
+                        <i class="fa-solid fa-plus"></i>ここをドラッグして新しいテーブルを配置
+                    </div>
+                </div>
+                <div class="sx-fp-scroll">
+                    <div class="sx-fp-room" id="sxFpRoom" style="width:1700px; height:760px;">
+                        @foreach ($tables as $table)
+                        @php $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count(); @endphp
+                        <div class="sx-fp-table" data-table-id="{{ $table->id }}"
+                             style="left:{{ $table->pos_x }}px; top:{{ $table->pos_y }}px;">
+                            <span class="sx-fp-table__name">{{ $table->name }}</span>
+                            <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </div>
