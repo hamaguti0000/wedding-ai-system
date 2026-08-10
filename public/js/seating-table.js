@@ -194,6 +194,26 @@
         e.dataTransfer.effectAllowed = 'move';
     });
 
+    // iOS Safari等はタッチでのHTML5ドラッグ&ドロップに非対応のため、
+    // 「ゲストをタップして選択→空席をタップして配置」でも同じことができるようにする
+    let selectedGuestId = null;
+
+    function setSelectedGuest(userId) {
+        selectedGuestId = userId;
+        fpUnassignedList?.querySelectorAll('li[data-user-id]').forEach(li => {
+            li.classList.toggle('is-selected', li.dataset.userId === userId);
+        });
+        document.querySelectorAll('.sxp-seat.is-empty').forEach(seat => {
+            seat.classList.toggle('is-select-target', !!userId);
+        });
+    }
+
+    fpUnassignedList?.addEventListener('click', (e) => {
+        const item = e.target.closest('li[data-user-id]');
+        if (!item) return;
+        setSelectedGuest(selectedGuestId === item.dataset.userId ? null : item.dataset.userId);
+    });
+
 
     function guestOptionsHtml(selectedId) {
         let html = `<option value="">— 未配置 —</option>`;
@@ -685,7 +705,15 @@
             await assignGuestToSeat(userId, seatEl.dataset.seatId);
         });
 
-        fpRoom.addEventListener('click', (e) => {
+        fpRoom.addEventListener('click', async (e) => {
+            const emptySeatEl = e.target.closest('.sx-fp-seat.is-empty');
+            if (emptySeatEl && selectedGuestId) {
+                const userId = selectedGuestId;
+                setSelectedGuest(null);
+                await assignGuestToSeat(userId, emptySeatEl.dataset.seatId);
+                return;
+            }
+
             const seatEl = e.target.closest('.sx-fp-seat.is-occupied');
             if (!seatEl) return;
             const name = seatEl.textContent.trim();

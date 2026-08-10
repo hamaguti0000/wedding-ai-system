@@ -191,7 +191,7 @@
 
     {{-- ── 座席表ビュー（実物の席次表に近いカード表示。ゲストをドラッグで配置）── --}}
     <div class="sx-fp-wrap" id="sxViewCards" hidden>
-        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>ゲストをテーブルの空席にドラッグして配置できます</p>
+        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>ゲストをタップ→空席をタップで配置できます（PCではドラッグも可）</p>
         <div class="sx-fp-body">
             <aside class="sx-fp-sidebar">
                 <div class="sx-sidebar__head">
