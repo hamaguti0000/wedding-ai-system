@@ -255,6 +255,14 @@ main {
     font: 600 .88rem/1.65 'Noto Sans JP', system-ui, sans-serif;
 }
 
+.ec-preview-action__buttons,
+.ec-pdf-preview__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .ec-preview-action__button {
     min-height: 44px;
     padding: 0 20px;
@@ -379,7 +387,14 @@ main {
         display: grid;
     }
 
-    .ec-pdf-preview__foot .ec-preview-action__button {
+    .ec-preview-action__buttons,
+    .ec-pdf-preview__buttons {
+        display: grid;
+        justify-content: stretch;
+    }
+
+    .ec-pdf-preview__foot .ec-preview-action__button,
+    .ec-preview-action__buttons .ec-preview-action__button {
         justify-content: center;
     }
 

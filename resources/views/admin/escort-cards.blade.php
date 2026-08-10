@@ -93,7 +93,10 @@
             <h2>このPDFが印刷用プレビューです</h2>
             <p><span id="ecPreviewCount">{{ $guests->count() }}</span>枚をA4名刺10面に配置しています。下のPDFを確認してから印刷してください。</p>
         </div>
-        <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+        <div class="ec-preview-action__buttons">
+            <button type="button" class="ec-preview-action__button ec-web-print">Webから印刷</button>
+            <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+        </div>
     </section>
     @endif
 
@@ -107,7 +110,10 @@
         <iframe id="ecPdfFrame" src="{{ $pdfUrl }}" title="エスコートカードPDFプレビュー"></iframe>
         <div class="ec-pdf-preview__foot">
             <span>PDFが表示されない場合は、ボタンから別画面で確認してください。</span>
-            <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+            <span class="ec-pdf-preview__buttons">
+                <button type="button" class="ec-preview-action__button ec-web-print">Webから印刷</button>
+                <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+            </span>
         </div>
     </section>
     @endif
@@ -121,6 +127,7 @@
     const previewCount = document.getElementById('ecPreviewCount');
     const pdfFrame = document.getElementById('ecPdfFrame');
     const pdfLinks = Array.from(document.querySelectorAll('.ec-pdf-open'));
+    const webPrintButtons = Array.from(document.querySelectorAll('.ec-web-print'));
     const refreshButton = document.getElementById('ecRefreshPreview');
     let timer = null;
 
@@ -150,6 +157,10 @@
             link.classList.toggle('is-disabled', total === 0);
             link.setAttribute('aria-disabled', total === 0 ? 'true' : 'false');
         });
+        webPrintButtons.forEach((button) => {
+            button.disabled = total === 0;
+            button.classList.toggle('is-disabled', total === 0);
+        });
         if (pdfFrame) {
             pdfFrame.src = total > 0 ? url : 'about:blank';
         }
@@ -173,7 +184,31 @@
         checks.forEach((check) => check.checked = check.dataset.default === '1');
         refreshPreview();
     });
+    const printFromWeb = () => {
+        const total = updateCounts();
+        if (total === 0) return;
+        const url = buildPdfUrl();
+        pdfLinks.forEach((link) => link.href = url);
+
+        try {
+            if (pdfFrame && pdfFrame.src !== url) {
+                pdfFrame.src = url;
+            }
+            const frameWindow = pdfFrame?.contentWindow;
+            if (frameWindow) {
+                frameWindow.focus();
+                frameWindow.print();
+                return;
+            }
+        } catch (error) {
+            // Some mobile browsers block printing embedded PDFs. Fall back to opening the PDF.
+        }
+
+        window.open(url, '_blank', 'noopener');
+    };
+
     refreshButton?.addEventListener('click', refreshPreview);
+    webPrintButtons.forEach((button) => button.addEventListener('click', printFromWeb));
     checks.forEach((check) => check.addEventListener('change', scheduleRefresh));
     updateCounts();
 })();
