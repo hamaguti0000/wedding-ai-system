@@ -81,11 +81,11 @@ def make_card(base_portrait, guest):
     first_name = (guest.get("first_name") or "").strip()
     last_name = (guest.get("last_name") or "").strip()
     if first_name or last_name:
-        draw_fit(draw, (mm(6.0), mm(53.0)), first_name, SERIF_PATH, mm(7.4), navy, mm(40))
-        draw_fit(draw, (mm(6.2), mm(65.5)), last_name, SERIF_PATH, mm(4.6), navy, mm(40))
+        draw_fit(draw, (mm(9.0), mm(49.0)), first_name, SERIF_PATH, mm(7.4), navy, mm(40))
+        draw_fit(draw, (mm(9.2), mm(61.5)), last_name, SERIF_PATH, mm(4.6), navy, mm(40))
     else:
         name = guest.get("name") or ""
-        draw_fit(draw, (mm(6.0), mm(57.4)), name, SERIF_PATH, mm(5.6), navy, mm(38))
+        draw_fit(draw, (mm(9.0), mm(53.4)), name, SERIF_PATH, mm(5.6), navy, mm(38))
 
     return portrait.rotate(-90, expand=True).resize((card_w, card_h), Image.Resampling.LANCZOS)
 
