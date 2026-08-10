@@ -101,8 +101,8 @@ class AdminSeatingController extends Controller
         ));
     }
 
-    /** 席配置済みゲストのエスコートカード印刷ページ */
-    public function escortCards()
+    /** ゲストを選択してエスコートカードを印刷するページ */
+    public function escortCards(Request $request)
     {
         $tables = SeatingTable::query()
             ->orderBy('display_order')
@@ -114,12 +114,45 @@ class AdminSeatingController extends Controller
                 $table->id => $this->tableLetter($index),
             ]);
 
-        $guests = User::query()
+        $allGuests = User::query()
             ->where('role', 'guest')
-            ->whereHas('guestProfile', fn ($q) => $q->where('participation', 'attending'))
-            ->whereHas('seatAssignment.seat.seatingTable')
             ->with(['guestProfile', 'seatAssignment.seat.seatingTable'])
             ->get()
+            ->sortBy(function (User $user) {
+                $profile = $user->guestProfile;
+
+                return sprintf(
+                    '%s-%s-%s',
+                    $profile?->participation ?? 'pending',
+                    $profile?->furigana() ?: ($profile?->last_name ?? $user->name),
+                    $profile?->first_name ?? ''
+                );
+            })
+            ->values();
+
+        $defaultSelectedIds = $allGuests
+            ->filter(fn (User $user) =>
+                $user->guestProfile?->participation === 'attending'
+                && $user->seatAssignment?->seat?->seatingTable
+            )
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values();
+
+        $selectedIds = collect($request->input('print_user_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if (! $request->has('selection_submitted')) {
+            $selectedIds = $defaultSelectedIds;
+        }
+
+        $selectedIdSet = $selectedIds->flip();
+
+        $guests = $allGuests
+            ->filter(fn (User $user) => $selectedIdSet->has($user->id))
             ->sortBy(function (User $user) {
                 $profile = $user->guestProfile;
 
@@ -134,7 +167,13 @@ class AdminSeatingController extends Controller
 
         $setting = WeddingSetting::first();
 
-        return view('admin.escort-cards', compact('guests', 'setting', 'tableMarks'));
+        return view('admin.escort-cards', compact(
+            'allGuests',
+            'guests',
+            'selectedIds',
+            'setting',
+            'tableMarks'
+        ));
     }
 
     private function tableLetter(int $index): string
