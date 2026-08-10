@@ -103,37 +103,41 @@
     </section>
     @else
     <section class="ec-sheets" aria-label="エスコートカードプレビュー">
-        @foreach ($guests->chunk(10) as $sheetGuests)
-        <div class="ec-print-sheet">
-            @foreach ($sheetGuests as $guest)
+        @foreach ($guests->chunk(10) as $sheetIndex => $sheetGuests)
+        <svg class="ec-print-sheet" viewBox="0 0 210 297" width="210mm" height="297mm" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="エスコートカード {{ $sheetIndex + 1 }}ページ目">
+            <defs>
+                <clipPath id="ec-card-clip-{{ $sheetIndex }}">
+                    <rect x="0" y="0" width="91" height="55"></rect>
+                </clipPath>
+            </defs>
+            <rect x="0" y="0" width="210" height="297" fill="#fff"></rect>
+            @foreach ($sheetGuests as $guestIndex => $guest)
             @php
                 $table = $guest->seatAssignment?->seat?->seatingTable;
                 $tableMark = $table ? ($tableMarks[$table->id] ?? '') : '';
                 $furigana = $guestFurigana($guest);
+                $name = $guestName($guest);
+                $x = ($guestIndex % 2) === 0 ? 14 : 105;
+                $y = 11 + intdiv($guestIndex, 2) * 55;
             @endphp
-            <article class="ec-card">
-                <div class="ec-card__inner">
-                    <header class="ec-card__header">
-                        <p class="ec-card__couple">{{ $couple }}</p>
-                        @if ($setting?->ceremony_date)
-                        <p class="ec-card__date">{{ \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y') }}</p>
-                        @endif
-                    </header>
-
-                    <div class="ec-table" aria-label="テーブル {{ $tableMark }}">
-                        <span class="ec-table__mark">{{ $tableMark }}</span>
-                    </div>
-
-                    <div class="ec-guest">
-                        @if ($furigana)
-                        <p class="ec-guest__kana">{{ $furigana }}</p>
-                        @endif
-                        <h2 class="ec-guest__name">{{ $guestName($guest) }}</h2>
-                    </div>
-                </div>
-            </article>
+            <g transform="translate({{ $x }} {{ $y }})" clip-path="url(#ec-card-clip-{{ $sheetIndex }})">
+                <rect x="0" y="0" width="91" height="55" fill="#fff"></rect>
+                <g transform="translate(45.5 27.5) rotate(90) translate(-27.5 -45.5)">
+                    <image href="{{ asset('images/escort-template.png') }}" x="0" y="0" width="55" height="91" preserveAspectRatio="none"></image>
+                    <rect x="4.7" y="4.6" width="25" height="11" fill="#f7f4ed" opacity="0.98"></rect>
+                    <text x="5.2" y="8.1" fill="#a98348" font-family="Segoe Script, Brush Script MT, cursive" font-size="3.1">{{ $couple }}</text>
+                    @if ($setting?->ceremony_date)
+                    <text x="5.2" y="13.0" fill="#a98348" font-family="Georgia, serif" font-size="2.65" letter-spacing="0.08">{{ \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y') }}</text>
+                    @endif
+                    <text x="44.7" y="38.2" fill="#253a5c" font-family="Georgia, serif" font-size="17.2" text-anchor="middle">{{ $tableMark }}</text>
+                    @if ($furigana)
+                    <text x="6" y="48.0" fill="#837767" font-family="Noto Sans JP, Yu Gothic, sans-serif" font-size="1.9" letter-spacing="0.18">{{ $furigana }}</text>
+                    @endif
+                    <text x="6" y="{{ $furigana ? '56.2' : '53.4' }}" fill="#253a5c" font-family="Noto Serif JP, Yu Mincho, serif" font-size="5.9" letter-spacing="0.05">{{ $name }}</text>
+                </g>
+            </g>
             @endforeach
-        </div>
+        </svg>
         @endforeach
     </section>
     @endif

@@ -286,131 +286,18 @@ main {
 }
 
 .ec-print-sheet {
-    position: relative;
+    display: block;
     width: 210mm;
     height: 297mm;
-    padding: 0;
     background: #fff;
     box-shadow: 0 18px 44px rgba(37, 45, 58, .16);
     break-after: page;
     page-break-after: always;
-    overflow: hidden;
 }
 
 .ec-print-sheet:last-child {
     break-after: auto;
     page-break-after: auto;
-}
-
-.ec-card {
-    position: absolute;
-    width: 91mm;
-    height: 55mm;
-    overflow: hidden;
-    background: #fff;
-    break-inside: avoid;
-    page-break-inside: avoid;
-}
-
-.ec-card:nth-child(1) { left: 14mm; top: 11mm; }
-.ec-card:nth-child(2) { left: 105mm; top: 11mm; }
-.ec-card:nth-child(3) { left: 14mm; top: 66mm; }
-.ec-card:nth-child(4) { left: 105mm; top: 66mm; }
-.ec-card:nth-child(5) { left: 14mm; top: 121mm; }
-.ec-card:nth-child(6) { left: 105mm; top: 121mm; }
-.ec-card:nth-child(7) { left: 14mm; top: 176mm; }
-.ec-card:nth-child(8) { left: 105mm; top: 176mm; }
-.ec-card:nth-child(9) { left: 14mm; top: 231mm; }
-.ec-card:nth-child(10) { left: 105mm; top: 231mm; }
-
-.ec-card__inner {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 55mm;
-    height: 91mm;
-    overflow: hidden;
-    transform: translate(-50%, -50%) rotate(90deg);
-    transform-origin: center;
-    background: var(--ec-paper) url('/images/escort-template.png') center / 100% 100% no-repeat;
-}
-
-.ec-card__header {
-    position: absolute;
-    left: 5.2mm;
-    top: 5.4mm;
-    z-index: 2;
-    min-width: 23mm;
-    padding: 0 2mm 1.2mm 0;
-    background: var(--ec-paper-soft);
-}
-
-.ec-card__couple {
-    margin: 0;
-    color: var(--ec-gold);
-    font-family: 'Brush Script MT', 'Segoe Script', cursive;
-    font-size: 8pt;
-    line-height: 1.08;
-    white-space: nowrap;
-}
-
-.ec-card__date {
-    margin: 1.8mm 0 0;
-    color: var(--ec-gold);
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 7.4pt;
-    letter-spacing: .035em;
-    white-space: nowrap;
-}
-
-.ec-table {
-    position: absolute;
-    top: 18mm;
-    right: 7.2mm;
-    z-index: 2;
-    width: 20mm;
-    height: 23mm;
-    display: grid;
-    place-items: center;
-}
-
-.ec-table__mark {
-    color: var(--ec-navy);
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 48pt;
-    font-weight: 400;
-    line-height: .9;
-}
-
-.ec-guest {
-    position: absolute;
-    left: 6mm;
-    right: 12mm;
-    top: 44mm;
-    z-index: 2;
-    min-height: 14mm;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.ec-guest__kana {
-    margin: 0 0 1.8mm;
-    color: var(--ec-muted);
-    font: 700 5pt 'Noto Sans JP', system-ui, sans-serif;
-    letter-spacing: .12em;
-    white-space: nowrap;
-}
-
-.ec-guest__name {
-    margin: 0;
-    color: var(--ec-navy);
-    font-family: Georgia, 'Noto Serif JP', 'Yu Mincho', serif;
-    font-size: 16.5pt;
-    font-weight: 500;
-    line-height: 1.05;
-    letter-spacing: .02em;
-    white-space: nowrap;
 }
 
 .ec-empty {
@@ -501,16 +388,19 @@ main {
     }
 
     .ec-print-sheet {
+        display: block;
         width: 210mm;
         height: 297mm;
         margin: 0 !important;
         padding: 0;
         box-shadow: none;
         overflow: hidden;
+        break-after: page;
+        page-break-after: always;
     }
 
-    .ec-card {
-        break-inside: avoid;
-        page-break-inside: avoid;
+    .ec-print-sheet:last-child {
+        break-after: auto;
+        page-break-after: auto;
     }
 }
