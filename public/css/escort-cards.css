@@ -255,7 +255,7 @@ main {
     font: 600 .88rem/1.65 'Noto Sans JP', system-ui, sans-serif;
 }
 
-.ec-preview-action button {
+.ec-preview-action__button {
     min-height: 44px;
     padding: 0 20px;
     border: 1px solid var(--ec-navy);
@@ -264,6 +264,33 @@ main {
     font: 900 .9rem 'Noto Sans JP', system-ui, sans-serif;
     white-space: nowrap;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ec-pdf-preview {
+    width: min(1120px, 100%);
+    margin: 0 auto 28px;
+    border: 1px solid rgba(37, 58, 92, .14);
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(37, 45, 58, .12);
+}
+
+.ec-pdf-preview iframe {
+    display: block;
+    width: 100%;
+    height: min(78vh, 920px);
+    border: 0;
+    background: #fff;
+}
+
+.ec-pdf-preview p {
+    margin: 0;
+    padding: 10px 14px;
+    color: #66707d;
+    font: 700 .82rem 'Noto Sans JP', system-ui, sans-serif;
+    border-top: 1px solid rgba(37, 58, 92, .1);
 }
 
 .ec-print-note {
@@ -329,6 +356,10 @@ main {
         display: grid;
     }
 
+    .ec-pdf-preview iframe {
+        height: 70vh;
+    }
+
     .ec-selector__actions {
         justify-content: start;
     }
@@ -371,7 +402,8 @@ main {
     .ec-toolbar,
     .ec-selector,
     .ec-print-note,
-    .ec-preview-action {
+    .ec-preview-action,
+    .ec-pdf-preview {
         display: none !important;
     }
 
