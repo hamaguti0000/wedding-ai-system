@@ -20,7 +20,6 @@
 
     <div class="gs-table__wreath" aria-label="{{ $table->name }}">
         <span class="gs-table__mark">{{ $tableMark }}</span>
-        <span class="gs-table__name">{{ $table->name }}</span>
     </div>
 
     <div class="gs-table__guests gs-table__guests--right">

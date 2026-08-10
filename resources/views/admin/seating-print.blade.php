@@ -15,16 +15,24 @@
     .sxp-toolbar a, .sxp-toolbar button {
         padding: 8px 18px;
         border: 1px solid #b38b59;
+        border-radius: 4px;
         background: #b38b59;
         color: #fff;
         font-size: 0.82rem;
         font-weight: 700;
         cursor: pointer;
         text-decoration: none;
+        transition: background-color .15s ease, color .15s ease;
     }
     .sxp-toolbar a.ghost {
         background: transparent;
         color: #8f6a3f;
+    }
+    .sxp-toolbar a:hover, .sxp-toolbar button:hover {
+        background: #966d3e;
+    }
+    .sxp-toolbar a.ghost:hover {
+        background: rgba(179,139,89,.1);
     }
     @media print {
         .header, .header-drawer, .header-overlay, .sxp-toolbar { display: none !important; }

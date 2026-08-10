@@ -10,14 +10,14 @@ main {
 }
 
 .gs-page {
-    --sxp-ink: #151a20;
-    --sxp-muted: #59616b;
-    --sxp-line: #20262d;
-    --sxp-soft-line: #6b7280;
-    --sxp-paper: #fffefb;
+    --sxp-ink: #2f2a24;
+    --sxp-muted: #8a7c68;
+    --sxp-line: rgba(120,90,55,.55);
+    --sxp-soft-line: rgba(120,90,55,.3);
+    --sxp-paper: #fbf5e9;
     --sxp-gold: #b58b55;
     --sxp-gold-dark: #775734;
-    --sxp-warm: #fff9ef;
+    --sxp-warm: #fff3de;
     width: 100%;
     min-height: calc(100vh - 60px);
     padding: 30px 16px 44px;
@@ -101,10 +101,9 @@ main {
     width: 100%;
     min-width: 1240px;
     margin: 0;
-    padding: 16px;
-    border: 1px solid rgba(32,38,45,.34);
-    background:
-        linear-gradient(180deg, #fff, #fffdf8);
+    padding: 20px;
+    border: 1px solid var(--sxp-line);
+    background: var(--sxp-paper);
 }
 
 .sxp-main-table,
@@ -114,8 +113,8 @@ main {
     margin: 0 auto 14px;
     display: grid;
     place-items: center;
-    border: 1.2px solid var(--sxp-line);
-    background: linear-gradient(180deg, #fff, var(--sxp-warm));
+    border: 1.5px solid var(--sxp-gold);
+    background: var(--sxp-warm);
 }
 
 .sxp-main-table__sub {
@@ -172,10 +171,9 @@ main {
 .sxp-table-card {
     min-height: 220px;
     display: grid;
-    grid-template-columns: 30px 1fr;
-    border: 1.25px solid var(--sxp-line);
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(17,24,39,.035);
+    grid-template-columns: 34px 1fr;
+    border: 1px solid var(--sxp-gold);
+    background: #fffefb;
     page-break-inside: avoid;
     scroll-margin-top: 92px;
 }
@@ -184,11 +182,12 @@ main {
     display: grid;
     place-items: start center;
     padding-top: 12px;
-    border-right: 1.15px solid var(--sxp-line);
-    color: var(--sxp-ink);
-    font-family: Georgia, 'Noto Serif JP', serif;
-    font-size: 1.58rem;
-    font-weight: 500;
+    border-right: 1px solid var(--sxp-gold);
+    background: var(--sxp-warm);
+    color: var(--sxp-gold-dark);
+    font-family: 'Noto Serif JP', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 700;
     line-height: 1;
 }
 
@@ -202,7 +201,8 @@ main {
     min-height: 34px;
     display: grid;
     grid-template-columns: 1fr;
-    border-bottom: 1.05px solid var(--sxp-line);
+    border-bottom: 1px solid var(--sxp-gold);
+    background: var(--sxp-warm);
 }
 
 .sxp-table-card__name,
@@ -222,14 +222,14 @@ main {
 
 .sxp-table-card__count {
     justify-content: center;
-    border-left: 1.05px solid var(--sxp-line);
+    border-left: 1px solid var(--sxp-line);
     font-size: .64rem;
 }
 
 .sxp-seat-map {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    border-bottom: 1.05px solid var(--sxp-line);
+    border-bottom: 1px solid var(--sxp-line);
 }
 
 .sxp-seat-rail {
@@ -239,7 +239,7 @@ main {
 }
 
 .sxp-seat-rail--left {
-    border-right: 1.15px solid var(--sxp-line);
+    border-right: 1px solid var(--sxp-line);
 }
 
 .sxp-seat-rail::before {
@@ -250,7 +250,7 @@ main {
     min-height: 58px;
     display: grid;
     grid-template-columns: 1fr;
-    border-bottom: 1.05px solid var(--sxp-line);
+    border-bottom: 1px solid var(--sxp-line);
     background: #fff;
 }
 
@@ -498,39 +498,6 @@ main {
 
 
 
-.sxp-layout::before,
-.sxp-layout::after {
-    content: "";
-    display: block;
-    height: 1px;
-    width: min(520px, 48%);
-    margin: 0 auto 12px;
-    background: linear-gradient(90deg, transparent, rgba(181,139,85,.42), transparent);
-}
-
-.sxp-layout::after {
-    margin: 12px auto 0;
-}
-
-.sxp-table-card__head {
-    background: linear-gradient(180deg, #fff, #fffaf2);
-}
-
-.sxp-seat:hover {
-    background: #fffdf7;
-}
-
-@media print {
-    .sxp-layout::before,
-    .sxp-layout::after {
-        display: none;
-    }
-
-    .sxp-table-card {
-        box-shadow: none;
-    }
-}
-
 .sxp-toolbar {
     position: sticky;
     top: 0;
@@ -544,6 +511,7 @@ main {
     gap: 7px;
     padding: 3px 8px;
     border: 1px solid #d8c6ad;
+    border-radius: 4px;
     background: #fff;
     color: #775734;
     font-size: .78rem;
@@ -574,6 +542,7 @@ main {
     gap: 6px;
     padding: 7px 10px;
     border: 1px solid #d8c6ad;
+    border-radius: 4px;
     background: #fffaf2;
     color: #775734;
     font-size: .78rem;
@@ -585,12 +554,14 @@ main {
     gap: 4px;
     padding: 3px;
     border: 1px solid #d8c6ad;
+    border-radius: 4px;
     background: #fffaf2;
 }
 
 .sxp-toolbar .sxp-toolbar__zoom button {
     padding: 6px 10px !important;
     border: 0 !important;
+    border-radius: 4px !important;
     background: transparent !important;
     color: #775734 !important;
 }
