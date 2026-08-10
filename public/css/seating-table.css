@@ -598,7 +598,10 @@ main { padding-top: 60px; text-align: initial; }
     }
 
     .sx-add-table {
-        min-width: 520px;
+        position: static;
+        min-width: 0;
+        max-width: 100%;
+        flex-wrap: wrap;
     }
 }
 
