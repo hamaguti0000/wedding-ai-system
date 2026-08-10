@@ -67,7 +67,11 @@ def make_card(base_portrait, guest, couple, date):
     portrait = base_portrait.copy()
     draw = ImageDraw.Draw(portrait)
 
-    paper = (247, 244, 237)
+    # couple/date欄の下地はテンプレートの背景色そのものに合わせないと、四角い
+    # 「貼り付けたテキストボックス」のような境界線が見えてしまう。色を決め打ちすると
+    # テンプレート画像を差し替えたときにまたズレるため、そのカードの角(文字も花柄も
+    # かからない場所)から都度サンプリングする。
+    paper = base_portrait.getpixel((mm(0.5), mm(0.5)))
     navy = (37, 58, 92)
     gold = (169, 131, 72)
 
