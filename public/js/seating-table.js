@@ -551,6 +551,7 @@
 
         fpRoom.addEventListener('pointerdown', (e) => {
             if (e.target.closest('.sx-fp-seat')) return;
+            if (window.matchMedia('(max-width: 900px)').matches) return; // モバイルはグリッド表示固定・自由配置は無効
             const el = e.target.closest('.sx-fp-table');
             if (!el) return;
             el.setPointerCapture(e.pointerId);

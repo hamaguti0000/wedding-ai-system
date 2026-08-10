@@ -657,6 +657,29 @@ main { padding-top: 60px; text-align: initial; }
         max-width: 100%;
         flex-wrap: wrap;
     }
+
+    /* 配置図: 自由配置の絶対座標だと座席リスト分ボックスが縦に伸びて重なるため、
+       このサイズでは会場配置を諦めて、崩れないグリッド表示に切り替える */
+    .sx-fp-scroll {
+        padding: 12px;
+    }
+
+    .sx-fp-room {
+        position: static;
+        width: 100% !important;
+        height: auto !important;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: none;
+        border: none;
+    }
+
+    .sx-fp-table {
+        position: static;
+        width: calc(50% - 5px);
+        cursor: default;
+    }
 }
 
 
