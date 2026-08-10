@@ -115,7 +115,7 @@ class AdminSeatingController extends Controller
         $setting = $data['setting'];
 
         $payload = [
-            'couple' => trim(($setting?->groom_name_en ?: $setting?->groom_name ?: 'Kakeru') . ' and ' . ($setting?->bride_name_en ?: $setting?->bride_name ?: 'Mirai')),
+            'couple' => trim(($setting?->groom_name_en ?: $setting?->groom_name ?: '') . ' and ' . ($setting?->bride_name_en ?: $setting?->bride_name ?: '')),
             'date' => $setting?->ceremony_date
                 ? \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y')
                 : '',
@@ -284,13 +284,22 @@ class AdminSeatingController extends Controller
         $request->validate([
             'name'        => 'required|string|max:50',
             'seat_count'  => 'nullable|integer|min:0|max:' . self::MAX_SEATS_PER_TABLE,
+            'pos_x'       => 'nullable|integer|min:0|max:9999',
+            'pos_y'       => 'nullable|integer|min:0|max:9999',
         ], [
             'name.required' => 'テーブル名を入力してください',
             'seat_count.max' => '1テーブルの最大席数は8席です',
         ]);
 
-        $count    = SeatingTable::count();
-        [$posX, $posY] = $this->findFreeTablePosition();
+        $count = SeatingTable::count();
+        // 配置図へのドラッグ&ドロップで作成した場合は落とした位置をそのまま使う。
+        // 表側の「テーブルを追加」フォームからの場合は座標が来ないので自動配置する。
+        if ($request->filled('pos_x') && $request->filled('pos_y')) {
+            $posX = (int) $request->pos_x;
+            $posY = (int) $request->pos_y;
+        } else {
+            [$posX, $posY] = $this->findFreeTablePosition();
+        }
 
         $table = SeatingTable::create([
             'name'          => $request->name,

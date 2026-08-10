@@ -349,18 +349,8 @@
         }
     });
 
-    /* ── テーブルを追加 ─────────────────────────────────────── */
-    document.getElementById('addTableBtn')?.addEventListener('click', async () => {
-        const nameInput = document.getElementById('newTableName');
-        const seatsInput = document.getElementById('newTableSeats');
-        const name = nameInput.value.trim();
-        if (!name) { alert('テーブル名を入力してください'); return; }
-        const seatCount = Math.max(0, Math.min(8, parseInt(seatsInput.value, 10) || 0));
-
-        const json = await api('POST', `${BASE}/tables`, { name, seat_count: seatCount });
-        const table = json.table;
-        const seats = json.seats || [];
-
+    /* ── テーブルを追加(表側の作成結果を表の行として挿入。配置図側のドラッグ作成と共用) ── */
+    function insertTableIntoListView(table, seats) {
         document.querySelector('.sx-no-tables')?.remove();
 
         if (seats.length === 0) {
@@ -392,6 +382,18 @@
                 body.appendChild(row);
             });
         }
+    }
+
+    document.getElementById('addTableBtn')?.addEventListener('click', async () => {
+        const nameInput = document.getElementById('newTableName');
+        const seatsInput = document.getElementById('newTableSeats');
+        const name = nameInput.value.trim();
+        if (!name) { alert('テーブル名を入力してください'); return; }
+        const seatCount = Math.max(0, Math.min(8, parseInt(seatsInput.value, 10) || 0));
+
+        const json = await api('POST', `${BASE}/tables`, { name, seat_count: seatCount });
+        insertTableIntoListView(json.table, json.seats || []);
+        appendFloorplanTable(json.table);
 
         nameInput.value = '';
         seatsInput.value = 4;
@@ -498,6 +500,57 @@
         };
         fpRoom.addEventListener('pointerup', endDrag);
         fpRoom.addEventListener('pointercancel', endDrag);
+    }
+
+    /* ── 配置図：パレットからドラッグして新しいテーブルを作成 ── */
+    function appendFloorplanTable(table) {
+        if (!fpRoom) return;
+        const el = document.createElement('div');
+        el.className = 'sx-fp-table';
+        el.dataset.tableId = table.id;
+        el.style.left = (table.pos_x || 0) + 'px';
+        el.style.top = (table.pos_y || 0) + 'px';
+        el.innerHTML = `<span class="sx-fp-table__name">${escapeHtml(table.name)}</span><span class="sx-fp-table__count">0/0</span>`;
+        fpRoom.appendChild(el);
+    }
+
+    const fpNewTable = document.getElementById('sxFpNewTable');
+    if (fpNewTable && fpRoom) {
+        fpNewTable.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', 'new-table');
+            e.dataTransfer.effectAllowed = 'copy';
+        });
+
+        fpRoom.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        fpRoom.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.getData('text/plain') !== 'new-table') return;
+
+            const name = prompt('新しいテーブルの名前を入力してください（例: 友人1）');
+            if (!name || !name.trim()) return;
+            const seatCountInput = prompt('席数（0〜8、あとから変更できます）', '4');
+            if (seatCountInput === null) return;
+            const seatCount = Math.max(0, Math.min(8, parseInt(seatCountInput, 10) || 0));
+
+            const roomRect = fpRoom.getBoundingClientRect();
+            // 要素の中心がドロップ位置に来るよう、カード幅・高さの半分だけ左上にずらす
+            // (sx-fp-table のCSS上の目安サイズ。厳密でなくても位置調整はドラッグで直せる)。
+            const x = Math.max(0, Math.round(e.clientX - roomRect.left - 85));
+            const y = Math.max(0, Math.round(e.clientY - roomRect.top - 40));
+
+            const json = await api('POST', `${BASE}/tables`, {
+                name: name.trim(),
+                seat_count: seatCount,
+                pos_x: x,
+                pos_y: y,
+            });
+            insertTableIntoListView(json.table, json.seats || []);
+            appendFloorplanTable(json.table);
+        });
     }
 
     updateProgress();

@@ -363,6 +363,23 @@ main { padding-top: 60px; text-align: initial; }
     background: #fbf7ee; border-bottom: 1px solid var(--sx-border-light);
     flex-shrink: 0;
 }
+.sx-fp-palette {
+    display: flex; padding: 10px 20px;
+    background: #fff; border-bottom: 1px solid var(--sx-border-light);
+    flex-shrink: 0;
+}
+.sx-fp-new-table {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    border: 1.5px dashed var(--sx-gold);
+    border-radius: 6px;
+    background: #fbf7ee;
+    color: var(--sx-gold-dark);
+    font-size: 0.82rem; font-weight: 700;
+    cursor: grab;
+    user-select: none;
+}
+.sx-fp-new-table:active { cursor: grabbing; }
 .sx-fp-scroll { flex: 1; overflow: auto; padding: 24px; }
 .sx-fp-room {
     position: relative;

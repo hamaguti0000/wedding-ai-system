@@ -187,6 +187,11 @@
     {{-- ── 配置図ビュー（会場内のテーブル配置。ドラッグで移動）── --}}
     <div class="sx-fp-wrap" id="sxViewFloorplan" hidden>
         <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>テーブルをドラッグして会場内の位置を調整できます</p>
+        <div class="sx-fp-palette">
+            <div class="sx-fp-new-table" id="sxFpNewTable" draggable="true">
+                <i class="fa-solid fa-plus"></i>ここをドラッグして新しいテーブルを配置
+            </div>
+        </div>
         <div class="sx-fp-scroll">
             <div class="sx-fp-room" id="sxFpRoom" style="width:1700px; height:760px;">
                 @foreach ($tables as $table)

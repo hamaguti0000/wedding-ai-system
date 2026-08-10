@@ -99,6 +99,26 @@ describe('POST /admin/seating/tables テーブル作成', function () {
         $overlapsExisting = ($new['pos_x'] == 24 && $new['pos_y'] == 24);
         expect($overlapsExisting)->toBeFalse();
     });
+
+    it('pos_x/pos_yを指定すると配置図へのドラッグ&ドロップ位置がそのまま使われる', function () {
+        $response = $this->actingAs(makeAdmin())
+            ->postJson('/admin/seating/tables', ['name' => 'ドロップ卓', 'pos_x' => 555, 'pos_y' => 333])
+            ->assertStatus(200);
+
+        $new = $response->json('table');
+        expect($new['pos_x'])->toBe(555);
+        expect($new['pos_y'])->toBe(333);
+    });
+
+    it('pos_x/pos_y未指定のときは自動配置される（従来通り）', function () {
+        $response = $this->actingAs(makeAdmin())
+            ->postJson('/admin/seating/tables', ['name' => '自動配置卓'])
+            ->assertStatus(200);
+
+        $new = $response->json('table');
+        expect($new['pos_x'])->not->toBeNull();
+        expect($new['pos_y'])->not->toBeNull();
+    });
 });
 
 // ─── テーブル削除 ─────────────────────────────────────────
