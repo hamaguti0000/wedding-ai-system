@@ -70,7 +70,6 @@ def make_card(base_portrait, guest, couple, date):
     paper = (247, 244, 237)
     navy = (37, 58, 92)
     gold = (169, 131, 72)
-    muted = (131, 119, 103)
 
     draw.rectangle([mm(4.6), mm(4.3), mm(30), mm(16.2)], fill=paper)
     date_font = font(SERIF_PATH, mm(2.45))
@@ -81,14 +80,16 @@ def make_card(base_portrait, guest, couple, date):
     table_font = font(SERIF_PATH, mm(18.5))
     draw.text((mm(44.4), mm(39.0)), guest.get("table", ""), font=table_font, fill=navy, anchor="mm")
 
-    kana = guest.get("furigana") or ""
-    name = guest.get("name") or ""
-    name_font = fit_font(SERIF_PATH, name, mm(5.6), mm(38))
-    if kana:
-        draw_fit(draw, (mm(6.0), mm(48.0)), kana, SANS_PATH, mm(1.9), muted, mm(38))
-        draw.text((mm(6.0), mm(56.2)), name, font=name_font, fill=navy)
+    # ローマ字(名/姓を2段組み、名を大きく)を優先し、ローマ字が無いアカウント(テスト用等)は
+    # 漢字氏名1行にフォールバックする。
+    first_name = (guest.get("first_name") or "").strip()
+    last_name = (guest.get("last_name") or "").strip()
+    if first_name or last_name:
+        draw_fit(draw, (mm(6.0), mm(49.0)), first_name, SERIF_PATH, mm(7.4), navy, mm(40))
+        draw_fit(draw, (mm(6.2), mm(61.5)), last_name, SERIF_PATH, mm(4.6), navy, mm(40))
     else:
-        draw.text((mm(6.0), mm(53.4)), name, font=name_font, fill=navy)
+        name = guest.get("name") or ""
+        draw_fit(draw, (mm(6.0), mm(53.4)), name, SERIF_PATH, mm(5.6), navy, mm(38))
 
     return portrait.rotate(-90, expand=True).resize((card_w, card_h), Image.Resampling.LANCZOS)
 

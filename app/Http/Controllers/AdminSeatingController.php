@@ -115,7 +115,7 @@ class AdminSeatingController extends Controller
         $setting = $data['setting'];
 
         $payload = [
-            'couple' => trim(($setting?->groom_name ?? 'Kakeru') . ' and ' . ($setting?->bride_name ?? 'Mirai')),
+            'couple' => trim(($setting?->groom_name_en ?: $setting?->groom_name ?: 'Kakeru') . ' and ' . ($setting?->bride_name_en ?: $setting?->bride_name ?: 'Mirai')),
             'date' => $setting?->ceremony_date
                 ? \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y')
                 : '',
@@ -123,12 +123,15 @@ class AdminSeatingController extends Controller
             'guests' => $data['guests']->map(function (User $guest) use ($data) {
                 $profile = $guest->guestProfile;
                 $table = $guest->seatAssignment?->seat?->seatingTable;
-                $name = $profile ? trim(($profile->last_name ?? '') . ' ' . ($profile->first_name ?? '')) : $guest->name;
-                $furigana = $profile ? trim(($profile->furigana_sei ?? '') . ' ' . ($profile->furigana_mei ?? '')) : '';
+                $kanjiName = $profile ? trim(($profile->last_name ?? '') . ' ' . ($profile->first_name ?? '')) : $guest->name;
+                [$firstNameEn, $lastNameEn] = $this->romanNameParts($guest->username);
 
                 return [
-                    'name' => $name ?: $guest->username,
-                    'furigana' => $furigana,
+                    // usernameは「名前_苗字」のローマ字で登録されている運用のため、それを氏名の
+                    // 正式なローマ字表記として使う(ふりがな未入力のゲストが多く自動変換は不可)。
+                    'first_name' => $firstNameEn,
+                    'last_name' => $lastNameEn,
+                    'name' => $kanjiName ?: $guest->username,
                     'table' => $table ? ($data['tableMarks'][$table->id] ?? '') : '',
                 ];
             })->values()->all(),
@@ -236,6 +239,25 @@ class AdminSeatingController extends Controller
             'setting' => WeddingSetting::first(),
             'tableMarks' => $tableMarks,
         ];
+    }
+
+    /**
+     * 「firstname_lastname」形式のusernameを Title Case のローマ字氏名に分解する。
+     * 形式に合わないアカウント(テストユーザー等)は空文字を返し、呼び出し側で漢字表記にフォールバックする。
+     *
+     * @return array{0: string, 1: string} [firstName, lastName]
+     */
+    private function romanNameParts(string $username): array
+    {
+        $parts = explode('_', $username, 2);
+
+        if (count($parts) !== 2) {
+            return ['', ''];
+        }
+
+        $titleCase = fn (string $s) => ucfirst(strtolower(trim($s)));
+
+        return [$titleCase($parts[0]), $titleCase($parts[1])];
     }
 
     private function tableLetter(int $index): string
