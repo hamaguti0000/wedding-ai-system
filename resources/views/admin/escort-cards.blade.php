@@ -39,11 +39,11 @@
             </div>
         </div>
 
-        <form method="GET" action="{{ route('admin.seating.escort-cards') }}" id="escortTargetForm">
+        <form method="GET" action="{{ route('admin.seating.escort-cards') }}" id="escortTargetForm" data-pdf-base="{{ route('admin.seating.escort-cards.pdf') }}">
             <input type="hidden" name="selection_submitted" value="1">
             <div class="ec-selector__summary">
                 <span><strong id="ecSelectedCount">{{ $selectedIds->count() }}</strong>名を印刷対象に選択中</span>
-                <button type="submit">選択した人でプレビューを作成</button>
+                <button type="button" id="ecRefreshPreview">選択した人でプレビューを作成</button>
             </div>
 
             <div class="ec-guest-list">
@@ -91,9 +91,9 @@
         <div>
             <p class="ec-selector__eyebrow">PDF Preview</p>
             <h2>このPDFが印刷用プレビューです</h2>
-            <p>{{ $guests->count() }}枚をA4名刺10面に配置しています。下のPDFを確認してから印刷してください。</p>
+            <p><span id="ecPreviewCount">{{ $guests->count() }}</span>枚をA4名刺10面に配置しています。下のPDFを確認してから印刷してください。</p>
         </div>
-        <a class="ec-preview-action__button" href="{{ $pdfUrl }}" target="_blank" rel="noopener">PDFを別画面で開く</a>
+        <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
     </section>
     @endif
 
@@ -104,34 +104,78 @@
     </section>
     @else
     <section class="ec-pdf-preview" aria-label="PDFプレビュー">
-        <iframe src="{{ $pdfUrl }}" title="エスコートカードPDFプレビュー"></iframe>
-        <p>PDFが表示されない場合は、上の「PDFを別画面で開く」から確認してください。</p>
+        <iframe id="ecPdfFrame" src="{{ $pdfUrl }}" title="エスコートカードPDFプレビュー"></iframe>
+        <div class="ec-pdf-preview__foot">
+            <span>PDFが表示されない場合は、ボタンから別画面で確認してください。</span>
+            <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+        </div>
     </section>
     @endif
 </div>
 
 <script>
 (() => {
+    const form = document.getElementById('escortTargetForm');
     const checks = Array.from(document.querySelectorAll('.ec-target-check'));
     const count = document.getElementById('ecSelectedCount');
-    const update = () => {
-        if (count) count.textContent = checks.filter((check) => check.checked).length;
+    const previewCount = document.getElementById('ecPreviewCount');
+    const pdfFrame = document.getElementById('ecPdfFrame');
+    const pdfLinks = Array.from(document.querySelectorAll('.ec-pdf-open'));
+    const refreshButton = document.getElementById('ecRefreshPreview');
+    let timer = null;
+
+    const buildPdfUrl = () => {
+        const params = new URLSearchParams();
+        params.set('selection_submitted', '1');
+        checks.filter((check) => check.checked).forEach((check) => {
+            params.append('print_user_ids[]', check.value);
+        });
+        return `${form.dataset.pdfBase}?${params.toString()}`;
+    };
+
+    const selectedCount = () => checks.filter((check) => check.checked).length;
+
+    const updateCounts = () => {
+        const total = selectedCount();
+        if (count) count.textContent = total;
+        if (previewCount) previewCount.textContent = total;
+        return total;
+    };
+
+    const refreshPreview = () => {
+        const total = updateCounts();
+        const url = buildPdfUrl();
+        pdfLinks.forEach((link) => {
+            link.href = url;
+            link.classList.toggle('is-disabled', total === 0);
+            link.setAttribute('aria-disabled', total === 0 ? 'true' : 'false');
+        });
+        if (pdfFrame) {
+            pdfFrame.src = total > 0 ? url : 'about:blank';
+        }
+    };
+
+    const scheduleRefresh = () => {
+        updateCounts();
+        window.clearTimeout(timer);
+        timer = window.setTimeout(refreshPreview, 650);
     };
 
     document.getElementById('ecSelectAll')?.addEventListener('click', () => {
         checks.forEach((check) => check.checked = true);
-        update();
+        refreshPreview();
     });
     document.getElementById('ecClearAll')?.addEventListener('click', () => {
         checks.forEach((check) => check.checked = false);
-        update();
+        refreshPreview();
     });
     document.getElementById('ecSelectDefault')?.addEventListener('click', () => {
         checks.forEach((check) => check.checked = check.dataset.default === '1');
-        update();
+        refreshPreview();
     });
-    checks.forEach((check) => check.addEventListener('change', update));
-    update();
+    refreshButton?.addEventListener('click', refreshPreview);
+    checks.forEach((check) => check.addEventListener('change', scheduleRefresh));
+    updateCounts();
 })();
 </script>
 @endsection
