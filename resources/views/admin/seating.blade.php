@@ -48,7 +48,8 @@
             <span class="sx-topbar__title"><i class="fa-solid fa-table"></i>席次表</span>
             <div class="sx-view-tabs" id="viewTabs">
                 <button type="button" class="sx-view-tab active" data-view="table"><i class="fa-solid fa-table-list"></i>表</button>
-                <button type="button" class="sx-view-tab" data-view="floorplan"><i class="fa-solid fa-map"></i>配置図</button>
+                <button type="button" class="sx-view-tab" data-view="cards"><i class="fa-solid fa-id-card"></i>座席表</button>
+                <button type="button" class="sx-view-tab" data-view="floorplan"><i class="fa-solid fa-map"></i>会場図</button>
             </div>
         </div>
         <div class="sx-topbar__center">
@@ -188,8 +189,8 @@
 
     </div>
 
-    {{-- ── 配置図ビュー（実物の席次表に近いカード表示。ゲストをドラッグで配置）── --}}
-    <div class="sx-fp-wrap" id="sxViewFloorplan" hidden>
+    {{-- ── 座席表ビュー（実物の席次表に近いカード表示。ゲストをドラッグで配置）── --}}
+    <div class="sx-fp-wrap" id="sxViewCards" hidden>
         <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>ゲストをテーブルの空席にドラッグして配置できます</p>
         <div class="sx-fp-body">
             <aside class="sx-fp-sidebar">
@@ -258,6 +259,23 @@
                         @endforeach
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── 会場図ビュー（テーブルをドラッグして会場内の位置を調整。どのテーブルがどこにあるか一目で分かる）── --}}
+    <div class="sx-map-wrap" id="sxViewFloorplan" hidden>
+        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>テーブルをドラッグして会場内の位置を調整できます</p>
+        <div class="sx-map-scroll">
+            <div class="sx-map-room" id="sxMapRoom" style="width:1400px; height:900px;">
+                @foreach ($tables as $table)
+                @php $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count(); @endphp
+                <div class="sx-map-table" data-table-id="{{ $table->id }}"
+                     style="left:{{ $table->pos_x }}px; top:{{ $table->pos_y }}px;">
+                    <span class="sx-map-table__name">{{ $table->name }}</span>
+                    <span class="sx-map-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                </div>
+                @endforeach
             </div>
         </div>
     </div>

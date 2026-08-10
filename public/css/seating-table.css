@@ -340,7 +340,7 @@ main { padding-top: 60px; text-align: initial; }
 }
 
 /* ── 表示切り替え（[hidden] 属性が display:flex 指定に負けないよう明示）── */
-#sxViewTable[hidden], #sxViewFloorplan[hidden] { display: none !important; }
+#sxViewTable[hidden], #sxViewCards[hidden], #sxViewFloorplan[hidden] { display: none !important; }
 
 /* ── 表示切り替えタブ ── */
 .sx-view-tabs { display: flex; gap: 2px; margin-left: 4px; }
@@ -472,6 +472,44 @@ main { padding-top: 60px; text-align: initial; }
 .sxp-seat.is-occupied:hover .sxp-seat__name { color: #c0392b; }
 .sxp-seat.is-drop-target { background: #fbf3e4; box-shadow: inset 0 0 0 2px var(--sxp-gold); }
 
+/* ── 会場図：どのテーブルがどこにあるかを俯瞰するための小さいマーカー ── */
+.sx-map-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.sx-map-scroll { flex: 1; overflow: auto; padding: 24px; -webkit-overflow-scrolling: touch; }
+.sx-map-room {
+    position: relative;
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(179,139,89,0.06) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(179,139,89,0.06) 40px);
+    border: 1px solid var(--sx-border-light);
+    border-radius: 4px;
+    background-color: #fffdf9;
+}
+.sx-map-table {
+    position: absolute;
+    width: 108px;
+    padding: 6px 8px;
+    background: #fff;
+    border: 1px solid var(--sx-gold);
+    border-radius: 6px;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.sx-map-table:hover { background: #fdf7ec; }
+.sx-map-table.is-dragging { cursor: grabbing; z-index: 20; box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
+.sx-map-table__name {
+    display: block;
+    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
+    font-size: 0.74rem; font-weight: 700; color: var(--sx-gold-dark, #775734);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sx-map-table__count {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.64rem; color: var(--sx-mid, #6a594c);
+}
 
 /* ── 2026-08 readability pass: 管理者は編集しやすさを優先 ── */
 .sx-app {

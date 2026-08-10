@@ -272,7 +272,7 @@
         refreshAllGuestSelects();
         // refreshAllGuestSelects で value がリセットされるため選択状態を再適用
         body.querySelectorAll('select.sx-guest').forEach(s => { s.value = s.dataset.currentUser || ''; });
-        affectedTableIds.forEach(id => syncFloorplanTable(id));
+        affectedTableIds.forEach(id => { syncFloorplanTable(id); syncMapTable(id); });
     });
 
     /* ── 席を削除 ───────────────────────────────────────────── */
@@ -298,6 +298,7 @@
         updateProgress();
         renderUnassignedList();
         syncFloorplanTable(tableId);
+        syncMapTable(tableId);
     });
 
     function removeSeatRow(row, tableId) {
@@ -371,6 +372,7 @@
             groupRows[groupRows.length - 1].after(newRow);
         }
         syncFloorplanTable(tableId);
+        syncMapTable(tableId);
     });
 
     function typeOptionsHtml(selected) {
@@ -532,17 +534,21 @@
         if (e.key === 'Escape') closeGuestDetail();
     });
 
-    /* ── 表示切り替え（表 / 配置図） ─────────────────────────── */
-    const viewTable     = document.getElementById('sxViewTable');
-    const viewFloorplan = document.getElementById('sxViewFloorplan');
+    /* ── 表示切り替え（表 / 座席表 / 会場図） ───────────────────── */
+    const views = {
+        table: document.getElementById('sxViewTable'),
+        cards: document.getElementById('sxViewCards'),
+        floorplan: document.getElementById('sxViewFloorplan'),
+    };
     document.getElementById('viewTabs')?.addEventListener('click', (e) => {
         const tab = e.target.closest('.sx-view-tab');
         if (!tab) return;
         document.querySelectorAll('.sx-view-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        const isFloorplan = tab.dataset.view === 'floorplan';
-        if (viewTable)     viewTable.hidden = isFloorplan;
-        if (viewFloorplan) viewFloorplan.hidden = !isFloorplan;
+        const target = tab.dataset.view;
+        Object.entries(views).forEach(([key, el]) => {
+            if (el) el.hidden = key !== target;
+        });
     });
 
     const fpRoom = document.getElementById('sxFpRoom');
@@ -576,6 +582,69 @@
         fpRoom.appendChild(el);
     }
 
+    /* ── 会場図：小さいマーカーをドラッグして会場内の位置を調整 ── */
+    const mapRoom = document.getElementById('sxMapRoom');
+
+    function appendMapTable(table) {
+        if (!mapRoom) return;
+        const el = document.createElement('div');
+        el.className = 'sx-map-table';
+        el.dataset.tableId = table.id;
+        el.style.left = (table.pos_x || 0) + 'px';
+        el.style.top = (table.pos_y || 0) + 'px';
+        el.innerHTML = `<span class="sx-map-table__name">${escapeHtml(table.name)}</span><span class="sx-map-table__count">0/0</span>`;
+        mapRoom.appendChild(el);
+    }
+
+    function syncMapTable(tableId) {
+        const el = document.querySelector(`.sx-map-table[data-table-id="${tableId}"]`);
+        if (!el) return;
+        const seats = body.querySelectorAll(`tr[data-table-id="${tableId}"] select.sx-guest`);
+        const total = seats.length;
+        const occupied = Array.from(seats).filter(s => s.dataset.currentUser).length;
+        const countEl = el.querySelector('.sx-map-table__count');
+        if (countEl) countEl.textContent = `${occupied}/${total}`;
+    }
+
+    if (mapRoom) {
+        let mapDrag = null;
+
+        mapRoom.addEventListener('pointerdown', (e) => {
+            const el = e.target.closest('.sx-map-table');
+            if (!el) return;
+            el.setPointerCapture(e.pointerId);
+            mapDrag = {
+                el,
+                startX: e.clientX,
+                startY: e.clientY,
+                origLeft: parseFloat(el.style.left) || 0,
+                origTop: parseFloat(el.style.top) || 0,
+            };
+            el.classList.add('is-dragging');
+        });
+
+        mapRoom.addEventListener('pointermove', (e) => {
+            if (!mapDrag) return;
+            const dx = e.clientX - mapDrag.startX;
+            const dy = e.clientY - mapDrag.startY;
+            mapDrag.el.style.left = Math.max(0, mapDrag.origLeft + dx) + 'px';
+            mapDrag.el.style.top  = Math.max(0, mapDrag.origTop + dy) + 'px';
+        });
+
+        const endMapDrag = async () => {
+            if (!mapDrag) return;
+            const el = mapDrag.el;
+            el.classList.remove('is-dragging');
+            const tableId = el.dataset.tableId;
+            const x = Math.round(parseFloat(el.style.left) || 0);
+            const y = Math.round(parseFloat(el.style.top) || 0);
+            mapDrag = null;
+            await api('PATCH', `${BASE}/tables/${tableId}/position`, { x, y });
+        };
+        mapRoom.addEventListener('pointerup', endMapDrag);
+        mapRoom.addEventListener('pointercancel', endMapDrag);
+    }
+
     /* ── 配置図：新しいテーブルを追加 ─────────────────────── */
     document.getElementById('sxFpNewTable')?.addEventListener('click', async () => {
         const name = prompt('新しいテーブルの名前を入力してください（例: 友人1）');
@@ -590,6 +659,7 @@
         });
         insertTableIntoListView(json.table, json.seats || []);
         appendFloorplanTable(json.table, json.seats || []);
+        appendMapTable(json.table);
     });
 
     /* ── 配置図：未配置ゲストをドラッグして座席に配置 ── */
