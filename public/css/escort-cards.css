@@ -62,7 +62,8 @@ main {
 
 
 .ec-selector,
-.ec-print-note {
+.ec-print-note,
+.ec-preview-action {
     width: min(1120px, 100%);
     margin: 0 auto 18px;
     border: 1px solid rgba(37, 58, 92, .14);
@@ -229,6 +230,42 @@ main {
     background: #fbf0ef;
 }
 
+
+.ec-preview-action {
+    width: min(1120px, 100%);
+    margin: 0 auto 18px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border-color: rgba(169, 131, 72, .3);
+    background: #fffaf2;
+}
+
+.ec-preview-action h2 {
+    margin: 0 0 5px;
+    color: var(--ec-navy);
+    font-size: 1.12rem;
+}
+
+.ec-preview-action p {
+    margin: 0;
+    color: #5f6670;
+    font: 600 .88rem/1.65 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-preview-action button {
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--ec-navy);
+    background: var(--ec-navy);
+    color: #fff;
+    font: 900 .9rem 'Noto Sans JP', system-ui, sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
 .ec-print-note {
     display: flex;
     gap: 10px;
@@ -384,7 +421,8 @@ main {
 
     .ec-selector__head,
     .ec-selector__summary,
-    .ec-print-note {
+    .ec-print-note,
+    .ec-preview-action {
         display: grid;
     }
 
@@ -423,7 +461,8 @@ main {
     .header-overlay,
     .ec-toolbar,
     .ec-selector,
-    .ec-print-note {
+    .ec-print-note,
+    .ec-preview-action {
         display: none !important;
     }
 

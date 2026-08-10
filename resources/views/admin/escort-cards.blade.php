@@ -22,7 +22,6 @@
     <div class="ec-toolbar">
         <a href="{{ route('admin.seating') }}">&larr; 席次表に戻る</a>
         <span>{{ $guests->count() }}枚 / A4名刺10面・縦デザイン</span>
-        <button type="button" onclick="window.print()">印刷する</button>
     </div>
 
     <section class="ec-selector" aria-label="印刷対象者選択">
@@ -43,7 +42,7 @@
             <input type="hidden" name="selection_submitted" value="1">
             <div class="ec-selector__summary">
                 <span><strong id="ecSelectedCount">{{ $selectedIds->count() }}</strong>名を印刷対象に選択中</span>
-                <button type="submit">選択した人でプレビュー更新</button>
+                <button type="submit">選択した人でプレビューを作成</button>
             </div>
 
             <div class="ec-guest-list">
@@ -85,6 +84,17 @@
         <strong>印刷前の確認</strong>
         <span>A4、倍率100%、余白なし、背景グラフィックONで印刷してください。最初は普通紙で1枚テストして、名刺用紙に重ねてズレを確認してください。</span>
     </section>
+
+    @if ($guests->isNotEmpty())
+    <section class="ec-preview-action" aria-label="印刷プレビュー">
+        <div>
+            <p class="ec-selector__eyebrow">Preview First</p>
+            <h2>まず下のプレビューを確認してください</h2>
+            <p>{{ $guests->count() }}枚をA4名刺10面に配置しています。問題なければ印刷プレビューを開いて、倍率100%になっているか確認してください。</p>
+        </div>
+        <button type="button" onclick="window.print()">印刷プレビューを開く</button>
+    </section>
+    @endif
 
     @if ($guests->isEmpty())
     <section class="ec-empty">
