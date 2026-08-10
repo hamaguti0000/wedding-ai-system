@@ -112,13 +112,10 @@ class AdminSeatingController extends Controller
     public function escortCardsPdf(Request $request)
     {
         $data = $this->escortCardData($request);
-        $setting = $data['setting'];
 
         $payload = [
-            'couple' => trim(($setting?->groom_name_en ?: $setting?->groom_name ?: '') . ' and ' . ($setting?->bride_name_en ?: $setting?->bride_name ?: '')),
-            'date' => $setting?->ceremony_date
-                ? \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y')
-                : '',
+            // 新郎新婦名・挙式日はescort-template.png自体に描き込み済みのため、
+            // ここでは組み立てない(スクリプト側で重ねて描画すると二重表示になる)。
             'template' => public_path('images/escort-template.png'),
             'guests' => $data['guests']->map(function (User $guest) use ($data) {
                 $profile = $guest->guestProfile;

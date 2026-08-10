@@ -60,27 +60,19 @@ def draw_fit(draw, pos, text, path, size, fill, max_width, anchor=None):
         return
     draw.text(pos, text, font=fit_font(path, text, size, max_width), fill=fill, anchor=anchor)
 
-def make_card(base_portrait, guest, couple, date):
+def make_card(base_portrait, guest):
     portrait_w, portrait_h = mm(55), mm(91)
     card_w, card_h = mm(91), mm(55)
 
     portrait = base_portrait.copy()
     draw = ImageDraw.Draw(portrait)
 
-    # couple/date欄の下地はテンプレートの背景色そのものに合わせないと、四角い
-    # 「貼り付けたテキストボックス」のような境界線が見えてしまう。色を決め打ちすると
-    # テンプレート画像を差し替えたときにまたズレるため、そのカードの角(文字も花柄も
-    # かからない場所)から都度サンプリングする。
-    paper = base_portrait.getpixel((mm(0.5), mm(0.5)))
     navy = (37, 58, 92)
-    gold = (169, 131, 72)
 
-    draw.rectangle([mm(4.6), mm(4.3), mm(30), mm(16.2)], fill=paper)
-    date_font = font(SERIF_PATH, mm(2.45))
-    draw_fit(draw, (mm(5.2), mm(7.9)), couple, SERIF_PATH, mm(2.8), gold, mm(24))
-    if date:
-        draw.text((mm(5.2), mm(13.0)), date, font=date_font, fill=gold)
-
+    # couple(新郎新婦名)/date(挙式日)は、escort-template.png自体に既にきれいな
+    # 筆記体フォントで描き込まれている(テンプレート作成時に名前入りで発注したもの)。
+    # ここでスクリプト側からも別フォントで重ねて描画すると、同じ内容の文字が
+    # 位置・フォントのずれた状態で二重に表示されてしまっていた。
     table_font = font(SERIF_PATH, mm(18.5))
     draw.text((mm(44.4), mm(39.0)), guest.get("table", ""), font=table_font, fill=navy, anchor="mm")
 
@@ -119,7 +111,7 @@ def main():
     for page_index in range(max(1, math.ceil(len(guests) / 10))):
         page = Image.new("RGB", (page_w, page_h), "white")
         for i, guest in enumerate(guests[page_index * 10:(page_index + 1) * 10]):
-            card = make_card(base_portrait, guest, payload.get("couple", ""), payload.get("date", ""))
+            card = make_card(base_portrait, guest)
             page.paste(card, (xs[i % 2], ys[i // 2]))
         pages.append(page)
 
