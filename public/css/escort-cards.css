@@ -286,26 +286,42 @@ main {
 }
 
 .ec-print-sheet {
+    position: relative;
     width: 210mm;
-    min-height: 297mm;
-    padding: 11mm 14mm;
-    display: grid;
-    grid-template-columns: repeat(2, 91mm);
-    grid-template-rows: repeat(5, 55mm);
-    gap: 0;
+    height: 297mm;
+    padding: 0;
     background: #fff;
     box-shadow: 0 18px 44px rgba(37, 45, 58, .16);
     break-after: page;
     page-break-after: always;
+    overflow: hidden;
+}
+
+.ec-print-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
 }
 
 .ec-card {
-    position: relative;
+    position: absolute;
     width: 91mm;
     height: 55mm;
     overflow: hidden;
     background: #fff;
+    break-inside: avoid;
+    page-break-inside: avoid;
 }
+
+.ec-card:nth-child(1) { left: 14mm; top: 11mm; }
+.ec-card:nth-child(2) { left: 105mm; top: 11mm; }
+.ec-card:nth-child(3) { left: 14mm; top: 66mm; }
+.ec-card:nth-child(4) { left: 105mm; top: 66mm; }
+.ec-card:nth-child(5) { left: 14mm; top: 121mm; }
+.ec-card:nth-child(6) { left: 105mm; top: 121mm; }
+.ec-card:nth-child(7) { left: 14mm; top: 176mm; }
+.ec-card:nth-child(8) { left: 105mm; top: 176mm; }
+.ec-card:nth-child(9) { left: 14mm; top: 231mm; }
+.ec-card:nth-child(10) { left: 105mm; top: 231mm; }
 
 .ec-card__inner {
     position: absolute;
@@ -448,12 +464,18 @@ main {
         margin: 0;
     }
 
+    html,
     body {
+        width: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
         background: #fff !important;
     }
 
     main {
-        padding-top: 0 !important;
+        width: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .header,
@@ -467,7 +489,9 @@ main {
     }
 
     .ec-page {
+        width: 210mm;
         min-height: auto;
+        margin: 0 !important;
         padding: 0;
         background: #fff !important;
     }
@@ -478,8 +502,15 @@ main {
 
     .ec-print-sheet {
         width: 210mm;
-        min-height: 297mm;
-        padding: 11mm 14mm;
+        height: 297mm;
+        margin: 0 !important;
+        padding: 0;
         box-shadow: none;
+        overflow: hidden;
+    }
+
+    .ec-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 }
