@@ -150,7 +150,7 @@ class AdminSeatingController extends Controller
             $jsonPath,
             $pdfPath,
         ]);
-        $process->setTimeout(120);
+        $process->setTimeout(180);
         $process->run();
 
         @unlink($jsonPath);
