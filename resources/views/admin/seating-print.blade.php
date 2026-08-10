@@ -107,7 +107,7 @@
             <section class="sxp-layout" aria-label="席とテーブルを統合した席次表">
         <div class="sxp-main-table">
             <span class="sxp-main-table__sub">Main Table</span>
-            <span class="sxp-main-table__title">濵口翔　馬場弥礼</span>
+            <span class="sxp-main-table__title">{{ trim(($setting?->groom_name ?? '') . '　' . ($setting?->bride_name ?? '')) }}</span>
         </div>
 
         @php
