@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-DPI = 150
+DPI = 200
 PX_PER_MM = DPI / 25.4
 
 def mm(value):
@@ -126,9 +126,9 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
     first, rest = pages[0], pages[1:]
     # 300DPI・JPEGデフォルト品質のままだと大人数でPDFが十数MBになり、モバイル回線での
-    # プレビュー表示が完了しない/固まる原因になっていた。テンプレートは線画+ベタ塗りが
-    # 主体で写真ほど解像度を必要としないため、150DPI・quality=70でも劣化は目視で分からない。
-    first.save(out_path, "PDF", resolution=DPI, save_all=True, append_images=rest, quality=70)
+    # プレビュー表示が完了しない/固まる原因になっていた。200DPI・quality=80だと
+    # 205名でも約8MBに収まりつつ、150DPI・quality=70より花柄の線がくっきり見える。
+    first.save(out_path, "PDF", resolution=DPI, save_all=True, append_images=rest, quality=80)
 
 if __name__ == "__main__":
     main()
