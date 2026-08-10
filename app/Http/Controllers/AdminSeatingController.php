@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\WeddingSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\Process\Process;
 
 class AdminSeatingController extends Controller
 {
@@ -104,6 +105,69 @@ class AdminSeatingController extends Controller
     /** ゲストを選択してエスコートカードを印刷するページ */
     public function escortCards(Request $request)
     {
+        return view('admin.escort-cards', $this->escortCardData($request));
+    }
+
+
+    public function escortCardsPdf(Request $request)
+    {
+        $data = $this->escortCardData($request);
+        $setting = $data['setting'];
+
+        $payload = [
+            'couple' => trim(($setting?->groom_name ?? 'Kakeru') . ' and ' . ($setting?->bride_name ?? 'Mirai')),
+            'date' => $setting?->ceremony_date
+                ? \Carbon\Carbon::parse($setting->ceremony_date)->format('M.j.Y')
+                : '',
+            'template' => public_path('images/escort-template.png'),
+            'guests' => $data['guests']->map(function (User $guest) use ($data) {
+                $profile = $guest->guestProfile;
+                $table = $guest->seatAssignment?->seat?->seatingTable;
+                $name = $profile ? trim(($profile->last_name ?? '') . ' ' . ($profile->first_name ?? '')) : $guest->name;
+                $furigana = $profile ? trim(($profile->furigana_sei ?? '') . ' ' . ($profile->furigana_mei ?? '')) : '';
+
+                return [
+                    'name' => $name ?: $guest->username,
+                    'furigana' => $furigana,
+                    'table' => $table ? ($data['tableMarks'][$table->id] ?? '') : '',
+                ];
+            })->values()->all(),
+        ];
+
+        $dir = storage_path('app/escort-cards');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $token = uniqid('escort_', true);
+        $jsonPath = $dir . '/' . $token . '.json';
+        $pdfPath = $dir . '/' . $token . '.pdf';
+        file_put_contents($jsonPath, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+        $process = new Process([
+            'python3',
+            base_path('scripts/generate_escort_cards_pdf.py'),
+            $jsonPath,
+            $pdfPath,
+        ]);
+        $process->setTimeout(120);
+        $process->run();
+
+        @unlink($jsonPath);
+
+        if (! $process->isSuccessful() || ! is_file($pdfPath)) {
+            report(new \RuntimeException('Escort PDF generation failed: ' . $process->getErrorOutput() . $process->getOutput()));
+            abort(500, 'PDF生成に失敗しました。');
+        }
+
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="escort-cards.pdf"',
+        ])->deleteFileAfterSend(true);
+    }
+
+    private function escortCardData(Request $request): array
+    {
         $tables = SeatingTable::query()
             ->orderBy('display_order')
             ->get(['id', 'name']);
@@ -165,15 +229,13 @@ class AdminSeatingController extends Controller
             })
             ->values();
 
-        $setting = WeddingSetting::first();
-
-        return view('admin.escort-cards', compact(
-            'allGuests',
-            'guests',
-            'selectedIds',
-            'setting',
-            'tableMarks'
-        ));
+        return [
+            'allGuests' => $allGuests,
+            'guests' => $guests,
+            'selectedIds' => $selectedIds,
+            'setting' => WeddingSetting::first(),
+            'tableMarks' => $tableMarks,
+        ];
     }
 
     private function tableLetter(int $index): string

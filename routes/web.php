@@ -236,6 +236,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/seating/print',                       [AdminSeatingController::class, 'print'])         ->name('seating.print');
     Route::get('/seating/guest-preview',               [AdminSeatingController::class, 'guestPreview'])  ->name('seating.guest-preview');
     Route::get('/seating/escort-cards',               [AdminSeatingController::class, 'escortCards'])   ->name('seating.escort-cards');
+    Route::get('/seating/escort-cards/pdf',           [AdminSeatingController::class, 'escortCardsPdf'])->name('seating.escort-cards.pdf');
     Route::post('/seating/tables',                     [AdminSeatingController::class, 'storeTable'])    ->name('seating.tables.store');
     Route::delete('/seating/tables/{tableId}',         [AdminSeatingController::class, 'destroyTable'])  ->name('seating.tables.destroy');
     Route::patch('/seating/tables/{tableId}/position', [AdminSeatingController::class, 'updatePosition'])->name('seating.tables.position');

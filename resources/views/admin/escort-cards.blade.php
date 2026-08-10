@@ -90,9 +90,9 @@
         <div>
             <p class="ec-selector__eyebrow">Preview First</p>
             <h2>まず下のプレビューを確認してください</h2>
-            <p>{{ $guests->count() }}枚をA4名刺10面に配置しています。問題なければ印刷プレビューを開いて、倍率100%になっているか確認してください。</p>
+            <p>{{ $guests->count() }}枚をA4名刺10面に配置しています。問題なければPDF印刷プレビューを開いて、用紙がA4・倍率100%になっているか確認してください。</p>
         </div>
-        <button type="button" onclick="window.print()">印刷プレビューを開く</button>
+        <button type="submit" form="escortTargetForm" formmethod="GET" formaction="{{ route('admin.seating.escort-cards.pdf') }}" formtarget="_blank">PDF印刷プレビューを開く</button>
     </section>
     @endif
 
