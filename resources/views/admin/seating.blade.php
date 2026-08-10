@@ -18,6 +18,10 @@
         $p = $user->guestProfile;
         return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
     };
+    $tableMark = function ($table) {
+        $name = trim($table->name ?? '');
+        return $name !== '' ? mb_substr($name, 0, 1) : 'T';
+    };
 
     $allGuestsJson = $allGuests->map(function ($u) use ($guestName, $guestSide, $guestRel) {
         return [
@@ -184,9 +188,9 @@
 
     </div>
 
-    {{-- ── 配置図ビュー（会場内のテーブル配置。ドラッグで移動）── --}}
+    {{-- ── 配置図ビュー（実物の席次表に近いカード表示。ゲストをドラッグで配置）── --}}
     <div class="sx-fp-wrap" id="sxViewFloorplan" hidden>
-        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>テーブルをドラッグして会場内の位置を調整、ゲストをテーブルにドラッグして配置できます</p>
+        <p class="sx-fp-hint"><i class="fa-solid fa-hand-pointer"></i>ゲストをテーブルの空席にドラッグして配置できます</p>
         <div class="sx-fp-body">
             <aside class="sx-fp-sidebar">
                 <div class="sx-sidebar__head">
@@ -207,28 +211,49 @@
             </aside>
             <div class="sx-fp-main">
                 <div class="sx-fp-palette">
-                    <div class="sx-fp-new-table" id="sxFpNewTable" draggable="true">
-                        <i class="fa-solid fa-plus"></i>ここをドラッグして新しいテーブルを配置
-                    </div>
+                    <button type="button" class="sx-fp-new-table" id="sxFpNewTable">
+                        <i class="fa-solid fa-plus"></i>新しいテーブルを追加
+                    </button>
                 </div>
                 <div class="sx-fp-scroll">
-                    <div class="sx-fp-room" id="sxFpRoom" style="width:1700px; height:760px;">
+                    <div class="sx-fp-room" id="sxFpRoom">
                         @foreach ($tables as $table)
-                        @php $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count(); @endphp
-                        <div class="sx-fp-table" data-table-id="{{ $table->id }}"
-                             style="left:{{ $table->pos_x }}px; top:{{ $table->pos_y }}px;">
-                            <div class="sx-fp-table__head">
-                                <span class="sx-fp-table__name">{{ $table->name }}</span>
-                                <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                        @php
+                            $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
+                            $seatsList = $table->seats->values();
+                            $leftSeats = $seatsList->slice(0, (int) ceil(max($seatsList->count(), 1) / 2))->values();
+                            $rightSeats = $seatsList->slice($leftSeats->count())->values();
+                        @endphp
+                        <div class="sx-fp-table sxp-table-card" data-table-id="{{ $table->id }}">
+                            <div class="sxp-table-label">{{ $tableMark($table) }}</div>
+                            <div class="sxp-table-content">
+                                <div class="sxp-table-card__head sx-fp-table__head">
+                                    <span class="sxp-table-card__name sx-fp-table__name">{{ $table->name }}</span>
+                                    <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
+                                </div>
+                                <div class="sxp-seat-map">
+                                    <div class="sxp-seat-rail sxp-seat-rail--left">
+                                        @foreach ($leftSeats as $seat)
+                                        <div class="sxp-seat sx-fp-seat {{ $seat->assignment ? 'is-occupied' : 'is-empty' }}"
+                                             data-seat-id="{{ $seat->id }}" data-table-id="{{ $table->id }}">
+                                            <div class="sxp-seat__body">
+                                                <span class="sxp-seat__name">{{ $seat->assignment ? $guestName($seat->assignment->user) : '空席' }}</span>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="sxp-seat-rail sxp-seat-rail--right">
+                                        @foreach ($rightSeats as $seat)
+                                        <div class="sxp-seat sx-fp-seat {{ $seat->assignment ? 'is-occupied' : 'is-empty' }}"
+                                             data-seat-id="{{ $seat->id }}" data-table-id="{{ $table->id }}">
+                                            <div class="sxp-seat__body">
+                                                <span class="sxp-seat__name">{{ $seat->assignment ? $guestName($seat->assignment->user) : '空席' }}</span>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
-                            <ul class="sx-fp-seats">
-                                @foreach ($table->seats as $seat)
-                                <li class="sx-fp-seat {{ $seat->assignment ? 'is-occupied' : 'is-empty' }}"
-                                    data-seat-id="{{ $seat->id }}" data-table-id="{{ $table->id }}">
-                                    {{ $seat->assignment ? $guestName($seat->assignment->user) : '空席' }}
-                                </li>
-                                @endforeach
-                            </ul>
                         </div>
                         @endforeach
                     </div>

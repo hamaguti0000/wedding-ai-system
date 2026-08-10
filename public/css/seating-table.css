@@ -392,69 +392,85 @@ main { padding-top: 60px; text-align: initial; }
     background: #fbf7ee;
     color: var(--sx-gold-dark);
     font-size: 0.82rem; font-weight: 700;
-    cursor: grab;
-    user-select: none;
+    cursor: pointer;
+    font-family: inherit;
 }
-.sx-fp-new-table:active { cursor: grabbing; }
+.sx-fp-new-table:hover { background: #fdf1de; }
 .sx-fp-scroll { flex: 1; overflow: auto; padding: 24px; }
 .sx-fp-room {
-    position: relative;
-    background:
-        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(179,139,89,0.06) 40px),
-        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(179,139,89,0.06) 40px);
-    border: 1px solid var(--sx-border-light);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-content: flex-start;
+}
+/* ── 配置図のテーブルカード：印刷ページ(seating-print.css)の実物デザインを移植 ── */
+.sx-fp-table.is-full { opacity: 0.9; }
+
+.sxp-table-card {
+    --sxp-ink: #2f2a24;
+    --sxp-muted: #8a7c68;
+    --sxp-line: rgba(120,90,55,.35);
+    --sxp-gold: #b58b55;
+    --sxp-gold-dark: #775734;
+    --sxp-warm: #fff3de;
+    width: 240px;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    border: 1px solid var(--sxp-gold);
+    background: #fffefb;
     border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-.sx-fp-table {
-    position: absolute;
-    width: 200px;
-    padding: 8px 10px 10px;
-    background: #fff;
-    border: 1px solid var(--sx-border);
-    border-radius: 6px;
-    cursor: grab;
-    user-select: none;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    display: flex; flex-direction: column; gap: 6px;
+.sxp-table-label {
+    display: grid; place-items: start center;
+    padding-top: 8px;
+    border-right: 1px solid var(--sxp-gold);
+    background: var(--sxp-warm);
+    color: var(--sxp-gold-dark);
+    font-family: 'Noto Serif JP', Georgia, serif;
+    font-size: 0.92rem; font-weight: 700; line-height: 1;
 }
-.sx-fp-table:hover { border-color: var(--sx-gold); }
-.sx-fp-table.is-dragging { cursor: grabbing; z-index: 20; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border-color: var(--sx-gold); }
-.sx-fp-table.is-full { opacity: 0.85; }
+.sxp-table-content { min-width: 0; display: grid; grid-template-rows: auto 1fr; }
 .sx-fp-table__head {
     display: flex; align-items: center; justify-content: space-between; gap: 6px;
-    padding-bottom: 6px; border-bottom: 1px solid var(--sx-border-light);
+    padding: 4px 7px;
+    border-bottom: 1px solid var(--sxp-gold);
+    background: var(--sxp-warm);
 }
 .sx-fp-table__name {
-    font-family: 'Playfair Display', 'Noto Sans JP', serif;
-    font-size: 0.78rem; font-weight: 600; color: var(--sx-ink);
+    font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
+    font-size: 0.76rem; font-weight: 800; color: var(--sxp-ink);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sx-fp-table__count {
-    flex-shrink: 0; font-size: 0.66rem; color: var(--sx-muted);
-    background: var(--sx-row-alt); border-radius: 8px; padding: 1px 6px;
+    flex-shrink: 0; font-size: 0.62rem; color: var(--sxp-muted);
+    padding-left: 6px; border-left: 1px solid var(--sxp-line);
 }
-.sx-fp-seats {
-    display: flex; flex-direction: column; gap: 3px;
-    list-style: none; margin: 0; padding: 0;
+.sxp-seat-map {
+    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+}
+.sxp-seat-rail { min-width: 0; display: grid; align-content: start; }
+.sxp-seat-rail--left { border-right: 1px solid var(--sxp-line); }
+.sxp-seat {
+    min-height: 34px;
+    display: grid; place-items: center;
+    padding: 3px 4px;
+    border-bottom: 1px solid var(--sxp-line);
+    background: #fff;
+    text-align: center;
     cursor: default;
 }
-.sx-fp-seat {
-    padding: 4px 7px;
-    border: 1px dashed var(--sx-border-light);
-    border-radius: 5px;
-    font-size: 0.7rem;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.sxp-seat__name {
+    font-size: 0.66rem; font-weight: 700; color: var(--sxp-ink);
+    line-height: 1.2; overflow-wrap: anywhere; word-break: keep-all;
 }
-.sx-fp-seat.is-empty {
-    color: var(--sx-muted); font-style: italic;
-}
-.sx-fp-seat.is-occupied {
-    border-style: solid; border-color: var(--sx-border);
-    background: var(--sx-row-alt); color: var(--sx-ink); font-weight: 600;
-    cursor: pointer;
-}
-.sx-fp-seat.is-occupied:hover { border-color: #c0392b; background: #fdf2f2; }
-.sx-fp-seat.is-drop-target { border-color: var(--sx-gold); background: #fbf3e4; box-shadow: 0 0 0 2px rgba(179,139,89,0.25); }
+.sxp-seat.is-empty .sxp-seat__name { color: var(--sxp-muted); font-weight: 400; font-style: italic; }
+.sxp-seat.is-occupied { cursor: pointer; }
+.sxp-seat.is-occupied:hover { background: #fdf2f2; }
+.sxp-seat.is-occupied:hover .sxp-seat__name { color: #c0392b; }
+.sxp-seat.is-drop-target { background: #fbf3e4; box-shadow: inset 0 0 0 2px var(--sxp-gold); }
 
 
 /* ── 2026-08 readability pass: 管理者は編集しやすさを優先 ── */
@@ -608,12 +624,6 @@ main { padding-top: 60px; text-align: initial; }
     background-color: #fffdf9;
 }
 
-.sx-fp-table {
-    min-height: 48px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(47, 36, 23, .08);
-}
-
 @media (max-width: 900px) {
     .sx-topbar {
         align-items: flex-start;
@@ -658,27 +668,12 @@ main { padding-top: 60px; text-align: initial; }
         flex-wrap: wrap;
     }
 
-    /* 配置図: 自由配置の絶対座標だと座席リスト分ボックスが縦に伸びて重なるため、
-       このサイズでは会場配置を諦めて、崩れないグリッド表示に切り替える */
     .sx-fp-scroll {
         padding: 12px;
     }
 
-    .sx-fp-room {
-        position: static;
-        width: 100% !important;
-        height: auto !important;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        background: none;
-        border: none;
-    }
-
-    .sx-fp-table {
-        position: static;
-        width: calc(50% - 5px);
-        cursor: default;
+    .sxp-table-card {
+        width: 100%;
     }
 }
 

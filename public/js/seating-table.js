@@ -148,26 +148,37 @@
         sel.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
+    function fpSeatHtml(seatId, tableId, guestName) {
+        const occupied = !!guestName;
+        return `<div class="sxp-seat sx-fp-seat ${occupied ? 'is-occupied' : 'is-empty'}" data-seat-id="${seatId}" data-table-id="${tableId}">
+            <div class="sxp-seat__body"><span class="sxp-seat__name">${escapeHtml(guestName || '空席')}</span></div>
+        </div>`;
+    }
+
+    // 座席の追加・削除で左右レールの振り分けが変わるため、シートマップは毎回まるごと再構築する
     function syncFloorplanTable(tableId) {
         const fpTable = document.querySelector(`.sx-fp-table[data-table-id="${tableId}"]`);
         if (!fpTable) return;
-        const seats = body.querySelectorAll(`tr[data-table-id="${tableId}"] select.sx-guest`);
-        const total = seats.length;
-        const occupied = Array.from(seats).filter(s => s.dataset.currentUser).length;
+        const seatSelects = Array.from(body.querySelectorAll(`tr[data-table-id="${tableId}"] select.sx-guest`));
+        const total = seatSelects.length;
+        const occupied = seatSelects.filter(s => s.dataset.currentUser).length;
         const countEl = fpTable.querySelector('.sx-fp-table__count');
         if (countEl) countEl.textContent = `${occupied}/${total}`;
         fpTable.classList.toggle('is-full', total > 0 && occupied >= total);
 
-        seats.forEach(sel => {
-            const seatId = sel.dataset.seatId;
-            const li = fpTable.querySelector(`.sx-fp-seat[data-seat-id="${seatId}"]`);
-            if (!li) return;
+        const seatData = seatSelects.map(sel => {
             const userId = sel.dataset.currentUser || '';
             const guest = userId ? ALL_GUESTS.find(g => String(g.id) === String(userId)) : null;
-            li.textContent = guest ? guest.name : '空席';
-            li.classList.toggle('is-occupied', !!guest);
-            li.classList.toggle('is-empty', !guest);
+            return { seatId: sel.dataset.seatId, name: guest ? guest.name : '' };
         });
+        const leftCount = Math.ceil(Math.max(seatData.length, 1) / 2);
+        const leftSeats = seatData.slice(0, leftCount);
+        const rightSeats = seatData.slice(leftCount);
+
+        const leftRail = fpTable.querySelector('.sxp-seat-rail--left');
+        const rightRail = fpTable.querySelector('.sxp-seat-rail--right');
+        if (leftRail) leftRail.innerHTML = leftSeats.map(s => fpSeatHtml(s.seatId, tableId, s.name)).join('');
+        if (rightRail) rightRail.innerHTML = rightSeats.map(s => fpSeatHtml(s.seatId, tableId, s.name)).join('');
     }
 
     unassignedList?.addEventListener('click', (e) => {
@@ -284,7 +295,6 @@
         }
 
         removeSeatRow(row, tableId);
-        document.querySelector(`.sx-fp-seat[data-seat-id="${seatId}"]`)?.remove();
         updateProgress();
         renderUnassignedList();
         syncFloorplanTable(tableId);
@@ -359,15 +369,6 @@
             const mergeCell = document.querySelector(`.sx-cell-table[data-table-id="${tableId}"]`);
             if (mergeCell) mergeCell.rowSpan = groupRows.length + 1;
             groupRows[groupRows.length - 1].after(newRow);
-        }
-        const fpSeats = document.querySelector(`.sx-fp-table[data-table-id="${tableId}"] .sx-fp-seats`);
-        if (fpSeats) {
-            const li = document.createElement('li');
-            li.className = 'sx-fp-seat is-empty';
-            li.dataset.seatId = seat.id;
-            li.dataset.tableId = tableId;
-            li.textContent = '空席';
-            fpSeats.appendChild(li);
         }
         syncFloorplanTable(tableId);
     });
@@ -544,110 +545,52 @@
         if (viewFloorplan) viewFloorplan.hidden = !isFloorplan;
     });
 
-    /* ── 配置図：テーブルのドラッグ移動 ─────────────────────── */
     const fpRoom = document.getElementById('sxFpRoom');
-    if (fpRoom) {
-        let drag = null;
 
-        fpRoom.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.sx-fp-seat')) return;
-            if (window.matchMedia('(max-width: 900px)').matches) return; // モバイルはグリッド表示固定・自由配置は無効
-            const el = e.target.closest('.sx-fp-table');
-            if (!el) return;
-            el.setPointerCapture(e.pointerId);
-            drag = {
-                el,
-                startX: e.clientX,
-                startY: e.clientY,
-                origLeft: parseFloat(el.style.left) || 0,
-                origTop: parseFloat(el.style.top) || 0,
-            };
-            el.classList.add('is-dragging');
-        });
-
-        fpRoom.addEventListener('pointermove', (e) => {
-            if (!drag) return;
-            const dx = e.clientX - drag.startX;
-            const dy = e.clientY - drag.startY;
-            const newLeft = Math.max(0, drag.origLeft + dx);
-            const newTop  = Math.max(0, drag.origTop + dy);
-            drag.el.style.left = newLeft + 'px';
-            drag.el.style.top  = newTop + 'px';
-        });
-
-        const endDrag = async (e) => {
-            if (!drag) return;
-            const el = drag.el;
-            el.classList.remove('is-dragging');
-            const tableId = el.dataset.tableId;
-            const x = Math.round(parseFloat(el.style.left) || 0);
-            const y = Math.round(parseFloat(el.style.top) || 0);
-            drag = null;
-            await api('PATCH', `${BASE}/tables/${tableId}/position`, { x, y });
-        };
-        fpRoom.addEventListener('pointerup', endDrag);
-        fpRoom.addEventListener('pointercancel', endDrag);
+    function tableMarkOf(name) {
+        const trimmed = (name || '').trim();
+        return trimmed ? trimmed.charAt(0) : 'T';
     }
 
-    /* ── 配置図：パレットからドラッグして新しいテーブルを作成 ── */
     function appendFloorplanTable(table, seats) {
         if (!fpRoom) return;
         seats = seats || [];
         const el = document.createElement('div');
-        el.className = 'sx-fp-table';
+        el.className = 'sx-fp-table sxp-table-card';
         el.dataset.tableId = table.id;
-        el.style.left = (table.pos_x || 0) + 'px';
-        el.style.top = (table.pos_y || 0) + 'px';
-        const seatsHtml = seats.map(s =>
-            `<li class="sx-fp-seat is-empty" data-seat-id="${s.id}" data-table-id="${table.id}">空席</li>`
-        ).join('');
+        const leftCount = Math.ceil(Math.max(seats.length, 1) / 2);
+        const leftSeats = seats.slice(0, leftCount);
+        const rightSeats = seats.slice(leftCount);
         el.innerHTML = `
-            <div class="sx-fp-table__head">
-                <span class="sx-fp-table__name">${escapeHtml(table.name)}</span>
-                <span class="sx-fp-table__count">0/${seats.length}</span>
-            </div>
-            <ul class="sx-fp-seats">${seatsHtml}</ul>`;
+            <div class="sxp-table-label">${escapeHtml(tableMarkOf(table.name))}</div>
+            <div class="sxp-table-content">
+                <div class="sxp-table-card__head sx-fp-table__head">
+                    <span class="sxp-table-card__name sx-fp-table__name">${escapeHtml(table.name)}</span>
+                    <span class="sx-fp-table__count">0/${seats.length}</span>
+                </div>
+                <div class="sxp-seat-map">
+                    <div class="sxp-seat-rail sxp-seat-rail--left">${leftSeats.map(s => fpSeatHtml(s.id, table.id, '')).join('')}</div>
+                    <div class="sxp-seat-rail sxp-seat-rail--right">${rightSeats.map(s => fpSeatHtml(s.id, table.id, '')).join('')}</div>
+                </div>
+            </div>`;
         fpRoom.appendChild(el);
     }
 
-    const fpNewTable = document.getElementById('sxFpNewTable');
-    if (fpNewTable && fpRoom) {
-        fpNewTable.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', 'new-table');
-            e.dataTransfer.effectAllowed = 'copy';
+    /* ── 配置図：新しいテーブルを追加 ─────────────────────── */
+    document.getElementById('sxFpNewTable')?.addEventListener('click', async () => {
+        const name = prompt('新しいテーブルの名前を入力してください（例: 友人1）');
+        if (!name || !name.trim()) return;
+        const seatCountInput = prompt('席数（0〜8、あとから変更できます）', '4');
+        if (seatCountInput === null) return;
+        const seatCount = Math.max(0, Math.min(8, parseInt(seatCountInput, 10) || 0));
+
+        const json = await api('POST', `${BASE}/tables`, {
+            name: name.trim(),
+            seat_count: seatCount,
         });
-
-        fpRoom.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-        });
-
-        fpRoom.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            if (e.dataTransfer.getData('text/plain') !== 'new-table') return;
-
-            const name = prompt('新しいテーブルの名前を入力してください（例: 友人1）');
-            if (!name || !name.trim()) return;
-            const seatCountInput = prompt('席数（0〜8、あとから変更できます）', '4');
-            if (seatCountInput === null) return;
-            const seatCount = Math.max(0, Math.min(8, parseInt(seatCountInput, 10) || 0));
-
-            const roomRect = fpRoom.getBoundingClientRect();
-            // 要素の中心がドロップ位置に来るよう、カード幅・高さの半分だけ左上にずらす
-            // (sx-fp-table のCSS上の目安サイズ。厳密でなくても位置調整はドラッグで直せる)。
-            const x = Math.max(0, Math.round(e.clientX - roomRect.left - 85));
-            const y = Math.max(0, Math.round(e.clientY - roomRect.top - 40));
-
-            const json = await api('POST', `${BASE}/tables`, {
-                name: name.trim(),
-                seat_count: seatCount,
-                pos_x: x,
-                pos_y: y,
-            });
-            insertTableIntoListView(json.table, json.seats || []);
-            appendFloorplanTable(json.table, json.seats || []);
-        });
-    }
+        insertTableIntoListView(json.table, json.seats || []);
+        appendFloorplanTable(json.table, json.seats || []);
+    });
 
     /* ── 配置図：未配置ゲストをドラッグして座席に配置 ── */
     if (fpRoom) {
