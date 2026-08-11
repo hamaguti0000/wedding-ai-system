@@ -22,16 +22,27 @@
         $name = trim($table->name ?? '');
         return $name !== '' ? mb_substr($name, 0, 1) : 'T';
     };
-    // 空席を詰めてゲスト表示と行を合わせる案も試したが、タップして配置するたびに
-    // 他の人の表示位置までずれて動いてしまい編集時の予測可能性が損なわれたため、
-    // 各座席の位置(seat_index)は固定のまま表示する方式に戻した(2026-08)。
-    // ゲストにどう見えるかは「ゲスト表示プレビュー」ボタンで別途確認する運用とする。
+    // ゲスト表示ページ(partials/guest-table.blade.php)は空席を詰めて左右に分けるため、
+    // ここも同じ並びにしないと「管理画面で配置した位置」と「ゲストに見える位置」がズレる。
+    // 配置済みゲストは詰めた状態で左右split(ゲスト側と同じceil(n/2))し、
+    // 空席はタップ配置の対象として残す必要があるため、短い方の列に追い足していく。
+    // タップした席と表示位置がズレて分かりにくい問題は、JS側で配置直後の
+    // 座席をハイライト+スクロールして見せることで対処する(座席位置固定には戻さない)。
     $splitSeatsForDisplay = function ($table) {
         $seats = $table->seats->values();
-        $leftCount = (int) ceil(max($seats->count(), 1) / 2);
-        $left = $seats->slice(0, $leftCount)->values();
-        $right = $seats->slice($leftCount)->values();
-        return [$left, $right];
+        $occupied = $seats->filter(fn($s) => $s->assignment !== null)->values();
+        $empty = $seats->filter(fn($s) => $s->assignment === null)->values();
+        $leftCount = (int) ceil(max($occupied->count(), 1) / 2);
+        $left = $occupied->slice(0, $leftCount)->values()->all();
+        $right = $occupied->slice($leftCount)->values()->all();
+        foreach ($empty as $seat) {
+            if (count($left) <= count($right)) {
+                $left[] = $seat;
+            } else {
+                $right[] = $seat;
+            }
+        }
+        return [collect($left), collect($right)];
     };
 
     $allGuestsJson = $allGuests->map(function ($u) use ($guestName, $guestSide, $guestRel) {
@@ -238,7 +249,8 @@
                             <div class="sxp-table-label">{{ $tableMark($table) }}</div>
                             <div class="sxp-table-content">
                                 <div class="sxp-table-card__head sx-fp-table__head">
-                                    <span class="sxp-table-card__name sx-fp-table__name">{{ $table->name }}</span>
+                                    <input type="text" class="sx-table-name sxp-table-card__name sx-fp-table__name"
+                                           data-table-id="{{ $table->id }}" value="{{ $table->name }}" maxlength="50">
                                     <span class="sx-fp-table__count">{{ $occupied }}/{{ $table->seats->count() }}</span>
                                 </div>
                                 <div class="sxp-seat-map">

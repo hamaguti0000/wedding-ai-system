@@ -157,19 +157,24 @@
 
     // ゲスト表示ページ(partials/guest-table.blade.php)は空席を詰めて左右に分けるため、
     // ここも同じ並びにしないと「管理画面で配置した位置」と「ゲストに見える位置」がズレる
-    // (admin/seating.blade.phpの$splitSeatsForDisplayと同じ思想)。
-    // 空席を詰める方式は、タップして配置するたびに他の人の表示位置までずれて
-    // 動いてしまい編集時の予測可能性が損なわれたため、各座席の位置(seat_index)は
-    // 固定のまま表示する(admin/seating.blade.phpの$splitSeatsForDisplayと同じ思想)。
+    // (admin/seating.blade.phpの$splitSeatsForDisplayと同じ思想)。タップした席と
+    // 表示位置がズレる分かりにくさは、配置直後のハイライト+スクロールで対処する
+    // (syncFloorplanTableのhighlightSeatId参照部分)。
     function splitSeatsForDisplay(seats) {
-        const leftCount = Math.ceil(Math.max(seats.length, 1) / 2);
-        const left = seats.slice(0, leftCount);
-        const right = seats.slice(leftCount);
+        const occupied = seats.filter(s => s.name);
+        const empty = seats.filter(s => !s.name);
+        const leftCount = Math.ceil(Math.max(occupied.length, 1) / 2);
+        const left = occupied.slice(0, leftCount);
+        const right = occupied.slice(leftCount);
+        empty.forEach(seat => {
+            if (left.length <= right.length) left.push(seat);
+            else right.push(seat);
+        });
         return [left, right];
     }
 
     // 座席の追加・削除で左右レールの振り分けが変わるため、シートマップは毎回まるごと再構築する
-    function syncFloorplanTable(tableId) {
+    function syncFloorplanTable(tableId, highlightSeatId) {
         const fpTable = document.querySelector(`.sx-fp-table[data-table-id="${tableId}"]`);
         if (!fpTable) return;
         const seatSelects = Array.from(body.querySelectorAll(`tr[data-table-id="${tableId}"] select.sx-guest`));
@@ -190,6 +195,17 @@
         const rightRail = fpTable.querySelector('.sxp-seat-rail--right');
         if (leftRail) leftRail.innerHTML = leftSeats.map(s => fpSeatHtml(s.seatId, tableId, s.name)).join('');
         if (rightRail) rightRail.innerHTML = rightSeats.map(s => fpSeatHtml(s.seatId, tableId, s.name)).join('');
+
+        // 空席を詰めるため配置直後にゲストの表示位置が動くことがある。
+        // どこに入ったか一目で分かるよう、対象の座席をハイライト+スクロールして見せる。
+        if (highlightSeatId) {
+            const target = fpTable.querySelector(`.sxp-seat[data-seat-id="${highlightSeatId}"]`);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('sxp-seat--just-updated');
+                setTimeout(() => target.classList.remove('sxp-seat--just-updated'), 1800);
+            }
+        }
     }
 
     unassignedList?.addEventListener('click', (e) => {
@@ -303,7 +319,10 @@
         refreshAllGuestSelects();
         // refreshAllGuestSelects で value がリセットされるため選択状態を再適用
         body.querySelectorAll('select.sx-guest').forEach(s => { s.value = s.dataset.currentUser || ''; });
-        affectedTableIds.forEach(id => { syncFloorplanTable(id); syncMapTable(id); });
+        affectedTableIds.forEach(id => {
+            syncFloorplanTable(id, id === tableId && newUser ? seatId : undefined);
+            syncMapTable(id);
+        });
     });
 
     /* ── 席を削除 ───────────────────────────────────────────── */
@@ -412,8 +431,8 @@
         ).join('');
     }
 
-    /* ── テーブル名の変更 ───────────────────────────────────── */
-    body.addEventListener('change', async (e) => {
+    /* ── テーブル名の変更(表ビュー・座席表ビュー共通。documentに1つだけ張る) ── */
+    document.addEventListener('change', async (e) => {
         const input = e.target.closest('.sx-table-name');
         if (!input) return;
         const name = input.value.trim();
@@ -421,8 +440,13 @@
         await api('PATCH', `${BASE}/tables/${input.dataset.tableId}`, { name });
         input.defaultValue = name;
 
-        // このテーブルに配置中のゲストの table 名を更新し、他セレクトの「配置中」表示に反映
+        // 表ビュー・座席表ビュー両方に同じテーブルの見出しがあるため、両方を更新する
         const tableId = input.dataset.tableId;
+        document.querySelectorAll(`.sx-table-name[data-table-id="${tableId}"]`).forEach(el => {
+            if (el !== input) el.value = name;
+        });
+
+        // このテーブルに配置中のゲストの table 名を更新し、他セレクトの「配置中」表示に反映
         const seatedUserIds = Array.from(body.querySelectorAll(`tr[data-table-id="${tableId}"] select.sx-guest`))
             .map(sel => sel.dataset.currentUser)
             .filter(Boolean);
@@ -600,7 +624,8 @@
             <div class="sxp-table-label">${escapeHtml(tableMarkOf(table.name))}</div>
             <div class="sxp-table-content">
                 <div class="sxp-table-card__head sx-fp-table__head">
-                    <span class="sxp-table-card__name sx-fp-table__name">${escapeHtml(table.name)}</span>
+                    <input type="text" class="sx-table-name sxp-table-card__name sx-fp-table__name"
+                           data-table-id="${table.id}" value="${escapeHtml(table.name)}" maxlength="50">
                     <span class="sx-fp-table__count">0/${seats.length}</span>
                 </div>
                 <div class="sxp-seat-map">
