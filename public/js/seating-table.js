@@ -158,16 +158,13 @@
     // ゲスト表示ページ(partials/guest-table.blade.php)は空席を詰めて左右に分けるため、
     // ここも同じ並びにしないと「管理画面で配置した位置」と「ゲストに見える位置」がズレる
     // (admin/seating.blade.phpの$splitSeatsForDisplayと同じ思想)。
+    // 空席を詰める方式は、タップして配置するたびに他の人の表示位置までずれて
+    // 動いてしまい編集時の予測可能性が損なわれたため、各座席の位置(seat_index)は
+    // 固定のまま表示する(admin/seating.blade.phpの$splitSeatsForDisplayと同じ思想)。
     function splitSeatsForDisplay(seats) {
-        const occupied = seats.filter(s => s.name);
-        const empty = seats.filter(s => !s.name);
-        const leftCount = Math.ceil(Math.max(occupied.length, 1) / 2);
-        const left = occupied.slice(0, leftCount);
-        const right = occupied.slice(leftCount);
-        empty.forEach(seat => {
-            if (left.length <= right.length) left.push(seat);
-            else right.push(seat);
-        });
+        const leftCount = Math.ceil(Math.max(seats.length, 1) / 2);
+        const left = seats.slice(0, leftCount);
+        const right = seats.slice(leftCount);
         return [left, right];
     }
 
