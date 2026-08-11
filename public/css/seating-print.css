@@ -106,8 +106,7 @@ main {
     background: var(--sxp-paper);
 }
 
-.sxp-main-table,
-.sxp-entrance {
+.sxp-main-table {
     width: 390px;
     min-height: 42px;
     margin: 0 auto 14px;
@@ -126,8 +125,7 @@ main {
     text-transform: uppercase;
 }
 
-.sxp-main-table__title,
-.sxp-entrance span {
+.sxp-main-table__title {
     color: var(--sxp-ink);
     font-family: 'Noto Serif JP', 'Noto Sans JP', serif;
     font-size: 1.08rem;
@@ -383,7 +381,9 @@ main {
 
     .sxp-zoom-shell {
         width: 100%;
-        transform: none !important;
+        transform: scale(var(--sxp-print-fit-scale, 1));
+        transform-origin: top center;
+        height: var(--sxp-print-fit-height, auto);
     }
 
     .sxp-layout {
@@ -391,6 +391,18 @@ main {
         min-width: 0;
         padding: 3mm;
         border-width: .7pt;
+    }
+
+    .sxp-print-half {
+        display: grid;
+        gap: 2mm;
+        transform: scale(var(--sxp-print-fit-scale, 1));
+        transform-origin: top center;
+        height: var(--sxp-print-fit-height, auto);
+    }
+
+    .sxp-print-half--break {
+        break-before: page;
     }
 
     .sxp-main-table {
@@ -404,8 +416,7 @@ main {
         font-size: 5.8pt;
     }
 
-    .sxp-main-table__title,
-    .sxp-entrance span {
+    .sxp-main-table__title {
         font-size: 10pt;
     }
 
@@ -483,11 +494,8 @@ main {
         font-size: 7.6pt;
     }
 
-    .sxp-entrance {
-        width: 95mm;
-        min-height: 8mm;
-        margin-top: 3mm;
-        border-width: .7pt;
+    body.has-admin-sidebar main {
+        margin-left: 0 !important;
     }
 
     @page {
@@ -569,4 +577,33 @@ main {
 .sxp-toolbar .sxp-toolbar__zoom button.is-active {
     background: #775734 !important;
     color: #fff !important;
+}
+
+.sxp-toolbar__papersize {
+    display: inline-flex;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid #d8c6ad;
+    border-radius: 4px;
+    background: #fffaf2;
+}
+
+.sxp-toolbar .sxp-toolbar__papersize button {
+    padding: 6px 10px !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: #775734 !important;
+}
+
+.sxp-toolbar .sxp-toolbar__papersize button.is-active {
+    background: #775734 !important;
+    color: #fff !important;
+}
+
+.sxp-toolbar__hint {
+    flex-basis: 100%;
+    text-align: center;
+    color: #a08a66;
+    font-size: .72rem;
 }

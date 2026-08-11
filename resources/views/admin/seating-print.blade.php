@@ -30,7 +30,7 @@
     }
     /* position: fixedで浮くようになった分、本文が隠れないよう余白を空ける */
     #sxpPage {
-        padding-top: 110px;
+        padding-top: 140px;
     }
     .sxp-toolbar a, .sxp-toolbar button {
         padding: 8px 18px;
@@ -55,10 +55,10 @@
         background: rgba(179,139,89,.1);
     }
     @media print {
-        .header, .header-drawer, .header-overlay, .sxp-toolbar { display: none !important; }
+        .header, .header-drawer, .header-overlay, .sxp-toolbar,
+        .admin-sidebar, footer { display: none !important; }
         main { padding-top: 0 !important; }
         #sxpPage { padding-top: 30px !important; }
-        @page { size: A3 landscape; margin: 14mm; }
     }
 </style>
 @endpush
@@ -94,7 +94,12 @@
         <button type="button" data-sxp-zoom="1">100%</button>
         <button type="button" data-sxp-zoom="1.2">120%</button>
     </div>
-    <button type="button" onclick="window.print()">印刷する</button>
+    <div class="sxp-toolbar__papersize" aria-label="用紙サイズ">
+        <button type="button" data-sxp-page="a3">A3・1枚</button>
+        <button type="button" data-sxp-page="a4">A4・2枚</button>
+    </div>
+    <button type="button" onclick="window.print()">印刷 / PDF保存</button>
+    <span class="sxp-toolbar__hint">※印刷ダイアログの「送信先」で「PDFに保存」を選ぶとPDF保存できます</span>
 </div>
 
 <div class="gs-page" id="sxpPage">
@@ -254,6 +259,138 @@
 
     setZoom(saved);
     applySearch();
+})();
+
+(function () {
+    const pageEl = document.getElementById('sxpPage');
+    const zoomShell = document.getElementById('sxpZoomShell');
+    const board = document.querySelector('.sxp-board');
+    const pageSizeButtons = document.querySelectorAll('[data-sxp-page]');
+    if (!pageEl || !zoomShell || !board || pageSizeButtons.length === 0) return;
+
+    const MM_TO_PX = 96 / 25.4;
+    const SPECS = {
+        a3: { wMm: 420, hMm: 297, marginMm: 10 },
+        a4: { wMm: 297, hMm: 210, marginMm: 10 },
+    };
+    const SAFETY_PX = 3 * MM_TO_PX;
+    const PAGE2_TOP_BUFFER_PX = 5 * MM_TO_PX;
+
+    const originalRows = Array.from(board.children);
+    let currentPageSize = localStorage.getItem('seatingPrintPageSize') || 'a3';
+
+    const pageStyleEl = document.createElement('style');
+    pageStyleEl.id = 'sxpPageSizeStyle';
+    document.head.appendChild(pageStyleEl);
+
+    function usableAreaPx(spec) {
+        return {
+            w: (spec.wMm - spec.marginMm * 2) * MM_TO_PX,
+            h: (spec.hMm - spec.marginMm * 2) * MM_TO_PX,
+        };
+    }
+
+    function updatePageSizeButtons() {
+        pageSizeButtons.forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.sxpPage === currentPageSize);
+        });
+    }
+
+    function setPageSize(size) {
+        currentPageSize = size;
+        localStorage.setItem('seatingPrintPageSize', size);
+        updatePageSizeButtons();
+    }
+
+    function resetBoardStructure() {
+        zoomShell.style.removeProperty('--sxp-print-fit-scale');
+        zoomShell.style.removeProperty('--sxp-print-fit-height');
+        board.querySelectorAll(':scope > .sxp-print-half').forEach((wrap) => wrap.remove());
+        originalRows.forEach((row) => board.appendChild(row));
+    }
+
+    function tableCountOf(row) {
+        return row.querySelectorAll('.sxp-table-card').length;
+    }
+
+    function splitRowsByCount(rows) {
+        const total = rows.reduce((sum, row) => sum + tableCountOf(row), 0);
+        const half = total / 2;
+        let running = 0;
+        let cut = rows.length;
+        for (let i = 0; i < rows.length; i += 1) {
+            running += tableCountOf(rows[i]);
+            if (running >= half) {
+                cut = i + 1;
+                break;
+            }
+        }
+        return [rows.slice(0, cut), rows.slice(cut)];
+    }
+
+    function fitElement(el, availWpx, availHpx) {
+        el.style.setProperty('--sxp-print-fit-scale', '1');
+        el.style.setProperty('--sxp-print-fit-height', 'auto');
+        const naturalW = el.scrollWidth;
+        const naturalH = el.scrollHeight;
+        const scale = Math.min(1, availHpx / naturalH, availWpx / naturalW);
+        el.style.setProperty('--sxp-print-fit-scale', String(scale));
+        el.style.setProperty('--sxp-print-fit-height', (naturalH * scale) + 'px');
+        return scale;
+    }
+
+    function applyPrintFit() {
+        resetBoardStructure();
+        const spec = SPECS[currentPageSize] || SPECS.a3;
+        pageStyleEl.textContent = `@media print { @page { size: ${spec.wMm}mm ${spec.hMm}mm; margin: ${spec.marginMm}mm; } }`;
+
+        const usable = usableAreaPx(spec);
+
+        // ブラウザの実際のウィンドウ幅と印刷用紙の幅は一致しないため、
+        // 印刷時に近い横幅を#sxpPageへ強制指定してから高さを測る。
+        // (measureせずに測ると、実際の印刷幅と異なる幅で計算した誤った縮小率になる)
+        const prevWidth = pageEl.style.width;
+        pageEl.style.width = usable.w + 'px';
+        void pageEl.offsetHeight;
+
+        if (currentPageSize === 'a4') {
+            const [rowsA, rowsB] = splitRowsByCount(originalRows);
+            const wrapA = document.createElement('div');
+            wrapA.className = 'sxp-print-half';
+            rowsA.forEach((row) => wrapA.appendChild(row));
+            const wrapB = document.createElement('div');
+            wrapB.className = 'sxp-print-half sxp-print-half--break';
+            rowsB.forEach((row) => wrapB.appendChild(row));
+            board.appendChild(wrapA);
+            board.appendChild(wrapB);
+
+            const consumedTop = board.getBoundingClientRect().top - pageEl.getBoundingClientRect().top;
+            fitElement(wrapA, usable.w, Math.max(usable.h - consumedTop - SAFETY_PX, usable.h * 0.3));
+            fitElement(wrapB, usable.w, Math.max(usable.h - PAGE2_TOP_BUFFER_PX - SAFETY_PX, usable.h * 0.3));
+        } else {
+            const consumedTop = zoomShell.getBoundingClientRect().top - pageEl.getBoundingClientRect().top;
+            fitElement(zoomShell, usable.w, Math.max(usable.h - consumedTop - SAFETY_PX, usable.h * 0.3));
+        }
+
+        pageEl.style.width = prevWidth;
+    }
+
+    function resetAfterPrint() {
+        resetBoardStructure();
+    }
+
+    pageSizeButtons.forEach((button) => {
+        button.addEventListener('click', () => setPageSize(button.dataset.sxpPage));
+    });
+
+    window.addEventListener('beforeprint', applyPrintFit);
+    window.addEventListener('afterprint', resetAfterPrint);
+
+    // テスト自動化用フック(Playwrightのpage.pdf()はbeforeprint/afterprintを発火しないため)
+    window.__sxpTestSetPageSize = setPageSize;
+    window.__sxpTestApplyPrintFit = applyPrintFit;
+
+    updatePageSizeButtons();
 })();
 </script>
 @endpush
