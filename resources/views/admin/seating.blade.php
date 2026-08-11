@@ -22,6 +22,26 @@
         $name = trim($table->name ?? '');
         return $name !== '' ? mb_substr($name, 0, 1) : 'T';
     };
+    // ゲスト表示ページ(partials/guest-table.blade.php)は空席を詰めて左右に分けるため、
+    // ここも同じ並びにしないと「管理画面で配置した位置」と「ゲストに見える位置」がズレる。
+    // 配置済みゲストは詰めた状態で左右split(ゲスト側と同じceil(n/2))し、
+    // 空席はタップ配置の対象として残す必要があるため、短い方の列に追い足していく。
+    $splitSeatsForDisplay = function ($table) {
+        $seats = $table->seats->values();
+        $occupied = $seats->filter(fn($s) => $s->assignment !== null)->values();
+        $empty = $seats->filter(fn($s) => $s->assignment === null)->values();
+        $leftCount = (int) ceil(max($occupied->count(), 1) / 2);
+        $left = $occupied->slice(0, $leftCount)->values()->all();
+        $right = $occupied->slice($leftCount)->values()->all();
+        foreach ($empty as $seat) {
+            if (count($left) <= count($right)) {
+                $left[] = $seat;
+            } else {
+                $right[] = $seat;
+            }
+        }
+        return [collect($left), collect($right)];
+    };
 
     $allGuestsJson = $allGuests->map(function ($u) use ($guestName, $guestSide, $guestRel) {
         return [
@@ -221,9 +241,7 @@
                         @foreach ($tables as $table)
                         @php
                             $occupied = $table->seats->filter(fn($s) => $s->assignment !== null)->count();
-                            $seatsList = $table->seats->values();
-                            $leftSeats = $seatsList->slice(0, (int) ceil(max($seatsList->count(), 1) / 2))->values();
-                            $rightSeats = $seatsList->slice($leftSeats->count())->values();
+                            [$leftSeats, $rightSeats] = $splitSeatsForDisplay($table);
                         @endphp
                         <div class="sx-fp-table sxp-table-card" data-table-id="{{ $table->id }}">
                             <div class="sxp-table-label">{{ $tableMark($table) }}</div>

@@ -155,6 +155,22 @@
         </div>`;
     }
 
+    // ゲスト表示ページ(partials/guest-table.blade.php)は空席を詰めて左右に分けるため、
+    // ここも同じ並びにしないと「管理画面で配置した位置」と「ゲストに見える位置」がズレる
+    // (admin/seating.blade.phpの$splitSeatsForDisplayと同じ思想)。
+    function splitSeatsForDisplay(seats) {
+        const occupied = seats.filter(s => s.name);
+        const empty = seats.filter(s => !s.name);
+        const leftCount = Math.ceil(Math.max(occupied.length, 1) / 2);
+        const left = occupied.slice(0, leftCount);
+        const right = occupied.slice(leftCount);
+        empty.forEach(seat => {
+            if (left.length <= right.length) left.push(seat);
+            else right.push(seat);
+        });
+        return [left, right];
+    }
+
     // 座席の追加・削除で左右レールの振り分けが変わるため、シートマップは毎回まるごと再構築する
     function syncFloorplanTable(tableId) {
         const fpTable = document.querySelector(`.sx-fp-table[data-table-id="${tableId}"]`);
@@ -171,9 +187,7 @@
             const guest = userId ? ALL_GUESTS.find(g => String(g.id) === String(userId)) : null;
             return { seatId: sel.dataset.seatId, name: guest ? guest.name : '' };
         });
-        const leftCount = Math.ceil(Math.max(seatData.length, 1) / 2);
-        const leftSeats = seatData.slice(0, leftCount);
-        const rightSeats = seatData.slice(leftCount);
+        const [leftSeats, rightSeats] = splitSeatsForDisplay(seatData);
 
         const leftRail = fpTable.querySelector('.sxp-seat-rail--left');
         const rightRail = fpTable.querySelector('.sxp-seat-rail--right');
@@ -584,9 +598,7 @@
         const el = document.createElement('div');
         el.className = 'sx-fp-table sxp-table-card';
         el.dataset.tableId = table.id;
-        const leftCount = Math.ceil(Math.max(seats.length, 1) / 2);
-        const leftSeats = seats.slice(0, leftCount);
-        const rightSeats = seats.slice(leftCount);
+        const [leftSeats, rightSeats] = splitSeatsForDisplay(seats.map(s => ({ seatId: s.id, name: '' })));
         el.innerHTML = `
             <div class="sxp-table-label">${escapeHtml(tableMarkOf(table.name))}</div>
             <div class="sxp-table-content">
@@ -595,8 +607,8 @@
                     <span class="sx-fp-table__count">0/${seats.length}</span>
                 </div>
                 <div class="sxp-seat-map">
-                    <div class="sxp-seat-rail sxp-seat-rail--left">${leftSeats.map(s => fpSeatHtml(s.id, table.id, '')).join('')}</div>
-                    <div class="sxp-seat-rail sxp-seat-rail--right">${rightSeats.map(s => fpSeatHtml(s.id, table.id, '')).join('')}</div>
+                    <div class="sxp-seat-rail sxp-seat-rail--left">${leftSeats.map(s => fpSeatHtml(s.seatId, table.id, '')).join('')}</div>
+                    <div class="sxp-seat-rail sxp-seat-rail--right">${rightSeats.map(s => fpSeatHtml(s.seatId, table.id, '')).join('')}</div>
                 </div>
             </div>`;
         fpRoom.appendChild(el);
