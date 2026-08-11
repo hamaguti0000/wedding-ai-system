@@ -163,10 +163,6 @@
                                 </div>
                             </div>
                             @endforeach
-
-                            <div class="gs-stage gs-stage--entrance">
-                                <span>受付・入口</span>
-                            </div>
                         </div>
                     </div>
                 </div>

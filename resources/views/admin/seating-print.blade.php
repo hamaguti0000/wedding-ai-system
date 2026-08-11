@@ -180,10 +180,6 @@
             </div>
             @endforeach
         </div>
-
-        <div class="sxp-entrance">
-            <span>受付・入口</span>
-        </div>
             </section>
         </div>
     </div>
