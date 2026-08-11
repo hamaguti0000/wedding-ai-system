@@ -7,10 +7,30 @@
     .sxp-toolbar {
         display: flex;
         justify-content: center;
+        flex-wrap: wrap;
         gap: 10px;
         padding: 14px;
         background: #fff;
         border-bottom: 1px solid #e6dcc8;
+        /* テーブル数が多いと縦に長くなり、印刷ボタンがスクロールで見えなくなって
+           「印刷ボタンが無い」と誤解される事故があったため、常に見える位置に固定する。
+           body { overflow-y: auto } がサイト全体に効いているため、
+           position: sticky だと基準がbodyの内部スクロール(実際には発生しない)に
+           なってしまい機能しない。position: fixed にする。 */
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        z-index: 50;
+    }
+    @media (min-width: 768px) {
+        body.has-admin-sidebar .sxp-toolbar {
+            left: 220px;
+        }
+    }
+    /* position: fixedで浮くようになった分、本文が隠れないよう余白を空ける */
+    #sxpPage {
+        padding-top: 110px;
     }
     .sxp-toolbar a, .sxp-toolbar button {
         padding: 8px 18px;
@@ -37,6 +57,7 @@
     @media print {
         .header, .header-drawer, .header-overlay, .sxp-toolbar { display: none !important; }
         main { padding-top: 0 !important; }
+        #sxpPage { padding-top: 30px !important; }
         @page { size: A3 landscape; margin: 14mm; }
     }
 </style>
