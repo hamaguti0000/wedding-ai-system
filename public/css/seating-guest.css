@@ -453,7 +453,15 @@
     font-weight: 700;
     line-height: 1.45;
     letter-spacing: 0;
-    white-space: nowrap;
+    /*
+      以前はwhite-space: nowrapで常に1行に収めていたが、卓の列幅(minmax(88px, 1fr))
+      より長い氏名(例:5文字以上の姓名)だと折り返せず、隣の卓の氏名列にテキストが
+      はみ出して重なって読めなくなっていた(2026-08-12、あじさいテーマの卓プレビューで
+      「テスト ゲスト様」が右隣の卓の氏名と重なって発覚)。折り返しを許可し、
+      はみ出すより行が増える方を選ぶ。
+    */
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 .gs-guest.is-mine .gs-guest__name {
     color: var(--gs-red);
