@@ -234,6 +234,31 @@
     color: #fff;
 }
 
+/*
+  「拡大して読む」で横スクロールが必要な時だけJS側で.is-visibleを付けて表示する
+  (guest.blade.phpのsetBoardView参照)。スクロールできることに気づかず、最初に
+  見えている一番左の卓だけで全部だと誤解されるのを防ぐ。
+*/
+.gs-scroll-hint {
+    display: none;
+    position: relative;
+    z-index: 1;
+    margin: 0 0 8px;
+    text-align: center;
+    color: var(--gs-gold);
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    animation: gs-scroll-hint-nudge 1.6s ease-in-out infinite;
+}
+.gs-scroll-hint.is-visible {
+    display: block;
+}
+@keyframes gs-scroll-hint-nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
+}
+
 .gs-board-scroll {
     position: relative;
     z-index: 1;
@@ -244,6 +269,11 @@
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-color: var(--gs-gold) rgba(255,255,255,.4);
+    /* まだ続きがあることを示す固定の端影。スクロール位置に応じて消える動的なものではないが、
+       「ここは横に動かせる」という最低限のサインとして常時出しておく。 */
+    box-shadow:
+        inset -22px 0 16px -16px rgba(79,90,164,.22),
+        inset 22px 0 16px -16px rgba(79,90,164,.12);
 }
 .gs-board-scale {
     --gs-board-scale: 1;
@@ -285,7 +315,7 @@
 
 .gs-table-row {
     display: grid;
-    gap: 34px;
+    gap: 44px;
     align-items: center;
     margin-bottom: 52px;
 }
@@ -302,7 +332,7 @@
 .gs-edge-group {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 34px;
+    gap: 44px;
 }
 .gs-edge-gap {
     min-height: 1px;
@@ -316,6 +346,14 @@
     align-items: center;
     column-gap: 18px;
     scroll-margin: 140px;
+    /*
+      枠線ではなく、卓ごとの氏名+花マーカーをひとまとまりだと分かるよう、
+      境界のはっきりしない柔らかいハロー(楕円グラデーション)を敷く。硬い罫線だと
+      和紙・あじさいの意匠と喧嘩するため避けた(2026-08-12、テーブル同士の間隔を
+      空けてほしいという要望を受けて追加)。
+    */
+    border-radius: 22px;
+    background: radial-gradient(ellipse 88% 82% at center, rgba(241,243,255,.6), rgba(241,243,255,0) 74%);
 }
 .gs-table--mine {
     filter: drop-shadow(0 8px 18px rgba(196,43,61,.16));
@@ -598,11 +636,11 @@
         width: 2240px;
     }
     .gs-table-row {
-        gap: 26px;
+        gap: 34px;
         margin-bottom: 42px;
     }
     .gs-edge-group {
-        gap: 26px;
+        gap: 34px;
     }
     .gs-footnote {
         margin-top: 18px;

@@ -113,6 +113,15 @@
                     <button type="button" data-gs-view="read">拡大して読む</button>
                 </div>
 
+                {{--
+                  「拡大して読む」は実寸表示になる代わりに全体を横スクロールで見る仕様だが、
+                  スクロールできること自体が画面上で示されておらず、最初に見えている
+                  卓(一番左の列)だけが全部だと誤解される恐れがあった(2026-08-12、
+                  スマホ実機相当のスクリーンショットで確認)。スクロールが必要な時だけ
+                  JS側で.is-visibleを付けて表示するヒント。
+                --}}
+                <p class="gs-scroll-hint" id="gsScrollHint">→ 横にスクロールすると他の卓もご覧いただけます</p>
+
                 <div class="gs-board-scroll" id="gsGrid">
                     <div class="gs-board-scale" id="gsBoardScale">
                         <div class="gs-board" id="gsBoard">
@@ -185,6 +194,7 @@
     const scaleShell = document.getElementById('gsBoardScale');
     const board = document.getElementById('gsBoard');
     const viewButtons = document.querySelectorAll('[data-gs-view]');
+    const scrollHint = document.getElementById('gsScrollHint');
 
     function setBoardView(mode) {
         if (!scroller || !scaleShell || !board) return;
@@ -198,6 +208,10 @@
         viewButtons.forEach((button) => {
             button.classList.toggle('is-active', button.dataset.gsView === mode);
         });
+        // 実寸表示(scale=1)で、かつ画面幅の方が卓全体より狭い(=横スクロールが実際に必要)
+        // 時だけヒントを出す。デスクトップ等で全部収まっている時は不要。
+        const needsScroll = mode === 'read' && board.offsetWidth > scroller.clientWidth + 1;
+        scrollHint?.classList.toggle('is-visible', needsScroll);
     }
 
     viewButtons.forEach((button) => {
