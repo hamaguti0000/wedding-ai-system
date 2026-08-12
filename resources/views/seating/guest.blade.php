@@ -99,27 +99,19 @@
                     </p>
                 </header>
 
-                @if ($myTable)
-                <section class="gs-focus" id="gsBanner">
-                    <div>
-                        <p class="gs-focus__label">Your Seat</p>
-                        <p class="gs-focus__value">{{ $myTable->name }}</p>
-                    </div>
-                    <button class="gs-focus__btn" id="scrollToMyTable" type="button">自分の席へ</button>
-                </section>
-                @else
-                <section class="gs-focus gs-focus--pending">
-                    <div>
-                        <p class="gs-focus__label">Your Seat</p>
-                        <p class="gs-focus__value">未配置</p>
-                    </div>
-                    <p class="gs-focus__note">席はまだ確定していません。</p>
-                </section>
-                @endif
-
                 <div class="gs-view-tools" aria-label="表示切替">
                     <button type="button" class="is-active" data-gs-view="fit">全体表示</button>
                     <button type="button" data-gs-view="read">拡大して読む</button>
+                </div>
+
+                {{--
+                  卓の並びは会場の配置そのものなので組み替えられない。狭い画面で
+                  読みづらい場合は、配置を保ったまま倍率だけを上げ下げしてもらう。
+                --}}
+                <div class="gs-zoom-tools" aria-label="表示倍率">
+                    <button type="button" id="gsZoomOut" aria-label="縮小">−</button>
+                    <span id="gsZoomLevel" aria-live="polite">100%</span>
+                    <button type="button" id="gsZoomIn" aria-label="拡大">＋</button>
                 </div>
 
                 {{--
@@ -200,6 +192,24 @@
                     </div>
                 </div>
 
+                @if ($myTable)
+                <section class="gs-focus" id="gsBanner">
+                    <div>
+                        <p class="gs-focus__label">Your Seat</p>
+                        <p class="gs-focus__value">{{ $myTable->name }}</p>
+                    </div>
+                    <button class="gs-focus__btn" id="scrollToMyTable" type="button">自分の席へ</button>
+                </section>
+                @else
+                <section class="gs-focus gs-focus--pending">
+                    <div>
+                        <p class="gs-focus__label">Your Seat</p>
+                        <p class="gs-focus__value">未配置</p>
+                    </div>
+                    <p class="gs-focus__note">席はまだ確定していません。</p>
+                </section>
+                @endif
+
             </div>
         </section>
 
@@ -219,23 +229,64 @@
     const viewButtons = document.querySelectorAll('[data-gs-view]');
     const scrollHint = document.getElementById('gsScrollHint');
 
-    function setBoardView(mode) {
-        if (!scroller || !scaleShell || !board) return;
-        const fitScale = Math.min(1, (scroller.clientWidth - 8) / board.offsetWidth);
-        const scale = mode === 'read' ? 1 : fitScale;
+    const zoomIn = document.getElementById('gsZoomIn');
+    const zoomOut = document.getElementById('gsZoomOut');
+    const zoomLevel = document.getElementById('gsZoomLevel');
+
+    // 卓の並びは会場の配置そのものなので組み替えられない。狭い画面では倍率で対応する。
+    // zoomFactor は「そのモードの基準倍率」に対する掛け率。
+    let currentMode = 'fit';
+    let zoomFactor = 1;
+    const ZOOM_MIN = 1;
+    const ZOOM_MAX = 6;
+    const ZOOM_STEP = 1.4;
+
+    function baseScale(mode) {
+        return mode === 'read' ? 1 : Math.min(1, (scroller.clientWidth - 8) / board.offsetWidth);
+    }
+
+    function applyScale() {
+        const scale = baseScale(currentMode) * zoomFactor;
         scaleShell.style.setProperty('--gs-board-scale', scale.toFixed(3));
         scaleShell.style.height = `${board.offsetHeight * scale}px`;
-        scaleShell.classList.toggle('is-fit', mode !== 'read');
-        scroller.classList.toggle('is-reading', mode === 'read');
-        if (mode !== 'read') scroller.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+        scaleShell.classList.toggle('is-fit', currentMode !== 'read');
+        // 拡大すると横幅が画面を超えるため、その時はスクロールできるようにする。
+        const overflows = board.offsetWidth * scale > scroller.clientWidth + 1;
+        scroller.classList.toggle('is-reading', overflows);
+        scrollHint?.classList.toggle('is-visible', overflows);
+        if (zoomLevel) zoomLevel.textContent = Math.round(zoomFactor * 100) + '%';
+        if (zoomOut) zoomOut.disabled = zoomFactor <= ZOOM_MIN + 0.001;
+        if (zoomIn) zoomIn.disabled = zoomFactor >= ZOOM_MAX - 0.001;
+    }
+
+    function setBoardView(mode) {
+        if (!scroller || !scaleShell || !board) return;
+        currentMode = mode;
+        zoomFactor = 1;
+        applyScale();
+        scroller.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
         viewButtons.forEach((button) => {
             button.classList.toggle('is-active', button.dataset.gsView === mode);
         });
-        // 実寸表示(scale=1)で、かつ画面幅の方が卓全体より狭い(=横スクロールが実際に必要)
-        // 時だけヒントを出す。デスクトップ等で全部収まっている時は不要。
-        const needsScroll = mode === 'read' && board.offsetWidth > scroller.clientWidth + 1;
-        scrollHint?.classList.toggle('is-visible', needsScroll);
     }
+
+    function changeZoom(factor) {
+        if (!scroller || !scaleShell || !board) return;
+        // 拡大前に見えていた中心を、拡大後も同じ位置に保つ。
+        const prevScale = baseScale(currentMode) * zoomFactor;
+        const centerX = (scroller.scrollLeft + scroller.clientWidth / 2) / prevScale;
+        const centerY = (scroller.scrollTop + scroller.clientHeight / 2) / prevScale;
+
+        zoomFactor = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomFactor * factor));
+        applyScale();
+
+        const nextScale = baseScale(currentMode) * zoomFactor;
+        scroller.scrollLeft = centerX * nextScale - scroller.clientWidth / 2;
+        scroller.scrollTop = centerY * nextScale - scroller.clientHeight / 2;
+    }
+
+    zoomIn?.addEventListener('click', () => changeZoom(ZOOM_STEP));
+    zoomOut?.addEventListener('click', () => changeZoom(1 / ZOOM_STEP));
 
     viewButtons.forEach((button) => {
         button.addEventListener('click', () => setBoardView(button.dataset.gsView));
