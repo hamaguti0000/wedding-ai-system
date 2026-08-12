@@ -51,12 +51,18 @@
     box-shadow: 0 24px 66px rgba(68,47,28,.13);
 }
 
+/*
+  四隅の装飾。以前は2pxの濃い緑で描いた四分円だったため、線が硬く、紙の縁で
+  ぶつ切りになって「途中で切れた輪」に見えていた(2026-08-13、実機の写真で指摘)。
+  線を1pxに落として先に向かって淡く消えるマスクをかけ、手描きの草花のような
+  余韻を持たせる。あじさいも粒を散らすのではなく、小花が寄り集まった房として描く。
+*/
 .gs-corner {
     position: absolute;
-    width: 138px;
-    height: 138px;
+    width: 150px;
+    height: 150px;
     pointer-events: none;
-    opacity: .95;
+    opacity: .88;
 }
 .gs-corner::before,
 .gs-corner::after {
@@ -64,25 +70,37 @@
     position: absolute;
     border-radius: 999px;
 }
+/* あじさいの房 + 葉 */
 .gs-corner::before {
-    inset: 18px 24px auto auto;
-    width: 86px;
-    height: 28px;
-    transform: rotate(-28deg);
+    inset: 16px 22px auto auto;
+    width: 92px;
+    height: 30px;
+    transform: rotate(-26deg);
     background:
-        radial-gradient(circle at 12% 48%, var(--gs-hydrangea-soft) 0 12%, transparent 13%),
-        radial-gradient(circle at 28% 38%, var(--gs-hydrangea) 0 12%, transparent 13%),
-        radial-gradient(circle at 42% 58%, #aeb8ee 0 12%, transparent 13%),
-        radial-gradient(ellipse at 68% 54%, var(--gs-green-soft) 0 13%, transparent 14%),
-        radial-gradient(ellipse at 86% 42%, var(--gs-green) 0 12%, transparent 13%);
+        radial-gradient(circle at 10% 52%, #cdd5ff 0 10%, transparent 11%),
+        radial-gradient(circle at 21% 34%, #9aa5df 0 11%, transparent 12%),
+        radial-gradient(circle at 24% 72%, #b6bfec 0 9%, transparent 10%),
+        radial-gradient(circle at 35% 50%, #aab4e8 0 11%, transparent 12%),
+        radial-gradient(circle at 45% 30%, #e4e8ff 0 8%, transparent 9%),
+        radial-gradient(circle at 47% 68%, #c6cdf0 0 8%, transparent 9%),
+        radial-gradient(ellipse at 70% 56%, var(--gs-green-soft) 0 13%, transparent 14%),
+        radial-gradient(ellipse at 87% 40%, var(--gs-green) 0 12%, transparent 13%);
 }
+/*
+  両端が筆跡のように消える細い弧。border-left+border-bottomで描く弧は左下が
+  中心になるため、左下を原点にした放射マスクで「中心は濃く、両端へ向かって
+  消える」形にする(直線マスクだと弧全体が消えてしまった)。
+*/
 .gs-corner::after {
-    right: 28px;
-    top: 52px;
-    width: 62px;
-    height: 62px;
-    border-left: 2px solid var(--gs-green);
-    border-bottom: 2px solid var(--gs-green);
+    right: 22px;
+    top: 46px;
+    width: 78px;
+    height: 78px;
+    border: 1px solid transparent;
+    border-left-color: rgba(36, 89, 68, .62);
+    border-bottom-color: rgba(36, 89, 68, .62);
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, #000 52%, rgba(0,0,0,.55) 74%, transparent 96%);
+    mask-image: radial-gradient(circle at 0% 100%, #000 52%, rgba(0,0,0,.55) 74%, transparent 96%);
 }
 .gs-corner--tl { top: 18px; left: 18px; }
 .gs-corner--tr { top: 18px; right: 18px; transform: scaleX(-1); }

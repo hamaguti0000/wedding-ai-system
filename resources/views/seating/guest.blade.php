@@ -3,6 +3,15 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ css_asset('css/seating-guest.css') }}">
+<style>
+    /*
+      挙式までのカウントダウン(position:fixedで右下に固定表示)が、席次表の
+      ご芳名に重なって読めなくなっていた(2026-08-13、公開後に実機で発覚)。
+      席次表は名前を一件ずつ読む画面で、重なりは誤読につながるため、この
+      ページでは表示しない。他のページでは従来どおり表示される。
+    */
+    .countdown { display: none !important; }
+</style>
 @endpush
 
 @section('content')
@@ -125,8 +134,23 @@
                 <div class="gs-board-scroll" id="gsGrid">
                     <div class="gs-board-scale" id="gsBoardScale">
                         <div class="gs-board" id="gsBoard">
+                            {{--
+                              高砂は新郎新婦の席なので、「高砂」という役割名ではなく
+                              お二人の名前を出す。設定が未入力の場合だけ従来の「高砂」に戻す。
+                            --}}
+                            @php
+                                /*
+                                  trim($s, ' ＆') のように全角記号を文字リストに渡すと、trimは
+                                  バイト単位で削るため「礼」(E7 A4 BC)の末尾BCが＆(EF BC 86)の
+                                  BCと一致して削られ、名前が文字化けする。連結ではなく
+                                  空でない値だけを集めて結合する。
+                                */
+                                $stageNames = collect([$setting?->groom_name, $setting?->bride_name])
+                                    ->filter(fn ($v) => filled($v))
+                                    ->implode(' ＆ ');
+                            @endphp
                             <div class="gs-stage gs-stage--head">
-                                <span>高砂</span>
+                                <span>{{ $stageNames !== '' ? $stageNames : '高砂' }}</span>
                             </div>
 
                             @foreach ($printRows as $printRow)
@@ -176,7 +200,6 @@
                     </div>
                 </div>
 
-                <p class="gs-footnote">御席の不順、ご芳名に誤字がございましたら深くお詫び申し上げます</p>
             </div>
         </section>
 
