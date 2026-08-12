@@ -307,13 +307,37 @@
     opacity: .35;
     cursor: default;
 }
-.gs-zoom-tools span {
-    min-width: 52px;
+.gs-zoom-tools__field {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     color: var(--gs-muted);
     font-family: 'Noto Sans JP', system-ui, sans-serif;
     font-size: .78rem;
     font-weight: 700;
-    text-align: center;
+}
+.gs-zoom-tools__field input {
+    width: 62px;
+    min-height: 34px;
+    padding: 0 6px;
+    border: 1px solid rgba(157,113,66,.42);
+    border-radius: 6px;
+    background: rgba(255,255,255,.9);
+    color: var(--gs-ink);
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    text-align: right;
+}
+/* 数値入力のスピナーは狭い画面で押しづらく、誤操作のもとなので隠す */
+.gs-zoom-tools__field input::-webkit-outer-spin-button,
+.gs-zoom-tools__field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.gs-zoom-tools__field input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .gs-board-scroll {

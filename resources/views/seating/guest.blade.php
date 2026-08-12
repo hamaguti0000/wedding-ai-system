@@ -110,7 +110,11 @@
                 --}}
                 <div class="gs-zoom-tools" aria-label="表示倍率">
                     <button type="button" id="gsZoomOut" aria-label="縮小">−</button>
-                    <span id="gsZoomLevel" aria-live="polite">100%</span>
+                    <span class="gs-zoom-tools__field">
+                        <input type="number" id="gsZoomLevel" inputmode="numeric"
+                               min="100" max="600" step="10" value="100" aria-label="表示倍率(%)">
+                        <span aria-hidden="true">%</span>
+                    </span>
                     <button type="button" id="gsZoomIn" aria-label="拡大">＋</button>
                 </div>
 
@@ -254,7 +258,10 @@
         const overflows = board.offsetWidth * scale > scroller.clientWidth + 1;
         scroller.classList.toggle('is-reading', overflows);
         scrollHint?.classList.toggle('is-visible', overflows);
-        if (zoomLevel) zoomLevel.textContent = Math.round(zoomFactor * 100) + '%';
+        // 入力中の値を打ち消さないよう、フォーカス中は書き換えない。
+        if (zoomLevel && document.activeElement !== zoomLevel) {
+            zoomLevel.value = Math.round(zoomFactor * 100);
+        }
         if (zoomOut) zoomOut.disabled = zoomFactor <= ZOOM_MIN + 0.001;
         if (zoomIn) zoomIn.disabled = zoomFactor >= ZOOM_MAX - 0.001;
     }
@@ -288,6 +295,24 @@
     zoomIn?.addEventListener('click', () => changeZoom(ZOOM_STEP));
     zoomOut?.addEventListener('click', () => changeZoom(1 / ZOOM_STEP));
 
+    // 倍率の直接入力。空欄や範囲外は現在値へ戻す。
+    function applyTypedZoom() {
+        if (!zoomLevel) return;
+        const typed = parseFloat(zoomLevel.value);
+        if (!isFinite(typed)) {
+            zoomLevel.value = Math.round(zoomFactor * 100);
+            return;
+        }
+        const target = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, typed / 100));
+        changeZoom(target / zoomFactor);
+        zoomLevel.value = Math.round(zoomFactor * 100);
+    }
+    zoomLevel?.addEventListener('change', applyTypedZoom);
+    zoomLevel?.addEventListener('blur', applyTypedZoom);
+    zoomLevel?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); zoomLevel.blur(); }
+    });
+
     viewButtons.forEach((button) => {
         button.addEventListener('click', () => setBoardView(button.dataset.gsView));
     });
@@ -297,8 +322,21 @@
         setTimeout(() => myTable?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }), 80);
     });
 
-    window.addEventListener('resize', () => setBoardView(document.querySelector('[data-gs-view].is-active')?.dataset.gsView || 'fit'));
-    window.addEventListener('load', () => setBoardView('fit'));
+    /*
+      スマホでは画面を上下にスクロールするとアドレスバーが出入りして高さが変わり、
+      その都度resizeが発火する。ここでsetBoardViewを呼ぶと倍率が100%に戻ってしまう
+      ため（2026-08-13に指摘）、幅が実際に変わった時だけ基準倍率を計算し直し、
+      ユーザーが設定した倍率(zoomFactor)は保持する。
+    */
+    let lastWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+        if (window.innerWidth === lastWidth) return;
+        lastWidth = window.innerWidth;
+        applyScale();
+    });
+    // 画像やフォントの読み込み後に卓の大きさが変わることがあるので測り直すが、
+    // ここでも倍率はリセットしない。
+    window.addEventListener('load', () => applyScale());
     setBoardView('fit');
 })();
 </script>
