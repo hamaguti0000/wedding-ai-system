@@ -137,6 +137,16 @@
                 <i class="fa-solid fa-qrcode"></i> 受付QR
             </a>
             @endif
+            {{-- パスワードを書き換えずに、このゲストに見えている画面をそのまま確認する --}}
+            @unless ($user->isAdmin())
+            <form method="POST" action="{{ route('admin.users.impersonate', $user->id) }}"
+                  onsubmit="return confirm('{{ $user->name }} としてサイトを表示します。よろしいですか？');">
+                @csrf
+                <button type="submit" class="guest-btn">
+                    <i class="fa-solid fa-user-secret"></i> この人の画面を見る
+                </button>
+            </form>
+            @endunless
         </div>
     </section>
 

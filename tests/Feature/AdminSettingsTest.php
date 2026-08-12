@@ -12,10 +12,10 @@ describe('AdminSettingController::edit() 設定画面表示', function () {
             ->assertStatus(200);
     });
 
-    it('ゲストは 403', function () {
+    it('ゲストはホームへリダイレクト', function () {
         $this->actingAs(makeGuest())
             ->get('/admin/settings')
-            ->assertStatus(403);
+            ->assertRedirect(route('dashboard'));
     });
 
     it('設定レコードがなくても表示できる（firstOrNew）', function () {
@@ -156,9 +156,9 @@ describe('AdminSettingController::update() 設定保存', function () {
             ->assertSessionHasErrors(['venue_url']);
     });
 
-    it('ゲストは 403', function () {
+    it('ゲストはホームへリダイレクト', function () {
         $this->actingAs(makeGuest())
             ->post('/admin/settings', validSettingsPayload())
-            ->assertStatus(403);
+            ->assertRedirect(route('dashboard'));
     });
 });

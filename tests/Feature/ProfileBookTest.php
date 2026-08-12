@@ -27,10 +27,10 @@ describe('GET /admin/profile-book 管理画面表示', function () {
             ->assertOk();
     });
 
-    it('ゲストは403', function () {
+    it('ゲストはホームへリダイレクト', function () {
         $this->actingAs(makeGuest())
             ->get('/admin/profile-book')
-            ->assertStatus(403);
+            ->assertRedirect(route('dashboard'));
     });
 });
 
@@ -114,12 +114,12 @@ describe('POST /admin/profile-book PDFアップロード', function () {
             ->assertSessionHasErrors('pdfs.0');
     });
 
-    it('ゲストは403', function () {
+    it('ゲストはホームへリダイレクト', function () {
         $pdf = UploadedFile::fake()->create('profile.pdf', 100, 'application/pdf');
 
         $this->actingAs(makeGuest())
             ->post('/admin/profile-book', ['pdfs' => [$pdf]])
-            ->assertStatus(403);
+            ->assertRedirect(route('dashboard'));
     });
 
     it('変換に失敗した場合、既存のページは維持される', function () {

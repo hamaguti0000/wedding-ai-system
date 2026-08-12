@@ -22,7 +22,27 @@
 @php
     $__isAdmin = Auth::user()?->isAdmin();
 @endphp
-<body @class(['has-admin-sidebar' => $__isAdmin])>
+@php
+    $__impersonating = session()->has(\App\Http\Controllers\ImpersonationController::SESSION_KEY);
+@endphp
+<body @class(['has-admin-sidebar' => $__isAdmin, 'is-impersonating' => $__impersonating])>
+
+    {{--
+      代理ログイン中は「今は他人の画面を見ている」ことが一目で分かるようにする。
+      これが無いと、管理者が自分の画面と取り違えて操作してしまう恐れがある。
+    --}}
+    @if ($__impersonating)
+    <div class="impersonation-bar">
+        <span class="impersonation-bar__text">
+            <i class="fa-solid fa-user-secret"></i>
+            <strong>{{ Auth::user()->name }}</strong> として表示中（管理者による確認モード）
+        </span>
+        <form method="POST" action="{{ route('impersonate.stop') }}">
+            @csrf
+            <button type="submit" class="impersonation-bar__btn">管理者に戻る</button>
+        </form>
+    </div>
+    @endif
 
     @include('layouts.header')
 

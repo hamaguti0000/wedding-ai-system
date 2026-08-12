@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ProgramController;
@@ -80,6 +81,8 @@ Route::post('/verify/resend', [EmailVerificationController::class, 'resend'])
 Route::middleware('auth')->group(function () {
     Route::get('/email/register', [EmailRegistrationController::class, 'edit'])->name('email.register');
     Route::patch('/email/register', [EmailRegistrationController::class, 'update'])->name('email.register.update');
+    // 代理ログインの終了。代理中はゲスト権限になっているため admin ミドルウェアの外に置く。
+    Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
 });
 Route::middleware(['auth', 'email.ready'])->group(function () {
     Route::get('/password/change', [PasswordChangeController::class, 'edit'])->name('password.change');
@@ -220,6 +223,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->whereNumber('id')->name('users.edit');
     Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->whereNumber('id')->name('users.update');
     Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->whereNumber('id')->name('users.password');
+    // 代理ログイン開始（管理者のみ。終了側は代理中＝ゲスト権限になるため下の auth グループに置く）
+    Route::post('/users/{id}/impersonate', [ImpersonationController::class, 'start'])->whereNumber('id')->name('users.impersonate');
     Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->whereNumber('id')->name('users.destroy');
 
     // 受付チェックイン

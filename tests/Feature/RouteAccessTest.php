@@ -135,12 +135,12 @@ describe('guest ログイン（未回答）', function () {
             ->assertSee('まだご出欠のご回答が届いておりません');
     });
 
-    it('/admin は 403', function () {
-        $this->actingAs(makeGuest())->get('/admin')->assertStatus(403);
+    it('/admin はホームへリダイレクト', function () {
+        $this->actingAs(makeGuest())->get('/admin')->assertRedirect(route('dashboard'));
     });
 
-    it('/admin/ops は 403', function () {
-        $this->actingAs(makeGuest())->get('/admin/ops')->assertStatus(403);
+    it('/admin/ops はホームへリダイレクト', function () {
+        $this->actingAs(makeGuest())->get('/admin/ops')->assertRedirect(route('dashboard'));
     });
 
     it('/invitation は 200', function () {

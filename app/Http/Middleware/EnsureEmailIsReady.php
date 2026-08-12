@@ -16,6 +16,12 @@ class EnsureEmailIsReady
             return $next($request);
         }
 
+        // 管理者による代理ログイン中は、本人にメール登録・認証をさせるための画面へ
+        // 飛ばさない（ゲスト画面の確認ができなくなるため）。
+        if ($request->session()->has(\App\Http\Controllers\ImpersonationController::SESSION_KEY)) {
+            return $next($request);
+        }
+
         if ($this->isExemptRoute($request)) {
             return $next($request);
         }

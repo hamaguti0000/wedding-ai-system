@@ -79,12 +79,12 @@ describe('管理画面ページ', function () {
         $this->actingAs(makeAdmin())->get(route('admin.news'))->assertOk();
     });
 
-    it('ゲストは役割管理ページに 403', function () {
-        $this->actingAs(makeGuest('attending'))->get(route('admin.tasks'))->assertForbidden();
+    it('ゲストは役割管理ページからホームへリダイレクト', function () {
+        $this->actingAs(makeGuest('attending'))->get(route('admin.tasks'))->assertRedirect(route('dashboard'));
     });
 
-    it('ゲストはプログラム管理ページに 403', function () {
-        $this->actingAs(makeGuest('attending'))->get(route('admin.program'))->assertForbidden();
+    it('ゲストはプログラム管理ページからホームへリダイレクト', function () {
+        $this->actingAs(makeGuest('attending'))->get(route('admin.program'))->assertRedirect(route('dashboard'));
     });
 });
 
