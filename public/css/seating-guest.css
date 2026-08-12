@@ -280,8 +280,15 @@
     width: 100%;
     min-height: 1px;
 }
+/*
+  1行8卓 × 卓の最小幅294px(氏名列88px + 花82px + 氏名列88px + column-gap 18px×2)
+  + 卓間gap 44px×7 = 2660px が、卓を潰さずに並べるのに必要な幅。以前は2240pxしか
+  なく1卓あたり約50px不足していたため、卓の中身がグリッドの枠からはみ出し、
+  右端の卓が見切れていた(2026-08-12発覚。氏名の折り返しや隣の卓との重なりも
+  同じ幅不足が原因だった)。余裕を持たせて2720pxにする。
+*/
 .gs-board {
-    width: 2240px;
+    width: 2720px;
     margin: 0 auto;
     padding: 12px 4px 0;
     transform: scale(var(--gs-board-scale));
@@ -633,7 +640,8 @@
         padding: 2px 10px 10px;
     }
     .gs-board {
-        width: 2240px;
+        /* 卓間gapが34pxなので必要幅は 8×294 + 34×7 = 2590px。同じく余裕を持たせる。 */
+        width: 2660px;
     }
     .gs-table-row {
         gap: 34px;

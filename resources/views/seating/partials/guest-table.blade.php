@@ -1,8 +1,17 @@
 @php
     $isMyTable = $myTableId && $table->id === $myTableId;
-    $occupiedSeats = $table->seats->filter(fn($s) => $s->assignment !== null)->values();
-    $leftSeats = $occupiedSeats->slice(0, (int) ceil(max($occupiedSeats->count(), 1) / 2))->values();
-    $rightSeats = $occupiedSeats->slice($leftSeats->count())->values();
+    /*
+      左右の振り分けは「空席も含めた全席」を半分にして決める。以前は空席を先に
+      除外してから半分に割っていたため、空席の入り方によって人が本来と逆側に
+      表示されていた(2026-08-12、管理画面では右側の木下様がゲスト画面では
+      左側に出ていたことで発覚)。管理画面・印刷版(seating-print-table-card)は
+      元から全席基準で割っており、そちらに揃える。表示は空席を除いて行う。
+    */
+    $allSeats = $table->seats->values();
+    $leftAll = $allSeats->slice(0, (int) ceil(max($allSeats->count(), 1) / 2))->values();
+    $leftSeats = $leftAll->filter(fn($s) => $s->assignment !== null)->values();
+    $rightSeats = $allSeats->slice($leftAll->count())
+        ->filter(fn($s) => $s->assignment !== null)->values();
     $tableMark = $tableMark ?? 'T';
 @endphp
 <article class="gs-table {{ $isMyTable ? 'gs-table--mine' : '' }}" id="gst-{{ $table->id }}">

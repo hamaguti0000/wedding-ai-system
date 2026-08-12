@@ -205,3 +205,54 @@ describe('GuestSeatingController View データ型', function () {
         expect($data['isPublished'])->toBeBool();
     });
 });
+
+// ─── 卓の左右振り分け ──────────────────────────────────────
+
+describe('ゲスト席次表の左右振り分け', function () {
+
+    /**
+     * 空席を先に除外してから半分に割ると、空席の入り方によって人が本来と逆側に
+     * 表示されてしまう（2026-08-12、管理画面では右側の人がゲスト画面では左側に
+     * 出ていたことで発覚）。管理画面・印刷版と同じく「空席込みの全席」を基準に
+     * 左右を決めることを固定する。
+     */
+    it('空席が偏っていても管理画面と同じ左右に振り分けられる', function () {
+        $guest = makeGuest('attending');
+        $table = SeatingTable::create(['name' => '親族卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+
+        // 8席中、左半分(0-3)は後ろ2席だけ、右半分(4-7)は後ろ3席だけ埋める。
+        // 旧ロジックだと埋席5件をceil(5/2)=3で割り、右側の1人目が左に混ざっていた。
+        $seats = [];
+        for ($i = 0; $i < 8; $i++) {
+            $seats[] = Seat::create([
+                'seating_table_id' => $table->id,
+                'type' => 'normal',
+                'pos_x' => $i,
+                'pos_y' => 0,
+            ]);
+        }
+        $leftUsers  = [makeGuest('attending'), makeGuest('attending')];
+        $rightUsers = [makeGuest('attending'), makeGuest('attending'), makeGuest('attending')];
+        SeatAssignment::create(['seat_id' => $seats[2]->id, 'user_id' => $leftUsers[0]->id]);
+        SeatAssignment::create(['seat_id' => $seats[3]->id, 'user_id' => $leftUsers[1]->id]);
+        SeatAssignment::create(['seat_id' => $seats[5]->id, 'user_id' => $rightUsers[0]->id]);
+        SeatAssignment::create(['seat_id' => $seats[6]->id, 'user_id' => $rightUsers[1]->id]);
+        SeatAssignment::create(['seat_id' => $seats[7]->id, 'user_id' => $rightUsers[2]->id]);
+
+        $rendered = $this->actingAs($guest)->get('/seating')->getContent();
+
+        // 左ブロックと右ブロックを取り出し、それぞれの人数を確認する
+        preg_match(
+            '/gs-table__guests--left(.*?)gs-table__wreath(.*?)gs-table__guests--right(.*?)<\/article>/s',
+            $rendered,
+            $m
+        );
+        expect($m)->not->toBeEmpty();
+
+        $leftBlock  = $m[1];
+        $rightBlock = $m[3];
+
+        expect(substr_count($leftBlock, 'gs-guest__name'))->toBe(2);
+        expect(substr_count($rightBlock, 'gs-guest__name'))->toBe(3);
+    });
+});
