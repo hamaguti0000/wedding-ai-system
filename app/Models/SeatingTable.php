@@ -25,4 +25,26 @@ class SeatingTable extends Model
             ->whereHas('assignment')
             ->count();
     }
+
+    /**
+     * display_order順での0始まりインデックスからテーブルの記号を作る。
+     * A〜Z(26個)を使い切ったら、AA/AB…ではなくa〜z(小文字)に続ける方式
+     * (エスコートカード印刷で卓を一目で区別するための表記、2026-05頃導入)。
+     */
+    public static function letterForIndex(int $index): string
+    {
+        if ($index < 26) {
+            return chr(65 + $index);
+        }
+
+        $index -= 26;
+        $letter = '';
+
+        do {
+            $letter = chr(97 + ($index % 26)) . $letter;
+            $index = intdiv($index, 26) - 1;
+        } while ($index >= 0);
+
+        return $letter;
+    }
 }

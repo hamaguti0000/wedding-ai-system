@@ -175,7 +175,7 @@ class AdminSeatingController extends Controller
         $tableMarks = $tables
             ->values()
             ->mapWithKeys(fn ($table, $index) => [
-                $table->id => $this->tableLetter($index),
+                $table->id => SeatingTable::letterForIndex($index),
             ]);
 
         $allGuests = User::query()
@@ -255,23 +255,6 @@ class AdminSeatingController extends Controller
         $titleCase = fn (string $s) => ucfirst(strtolower(trim($s)));
 
         return [$titleCase($parts[0]), $titleCase($parts[1])];
-    }
-
-    private function tableLetter(int $index): string
-    {
-        if ($index < 26) {
-            return chr(65 + $index);
-        }
-
-        $index -= 26;
-        $letter = '';
-
-        do {
-            $letter = chr(97 + ($index % 26)) . $letter;
-            $index = intdiv($index, 26) - 1;
-        } while ($index >= 0);
-
-        return $letter;
     }
 
     // ── テーブル ────────────────────────────────────────────
