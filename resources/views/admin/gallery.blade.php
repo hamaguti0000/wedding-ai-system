@@ -85,8 +85,11 @@
 .gl-admin-item__tags { padding: 0 12px 10px; font-size: 0.72rem; color: #9b8573; line-height: 1.6; }
 .gl-tag-chip { display: inline-block; background: #fef9f0; border: 1px solid #e8d5b7; color: #b38b59; border-radius: 20px; padding: 1px 8px; margin: 2px 3px 0 0; }
 .gl-tag-panel { display: none; padding: 10px 12px; background: #fef9f0; border-top: 1px solid #e8d5b7; }
+.gl-tag-search { width: 100%; box-sizing: border-box; padding: 6px 10px; margin-bottom: 8px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.8rem; background: #fffdf9; }
+.gl-tag-search:focus { border-color: #b38b59; outline: none; }
 .gl-tag-panel__list { max-height: 160px; overflow-y: auto; border: 1px solid #e0d0bc; border-radius: 6px; padding: 6px 8px; background: #fff; margin-bottom: 8px; }
 .gl-tag-panel__list label { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; padding: 3px 0; cursor: pointer; }
+.gl-tag-panel__list label.is-hidden { display: none; }
 </style>
 @endpush
 
@@ -330,6 +333,13 @@ function toggleEdit(id) {
 function toggleTag(id) {
     const el = document.getElementById('tag-' + id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function filterTagList(input) {
+    const q = input.value.toLowerCase().trim();
+    const list = input.closest('form').querySelector('.gl-tag-panel__list');
+    list.querySelectorAll('label[data-name]').forEach(label => {
+        label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
+    });
 }
 function previewPhotos(input) {
     const previews = document.getElementById('photoPreviews');
