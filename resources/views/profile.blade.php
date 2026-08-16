@@ -8,7 +8,6 @@
 @section('content')
 
 @php
-    $checkInUrl = $checkInUrl ?? null;
     $avatarType = $user->avatarType();
     $avatarEmoji = $user->avatar_emoji;
     $avatarBgColor = $user->avatarBackgroundColor();
@@ -16,7 +15,6 @@
     $avatarBorderWidth = $user->avatarBorderWidth();
     $avatarImageUrl = $user->avatarImageUrl();
     $initial = $user->avatarInitial();
-    $checkInQrUrl = $checkInUrl ? 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' . urlencode($checkInUrl) : null;
 @endphp
 
 <div class="pf-wrap">
@@ -157,37 +155,6 @@
             <a href="{{ route('admin.dashboard') }}" class="pf-btn pf-btn--primary">
                 <i class="fa-solid fa-list-check" aria-hidden="true"></i>管理ダッシュボードへ
             </a>
-        </div>
-    </div>
-    @endif
-
-    @if (!$user->isAdmin() && $profile && $checkInUrl)
-    <div class="pf-card">
-        <span class="pf-section-en">Check-in QR</span>
-        <h2 class="pf-section-ja">受付QR</h2>
-        <div class="pf-section-rule"></div>
-
-        <div style="display:grid;gap:14px;justify-items:center;text-align:center;">
-            <div style="width:min(100%,320px);padding:16px;border-radius:16px;background:#fcf8f2;border:1px solid #f2e7d8;">
-                @if ($checkInQrUrl)
-                <img src="{{ $checkInQrUrl }}" alt="受付QRコード" style="width:100%;display:block;border-radius:12px;background:#fff;padding:12px;box-sizing:border-box;box-shadow:inset 0 0 0 1px #f0e3d2;">
-                @endif
-            </div>
-            <div style="max-width:520px;color:#7f6a57;font-size:0.88rem;line-height:1.7;">
-                当日はこのQRを受付でかざしてください。
-                スマホに保存しておくと、受付がスムーズです。
-            </div>
-            <div style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e4d6c3;background:#fff;color:#6b5847;font-size:.8rem;word-break:break-all;">
-                {{ $checkInUrl }}
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                <a href="{{ route('seating.guest') }}" class="pf-btn pf-btn--outline" style="min-width:160px;">
-                    <i class="fa-solid fa-chair"></i> 席次表へ
-                </a>
-                <a href="{{ route('invitation') }}" class="pf-btn pf-btn--primary" style="min-width:160px;">
-                    <i class="fa-solid fa-envelope-open-text"></i> 招待状へ
-                </a>
-            </div>
         </div>
     </div>
     @endif

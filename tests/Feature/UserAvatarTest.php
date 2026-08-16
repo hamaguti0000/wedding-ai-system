@@ -178,14 +178,13 @@ describe('ユーザーアイコン', function () {
 
 describe('受付QR表示', function () {
 
-    it('プロフィールに自分の受付QRが表示される', function () {
+    it('挙式終了に伴いプロフィールには受付QRを表示しない', function () {
         $guest = makeGuest('attending');
 
         $this->actingAs($guest)
             ->get(route('profile.edit'))
             ->assertOk()
-            ->assertSee('受付QR')
-            ->assertSee($guest->guestProfile->checkin_token);
+            ->assertDontSee('受付QR');
     });
 });
 

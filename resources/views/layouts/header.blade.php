@@ -47,38 +47,16 @@
                         <i class="fa-solid fa-heart" aria-hidden="true"></i>プロフィール
                     </a>
                 </li>
-                {{-- 式について ドロップダウン --}}
-                <li class="header__nav-item">
+                <li>
                     <a href="{{ route('program') }}"
-                       class="{{ request()->routeIs('program','access','faq') ? 'active' : '' }}">
-                        <i class="fa-solid fa-list-ol" aria-hidden="true"></i>式について
-                        <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
+                       class="{{ request()->routeIs('program') ? 'active' : '' }}">
+                        <i class="fa-solid fa-list-ol" aria-hidden="true"></i>プログラム
                     </a>
-                    <ul class="header__dropdown">
-                        <li>
-                            <a href="{{ route('program') }}"
-                               class="{{ request()->routeIs('program') ? 'active' : '' }}">
-                                <i class="fa-solid fa-list-ol"></i>プログラム
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('access') }}"
-                               class="{{ request()->routeIs('access') ? 'active' : '' }}">
-                                <i class="fa-solid fa-map-location-dot"></i>アクセス
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('faq') }}"
-                               class="{{ request()->routeIs('faq') ? 'active' : '' }}">
-                                <i class="fa-solid fa-circle-question"></i>Q&amp;A
-                            </a>
-                        </li>
-                    </ul>
                 </li>
-                {{-- ギャラリー・お知らせ・ゲストブック --}}
+                {{-- ギャラリー・お知らせ --}}
                 <li class="header__nav-item">
                     <a href="{{ route('gallery') }}"
-                       class="{{ request()->routeIs('gallery','gallery.upload','people.*','news.index','guestbook','profile-book') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('gallery','gallery.upload','people.*','news.index','profile-book') ? 'active' : '' }}">
                         <i class="fa-solid fa-heart" aria-hidden="true"></i>楽しむ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -113,12 +91,6 @@
                             <a href="{{ route('news.index') }}"
                                class="{{ request()->routeIs('news.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-bullhorn"></i>お知らせ一覧
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('guestbook') }}"
-                               class="{{ request()->routeIs('guestbook') ? 'active' : '' }}">
-                                <i class="fa-solid fa-comment-dots"></i>ゲストブック
                             </a>
                         </li>
                     </ul>
@@ -333,23 +305,10 @@
                     <i class="fa-solid fa-heart" aria-hidden="true"></i>プロフィール
                 </a>
             </li>
-            <li class="header-drawer__section-label">式について</li>
             <li>
                 <a href="{{ route('program') }}"
                    class="{{ request()->routeIs('program') ? 'active' : '' }}">
                     <i class="fa-solid fa-list-ol" aria-hidden="true"></i>プログラム
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('access') }}"
-                   class="{{ request()->routeIs('access') ? 'active' : '' }}">
-                    <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>アクセス
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('faq') }}"
-                   class="{{ request()->routeIs('faq') ? 'active' : '' }}">
-                    <i class="fa-solid fa-circle-question" aria-hidden="true"></i>Q&amp;A
                 </a>
             </li>
             @if ($isAttending)
@@ -391,12 +350,6 @@
                 <a href="{{ route('news.index') }}"
                    class="{{ request()->routeIs('news.index') ? 'active' : '' }}">
                     <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>お知らせ一覧
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('guestbook') }}"
-                   class="{{ request()->routeIs('guestbook') ? 'active' : '' }}">
-                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>ゲストブック
                 </a>
             </li>
             @endif

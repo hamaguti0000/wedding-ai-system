@@ -308,9 +308,6 @@
                     <i class="fa-brands fa-google"></i> Google Maps
                 </a>
                 @endif
-                <a href="{{ route('access') }}" class="home-details__access-btn">
-                    <i class="fa-solid fa-map-location-dot"></i> アクセス詳細
-                </a>
             </div>
             @else
             <p class="home-details__value">◯◯チャペル</p>
