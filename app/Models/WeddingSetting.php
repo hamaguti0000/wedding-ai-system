@@ -37,6 +37,7 @@ class WeddingSetting extends Model
         'shuttle_bus_map_url',
         'hero_type',
         'hero_video_path',
+        'ending_movie_path',
         'hero_interval',
         'image_display_modes',
     ];

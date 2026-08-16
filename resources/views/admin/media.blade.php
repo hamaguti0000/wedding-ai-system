@@ -151,6 +151,41 @@
         </div>
     </div>
 
+    {{-- ── エンディングムービー ── --}}
+    <div class="hero-setting-card">
+        <h2>エンディングムービー</h2>
+        <p style="font-size:0.8rem;color:#7a6555;margin:0 0 16px;">
+            披露宴で流したエンディングムービーなどを、音声付きでゲストが視聴できるページ（{{ url('/ending') }}）に公開します。
+        </p>
+
+        <div style="padding-top:4px;">
+            <p style="font-size:0.82rem;font-weight:600;color:#3d2f25;margin-bottom:10px;">動画ファイル（MP4 / WebM・最大300MB）</p>
+            @if($setting?->ending_movie_path)
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                <video src="{{ asset('storage/'.$setting->ending_movie_path) }}"
+                    style="height:60px;border-radius:6px;" muted></video>
+                <span style="font-size:0.8rem;color:#7a6555;">動画がアップロード済みです</span>
+                <form method="POST" action="{{ route('admin.media.ending-video-delete') }}"
+                    onsubmit="return confirm('エンディングムービーを削除しますか？')">
+                    @csrf @method('DELETE')
+                    <button class="btn-sm btn-danger">削除</button>
+                </form>
+            </div>
+            @endif
+            <form method="POST" action="{{ route('admin.media.ending-video') }}" enctype="multipart/form-data">
+                @csrf
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <input type="file" name="video" accept="video/mp4,video/webm"
+                        style="font-size:0.84rem;" required>
+                    <button type="submit" class="btn-save" style="padding:8px 20px;font-size:0.82rem;">
+                        アップロード
+                    </button>
+                </div>
+                @error('video')<p class="field-error">{{ $message }}</p>@enderror
+            </form>
+        </div>
+    </div>
+
     {{-- ── 各ロケーション ── --}}
     <div class="media-grid">
         @foreach(\App\Models\SiteImage::LOCATIONS as $key => $label)

@@ -113,12 +113,32 @@ main { padding: 0; text-align: initial; }
     </div>
     @else
     @php
-        $groups = $people->groupBy(fn($p) => $p->guestProfile?->guest_side ?? 'other');
-        $groupOrder = [
-            'groom' => '新郎側',
-            'bride' => '新婦側',
-            'other' => 'ゲスト',
-        ];
+        $sideLabels = ['groom' => '新郎', 'bride' => '新婦', 'other' => 'ゲスト'];
+        $relLabels  = ['family' => '親族', 'friend' => '友人', 'colleague' => '職場', 'other' => 'その他'];
+
+        $groupKey = function ($p) {
+            $profile = $p->guestProfile;
+            $side = $profile?->guest_side ?? 'other';
+            $rel  = $profile?->relationship ?? 'other';
+            return "{$side}_{$rel}";
+        };
+
+        $groups = $people->groupBy($groupKey);
+
+        // 新郎→新婦→側不明、それぞれ 親族→友人→職場→その他 の順に並べる
+        $orderedKeys = [];
+        foreach (['groom', 'bride', 'other'] as $side) {
+            foreach (['family', 'friend', 'colleague', 'other'] as $rel) {
+                $orderedKeys[] = "{$side}_{$rel}";
+            }
+        }
+        $groups = collect($orderedKeys)
+            ->filter(fn($key) => $groups->has($key))
+            ->mapWithKeys(fn($key) => [$key => $groups->get($key)]);
+
+        $groupLabel = fn($side, $rel) => $sideLabels[$side] . $relLabels[$rel];
+        $groomCount = $people->filter(fn($p) => ($p->guestProfile?->guest_side ?? 'other') === 'groom')->count();
+        $brideCount = $people->filter(fn($p) => ($p->guestProfile?->guest_side ?? 'other') === 'bride')->count();
     @endphp
 
     <div class="ppl-toolbar">
@@ -129,19 +149,20 @@ main { padding: 0; text-align: initial; }
         </div>
         <div class="ppl-tabs" id="pplTabs">
             <button class="ppl-tab active" data-side="all">すべて（{{ $people->count() }}）</button>
-            @if ($groups->has('groom'))
-            <button class="ppl-tab" data-side="groom">新郎側（{{ $groups->get('groom')->count() }}）</button>
+            @if ($groomCount > 0)
+            <button class="ppl-tab" data-side="groom">新郎側（{{ $groomCount }}）</button>
             @endif
-            @if ($groups->has('bride'))
-            <button class="ppl-tab" data-side="bride">新婦側（{{ $groups->get('bride')->count() }}）</button>
+            @if ($brideCount > 0)
+            <button class="ppl-tab" data-side="bride">新婦側（{{ $brideCount }}）</button>
             @endif
         </div>
     </div>
 
     <div id="pplGroups">
-        @foreach ($groups as $side => $members)
+        @foreach ($groups as $key => $members)
+        @php [$side, $rel] = explode('_', $key, 2); @endphp
         <div class="ppl-group" data-side-group="{{ $side }}">
-            <div class="ppl-group__label">{{ $groupOrder[$side] ?? 'ゲスト' }} · {{ $members->count() }}名</div>
+            <div class="ppl-group__label">{{ $groupLabel($side, $rel) }} · {{ $members->count() }}名</div>
             <div class="ppl-list">
                 @foreach ($members as $person)
                 @php $profile = $person->guestProfile; @endphp

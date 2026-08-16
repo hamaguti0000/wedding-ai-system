@@ -148,4 +148,32 @@ class AdminMediaController extends Controller
 
         return back()->with('success', '動画を削除しました');
     }
+
+    public function uploadEndingMovie(Request $request)
+    {
+        $request->validate(['video' => 'required|mimes:mp4,webm|max:307200']); // 300MB
+
+        $setting = WeddingSetting::firstOrNew([]);
+
+        if ($setting->ending_movie_path) {
+            Storage::disk('public')->delete($setting->ending_movie_path);
+        }
+
+        $path = $request->file('video')->store('site-media/ending-movie', 'public');
+        $setting->ending_movie_path = $path;
+        $setting->save();
+
+        return back()->with('success', 'エンディングムービーをアップロードしました');
+    }
+
+    public function deleteEndingMovie()
+    {
+        $setting = WeddingSetting::first();
+        if ($setting?->ending_movie_path) {
+            Storage::disk('public')->delete($setting->ending_movie_path);
+            $setting->update(['ending_movie_path' => null]);
+        }
+
+        return back()->with('success', 'エンディングムービーを削除しました');
+    }
 }

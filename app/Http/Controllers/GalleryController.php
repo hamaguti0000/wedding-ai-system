@@ -13,6 +13,7 @@ class GalleryController extends Controller
     {
         $photos = GalleryPhoto::where('is_active', true)
             ->where('status', 'approved')
+            ->with('taggedUsers.guestProfile')
             ->orderBy('sort_order')->orderBy('id')->get();
 
         return view('gallery', compact('photos'));

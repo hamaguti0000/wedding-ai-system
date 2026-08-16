@@ -52,6 +52,24 @@ main { padding: 0; text-align: initial; }
 }
 .gl-lightbox.is-open .gl-lightbox__img { transform: scale(1); }
 .gl-lightbox__caption { position: absolute; bottom: -32px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+.gl-lightbox__tags {
+    position: absolute; bottom: -64px; left: 0; right: 0;
+    text-align: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+}
+.gl-lightbox__tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.12); color: #fff; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.3); border-radius: 20px;
+    padding: 4px 12px; font-size: 0.76rem; transition: background 0.15s;
+}
+.gl-lightbox__tag:hover { background: rgba(255,255,255,0.25); }
+.gl-lightbox__download {
+    position: absolute; top: -44px; left: 0;
+    background: none; border: none; color: #fff;
+    font-size: 1.3rem; cursor: pointer; opacity: 0.7;
+    transition: opacity 0.15s; text-decoration: none;
+}
+.gl-lightbox__download:hover { opacity: 1; }
 .gl-lightbox__close { position: absolute; top: -44px; right: 0; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; opacity: 0.7; transition: opacity 0.15s; }
 .gl-lightbox__close:hover { opacity: 1; }
 .gl-lightbox__nav {
@@ -105,10 +123,17 @@ main { padding: 0; text-align: initial; }
     @else
     <div class="gl-grid" id="glGrid">
         @foreach ($photos as $i => $photo)
+        @php $others = $photo->taggedUsers->where('id', '!=', $user->id); @endphp
         <div class="gl-item" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
             <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
-            @if ($photo->caption)
-            <div class="gl-item__caption">{{ $photo->caption }}</div>
+            @if ($photo->caption || $others->isNotEmpty())
+            <div class="gl-item__caption">
+                {{ $photo->caption }}
+                @if ($others->isNotEmpty())
+                <br><i class="fa-solid fa-user-group" style="font-size:0.7rem;opacity:0.8;"></i>
+                {{ $others->map(fn($u) => $u->guestProfile?->fullName() ?: $u->name)->implode('、') }}
+                @endif
+            </div>
             @endif
         </div>
         @endforeach
@@ -119,6 +144,9 @@ main { padding: 0; text-align: initial; }
 @if ($photos->isNotEmpty())
 <div class="gl-lightbox" id="glLightbox" onclick="closeLightboxOnOverlay(event)">
     <div class="gl-lightbox__inner">
+        <a class="gl-lightbox__download" id="glLightboxDownload" href="" download onclick="event.stopPropagation()" aria-label="ダウンロード">
+            <i class="fa-solid fa-download"></i>
+        </a>
         <button class="gl-lightbox__close" onclick="closeLightbox()" aria-label="閉じる">
             <i class="fa-solid fa-xmark"></i>
         </button>
@@ -130,11 +158,22 @@ main { padding: 0; text-align: initial; }
             <i class="fa-solid fa-chevron-right"></i>
         </button>
         <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
+        <div class="gl-lightbox__tags" id="glLightboxTags"></div>
     </div>
 </div>
 
+@php
+    $photosJson = $photos->map(function ($p) use ($user) {
+        $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) {
+            return ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name];
+        })->values();
+
+        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];
+    })->values();
+@endphp
 <script>
-const photos = @json($photos->map(fn($p) => ['url' => $p->url, 'caption' => $p->caption])->values());
+const peopleBaseUrl = "{{ url('/people') }}";
+const photos = @json($photosJson);
 let current = 0;
 
 function openLightbox(index) {
@@ -154,6 +193,12 @@ function showPhoto() {
     const p = photos[current];
     document.getElementById('glLightboxImg').src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption ?? '';
+    document.getElementById('glLightboxDownload').href = p.url;
+    const tagsEl = document.getElementById('glLightboxTags');
+    const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    tagsEl.innerHTML = (p.tags || []).map(t =>
+        `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}" onclick="event.stopPropagation()"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
+    ).join('');
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
 function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
