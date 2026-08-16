@@ -239,6 +239,18 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.gallery') }}"
+                   class="{{ request()->routeIs('admin.gallery*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-images" aria-hidden="true"></i>ギャラリー管理
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.guestbook') }}"
+                   class="{{ request()->routeIs('admin.guestbook*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>ゲストブック管理
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.profiles') }}"
                    class="{{ request()->routeIs('admin.profiles') ? 'active' : '' }}">
                     <i class="fa-solid fa-heart" aria-hidden="true"></i>プロフィール
