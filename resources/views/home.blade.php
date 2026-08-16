@@ -131,66 +131,6 @@
 </section>
 @endif
 
-{{-- ══ インフォメーション（返信期日・シャトルバス）══════════════════ --}}
-@php
-    $showNotice = $setting?->rsvp_deadline || ($setting?->shuttle_bus_enabled && $setting?->shuttle_bus_departure);
-@endphp
-@if ($showNotice)
-<section class="home-notice">
-    <div class="home-notice__inner">
-
-        {{-- 返信期日 --}}
-        @if ($setting?->rsvp_deadline)
-        <div class="home-notice__item">
-            <div class="home-notice__icon-wrap">
-                <i class="fa-regular fa-calendar-check"></i>
-            </div>
-            <div class="home-notice__body">
-                <p class="home-notice__label">ご返信期日</p>
-                <p class="home-notice__text">
-                    {{ $setting->rsvp_deadline->format('Y年n月j日') }}までにご回答くださいますようお願い申し上げます。
-                </p>
-            </div>
-        </div>
-        @if ($setting?->shuttle_bus_enabled && $setting?->shuttle_bus_departure)
-        <div class="home-notice__divider"></div>
-        @endif
-        @endif
-
-        {{-- シャトルバス --}}
-        @if ($setting?->shuttle_bus_enabled && $setting?->shuttle_bus_departure)
-        <div class="home-notice__item">
-            <div class="home-notice__icon-wrap">
-                <i class="fa-solid fa-bus-simple"></i>
-            </div>
-            <div class="home-notice__body">
-                <p class="home-notice__label">シャトルバスのご案内</p>
-                <p class="home-notice__text">
-                    当方にてシャトルバスをご準備しております<br>
-                    ご利用の方は{{ $setting->shuttle_bus_departure }}まで<br>
-                    お越しくださいますようお願い申し上げます
-                </p>
-                @if ($setting->shuttle_bus_times)
-                <p class="home-notice__time">
-                    <i class="fa-regular fa-clock"></i>&ensp;出発時間：{{ $setting->shuttle_bus_times }}
-                </p>
-                @endif
-                @if ($setting->shuttle_bus_note)
-                <p class="home-notice__note">{{ $setting->shuttle_bus_note }}</p>
-                @endif
-                @if ($setting->shuttle_bus_map_url)
-                <a href="{{ $setting->shuttle_bus_map_url }}" target="_blank" rel="noopener"
-                   class="home-notice__map-btn">
-                    <i class="fa-brands fa-google"></i> 乗り場の地図を見る
-                </a>
-                @endif
-            </div>
-        </div>
-        @endif
-
-    </div>
-</section>
-@endif
 
 {{-- ══ 当日のお願い（タスクが割り当てられている場合のみ表示）══════════ --}}
 @if ($homeTasks->isNotEmpty())
