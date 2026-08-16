@@ -592,9 +592,22 @@
 .gs-guest__name a {
     color: inherit;
     text-decoration: none;
+    border-bottom: 1px dotted #b38b59;
+    padding-bottom: 1px;
 }
-.gs-guest__name a:hover {
-    text-decoration: underline;
+.gs-guest__name a::after {
+    content: '\f030';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.62em;
+    color: #b38b59;
+    margin-left: 3px;
+    vertical-align: 1px;
+}
+.gs-guest__name a:hover,
+.gs-guest__name a:active {
+    color: #b38b59;
+    border-bottom-style: solid;
 }
 .gs-guest.is-mine .gs-guest__name {
     color: var(--gs-red);
