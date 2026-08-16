@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
 use App\Models\User;
+use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -37,7 +38,7 @@ class AdminGalleryController extends Controller
         return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, ImageDuplicateDetector $duplicateDetector)
     {
         $request->validate([
             'photos'          => 'required|array|max:20',
@@ -52,8 +53,14 @@ class AdminGalleryController extends Controller
 
         $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
         $count = 0;
+        $duplicateCount = 0;
 
         foreach ($request->file('photos') as $i => $file) {
+            if ($duplicateDetector->findDuplicate($file->getRealPath()) !== null) {
+                $duplicateCount++;
+                continue;
+            }
+
             $path = $file->store('gallery', 'public');
             GalleryPhoto::create([
                 'file_path'  => $path,
@@ -61,11 +68,18 @@ class AdminGalleryController extends Controller
                 'sort_order' => $maxOrder + $count + 1,
                 'is_active'  => true,
                 'status'     => 'approved',
+                'file_hash'  => $duplicateDetector->fileHash($file->getRealPath()),
+                'phash'      => $duplicateDetector->perceptualHash($file->getRealPath()),
             ]);
             $count++;
         }
 
-        return back()->with('success', "{$count}枚の写真を追加しました");
+        $message = "{$count}枚の写真を追加しました";
+        if ($duplicateCount > 0) {
+            $message .= "(既存の写真と同じものが{$duplicateCount}枚あったため除外しました)";
+        }
+
+        return back()->with('success', $message);
     }
 
     public function update(Request $request, int $id)

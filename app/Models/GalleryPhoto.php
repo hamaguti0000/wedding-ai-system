@@ -16,6 +16,8 @@ class GalleryPhoto extends Model
         'uploaded_by_user_id',
         'status',
         'is_guest_upload',
+        'file_hash',
+        'phash',
     ];
 
     protected function casts(): array

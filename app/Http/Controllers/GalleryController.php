@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
+use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,7 +23,7 @@ class GalleryController extends Controller
         return view('gallery-upload');
     }
 
-    public function upload(Request $request)
+    public function upload(Request $request, ImageDuplicateDetector $duplicateDetector)
     {
         $request->validate([
             'photos'     => 'required|array|max:10',
@@ -36,9 +37,17 @@ class GalleryController extends Controller
         ]);
 
         $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
-        $count    = 0;
+        $count           = 0;
+        $duplicateCount  = 0;
 
-        foreach ($request->file('photos') as $i => $file) {
+        foreach ($request->file('photos') as $file) {
+            // 誰かから回ってきた同じ写真を複数人が投稿するケースがあるため、
+            // 完全一致・見た目がほぼ同じ写真は新規登録せずスキップする。
+            if ($duplicateDetector->findDuplicate($file->getRealPath()) !== null) {
+                $duplicateCount++;
+                continue;
+            }
+
             $path = $file->store('gallery/guest', 'public');
             GalleryPhoto::create([
                 'file_path'           => $path,
@@ -48,10 +57,25 @@ class GalleryController extends Controller
                 'uploaded_by_user_id' => Auth::id(),
                 'status'              => 'pending',
                 'is_guest_upload'     => true,
+                'file_hash'           => $duplicateDetector->fileHash($file->getRealPath()),
+                'phash'               => $duplicateDetector->perceptualHash($file->getRealPath()),
             ]);
             $count++;
         }
 
-        return back()->with('success', "{$count}枚の写真を投稿しました！管理者の確認後に公開されます🎉");
+        return back()->with('success', $this->uploadResultMessage($count, $duplicateCount));
+    }
+
+    private function uploadResultMessage(int $count, int $duplicateCount): string
+    {
+        if ($count === 0 && $duplicateCount > 0) {
+            return 'その写真はすでに他の方が投稿済みでした。別の写真を投稿してください。';
+        }
+
+        if ($duplicateCount > 0) {
+            return "{$count}枚の写真を投稿しました！(既に投稿済みの写真と同じものが{$duplicateCount}枚あったため除外しました)管理者の確認後に公開されます🎉";
+        }
+
+        return "{$count}枚の写真を投稿しました！管理者の確認後に公開されます🎉";
     }
 }
