@@ -26,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
             'program'        => 'banner_program',
             'profiles.index' => 'banner_profile',
             'profiles.show'  => 'banner_profile',
+            'people.index'   => 'banner_gallery',
+            'people.show'    => 'banner_gallery',
             'login'          => 'login_bg',
         ];
 

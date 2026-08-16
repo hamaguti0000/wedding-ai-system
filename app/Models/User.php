@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Mail\EmailVerificationMail;
 use App\Mail\PasswordResetMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -156,6 +157,11 @@ class User extends Authenticatable
     public function loginHistories(): HasMany
     {
         return $this->hasMany(LoginHistory::class);
+    }
+
+    public function taggedPhotos(): BelongsToMany
+    {
+        return $this->belongsToMany(GalleryPhoto::class, 'gallery_photo_taggings');
     }
 
     public function isAdmin(): bool

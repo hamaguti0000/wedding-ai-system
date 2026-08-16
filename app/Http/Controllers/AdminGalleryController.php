@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,6 +12,7 @@ class AdminGalleryController extends Controller
     public function index()
     {
         $photos  = GalleryPhoto::where('is_guest_upload', false)
+            ->with('taggedUsers')
             ->orderBy('sort_order')->orderBy('id')->get();
 
         $pending = GalleryPhoto::where('is_guest_upload', true)
@@ -20,10 +22,19 @@ class AdminGalleryController extends Controller
 
         $guestApproved = GalleryPhoto::where('is_guest_upload', true)
             ->whereIn('status', ['approved', 'rejected'])
-            ->with('uploader')
+            ->with(['uploader', 'taggedUsers'])
             ->orderByDesc('created_at')->get();
 
-        return view('admin.gallery', compact('photos', 'pending', 'guestApproved'));
+        $taggableGuests = User::where('role', 'guest')
+            ->with('guestProfile')
+            ->get()
+            ->sortBy(function (User $u) {
+                $p = $u->guestProfile;
+                return $p ? $p->last_name . $p->first_name : $u->name;
+            })
+            ->values();
+
+        return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests'));
     }
 
     public function store(Request $request)
@@ -100,6 +111,21 @@ class AdminGalleryController extends Controller
         $photo->update(['status' => 'rejected', 'is_active' => false]);
 
         return back()->with('success', '写真を却下しました');
+    }
+
+    /** 写真に写っている人物をタグ付け */
+    public function tag(Request $request, int $id)
+    {
+        $photo = GalleryPhoto::where('status', 'approved')->findOrFail($id);
+
+        $request->validate([
+            'user_ids'   => 'nullable|array',
+            'user_ids.*' => 'integer|exists:users,id',
+        ]);
+
+        $photo->taggedUsers()->sync($request->input('user_ids', []));
+
+        return back()->with('success', '写真のタグ付けを更新しました');
     }
 
     public function moveUp(int $id)

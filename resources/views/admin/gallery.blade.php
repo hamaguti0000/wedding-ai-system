@@ -80,6 +80,13 @@
 .guest-history-section { margin-bottom: 32px; }
 .guest-history-section summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #7a6a5a; padding: 10px 0; user-select: none; }
 .gl-admin-item.rejected { opacity: 0.4; }
+
+/* 人物タグ付け */
+.gl-admin-item__tags { padding: 0 12px 10px; font-size: 0.72rem; color: #9b8573; line-height: 1.6; }
+.gl-tag-chip { display: inline-block; background: #fef9f0; border: 1px solid #e8d5b7; color: #b38b59; border-radius: 20px; padding: 1px 8px; margin: 2px 3px 0 0; }
+.gl-tag-panel { display: none; padding: 10px 12px; background: #fef9f0; border-top: 1px solid #e8d5b7; }
+.gl-tag-panel__list { max-height: 160px; overflow-y: auto; border: 1px solid #e0d0bc; border-radius: 6px; padding: 6px 8px; background: #fff; margin-bottom: 8px; }
+.gl-tag-panel__list label { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; padding: 3px 0; cursor: pointer; }
 </style>
 @endpush
 
@@ -189,10 +196,18 @@
                 <div class="gl-admin-item__actions">
                     <form method="POST" action="{{ route('admin.gallery.move-up', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="上へ"><i class="fa-solid fa-chevron-up"></i></button></form>
                     <form method="POST" action="{{ route('admin.gallery.move-down', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="下へ"><i class="fa-solid fa-chevron-down"></i></button></form>
-                    <button class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})" title="編集"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-sm btn-sm-pw" onclick="toggleTag({{ $photo->id }})" title="人物タグ"><i class="fa-solid fa-user-tag"></i></button>
                     <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button></form>
                 </div>
             </div>
+            @if ($photo->taggedUsers->isNotEmpty())
+            <div class="gl-admin-item__tags">
+                @foreach ($photo->taggedUsers as $tagged)
+                <span class="gl-tag-chip">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
+                @endforeach
+            </div>
+            @endif
             <div id="edit-{{ $photo->id }}" style="display:none;padding:10px 12px;background:#fef9f0;border-top:1px solid #e8d5b7;">
                 <form method="POST" action="{{ route('admin.gallery.update', $photo->id) }}">
                     @csrf @method('PATCH')
@@ -207,6 +222,7 @@
                     <button type="submit" class="btn-primary" style="padding:6px 16px;font-size:0.82rem;">保存</button>
                 </form>
             </div>
+            @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests])
         </div>
         @endforeach
     </div>{{-- #galleryGrid --}}
@@ -232,12 +248,25 @@
                         </span>
                     </p>
                     <div class="gl-admin-item__actions">
+                        @if ($photo->status === 'approved')
+                        <button class="btn-sm btn-sm-pw" onclick="toggleTag({{ $photo->id }})" title="人物タグ"><i class="fa-solid fa-user-tag"></i></button>
+                        @endif
                         <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">
                             @csrf @method('DELETE')
                             <button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button>
                         </form>
                     </div>
                 </div>
+                @if ($photo->taggedUsers->isNotEmpty())
+                <div class="gl-admin-item__tags">
+                    @foreach ($photo->taggedUsers as $tagged)
+                    <span class="gl-tag-chip">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
+                    @endforeach
+                </div>
+                @endif
+                @if ($photo->status === 'approved')
+                @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests])
+                @endif
             </div>
             @endforeach
         </div>
@@ -296,6 +325,10 @@
 
 function toggleEdit(id) {
     const el = document.getElementById('edit-' + id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function toggleTag(id) {
+    const el = document.getElementById('tag-' + id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 function previewPhotos(input) {

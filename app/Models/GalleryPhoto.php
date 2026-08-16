@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class GalleryPhoto extends Model
 {
@@ -33,6 +34,11 @@ class GalleryPhoto extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by_user_id');
+    }
+
+    public function taggedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'gallery_photo_taggings');
     }
 
     public function isPending(): bool

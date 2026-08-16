@@ -589,6 +589,13 @@
     white-space: normal;
     overflow-wrap: break-word;
 }
+.gs-guest__name a {
+    color: inherit;
+    text-decoration: none;
+}
+.gs-guest__name a:hover {
+    text-decoration: underline;
+}
 .gs-guest.is-mine .gs-guest__name {
     color: var(--gs-red);
 }

@@ -22,7 +22,7 @@
             $isMe = $mySeat && $seat->id === $mySeat->id;
         @endphp
         <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-            <p class="gs-guest__name">{{ $guestName($assignedUser) }} 様</p>
+            <p class="gs-guest__name"><a href="{{ route('people.show', $assignedUser) }}">{{ $guestName($assignedUser) }}</a> 様</p>
         </div>
         @endforeach
     </div>
@@ -38,7 +38,7 @@
             $isMe = $mySeat && $seat->id === $mySeat->id;
         @endphp
         <div class="gs-guest {{ $isMe ? 'is-mine' : '' }}">
-            <p class="gs-guest__name">{{ $guestName($assignedUser) }} 様</p>
+            <p class="gs-guest__name"><a href="{{ route('people.show', $assignedUser) }}">{{ $guestName($assignedUser) }}</a> 様</p>
         </div>
         @endforeach
     </div>

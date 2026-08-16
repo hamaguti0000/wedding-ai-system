@@ -78,7 +78,7 @@
                 {{-- ギャラリー・お知らせ・ゲストブック --}}
                 <li class="header__nav-item">
                     <a href="{{ route('gallery') }}"
-                       class="{{ request()->routeIs('gallery','gallery.upload','news.index','guestbook','profile-book') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('gallery','gallery.upload','people.*','news.index','guestbook','profile-book') ? 'active' : '' }}">
                         <i class="fa-solid fa-heart" aria-hidden="true"></i>楽しむ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -93,6 +93,12 @@
                             <a href="{{ route('gallery.upload') }}"
                                class="{{ request()->routeIs('gallery.upload') ? 'active' : '' }}">
                                 <i class="fa-solid fa-camera"></i>写真を投稿
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('people.index') }}"
+                               class="{{ request()->routeIs('people.*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-users"></i>参加者一覧
                             </a>
                         </li>
                         @if ($isProfileBookPublic)
@@ -365,6 +371,12 @@
                 <a href="{{ route('gallery.upload') }}"
                    class="{{ request()->routeIs('gallery.upload') ? 'active' : '' }}">
                     <i class="fa-solid fa-camera" aria-hidden="true"></i>写真を投稿
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('people.index') }}"
+                   class="{{ request()->routeIs('people.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-users" aria-hidden="true"></i>参加者一覧
                 </a>
             </li>
             @if ($isProfileBookPublic)

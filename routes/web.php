@@ -29,6 +29,7 @@ use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\AdminTaskController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\AdminGalleryController;
+use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\ProfileBookController;
 use App\Http\Controllers\AdminProfileBookController;
 use App\Http\Controllers\NewsController;
@@ -108,6 +109,8 @@ Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () 
     Route::get('/gallery',              [GalleryController::class,   'index'])->name('gallery');
     Route::get('/gallery/upload',       [GalleryController::class,   'uploadForm'])->name('gallery.upload');
     Route::post('/gallery/upload',      [GalleryController::class,   'upload'])->name('gallery.upload.post');
+    Route::get('/people',               [PeopleController::class,    'index'])->name('people.index');
+    Route::get('/people/{user}',        [PeopleController::class,    'show'])->name('people.show');
     Route::get('/news',               [NewsController::class,       'index'])->name('news.index');
     Route::get('/news/{id}',          [NewsController::class,       'show']) ->name('news.show');
     Route::get('/guestbook',          [GuestbookController::class,  'index'])->name('guestbook');
@@ -156,6 +159,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/gallery/{id}/move-down',  [AdminGalleryController::class, 'moveDown']) ->name('gallery.move-down');
     Route::post('/gallery/{id}/approve',     [AdminGalleryController::class, 'approve'])  ->name('gallery.approve');
     Route::post('/gallery/{id}/reject',      [AdminGalleryController::class, 'reject'])   ->name('gallery.reject');
+    Route::post('/gallery/{id}/tag',         [AdminGalleryController::class, 'tag'])      ->name('gallery.tag');
 
     // プロフィールブック管理
     Route::get('/profile-book',                  [AdminProfileBookController::class, 'edit'])       ->name('profile-book');
