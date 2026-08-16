@@ -1,6 +1,21 @@
 <?php
 
 use App\Models\GalleryPhoto;
+use App\Models\Seat;
+use App\Models\SeatAssignment;
+use App\Models\SeatingTable;
+use App\Models\User;
+
+/** 席次表に登録済み（座席割り当て済み）のゲストを作成する */
+function makeSeatedGuest(?string $participation = 'attending'): User
+{
+    $guest = makeGuest($participation);
+    $table = SeatingTable::create(['name' => 'テスト卓', 'display_order' => 1, 'pos_x' => 0, 'pos_y' => 0]);
+    $seat  = Seat::create(['seating_table_id' => $table->id, 'type' => 'normal', 'pos_x' => 0, 'pos_y' => 0]);
+    SeatAssignment::create(['seat_id' => $seat->id, 'user_id' => $guest->id]);
+
+    return $guest;
+}
 
 describe('PeopleController アクセス制御', function () {
 
@@ -16,7 +31,7 @@ describe('PeopleController アクセス制御', function () {
 
     it('ログイン済みゲストは他ゲストの写真アルバムも閲覧できる', function () {
         $viewer = makeGuest('attending');
-        $target = makeGuest('attending');
+        $target = makeSeatedGuest();
 
         $this->actingAs($viewer)
             ->get(route('people.show', $target))
@@ -24,10 +39,34 @@ describe('PeopleController アクセス制御', function () {
     });
 });
 
+describe('PeopleController 席次表登録者への絞り込み', function () {
+
+    it('一覧には座席が割り当てられているゲストのみ表示される', function () {
+        $seated   = makeSeatedGuest();
+        $unseated = makeGuest('attending');
+
+        $data = $this->actingAs(makeGuest('attending'))
+            ->get('/people')
+            ->getOriginalContent()
+            ->getData();
+
+        expect($data['people']->pluck('id'))->toContain($seated->id);
+        expect($data['people']->pluck('id'))->not->toContain($unseated->id);
+    });
+
+    it('座席未割り当てのゲストのアルバムは404になる', function () {
+        $unseated = makeGuest('attending');
+
+        $this->actingAs(makeGuest('attending'))
+            ->get(route('people.show', $unseated))
+            ->assertNotFound();
+    });
+});
+
 describe('PeopleController 人物アルバムの絞り込み', function () {
 
     it('タグ付けされた承認済み写真だけが表示される', function () {
-        $target = makeGuest('attending');
+        $target = makeSeatedGuest();
 
         $tagged = GalleryPhoto::create([
             'file_path'  => 'gallery/tagged.jpg',
@@ -54,7 +93,7 @@ describe('PeopleController 人物アルバムの絞り込み', function () {
     });
 
     it('非公開(is_active=false)や未承認の写真はタグ付けされていても表示されない', function () {
-        $target = makeGuest('attending');
+        $target = makeSeatedGuest();
 
         $inactive = GalleryPhoto::create([
             'file_path'  => 'gallery/inactive.jpg',

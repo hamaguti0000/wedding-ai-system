@@ -8,7 +8,9 @@ class PeopleController extends Controller
 {
     public function index()
     {
+        // 一旦、席次表に登録済み（座席が割り当て済み）のゲストのみ一覧に出す
         $people = User::where('role', 'guest')
+            ->whereHas('seatAssignment')
             ->with('guestProfile')
             ->get()
             ->sortBy(function (User $u) {
@@ -23,6 +25,7 @@ class PeopleController extends Controller
     public function show(User $user)
     {
         abort_if($user->isAdmin(), 404);
+        abort_if($user->seatAssignment === null, 404);
 
         $photos = $user->taggedPhotos()
             ->where('is_active', true)
