@@ -129,10 +129,10 @@ describe('guest ログイン（未回答）', function () {
         $this->actingAs(makeGuest())->get('/home')->assertStatus(200);
     });
 
-    it('/home に未回答バナーが表示される', function () {
+    it('挙式終了に伴い/homeにRSVP未回答バナーは表示されない', function () {
         $this->actingAs(makeGuest())
             ->get('/home')
-            ->assertSee('まだご出欠のご回答が届いておりません');
+            ->assertDontSee('まだご出欠のご回答が届いておりません');
     });
 
     it('/admin はホームへリダイレクト', function () {
@@ -161,10 +161,10 @@ describe('guest ログイン（未回答）', function () {
 // ─── guest ログイン（出席済み）───────────────────────────
 describe('guest ログイン（出席済み）', function () {
 
-    it('/home に出席バナーが表示される', function () {
+    it('挙式終了に伴い/home に出席バナーは表示されない', function () {
         $this->actingAs(makeGuest('attending'))
             ->get('/home')
-            ->assertSee('ご出席のご登録ありがとうございます');
+            ->assertDontSee('ご出席のご登録ありがとうございます');
     });
 
     it('/home に未回答バナーが表示されない', function () {
@@ -183,10 +183,10 @@ describe('guest ログイン（出席済み）', function () {
 // ─── guest ログイン（欠席済み）───────────────────────────
 describe('guest ログイン（欠席済み）', function () {
 
-    it('/home に欠席バナーが表示される', function () {
+    it('挙式終了に伴い/home に欠席バナーは表示されない', function () {
         $this->actingAs(makeGuest('declining'))
             ->get('/home')
-            ->assertSee('欠席のご連絡ありがとうございます');
+            ->assertDontSee('欠席のご連絡ありがとうございます');
     });
 
     it('/seating → /home にリダイレクト（欠席）', function () {
