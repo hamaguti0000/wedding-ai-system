@@ -227,6 +227,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->whereNumber('id')->name('users.edit');
     Route::patch('/users/{id}',      [AdminUserController::class, 'update'])       ->whereNumber('id')->name('users.update');
     Route::patch('/users/{id}/password', [AdminUserController::class, 'updatePassword'])->whereNumber('id')->name('users.password');
+    Route::patch('/users/{id}/guest-info', [AdminUserController::class, 'updateGuestInfo'])->whereNumber('id')->name('users.guest-info');
     // 代理ログイン開始（管理者のみ。終了側は代理中＝ゲスト権限になるため下の auth グループに置く）
     Route::post('/users/{id}/impersonate', [ImpersonationController::class, 'start'])->whereNumber('id')->name('users.impersonate');
     Route::delete('/users/{id}',     [AdminUserController::class, 'destroy'])      ->whereNumber('id')->name('users.destroy');

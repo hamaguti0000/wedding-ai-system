@@ -508,6 +508,41 @@ class AdminUserController extends Controller
             ->with('success', "「{$user->username}」の情報を更新しました");
     }
 
+    /**
+     * ユーザー一覧からの直接編集で「お立場」「ご関係」だけを更新する。
+     * 通常の update() は RSVP・タスク割当など全項目を上書きしてしまうため、
+     * 一覧上でのすばやい修正にはこの専用エンドポイントを使う。
+     */
+    public function updateGuestInfo(Request $request, int $id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->isAdmin()) {
+            return response()->json(['error' => '管理者アカウントには設定できません'], 422);
+        }
+
+        $request->validate([
+            'guest_side'   => 'nullable|in:groom,bride',
+            'relationship' => 'nullable|in:friend,family,colleague,other',
+        ]);
+
+        $profile = GuestProfile::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'guest_side'   => $request->guest_side ?: null,
+                'relationship' => $request->relationship ?: null,
+            ]
+        );
+
+        return response()->json([
+            'success'          => true,
+            'guest_side'       => $profile->guest_side,
+            'guest_side_label' => $profile->guestSideLabel(),
+            'relationship'         => $profile->relationship,
+            'relationship_label'   => $profile->relationshipLabel(),
+        ]);
+    }
+
     public function updatePassword(Request $request, int $id)
     {
         $request->validate([

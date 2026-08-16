@@ -70,6 +70,21 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
 .user-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
 .user-no-results.visible { display: block; }
 
+/* お立場・ご関係のインライン編集 */
+.guest-info-select {
+    padding: 5px 6px; border: 1px solid #e0d0bc; border-radius: 5px;
+    font-size: 0.8rem; background: #fffdf9; color: #4f4036; max-width: 108px;
+}
+.guest-info-select:focus { border-color: #b38b59; outline: none; }
+.guest-info-select.side-groom { border-color: #7a9cc6; background: #eef3fa; }
+.guest-info-select.side-bride { border-color: #d98ca6; background: #fbeef2; }
+.guest-info-select.is-saving { opacity: 0.5; }
+.guest-info-saved-flash { animation: guest-info-flash 0.9s ease; }
+@keyframes guest-info-flash {
+    0%   { background: #d9f2df; }
+    100% { background: transparent; }
+}
+
 @media (max-width: 767px) {
     .card { padding: 16px; }
     .fg-2, .fg-3, .fg-4 { grid-template-columns: 1fr; }
@@ -274,6 +289,12 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                 <button class="user-filter-btn" data-rsvp="declining">欠席</button>
                 <button class="user-filter-btn" data-rsvp="pending">未回答</button>
             </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                <button class="user-filter-btn active" data-side="all">お立場: 全</button>
+                <button class="user-filter-btn" data-side="groom">新郎側</button>
+                <button class="user-filter-btn" data-side="bride">新婦側</button>
+                <button class="user-filter-btn" data-side="">未設定</button>
+            </div>
         </div>
         <div class="user-result-count" id="userResultCount"></div>
         <div class="bulk-toolbar">
@@ -294,6 +315,8 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                     </th>
                     <th class="user-sortable" data-col="username">ユーザー名 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="user-sortable" data-col="name">氏名 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="user-sortable" data-col="side">お立場 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
+                    <th class="col-md-hide">ご関係</th>
                     <th class="col-md-hide">メール</th>
                     <th class="col-md-hide user-sortable" data-col="role">ロール <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="col-md-hide user-sortable" data-col="rsvp">出欠 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
@@ -314,7 +337,8 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                     data-furigana="{{ $furigana }}"
                     data-email="{{ strtolower($user->email ?? '') }}"
                     data-role="{{ $user->role }}"
-                    data-rsvp="{{ $status }}">
+                    data-rsvp="{{ $status }}"
+                    data-side="{{ $p?->guest_side }}">
                     <td class="select-col">
                         @if ($user->id !== auth()->id())
                             <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
@@ -334,6 +358,31 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                             @endif
                         @else
                             <span class="text-muted">{{ $user->name }}</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if (!$user->isAdmin())
+                        <select class="guest-info-select side-{{ $p?->guest_side }}"
+                                data-user-id="{{ $user->id }}" data-field="guest_side" aria-label="お立場">
+                            <option value="" {{ !$p?->guest_side ? 'selected' : '' }}>未設定</option>
+                            <option value="groom" {{ $p?->guest_side === 'groom' ? 'selected' : '' }}>新郎側</option>
+                            <option value="bride" {{ $p?->guest_side === 'bride' ? 'selected' : '' }}>新婦側</option>
+                        </select>
+                        @else
+                        <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    <td class="col-md-hide">
+                        @if (!$user->isAdmin())
+                        <select class="guest-info-select" data-user-id="{{ $user->id }}" data-field="relationship" aria-label="ご関係">
+                            <option value="" {{ !$p?->relationship ? 'selected' : '' }}>未設定</option>
+                            <option value="friend"    {{ $p?->relationship === 'friend'    ? 'selected' : '' }}>友人・知人</option>
+                            <option value="family"    {{ $p?->relationship === 'family'    ? 'selected' : '' }}>親族</option>
+                            <option value="colleague" {{ $p?->relationship === 'colleague' ? 'selected' : '' }}>職場関係</option>
+                            <option value="other"     {{ $p?->relationship === 'other'     ? 'selected' : '' }}>その他</option>
+                        </select>
+                        @else
+                        <span class="text-muted">—</span>
                         @endif
                     </td>
                     <td class="col-md-hide">
@@ -395,7 +444,7 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                 </tr>
                 {{-- パスワード変更行 --}}
                 <tr class="pw-row" id="pw-row-{{ $user->id }}">
-                    <td colspan="7">
+                    <td colspan="9">
                         <form method="POST" action="{{ route('admin.users.password', $user->id) }}"
                               class="pw-form">
                             @csrf @method('PATCH')
@@ -427,7 +476,7 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
 <script>
 // ── ユーザー検索・フィルター・ソート ───────────────────────
 (function () {
-    const state  = { q: '', role: 'all', rsvp: 'all', col: null, dir: 'asc' };
+    const state  = { q: '', role: 'all', rsvp: 'all', side: 'all', col: null, dir: 'asc' };
     const tbody  = document.getElementById('userTbody');
     const srch   = document.getElementById('userSearch');
     const clrBtn = document.getElementById('userSearchClear');
@@ -449,6 +498,10 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
             if (d.role === 'admin') return false;
             if (d.rsvp !== state.rsvp) return false;
         }
+        if (state.side !== 'all') {
+            if (d.role === 'admin') return false;
+            if ((d.side || '') !== state.side) return false;
+        }
         return true;
     }
 
@@ -461,6 +514,7 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
             case 'name':     va = da.name;     vb = db.name;     break;
             case 'role':     va = da.role;     vb = db.role;     break;
             case 'rsvp':     va = rsvpOrder[da.rsvp] ?? 3; vb = rsvpOrder[db.rsvp] ?? 3; break;
+            case 'side':     va = da.side || 'zzz'; vb = db.side || 'zzz'; break;
             default: return 0;
         }
         if (va < vb) return state.dir === 'asc' ? -1 :  1;
@@ -532,6 +586,16 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
         });
     });
 
+    // お立場フィルター
+    document.querySelectorAll('.user-filter-btn[data-side]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.user-filter-btn[data-side]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.side = btn.dataset.side;
+            applyAll();
+        });
+    });
+
     // 検索
     srch?.addEventListener('input', () => {
         state.q = srch.value.toLowerCase().trim();
@@ -546,6 +610,50 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
 
     applyAll();
 })();
+
+// ── お立場・ご関係のインライン編集 ──────────────────────────
+document.querySelectorAll('.guest-info-select').forEach(select => {
+    select.addEventListener('change', async () => {
+        const userId = select.dataset.userId;
+        const field  = select.dataset.field;
+        const value  = select.value;
+        const row    = select.closest('tr');
+        const csrf   = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+        select.classList.add('is-saving');
+        select.disabled = true;
+
+        try {
+            const res = await fetch(`/admin/users/${userId}/guest-info`, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ [field]: value }),
+            });
+
+            if (!res.ok) throw new Error('保存に失敗しました');
+
+            const data = await res.json();
+
+            if (field === 'guest_side') {
+                select.className = 'guest-info-select' + (data.guest_side ? ' side-' + data.guest_side : '');
+                if (row) row.dataset.side = data.guest_side || '';
+            }
+
+            row?.classList.remove('guest-info-saved-flash');
+            void row?.offsetWidth; // reflow でアニメーションを再トリガー
+            row?.classList.add('guest-info-saved-flash');
+        } catch (e) {
+            alert('保存に失敗しました。もう一度お試しください。');
+        } finally {
+            select.classList.remove('is-saving');
+            select.disabled = false;
+        }
+    });
+});
 
 function togglePw(id) {
     const row = document.getElementById('pw-row-' + id);
