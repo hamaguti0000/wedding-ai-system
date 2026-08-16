@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
             'profiles.show'  => 'banner_profile',
             'people.index'   => 'banner_gallery',
             'people.show'    => 'banner_gallery',
-            'ending'         => 'banner_gallery',
+            'movies'         => 'banner_gallery',
             'login'          => 'login_bg',
         ];
 

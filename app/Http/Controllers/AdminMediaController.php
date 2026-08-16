@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminMediaController extends Controller
 {
+    public const MOVIE_TYPES = [
+        'opening' => 'オープニングムービー',
+        'profile' => 'プロフィールムービー',
+        'ending'  => 'エンディングムービー',
+    ];
+
     public function index()
     {
         $counts = SiteImage::selectRaw('location, count(*) as total, sum(is_active) as active_count')
@@ -149,31 +155,38 @@ class AdminMediaController extends Controller
         return back()->with('success', '動画を削除しました');
     }
 
-    public function uploadEndingMovie(Request $request)
+    public function uploadMovie(Request $request, string $type)
     {
+        abort_unless(array_key_exists($type, self::MOVIE_TYPES), 404);
+
         $request->validate(['video' => 'required|mimes:mp4,webm|max:307200']); // 300MB
 
+        $field   = "{$type}_movie_path";
         $setting = WeddingSetting::firstOrNew([]);
 
-        if ($setting->ending_movie_path) {
-            Storage::disk('public')->delete($setting->ending_movie_path);
+        if ($setting->{$field}) {
+            Storage::disk('public')->delete($setting->{$field});
         }
 
-        $path = $request->file('video')->store('site-media/ending-movie', 'public');
-        $setting->ending_movie_path = $path;
+        $path = $request->file('video')->store("site-media/{$type}-movie", 'public');
+        $setting->{$field} = $path;
         $setting->save();
 
-        return back()->with('success', 'エンディングムービーをアップロードしました');
+        return back()->with('success', self::MOVIE_TYPES[$type] . 'をアップロードしました');
     }
 
-    public function deleteEndingMovie()
+    public function deleteMovie(string $type)
     {
+        abort_unless(array_key_exists($type, self::MOVIE_TYPES), 404);
+
+        $field   = "{$type}_movie_path";
         $setting = WeddingSetting::first();
-        if ($setting?->ending_movie_path) {
-            Storage::disk('public')->delete($setting->ending_movie_path);
-            $setting->update(['ending_movie_path' => null]);
+
+        if ($setting?->{$field}) {
+            Storage::disk('public')->delete($setting->{$field});
+            $setting->update([$field => null]);
         }
 
-        return back()->with('success', 'エンディングムービーを削除しました');
+        return back()->with('success', self::MOVIE_TYPES[$type] . 'を削除しました');
     }
 }

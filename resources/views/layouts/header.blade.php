@@ -56,7 +56,7 @@
                 {{-- ギャラリー・お知らせ --}}
                 <li class="header__nav-item">
                     <a href="{{ route('gallery') }}"
-                       class="{{ request()->routeIs('gallery','gallery.upload','people.*','news.index','profile-book','ending') ? 'active' : '' }}">
+                       class="{{ request()->routeIs('gallery','gallery.upload','people.*','news.index','profile-book','movies') ? 'active' : '' }}">
                         <i class="fa-solid fa-heart" aria-hidden="true"></i>楽しむ
                         <i class="fa-solid fa-chevron-down dd-arrow" aria-hidden="true"></i>
                     </a>
@@ -80,9 +80,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('ending') }}"
-                               class="{{ request()->routeIs('ending') ? 'active' : '' }}">
-                                <i class="fa-solid fa-circle-play"></i>エンディングムービー
+                            <a href="{{ route('movies') }}"
+                               class="{{ request()->routeIs('movies') ? 'active' : '' }}">
+                                <i class="fa-solid fa-circle-play"></i>ムービー
                             </a>
                         </li>
                         @if ($isProfileBookPublic)
@@ -357,9 +357,9 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('ending') }}"
-                   class="{{ request()->routeIs('ending') ? 'active' : '' }}">
-                    <i class="fa-solid fa-circle-play" aria-hidden="true"></i>エンディングムービー
+                <a href="{{ route('movies') }}"
+                   class="{{ request()->routeIs('movies') ? 'active' : '' }}">
+                    <i class="fa-solid fa-circle-play" aria-hidden="true"></i>ムービー
                 </a>
             </li>
             @if ($isProfileBookPublic)

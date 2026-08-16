@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\WeddingSetting;
 
-class EndingMovieController extends Controller
+class MovieController extends Controller
 {
     public function show()
     {
         $setting = WeddingSetting::first();
 
-        return view('ending', compact('setting'));
+        return view('movies', compact('setting'));
     }
 }

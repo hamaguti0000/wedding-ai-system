@@ -30,7 +30,7 @@ use App\Http\Controllers\AdminTaskController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\AdminGalleryController;
 use App\Http\Controllers\PeopleController;
-use App\Http\Controllers\EndingMovieController;
+use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileBookController;
 use App\Http\Controllers\AdminProfileBookController;
 use App\Http\Controllers\NewsController;
@@ -112,7 +112,8 @@ Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () 
     Route::post('/gallery/upload',      [GalleryController::class,   'upload'])->name('gallery.upload.post');
     Route::get('/people',               [PeopleController::class,    'index'])->name('people.index');
     Route::get('/people/{user}',        [PeopleController::class,    'show'])->name('people.show');
-    Route::get('/ending',               [EndingMovieController::class, 'show'])->name('ending');
+    Route::get('/movies',               [MovieController::class, 'show'])->name('movies');
+    Route::redirect('/ending', '/movies');
     Route::get('/news',               [NewsController::class,       'index'])->name('news.index');
     Route::get('/news/{id}',          [NewsController::class,       'show']) ->name('news.show');
     Route::get('/guestbook',          [GuestbookController::class,  'index'])->name('guestbook');
@@ -143,8 +144,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post  ('/media/hero/type',               [AdminMediaController::class, 'setHeroType'])->name('media.hero-type');
     Route::post  ('/media/hero/video',              [AdminMediaController::class, 'uploadVideo'])->name('media.video');
     Route::delete('/media/hero/video',              [AdminMediaController::class, 'deleteVideo'])->name('media.video-delete');
-    Route::post  ('/media/ending/video',            [AdminMediaController::class, 'uploadEndingMovie'])->name('media.ending-video');
-    Route::delete('/media/ending/video',            [AdminMediaController::class, 'deleteEndingMovie'])->name('media.ending-video-delete');
+    Route::post  ('/media/movie/{type}',            [AdminMediaController::class, 'uploadMovie'])->where('type', 'opening|profile|ending')->name('media.movie.upload');
+    Route::delete('/media/movie/{type}',            [AdminMediaController::class, 'deleteMovie'])->where('type', 'opening|profile|ending')->name('media.movie.delete');
 
     // お知らせ管理
     Route::get('/news',                  [AdminNewsController::class, 'index'])   ->name('news');

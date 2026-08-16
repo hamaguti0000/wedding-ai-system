@@ -151,28 +151,30 @@
         </div>
     </div>
 
-    {{-- ── エンディングムービー ── --}}
+    {{-- ── ムービー（オープニング・プロフィール・エンディング） ── --}}
     <div class="hero-setting-card">
-        <h2>エンディングムービー</h2>
+        <h2>ムービー</h2>
         <p style="font-size:0.8rem;color:#7a6555;margin:0 0 16px;">
-            披露宴で流したエンディングムービーなどを、音声付きでゲストが視聴できるページ（{{ url('/ending') }}）に公開します。
+            披露宴で流したムービーを、音声付きでゲストが視聴できるページ（{{ url('/movies') }}）に公開します。
         </p>
 
-        <div style="padding-top:4px;">
-            <p style="font-size:0.82rem;font-weight:600;color:#3d2f25;margin-bottom:10px;">動画ファイル（MP4 / WebM・最大300MB）</p>
-            @if($setting?->ending_movie_path)
+        @foreach (\App\Http\Controllers\AdminMediaController::MOVIE_TYPES as $movieType => $movieLabel)
+        @php $moviePath = $setting?->{"{$movieType}_movie_path"}; @endphp
+        <div style="padding:16px 0;border-top:1px solid #f0ebe3;">
+            <p style="font-size:0.82rem;font-weight:600;color:#3d2f25;margin-bottom:10px;">{{ $movieLabel }}（MP4 / WebM・最大300MB）</p>
+            @if($moviePath)
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-                <video src="{{ asset('storage/'.$setting->ending_movie_path) }}"
+                <video src="{{ asset('storage/'.$moviePath) }}"
                     style="height:60px;border-radius:6px;" muted></video>
                 <span style="font-size:0.8rem;color:#7a6555;">動画がアップロード済みです</span>
-                <form method="POST" action="{{ route('admin.media.ending-video-delete') }}"
-                    onsubmit="return confirm('エンディングムービーを削除しますか？')">
+                <form method="POST" action="{{ route('admin.media.movie.delete', $movieType) }}"
+                    onsubmit="return confirm('{{ $movieLabel }}を削除しますか？')">
                     @csrf @method('DELETE')
                     <button class="btn-sm btn-danger">削除</button>
                 </form>
             </div>
             @endif
-            <form method="POST" action="{{ route('admin.media.ending-video') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.media.movie.upload', $movieType) }}" enctype="multipart/form-data">
                 @csrf
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <input type="file" name="video" accept="video/mp4,video/webm"
@@ -184,6 +186,7 @@
                 @error('video')<p class="field-error">{{ $message }}</p>@enderror
             </form>
         </div>
+        @endforeach
     </div>
 
     {{-- ── 各ロケーション ── --}}
