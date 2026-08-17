@@ -29,10 +29,11 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 .gl-wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 92px; }
 .gl-toolbar {
-    position: sticky; top: 76px; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 12px; margin-bottom: 22px; border: 1px solid #eee5da; border-radius: 16px; background: rgba(255,255,255,.88);
-    box-shadow: 0 10px 30px rgba(61,47,37,.08); backdrop-filter: blur(16px);
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px;
+    padding: 10px 12px; margin-bottom: 18px; border: 1px solid #eee5da; border-radius: 16px; background: rgba(255,255,255,.92);
+    box-shadow: 0 10px 30px rgba(61,47,37,.07); backdrop-filter: blur(16px);
 }
+.gl-toolbar__main { min-width: 0; }
 .gl-filter { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
 .gl-filter::-webkit-scrollbar { display: none; }
 .gl-filter button {
@@ -40,7 +41,8 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     font-size: .82rem; font-weight: 700; white-space: nowrap; cursor: pointer;
 }
 .gl-filter button.is-active { background: #3d2f25; border-color: #3d2f25; color: #fff; }
-.gl-count { color: #8a7a68; font-size: .82rem; white-space: nowrap; }
+.gl-count { margin-top: 9px; color: #8a7a68; font-size: .8rem; white-space: nowrap; }
+.gl-toolbar__upload { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #b38b59; color: #fff; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: .82rem; font-weight: 800; white-space: nowrap; }
 
 .gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; align-items: start; }
 .gl-card {
@@ -57,7 +59,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.9); color: #b42318; font-size: .75rem; font-weight: 700;
     box-shadow: 0 8px 22px rgba(0,0,0,.12);
 }
-.gl-card__body { padding: 14px 14px 16px; }
+.gl-card__body { padding: 12px 12px 14px; }
 .gl-card__caption { margin: 0 0 10px; color: #3d2f25; font-size: .9rem; font-weight: 700; line-height: 1.55; }
 .gl-card__caption.is-empty { color: #b0a090; font-weight: 500; }
 .gl-card__tags { display: flex; flex-wrap: wrap; gap: 6px; max-height: 58px; overflow: hidden; }
@@ -97,23 +99,29 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-mobile-upload { display: none; }
 
 @media (max-width: 767px) {
-    .gl-hero { min-height: 330px; padding: 108px 18px 28px; }
-    .gl-hero__lead { font-size: .88rem; }
-    .gl-wrap { width: min(100% - 24px, 1120px); padding-top: 22px; }
-    .gl-toolbar { top: 66px; align-items: stretch; flex-direction: column; border-radius: 14px; }
+    .gl-hero { min-height: 300px; padding: 102px 18px 24px; }
+    .gl-hero__lead { font-size: .86rem; line-height: 1.75; }
+    .gl-hero__actions { margin-top: 18px; }
+    .gl-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .gl-stat { min-width: 0; padding: 8px 10px; border-radius: 12px; }
+    .gl-wrap { width: min(100% - 20px, 1120px); padding-top: 18px; padding-bottom: 44px; }
+    .gl-toolbar { grid-template-columns: 1fr; align-items: stretch; border-radius: 14px; margin-bottom: 14px; }
+    .gl-toolbar__upload { min-height: 42px; width: 100%; box-sizing: border-box; }
     .gl-count { padding-left: 4px; }
-    .gl-grid { grid-template-columns: 1fr; gap: 14px; }
-    .gl-card { border-radius: 16px; }
-    .gl-card__photo { aspect-ratio: 1.18 / 1; }
-    .gl-card__body { padding: 13px; }
+    .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .gl-card { border-radius: 14px; box-shadow: 0 8px 22px rgba(61,47,37,.07); }
+    .gl-card__photo { aspect-ratio: 1 / 1; }
+    .gl-card__body { padding: 9px; }
+    .gl-card__caption { font-size: .78rem; margin-bottom: 7px; }
+    .gl-card__tags { gap: 4px; max-height: 48px; }
+    .gl-person-chip { padding: 3px 7px; font-size: .66rem; }
     .gl-lightbox { padding: 10px; }
     .gl-lightbox__shell { grid-template-columns: 1fr; max-height: 92vh; border-radius: 16px; }
     .gl-lightbox__stage { min-height: 58vh; }
     .gl-lightbox__img { max-height: 62vh; }
     .gl-lightbox__info { max-height: 30vh; padding: 18px; }
     .gl-lightbox__next { right: 14px; }
-    .gl-mobile-upload { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 80; display: flex; justify-content: center; }
-    .gl-mobile-upload .gl-btn { width: 100%; box-shadow: 0 16px 32px rgba(61,47,37,.18); }
+
 }
 </style>
 @endpush
@@ -156,14 +164,17 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     </div>
     @else
     <div class="gl-toolbar" aria-label="ギャラリーの絞り込み">
-        <div class="gl-filter">
-            <button type="button" class="is-active" data-filter="all">すべて</button>
-            <button type="button" data-filter="tagged">人物タグあり</button>
-            @if ($currentUserId)
-            <button type="button" data-filter="mine">あなたの写真</button>
-            @endif
+        <div class="gl-toolbar__main">
+            <div class="gl-filter">
+                <button type="button" class="is-active" data-filter="all">すべて</button>
+                <button type="button" data-filter="tagged">人物タグあり</button>
+                @if ($currentUserId)
+                <button type="button" data-filter="mine">あなたの写真</button>
+                @endif
+            </div>
+            <div class="gl-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚表示</div>
         </div>
-        <div class="gl-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚表示</div>
+        <a href="{{ route('gallery.upload') }}" class="gl-toolbar__upload"><i class="fa-solid fa-cloud-arrow-up"></i> 投稿</a>
     </div>
 
     <div class="gl-grid" id="glGrid">
@@ -179,19 +190,23 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
                 <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> あなた</span>
                 @endif
             </div>
+            @if ($photo->caption || $tagNames->isNotEmpty())
             <div class="gl-card__body">
-                <p class="gl-card__caption {{ $photo->caption ? '' : 'is-empty' }}">{{ $photo->caption ?: 'Wedding photo' }}</p>
+                @if ($photo->caption)
+                <p class="gl-card__caption">{{ $photo->caption }}</p>
+                @endif
                 @if ($tagNames->isNotEmpty())
                 <div class="gl-card__tags">
-                    @foreach ($tagNames->take(4) as $tag)
+                    @foreach ($tagNames->take(3) as $tag)
                     <span class="gl-person-chip {{ $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
                     @endforeach
-                    @if ($tagNames->count() > 4)
-                    <span class="gl-more">+{{ $tagNames->count() - 4 }}名</span>
+                    @if ($tagNames->count() > 3)
+                    <span class="gl-more">+{{ $tagNames->count() - 3 }}名</span>
                     @endif
                 </div>
                 @endif
             </div>
+            @endif
         </article>
         @endforeach
     </div>
@@ -251,7 +266,7 @@ function closeLightboxOnOverlay(e) {
 function showPhoto() {
     const p = photos[current];
     document.getElementById('glLightboxImg').src = p.url;
-    document.getElementById('glLightboxCaption').textContent = p.caption || 'Wedding photo';
+    document.getElementById('glLightboxCaption').textContent = p.caption || '';
     document.getElementById('glLightboxDownload').href = p.url;
     document.getElementById('glLightboxIndex').textContent = `Photo ${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
@@ -287,7 +302,4 @@ document.addEventListener('keydown', e => {
 </script>
 @endif
 
-<a href="{{ route('gallery.upload') }}" class="gl-mobile-upload" aria-label="写真を投稿する">
-    <span class="gl-btn gl-btn--gold"><i class="fa-solid fa-cloud-arrow-up"></i> 写真を投稿する</span>
-</a>
 @endsection
