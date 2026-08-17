@@ -64,7 +64,18 @@ class GalleryController extends Controller
             $count++;
         }
 
-        return back()->with('success', $this->uploadResultMessage($count, $duplicateCount));
+        $message = $this->uploadResultMessage($count, $duplicateCount);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'uploaded_count' => $count,
+                'duplicate_count' => $duplicateCount,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     private function uploadResultMessage(int $count, int $duplicateCount): string
