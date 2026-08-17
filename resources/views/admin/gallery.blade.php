@@ -82,6 +82,26 @@
 .gl-admin-item.rejected { opacity: 0.4; }
 
 /* 人物タグ付け */
+
+.gl-tag-panel__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    margin-bottom: 8px; color: #5d4635; font-size: 0.82rem;
+}
+.gl-tag-selected-count { color: #b38b59; margin-left: 6px; font-size: 0.74rem; }
+.gl-tag-clear {
+    border: 1px solid #e8d5b7; background: #fff; color: #9b8573;
+    border-radius: 999px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;
+}
+.gl-tag-selected { min-height: 28px; margin-bottom: 8px; }
+.gl-tag-selected:empty::before { content: 'まだ選択されていません'; color: #c0b0a0; font-size: 0.76rem; }
+.gl-tag-panel__list label span { display: grid; gap: 1px; }
+.gl-tag-panel__list label strong { font-weight: 600; color: #5d4635; }
+.gl-tag-panel__list label small { color: #a99888; font-size: 0.68rem; }
+.gl-tag-panel__actions { display: flex; align-items: center; gap: 8px; }
+.gl-tag-status { color: #9b8573; font-size: 0.76rem; }
+.gl-tag-status.is-ok { color: #15803d; }
+.gl-tag-status.is-error { color: #dc2626; }
+.gl-admin-item__tags { min-height: 24px; }
 .gl-admin-item__tags { padding: 0 12px 10px; font-size: 0.72rem; color: #9b8573; line-height: 1.6; }
 .gl-tag-chip { display: inline-block; background: #fef9f0; border: 1px solid #e8d5b7; color: #b38b59; border-radius: 20px; padding: 1px 8px; margin: 2px 3px 0 0; }
 .gl-tag-panel { display: none; padding: 10px 12px; background: #fef9f0; border-top: 1px solid #e8d5b7; }
@@ -332,8 +352,123 @@ function toggleEdit(id) {
 }
 function toggleTag(id) {
     const el = document.getElementById('tag-' + id);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (!el) return;
+    el.style.display = el.style.display === 'none' || !el.style.display ? 'block' : 'none';
+    el.querySelector('.gl-tag-search')?.focus();
 }
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+    }[ch]));
+}
+
+function galleryTagNames(form) {
+    return Array.from(form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]:checked')).map(input => {
+        const label = input.closest('label');
+        return { id: input.value, name: label?.dataset.label || label?.textContent.trim() || '' };
+    });
+}
+
+function renderSelectedTags(form) {
+    const selected = form.querySelector('.gl-tag-selected');
+    const count = form.querySelector('.gl-tag-selected-count');
+    const names = galleryTagNames(form);
+    if (selected) {
+        selected.innerHTML = names.map(tag => `<span class="gl-tag-chip" data-user-id="${escapeHtml(tag.id)}">${escapeHtml(tag.name)}</span>`).join('');
+    }
+    if (count) count.textContent = `${names.length}名選択中`;
+}
+
+function updateCardTags(photoId, tags) {
+    const card = document.querySelector(`.gl-admin-item[data-id="${photoId}"]`) || document.querySelector(`#tag-${photoId}`)?.closest('.gl-admin-item');
+    if (!card) return;
+    let holder = card.querySelector('.gl-admin-item__tags');
+    const panel = card.querySelector(`#tag-${photoId}`);
+    if (!holder) {
+        holder = document.createElement('div');
+        holder.className = 'gl-admin-item__tags';
+        card.insertBefore(holder, panel || null);
+    }
+    holder.innerHTML = tags.length
+        ? tags.map(tag => `<span class="gl-tag-chip">${escapeHtml(tag.name)}</span>`).join('')
+        : '';
+}
+
+document.querySelectorAll('.gl-tag-form').forEach(form => {
+    const search = form.querySelector('.gl-tag-search');
+    const list = form.querySelector('.gl-tag-panel__list');
+    const status = form.querySelector('.gl-tag-status');
+
+    search?.addEventListener('input', () => {
+        const q = search.value.toLowerCase().trim();
+        list.querySelectorAll('label[data-name]').forEach(label => {
+            label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
+        });
+    });
+
+    form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+            renderSelectedTags(form);
+            if (status) {
+                status.textContent = '未保存の変更があります';
+                status.className = 'gl-tag-status';
+            }
+        });
+    });
+
+    form.querySelector('.gl-tag-clear')?.addEventListener('click', () => {
+        form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]').forEach(input => input.checked = false);
+        renderSelectedTags(form);
+        if (status) {
+            status.textContent = '未保存の変更があります';
+            status.className = 'gl-tag-status';
+        }
+    });
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = form.querySelector('.gl-tag-save');
+        const data = new FormData(form);
+        if (status) {
+            status.textContent = '保存中...';
+            status.className = 'gl-tag-status';
+        }
+        if (button) button.disabled = true;
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                body: data,
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || '保存に失敗しました');
+            updateCardTags(json.photo_id, json.tags || []);
+            if (status) {
+                status.textContent = '保存しました';
+                status.className = 'gl-tag-status is-ok';
+            }
+        } catch (error) {
+            if (status) {
+                status.textContent = error.message || '保存に失敗しました';
+                status.className = 'gl-tag-status is-error';
+            }
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    renderSelectedTags(form);
+});
+
 function filterTagList(input) {
     const q = input.value.toLowerCase().trim();
     const list = input.closest('form').querySelector('.gl-tag-panel__list');

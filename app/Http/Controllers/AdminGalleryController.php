@@ -13,7 +13,7 @@ class AdminGalleryController extends Controller
     public function index()
     {
         $photos  = GalleryPhoto::where('is_guest_upload', false)
-            ->with('taggedUsers')
+            ->with('taggedUsers.guestProfile')
             ->orderBy('sort_order')->orderBy('id')->get();
 
         $pending = GalleryPhoto::where('is_guest_upload', true)
@@ -23,7 +23,7 @@ class AdminGalleryController extends Controller
 
         $guestApproved = GalleryPhoto::where('is_guest_upload', true)
             ->whereIn('status', ['approved', 'rejected'])
-            ->with(['uploader', 'taggedUsers'])
+            ->with(['uploader', 'taggedUsers.guestProfile'])
             ->orderByDesc('created_at')->get();
 
         $taggableGuests = User::where('role', 'guest')
@@ -138,6 +138,19 @@ class AdminGalleryController extends Controller
         ]);
 
         $photo->taggedUsers()->sync($request->input('user_ids', []));
+        $photo->load('taggedUsers.guestProfile');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => '写真のタグ付けを更新しました',
+                'photo_id' => $photo->id,
+                'tags' => $photo->taggedUsers->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->guestProfile?->fullName() ?: $user->name,
+                ])->values(),
+            ]);
+        }
 
         return back()->with('success', '写真のタグ付けを更新しました');
     }
