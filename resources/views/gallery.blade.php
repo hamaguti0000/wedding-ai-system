@@ -138,6 +138,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         height: 100dvh;
         max-height: none;
         display: grid;
+        grid-template-columns: 1fr;
         grid-template-rows: 1fr auto;
         border-radius: 0;
         overflow: hidden;
