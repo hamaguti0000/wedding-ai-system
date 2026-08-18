@@ -6,15 +6,24 @@ use App\Models\GalleryPhoto;
 use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class GalleryController extends Controller
 {
     public function index()
     {
+        $relations = ['taggedUsers.guestProfile'];
+        if (Schema::hasTable('guest_groups')) {
+            $relations[] = 'taggedGroups.primaryGuest';
+        }
+
         $photos = GalleryPhoto::where('is_active', true)
             ->where('status', 'approved')
-            ->with(['taggedUsers.guestProfile', 'taggedGroups.primaryGuest'])
+            ->with($relations)
             ->orderBy('sort_order')->orderBy('id')->get();
+        if (! Schema::hasTable('guest_groups')) {
+            $photos->each->setRelation('taggedGroups', collect());
+        }
 
         return view('gallery', compact('photos'));
     }

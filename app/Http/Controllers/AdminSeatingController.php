@@ -11,6 +11,7 @@ use App\Models\WeddingSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Process\Process;
 
 class AdminSeatingController extends Controller
@@ -23,10 +24,16 @@ class AdminSeatingController extends Controller
         // ── Display data: View に渡す Collection ───────────────────────────
         // *Guests suffix → Collection<User> であることを名前で保証する
 
-        $tables = SeatingTable::with([
-            'seats.assignment.user.guestProfile',
-            'assignedGroups.primaryGuest',
-        ])->orderBy('display_order')->get();
+        $hasGuestGroups = Schema::hasTable('guest_groups');
+        $tableRelations = ['seats.assignment.user.guestProfile'];
+        if ($hasGuestGroups) {
+            $tableRelations[] = 'assignedGroups.primaryGuest';
+        }
+
+        $tables = SeatingTable::with($tableRelations)->orderBy('display_order')->get();
+        if (! $hasGuestGroups) {
+            $tables->each->setRelation('assignedGroups', collect());
+        }
 
         // 内部計算用（View には渡さない）
         $attendingAll = User::where('role', 'guest')
@@ -52,10 +59,12 @@ class AdminSeatingController extends Controller
 
         $typeConfig = Seat::typeConfig();
         $setting    = WeddingSetting::first();
-        $seatingGroups = GuestGroup::with(['primaryGuest', 'assignedSeatingTables'])
-            ->get()
-            ->sortBy(fn (GuestGroup $group) => $group->displayName())
-            ->values();
+        $seatingGroups = $hasGuestGroups
+            ? GuestGroup::with(['primaryGuest', 'assignedSeatingTables'])
+                ->get()
+                ->sortBy(fn (GuestGroup $group) => $group->displayName())
+                ->values()
+            : collect();
 
         // View に渡すデータの責務:
         //   $tables           → EloquentCollection<SeatingTable>
@@ -415,6 +424,10 @@ class AdminSeatingController extends Controller
 
     public function assignGroup(Request $request): JsonResponse
     {
+        if (! Schema::hasTable('guest_groups')) {
+            return response()->json(['error' => 'グループ機能はまだ利用できません'], 422);
+        }
+
         $request->validate([
             'guest_group_id' => 'required|string|exists:guest_groups,id',
             'seating_table_id' => 'nullable|integer|exists:seating_tables,id',
