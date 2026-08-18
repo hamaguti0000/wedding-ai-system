@@ -3,14 +3,15 @@
      $taggableGuests: Collection<User> --}}
 @php
     $taggedIds = $photo->taggedUsers->pluck('id')->all();
+    $taggedGroupIds = $photo->taggedGroups->pluck('id')->all();
 @endphp
 <div id="tag-{{ $photo->id }}" class="gl-tag-panel" data-photo-id="{{ $photo->id }}">
     <form method="POST" action="{{ route('admin.gallery.tag', $photo->id) }}" class="gl-tag-form" data-photo-id="{{ $photo->id }}">
         @csrf
         <div class="gl-tag-panel__head">
             <div>
-                <strong>写っているゲスト</strong>
-                <span class="gl-tag-selected-count">{{ count($taggedIds) }}名選択中</span>
+                <strong>写っているゲスト・グループ</strong>
+                <span class="gl-tag-selected-count">{{ count($taggedIds) + count($taggedGroupIds) }}件選択中</span>
             </div>
             <button type="button" class="gl-tag-clear">全解除</button>
         </div>
@@ -19,12 +20,33 @@
             @foreach ($photo->taggedUsers as $tagged)
             <span class="gl-tag-chip" data-user-id="{{ $tagged->id }}">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
             @endforeach
+            @foreach ($photo->taggedGroups as $group)
+            <span class="gl-tag-chip gl-tag-chip--group" data-group-id="{{ $group->id }}">{{ $group->displayName() }}</span>
+            @endforeach
         </div>
 
         @if ($taggableGuests->isNotEmpty())
         <input type="search" class="gl-tag-search" placeholder="名前・ふりがなで検索" autocomplete="off">
         @endif
 
+        @if ($taggableGroups->isNotEmpty())
+        <div class="gl-tag-panel__subhead">グループ</div>
+        <div class="gl-tag-panel__list gl-tag-panel__list--groups">
+            @foreach ($taggableGroups as $group)
+            @php
+                $groupName = $group->displayName();
+                $searchName = strtolower($groupName . ' ' . $group->id);
+            @endphp
+            <label data-name="{{ $searchName }}" data-group-id="{{ $group->id }}" data-label="{{ $groupName }}">
+                <input type="checkbox" name="group_ids[]" value="{{ $group->id }}"
+                       {{ in_array($group->id, $taggedGroupIds, true) ? 'checked' : '' }}>
+                <span><strong>{{ $groupName }}</strong></span>
+            </label>
+            @endforeach
+        </div>
+        @endif
+
+        <div class="gl-tag-panel__subhead">ゲスト</div>
         <div class="gl-tag-panel__list">
             @forelse ($taggableGuests as $guest)
             @php

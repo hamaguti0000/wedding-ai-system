@@ -94,6 +94,7 @@
     margin-bottom: 8px; color: #5d4635; font-size: 0.82rem;
 }
 .gl-tag-selected-count { color: #b38b59; margin-left: 6px; font-size: 0.74rem; }
+.gl-tag-panel__subhead { margin: 8px 0 5px; color: #7a6a5a; font-size: 0.74rem; font-weight: 700; }
 .gl-tag-clear {
     border: 1px solid #e8d5b7; background: #fff; color: #9b8573;
     border-radius: 999px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;
@@ -112,6 +113,7 @@
     padding: 0 12px 10px; font-size: 0.72rem; color: #9b8573; line-height: 1.6;
     background: #fff; flex: 0 0 auto;
 }
+.gl-tag-chip--group { background: #eef7ff; border-color: #bfdbfe; color: #2563eb; }
 .gl-tag-chip {
     display: inline-flex; align-items: center; max-width: calc(100% - 8px);
     background: #fef9f0; border: 1px solid #e8d5b7; color: #b38b59; border-radius: 20px;
@@ -238,8 +240,11 @@
                     <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button></form>
                 </div>
             </div>
-            @if ($photo->taggedUsers->isNotEmpty())
+            @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
             <div class="gl-admin-item__tags">
+                @foreach ($photo->taggedGroups as $group)
+                <span class="gl-tag-chip gl-tag-chip--group">{{ $group->displayName() }}</span>
+                @endforeach
                 @foreach ($photo->taggedUsers as $tagged)
                 <span class="gl-tag-chip">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
                 @endforeach
@@ -259,7 +264,7 @@
                     <button type="submit" class="btn-primary" style="padding:6px 16px;font-size:0.82rem;">保存</button>
                 </form>
             </div>
-            @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests])
+            @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests, 'taggableGroups' => $taggableGroups])
         </div>
         @endforeach
     </div>{{-- #galleryGrid --}}
@@ -287,22 +292,35 @@
                     <div class="gl-admin-item__actions">
                         @if ($photo->status === 'approved')
                         <button class="btn-sm btn-sm-pw" onclick="toggleTag({{ $photo->id }})" title="人物タグ"><i class="fa-solid fa-user-tag"></i></button>
+                        <form method="POST" action="{{ route('admin.gallery.reject', $photo->id) }}" class="gallery-status-form" data-confirm="却下しますか？">
+                            @csrf
+                            <button class="btn-sm btn-reject" title="却下">却下</button>
+                        </form>
+                        @else
+                        <form method="POST" action="{{ route('admin.gallery.approve', $photo->id) }}" class="gallery-status-form">
+                            @csrf
+                            <button class="btn-sm btn-approve" title="承認">承認</button>
+                        </form>
                         @endif
+                        <span class="pending-item__status" aria-live="polite"></span>
                         <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">
                             @csrf @method('DELETE')
                             <button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button>
                         </form>
                     </div>
                 </div>
-                @if ($photo->taggedUsers->isNotEmpty())
+                @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
                 <div class="gl-admin-item__tags">
+                    @foreach ($photo->taggedGroups as $group)
+                    <span class="gl-tag-chip gl-tag-chip--group">{{ $group->displayName() }}</span>
+                    @endforeach
                     @foreach ($photo->taggedUsers as $tagged)
                     <span class="gl-tag-chip">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
                     @endforeach
                 </div>
                 @endif
                 @if ($photo->status === 'approved')
-                @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests])
+                @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests, 'taggableGroups' => $taggableGroups])
                 @endif
             </div>
             @endforeach
@@ -372,13 +390,13 @@ function updatePendingCount(delta) {
     }
 }
 
-document.querySelectorAll('.pending-action-form').forEach(form => {
+document.querySelectorAll('.pending-action-form, .gallery-status-form').forEach(form => {
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const confirmMessage = form.dataset.confirm;
         if (confirmMessage && !confirm(confirmMessage)) return;
 
-        const card = form.closest('.pending-item');
+        const card = form.closest('.pending-item, .gl-admin-item');
         const status = card?.querySelector('.pending-item__status');
         const buttons = card ? Array.from(card.querySelectorAll('button')) : [];
         buttons.forEach(button => button.disabled = true);
@@ -405,7 +423,7 @@ document.querySelectorAll('.pending-action-form').forEach(form => {
             card?.classList.add('is-removing');
             setTimeout(() => {
                 card?.remove();
-                updatePendingCount(-1);
+                if (card?.classList.contains('pending-item')) updatePendingCount(-1);
             }, 180);
         } catch (error) {
             if (status) {
@@ -441,7 +459,7 @@ function escapeHtml(value) {
 function galleryTagNames(form) {
     return Array.from(form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]:checked')).map(input => {
         const label = input.closest('label');
-        return { id: input.value, name: label?.dataset.label || label?.textContent.trim() || '' };
+        return { id: input.value, name: label?.dataset.label || label?.textContent.trim() || '', type: input.name === 'group_ids[]' ? 'group' : 'user' };
     });
 }
 
@@ -450,7 +468,7 @@ function renderSelectedTags(form) {
     const count = form.querySelector('.gl-tag-selected-count');
     const names = galleryTagNames(form);
     if (selected) {
-        selected.innerHTML = names.map(tag => `<span class="gl-tag-chip" data-user-id="${escapeHtml(tag.id)}">${escapeHtml(tag.name)}</span>`).join('');
+        selected.innerHTML = names.map(tag => `<span class="gl-tag-chip ${tag.type === 'group' ? 'gl-tag-chip--group' : ''}" data-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.name)}</span>`).join('');
     }
     if (count) count.textContent = `${names.length}名選択中`;
 }
@@ -465,19 +483,19 @@ function updateCardTags(photoId, tags) {
         holder.className = 'gl-admin-item__tags';
         card.insertBefore(holder, panel || null);
     }
-    holder.innerHTML = tags.length
-        ? tags.map(tag => `<span class="gl-tag-chip">${escapeHtml(tag.name)}</span>`).join('')
-        : '';
+    const groups = arguments.length > 2 ? arguments[2] : [];
+    const chips = groups.map(group => `<span class="gl-tag-chip gl-tag-chip--group">${escapeHtml(group.name)}</span>`)
+        .concat(tags.map(tag => `<span class="gl-tag-chip">${escapeHtml(tag.name)}</span>`));
+    holder.innerHTML = chips.join('');
 }
 
 document.querySelectorAll('.gl-tag-form').forEach(form => {
     const search = form.querySelector('.gl-tag-search');
-    const list = form.querySelector('.gl-tag-panel__list');
     const status = form.querySelector('.gl-tag-status');
 
     search?.addEventListener('input', () => {
         const q = search.value.toLowerCase().trim();
-        list.querySelectorAll('label[data-name]').forEach(label => {
+        form.querySelectorAll('.gl-tag-panel__list label[data-name]').forEach(label => {
             label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
         });
     });
@@ -522,7 +540,7 @@ document.querySelectorAll('.gl-tag-form').forEach(form => {
             });
             const json = await res.json();
             if (!res.ok || !json.success) throw new Error(json.message || '保存に失敗しました');
-            updateCardTags(json.photo_id, json.tags || []);
+            updateCardTags(json.photo_id, json.tags || [], json.groups || []);
             if (status) {
                 status.textContent = '保存しました';
                 status.className = 'gl-tag-status is-ok';
@@ -542,8 +560,8 @@ document.querySelectorAll('.gl-tag-form').forEach(form => {
 
 function filterTagList(input) {
     const q = input.value.toLowerCase().trim();
-    const list = input.closest('form').querySelector('.gl-tag-panel__list');
-    list.querySelectorAll('label[data-name]').forEach(label => {
+    const form = input.closest('form');
+    form.querySelectorAll('.gl-tag-panel__list label[data-name]').forEach(label => {
         label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
     });
 }

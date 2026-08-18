@@ -30,7 +30,7 @@ class PeopleController extends Controller
         $photos = $user->taggedPhotos()
             ->where('is_active', true)
             ->where('status', 'approved')
-            ->with('taggedUsers.guestProfile')
+            ->with(['taggedUsers.guestProfile', 'taggedGroups.primaryGuest'])
             ->orderByDesc('created_at')
             ->get();
 

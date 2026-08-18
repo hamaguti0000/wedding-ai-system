@@ -43,6 +43,18 @@ class GalleryPhoto extends Model
         return $this->belongsToMany(User::class, 'gallery_photo_taggings');
     }
 
+    public function taggedGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            GuestGroup::class,
+            'gallery_photo_group_taggings',
+            'gallery_photo_id',
+            'guest_group_id',
+            'id',
+            'id'
+        );
+    }
+
     public function isPending(): bool
     {
         return $this->status === 'pending';

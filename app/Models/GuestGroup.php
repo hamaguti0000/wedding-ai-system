@@ -21,4 +21,13 @@ class GuestGroup extends Model
     {
         return $this->belongsTo(GuestProfile::class, 'primary_guest_id', 'id');
     }
+
+    public function displayName(): string
+    {
+        if ($this->primaryGuest) {
+            return $this->primaryGuest->fullName() . ' グループ';
+        }
+
+        return 'グループ ' . $this->id;
+    }
 }

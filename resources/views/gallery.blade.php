@@ -129,7 +129,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 @section('content')
 @php
     $currentUserId = auth()->id();
-    $taggedPhotoCount = $photos->filter(fn($photo) => $photo->taggedUsers->isNotEmpty())->count();
+    $taggedPhotoCount = $photos->filter(fn($photo) => $photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())->count();
     $myPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId))->count() : 0;
 @endphp
 
@@ -180,10 +180,10 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     <div class="gl-grid" id="glGrid">
         @foreach ($photos as $i => $photo)
         @php
-            $tagNames = $photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name])->values();
+            $tagNames = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->displayName(), 'type' => 'group'])->concat($photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name, 'type' => 'user']))->values();
             $isMine = $currentUserId && $photo->taggedUsers->contains('id', $currentUserId);
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ $photo->taggedUsers->isNotEmpty() ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" onclick="openLightbox({{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" onclick="openLightbox({{ $i }})">
             <div class="gl-card__photo">
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
                 @if ($isMine)
@@ -198,7 +198,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
                 @if ($tagNames->isNotEmpty())
                 <div class="gl-card__tags">
                     @foreach ($tagNames->take(3) as $tag)
-                    <span class="gl-person-chip {{ $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
+                    <span class="gl-person-chip {{ ($tag['type'] ?? 'user') === 'user' && $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
                     @endforeach
                     @if ($tagNames->count() > 3)
                     <span class="gl-more">+{{ $tagNames->count() - 3 }}名</span>
@@ -231,13 +231,21 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 @php
     $photosJson = $photos->map(function ($p) use ($currentUserId) {
-        $tags = $p->taggedUsers->map(function ($u) use ($currentUserId) {
+        $tags = $p->taggedGroups->map(function ($g) {
+            return [
+                'id' => $g->id,
+                'name' => $g->displayName(),
+                'is_current' => false,
+                'type' => 'group',
+            ];
+        })->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
             return [
                 'id' => $u->id,
                 'name' => $u->guestProfile?->fullName() ?: $u->name,
                 'is_current' => $currentUserId === $u->id,
+                'type' => 'user',
             ];
-        })->values();
+        }))->values();
 
         return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];
     })->values();
@@ -271,7 +279,7 @@ function showPhoto() {
     document.getElementById('glLightboxIndex').textContent = `Photo ${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
     tagsEl.innerHTML = (p.tags || []).length
-        ? p.tags.map(t => `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${peopleBaseUrl}/${t.id}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`).join('')
+        ? p.tags.map(t => `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${t.type === 'group' ? '#' : peopleBaseUrl + '/' + t.id}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`).join('')
         : '<span class="gl-person-chip">人物タグはまだありません</span>';
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }

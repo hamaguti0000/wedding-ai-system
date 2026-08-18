@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
+use App\Models\GuestGroup;
 use App\Models\User;
 use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class AdminGalleryController extends Controller
     public function index()
     {
         $photos  = GalleryPhoto::where('is_guest_upload', false)
-            ->with('taggedUsers.guestProfile')
+            ->with(['taggedUsers.guestProfile', 'taggedGroups.primaryGuest'])
             ->orderBy('sort_order')->orderBy('id')->get();
 
         $pending = GalleryPhoto::where('is_guest_upload', true)
@@ -23,7 +24,7 @@ class AdminGalleryController extends Controller
 
         $guestApproved = GalleryPhoto::where('is_guest_upload', true)
             ->whereIn('status', ['approved', 'rejected'])
-            ->with(['uploader', 'taggedUsers.guestProfile'])
+            ->with(['uploader', 'taggedUsers.guestProfile', 'taggedGroups.primaryGuest'])
             ->orderByDesc('created_at')->get();
 
         $taggableGuests = User::where('role', 'guest')
@@ -35,7 +36,12 @@ class AdminGalleryController extends Controller
             })
             ->values();
 
-        return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests'));
+        $taggableGroups = GuestGroup::with('primaryGuest')
+            ->get()
+            ->sortBy(fn (GuestGroup $group) => $group->displayName())
+            ->values();
+
+        return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests', 'taggableGroups'));
     }
 
     public function store(Request $request, ImageDuplicateDetector $duplicateDetector)
@@ -155,12 +161,15 @@ class AdminGalleryController extends Controller
         $photo = GalleryPhoto::where('status', 'approved')->findOrFail($id);
 
         $request->validate([
-            'user_ids'   => 'nullable|array',
-            'user_ids.*' => 'integer|exists:users,id',
+            'user_ids'    => 'nullable|array',
+            'user_ids.*'  => 'integer|exists:users,id',
+            'group_ids'   => 'nullable|array',
+            'group_ids.*' => 'string|exists:guest_groups,id',
         ]);
 
         $photo->taggedUsers()->sync($request->input('user_ids', []));
-        $photo->load('taggedUsers.guestProfile');
+        $photo->taggedGroups()->sync($request->input('group_ids', []));
+        $photo->load(['taggedUsers.guestProfile', 'taggedGroups.primaryGuest']);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -170,6 +179,12 @@ class AdminGalleryController extends Controller
                 'tags' => $photo->taggedUsers->map(fn (User $user) => [
                     'id' => $user->id,
                     'name' => $user->guestProfile?->fullName() ?: $user->name,
+                    'type' => 'user',
+                ])->values(),
+                'groups' => $photo->taggedGroups->map(fn (GuestGroup $group) => [
+                    'id' => $group->id,
+                    'name' => $group->displayName(),
+                    'type' => 'group',
                 ])->values(),
             ]);
         }
