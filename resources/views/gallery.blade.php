@@ -75,11 +75,22 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 .gl-lightbox {
     position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; padding: 22px;
-    background: rgba(17,12,8,.92); opacity: 0; pointer-events: none; transition: opacity .2s ease;
+    background: radial-gradient(circle at center, rgba(46,34,25,.94), rgba(12,9,7,.96));
+    opacity: 0; pointer-events: none; transition: opacity .2s ease;
 }
 .gl-lightbox.is-open { opacity: 1; pointer-events: all; }
-.gl-lightbox__shell { position: relative; width: min(1120px, 100%); max-height: 90vh; display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 0; border-radius: 18px; overflow: hidden; background: #111; box-shadow: 0 26px 90px rgba(0,0,0,.48); }
-.gl-lightbox__stage { display: grid; place-items: center; min-height: 420px; background: #050403; }
+.gl-lightbox__shell {
+    position: relative; width: min(1120px, 100%); max-height: 90vh;
+    display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0;
+    border-radius: 22px; overflow: hidden; background: #0b0806;
+    box-shadow: 0 26px 90px rgba(0,0,0,.48);
+}
+.gl-lightbox__stage {
+    display: grid; place-items: center; min-height: 420px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)),
+        #090705;
+}
 .gl-lightbox__img { max-width: 100%; max-height: 90vh; object-fit: contain; display: block; }
 .gl-lightbox__info { padding: 24px; background: #fffaf3; color: #3d2f25; overflow-y: auto; }
 .gl-lightbox__label { color: #b38b59; font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; }
@@ -88,14 +99,16 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-lightbox__tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: #fff; border: 1px solid #eadccd; color: #755f48; text-decoration: none; font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gl-lightbox__tag.is-current { color: #b42318; border-color: #ffd0d0; background: #fff1f1; font-weight: 700; }
 .gl-lightbox__close, .gl-lightbox__nav, .gl-lightbox__download {
-    position: absolute; z-index: 2; border: 0; color: #fff; background: rgba(255,255,255,.15); backdrop-filter: blur(10px); cursor: pointer;
-    width: 42px; height: 42px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+    position: absolute; z-index: 4; border: 0; color: #fff; background: rgba(29,22,17,.56); backdrop-filter: blur(14px); cursor: pointer;
+    width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+    box-shadow: 0 12px 28px rgba(0,0,0,.24);
 }
 .gl-lightbox__close { right: 14px; top: 14px; }
 .gl-lightbox__download { left: 14px; top: 14px; }
+.gl-lightbox__topcount { display: none; }
 .gl-lightbox__nav { top: 50%; transform: translateY(-50%); }
 .gl-lightbox__prev { left: 14px; }
-.gl-lightbox__next { right: 334px; }
+.gl-lightbox__next { right: 344px; }
 .gl-mobile-upload { display: none; }
 
 @media (max-width: 767px) {
@@ -115,12 +128,128 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     .gl-card__caption { font-size: .78rem; margin-bottom: 7px; }
     .gl-card__tags { gap: 4px; max-height: 48px; }
     .gl-person-chip { padding: 3px 7px; font-size: .66rem; }
-    .gl-lightbox { padding: 10px; }
-    .gl-lightbox__shell { grid-template-columns: 1fr; max-height: 92vh; border-radius: 16px; }
-    .gl-lightbox__stage { min-height: 58vh; }
-    .gl-lightbox__img { max-height: 62vh; }
-    .gl-lightbox__info { max-height: 30vh; padding: 18px; }
-    .gl-lightbox__next { right: 14px; }
+    .gl-lightbox {
+        display: block;
+        padding: 0;
+        background: #100c09;
+    }
+    .gl-lightbox__shell {
+        width: 100%;
+        height: 100dvh;
+        max-height: none;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        border-radius: 0;
+        overflow: hidden;
+        background: #100c09;
+        box-shadow: none;
+    }
+    .gl-lightbox__shell::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 104px;
+        z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(180deg, rgba(16,12,9,.84), rgba(16,12,9,0));
+    }
+    .gl-lightbox__stage {
+        min-height: 0;
+        height: 100%;
+        padding: calc(env(safe-area-inset-top) + 68px) 12px 150px;
+        box-sizing: border-box;
+        background: #100c09;
+    }
+    .gl-lightbox__img {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 18px 48px rgba(0,0,0,.32);
+        background: #050403;
+    }
+    .gl-lightbox__info {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: calc(env(safe-area-inset-bottom) + 12px);
+        z-index: 4;
+        max-height: 142px;
+        padding: 13px 14px 14px;
+        border: 1px solid rgba(234,220,205,.72);
+        border-radius: 18px;
+        background: rgba(255,250,243,.94);
+        color: #3d2f25;
+        overflow-y: auto;
+        box-shadow: 0 18px 42px rgba(0,0,0,.26);
+        backdrop-filter: blur(18px);
+    }
+    .gl-lightbox__label {
+        display: block;
+        margin-bottom: 8px;
+        color: #9a7445;
+        font-size: .64rem;
+        letter-spacing: 2.5px;
+    }
+    .gl-lightbox__caption {
+        margin: 0 0 10px;
+        font-size: .86rem;
+        line-height: 1.55;
+    }
+    .gl-lightbox__caption:empty { display: none; }
+    .gl-lightbox__tags {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 1px;
+        scrollbar-width: none;
+    }
+    .gl-lightbox__tags::-webkit-scrollbar { display: none; }
+    .gl-lightbox__tag,
+    .gl-lightbox__tags .gl-person-chip {
+        flex: 0 0 auto;
+        max-width: 72vw;
+        padding: 8px 12px;
+        font-size: .78rem;
+        background: rgba(255,255,255,.88);
+    }
+    .gl-lightbox__close,
+    .gl-lightbox__download {
+        top: calc(env(safe-area-inset-top) + 14px);
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.14);
+    }
+    .gl-lightbox__close { right: 14px; }
+    .gl-lightbox__download { left: 14px; }
+    .gl-lightbox__topcount {
+        display: inline-flex;
+        position: absolute;
+        left: 74px;
+        right: 74px;
+        top: calc(env(safe-area-inset-top) + 17px);
+        z-index: 5;
+        min-height: 38px;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,.9);
+        font-size: .74rem;
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        pointer-events: none;
+    }
+    .gl-lightbox__nav {
+        width: 46px;
+        height: 46px;
+        background: rgba(255,255,255,.18);
+        border: 1px solid rgba(255,255,255,.12);
+    }
+    .gl-lightbox__prev { left: 12px; }
+    .gl-lightbox__next { right: 12px; }
 
 }
 </style>
@@ -217,6 +346,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 <div class="gl-lightbox" id="glLightbox" onclick="closeLightboxOnOverlay(event)">
     <div class="gl-lightbox__shell" onclick="event.stopPropagation()">
         <a class="gl-lightbox__download" id="glLightboxDownload" href="" download aria-label="ダウンロード"><i class="fa-solid fa-download"></i></a>
+        <span class="gl-lightbox__topcount" id="glLightboxTopIndex">Photo</span>
         <button class="gl-lightbox__close" type="button" onclick="closeLightbox()" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
         <button class="gl-lightbox__nav gl-lightbox__prev" type="button" onclick="prevPhoto()" aria-label="前へ"><i class="fa-solid fa-chevron-left"></i></button>
         <button class="gl-lightbox__nav gl-lightbox__next" type="button" onclick="nextPhoto()" aria-label="次へ"><i class="fa-solid fa-chevron-right"></i></button>
@@ -277,6 +407,7 @@ function showPhoto() {
     document.getElementById('glLightboxCaption').textContent = p.caption || '';
     document.getElementById('glLightboxDownload').href = p.url;
     document.getElementById('glLightboxIndex').textContent = `Photo ${current + 1} / ${photos.length}`;
+    document.getElementById('glLightboxTopIndex').textContent = `${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
     tagsEl.innerHTML = (p.tags || []).length
         ? p.tags.map(t => `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${t.type === 'group' ? '#' : peopleBaseUrl + '/' + t.id}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`).join('')
