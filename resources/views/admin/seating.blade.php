@@ -3,6 +3,22 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ css_asset('css/seating-table.css') }}">
+<style>
+.sx-group-assign { margin-top: 18px; padding: 14px; border: 1px solid #eadccd; border-radius: 12px; background: #fffdf9; }
+.sx-group-assign__head { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 10px; }
+.sx-group-assign__head strong { color: #3d2f25; font-size: .9rem; }
+.sx-group-assign__head span { color: #9b8573; font-size: .76rem; }
+.sx-group-assign__list { display: grid; gap: 8px; max-height: 260px; overflow-y: auto; }
+.sx-group-assign__row { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 8px; align-items: center; }
+.sx-group-assign__name { min-width: 0; color: #5d4635; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sx-group-assign__select { width: 100%; padding: 7px 9px; border: 1px solid #e0d0bc; border-radius: 8px; background: #fff; color: #3d2f25; font-size: .82rem; }
+.sx-group-assign__status { min-height: 18px; margin-top: 8px; color: #9b8573; font-size: .76rem; }
+.sx-group-assign__status.is-ok { color: #15803d; }
+.sx-group-assign__status.is-error { color: #dc2626; }
+.sx-table-groups { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.sx-table-group-chip { display: inline-flex; max-width: 100%; padding: 2px 7px; border-radius: 999px; background: #eef7ff; border: 1px solid #bfdbfe; color: #2563eb; font-size: .68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 760px) { .sx-group-assign__row { grid-template-columns: 1fr; } }
+</style>
 @endpush
 
 @section('content')
@@ -207,6 +223,30 @@
                 <input type="number" id="newTableSeats" value="4" min="0" max="8" title="席数">
                 <button type="button" id="addTableBtn"><i class="fa-solid fa-plus"></i>テーブルを追加</button>
             </div>
+
+            @if ($seatingGroups->isNotEmpty())
+            <section class="sx-group-assign" aria-label="グループのテーブル振り分け">
+                <div class="sx-group-assign__head">
+                    <strong>グループ振り分け</strong>
+                    <span>グループごとにテーブルを選択</span>
+                </div>
+                <div class="sx-group-assign__list">
+                    @foreach ($seatingGroups as $group)
+                    @php $currentTableId = $group->assignedSeatingTables->first()?->id; @endphp
+                    <label class="sx-group-assign__row">
+                        <span class="sx-group-assign__name">{{ $group->displayName() }}</span>
+                        <select class="sx-group-assign__select" data-group-id="{{ $group->id }}">
+                            <option value="">未設定</option>
+                            @foreach ($tables as $table)
+                            <option value="{{ $table->id }}" @selected($currentTableId === $table->id)>{{ $table->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    @endforeach
+                </div>
+                <div class="sx-group-assign__status" id="groupAssignStatus" aria-live="polite"></div>
+            </section>
+            @endif
         </main>
 
     </div>
@@ -368,6 +408,47 @@
 </div>
 
 @endsection
+
+
+<script>
+(() => {
+    const status = document.getElementById('groupAssignStatus');
+    const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const setStatus = (message, cls = '') => {
+        if (!status) return;
+        status.textContent = message;
+        status.className = `sx-group-assign__status ${cls}`.trim();
+    };
+
+    document.querySelectorAll('.sx-group-assign__select').forEach(select => {
+        select.addEventListener('change', async () => {
+            select.disabled = true;
+            setStatus('保存中...');
+            try {
+                const res = await fetch('{{ route('admin.seating.groups.assign') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf(),
+                    },
+                    body: JSON.stringify({
+                        guest_group_id: select.dataset.groupId,
+                        seating_table_id: select.value || null,
+                    }),
+                });
+                const json = await res.json().catch(() => ({}));
+                if (!res.ok || !json.success) throw new Error(json.message || json.error || '保存に失敗しました');
+                setStatus('保存しました', 'is-ok');
+            } catch (error) {
+                setStatus(error.message || '保存に失敗しました', 'is-error');
+            } finally {
+                select.disabled = false;
+            }
+        });
+    });
+})();
+</script>
 
 @push('scripts')
 <script src="{{ versioned_asset('js/seating-table.js') }}"></script>

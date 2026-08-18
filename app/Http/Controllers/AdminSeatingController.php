@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GuestGroup;
 use App\Models\Seat;
 use App\Models\SeatAssignment;
 use App\Models\SeatingTable;
@@ -9,6 +10,7 @@ use App\Models\User;
 use App\Models\WeddingSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Process;
 
 class AdminSeatingController extends Controller
@@ -23,6 +25,7 @@ class AdminSeatingController extends Controller
 
         $tables = SeatingTable::with([
             'seats.assignment.user.guestProfile',
+            'assignedGroups.primaryGuest',
         ])->orderBy('display_order')->get();
 
         // 内部計算用（View には渡さない）
@@ -49,6 +52,10 @@ class AdminSeatingController extends Controller
 
         $typeConfig = Seat::typeConfig();
         $setting    = WeddingSetting::first();
+        $seatingGroups = GuestGroup::with(['primaryGuest', 'assignedSeatingTables'])
+            ->get()
+            ->sortBy(fn (GuestGroup $group) => $group->displayName())
+            ->values();
 
         // View に渡すデータの責務:
         //   $tables           → EloquentCollection<SeatingTable>
@@ -58,7 +65,7 @@ class AdminSeatingController extends Controller
         //   $summary          → array<string, int> (集計値のみ)
         //   $typeConfig       → array<string, array> (席タイプ設定)
         return view('admin.seating', compact(
-            'tables', 'assignedGuests', 'unassignedGuests', 'allGuests', 'summary', 'typeConfig', 'setting'
+            'tables', 'assignedGuests', 'unassignedGuests', 'allGuests', 'summary', 'typeConfig', 'setting', 'seatingGroups'
         ));
     }
 
@@ -405,6 +412,33 @@ class AdminSeatingController extends Controller
     }
 
     // ── 配置 ────────────────────────────────────────────────
+
+    public function assignGroup(Request $request): JsonResponse
+    {
+        $request->validate([
+            'guest_group_id' => 'required|string|exists:guest_groups,id',
+            'seating_table_id' => 'nullable|integer|exists:seating_tables,id',
+        ]);
+
+        DB::table('seating_table_group_assignments')
+            ->where('guest_group_id', $request->guest_group_id)
+            ->delete();
+
+        if ($request->filled('seating_table_id')) {
+            DB::table('seating_table_group_assignments')->insert([
+                'guest_group_id' => $request->guest_group_id,
+                'seating_table_id' => (int) $request->seating_table_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'guest_group_id' => $request->guest_group_id,
+            'seating_table_id' => $request->input('seating_table_id'),
+        ]);
+    }
 
     /** ゲストを席に配置（移動も兼ねる）*/
     public function assign(Request $request): JsonResponse

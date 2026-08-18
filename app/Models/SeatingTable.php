@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SeatingTable extends Model
@@ -12,6 +13,18 @@ class SeatingTable extends Model
     public function seats(): HasMany
     {
         return $this->hasMany(Seat::class);
+    }
+
+    public function assignedGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            GuestGroup::class,
+            'seating_table_group_assignments',
+            'seating_table_id',
+            'guest_group_id',
+            'id',
+            'id'
+        );
     }
 
     public function seatCount(): int
