@@ -104,7 +104,7 @@ class AdminGalleryController extends Controller
     }
 
     /** ゲスト投稿を承認してギャラリーに追加 */
-    public function approve(int $id)
+    public function approve(Request $request, int $id)
     {
         $photo = GalleryPhoto::where('is_guest_upload', true)->findOrFail($id);
         $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
@@ -115,16 +115,38 @@ class AdminGalleryController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        return back()->with('success', '写真を承認してギャラリーに追加しました');
+        $message = '写真を承認してギャラリーに追加しました';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'photo_id' => $photo->id,
+                'status' => 'approved',
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     /** ゲスト投稿を却下（ファイルは保持） */
-    public function reject(int $id)
+    public function reject(Request $request, int $id)
     {
         $photo = GalleryPhoto::where('is_guest_upload', true)->findOrFail($id);
         $photo->update(['status' => 'rejected', 'is_active' => false]);
 
-        return back()->with('success', '写真を却下しました');
+        $message = '写真を却下しました';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'photo_id' => $photo->id,
+                'status' => 'rejected',
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     /** 写真に写っている人物をタグ付け */

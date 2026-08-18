@@ -47,7 +47,7 @@
             @endforelse
         </div>
         <div class="gl-tag-panel__actions">
-            <button type="submit" class="btn-primary gl-tag-save" style="padding:6px 16px;font-size:0.82rem;">Ajaxで保存</button>
+            <button type="submit" class="btn-primary gl-tag-save" style="padding:6px 16px;font-size:0.82rem;">保存</button>
             <span class="gl-tag-status" aria-live="polite"></span>
         </div>
     </form>

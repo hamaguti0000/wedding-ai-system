@@ -48,12 +48,17 @@
 .pending-item {
     background: #fff; border-radius: 10px; overflow: hidden;
     border: 1px solid #fde68a; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: opacity .18s ease, transform .18s ease;
 }
+.pending-item.is-removing { opacity: 0; transform: scale(.98); }
 .pending-item__img { width: 100%; height: 140px; object-fit: cover; display: block; }
 .pending-item__body { padding: 10px 12px; }
 .pending-item__uploader { font-size: 0.76rem; color: #9b8573; margin-bottom: 4px; }
 .pending-item__caption  { font-size: 0.8rem; color: #7a6a5a; line-height: 1.5; margin-bottom: 8px; min-height: 1.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.pending-item__actions  { display: flex; gap: 6px; }
+.pending-item__actions  { display: flex; gap: 6px; flex-wrap: wrap; }
+.pending-item__status { flex-basis: 100%; min-height: 18px; color: #a16207; font-size: 0.74rem; }
+.pending-item__status.is-ok { color: #15803d; }
+.pending-item__status.is-error { color: #dc2626; }
 .btn-approve { background: #16a34a; color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.78rem; cursor: pointer; transition: background .15s; }
 .btn-approve:hover { background: #15803d; }
 .btn-reject  { background: #fff; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; cursor: pointer; transition: all .15s; }
@@ -133,12 +138,12 @@
 
     {{-- ゲスト投稿承認待ち --}}
     @if ($pending->isNotEmpty())
-    <div class="pending-section">
-        <h3>📥 ゲスト投稿 — 承認待ち（{{ $pending->count() }}件）</h3>
+    <div class="pending-section" id="pendingSection">
+        <h3>📥 ゲスト投稿 — 承認待ち（<span id="pendingCount">{{ $pending->count() }}</span>件）</h3>
         <p class="section-desc">ゲストから届いた写真です。承認するとギャラリーに追加されます。</p>
-        <div class="pending-grid">
+        <div class="pending-grid" id="pendingGrid">
             @foreach ($pending as $photo)
-            <div class="pending-item">
+            <div class="pending-item" data-pending-id="{{ $photo->id }}">
                 <img src="{{ $photo->url }}" alt="" class="pending-item__img">
                 <div class="pending-item__body">
                     <p class="pending-item__uploader">
@@ -148,17 +153,17 @@
                     </p>
                     <p class="pending-item__caption">{{ $photo->caption ?: '（コメントなし）' }}</p>
                     <div class="pending-item__actions">
-                        <form method="POST" action="{{ route('admin.gallery.approve', $photo->id) }}">
+                        <form method="POST" action="{{ route('admin.gallery.approve', $photo->id) }}" class="pending-action-form" data-action="approve">
                             @csrf
                             <button type="submit" class="btn-approve" title="承認してギャラリーに追加">
                                 <i class="fa-solid fa-check"></i> 承認
                             </button>
                         </form>
-                        <form method="POST" action="{{ route('admin.gallery.reject', $photo->id) }}"
-                              onsubmit="return confirm('却下しますか？')">
+                        <form method="POST" action="{{ route('admin.gallery.reject', $photo->id) }}" class="pending-action-form" data-action="reject" data-confirm="却下しますか？">
                             @csrf
                             <button type="submit" class="btn-reject">却下</button>
                         </form>
+                        <span class="pending-item__status" aria-live="polite"></span>
                     </div>
                 </div>
             </div>
@@ -354,6 +359,63 @@
     });
     applyAll();
 })();
+
+
+function updatePendingCount(delta) {
+    const countEl = document.getElementById('pendingCount');
+    if (!countEl) return;
+    const next = Math.max(0, Number(countEl.textContent || 0) + delta);
+    countEl.textContent = String(next);
+    if (next === 0) {
+        const section = document.getElementById('pendingSection');
+        if (section) section.style.display = 'none';
+    }
+}
+
+document.querySelectorAll('.pending-action-form').forEach(form => {
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const confirmMessage = form.dataset.confirm;
+        if (confirmMessage && !confirm(confirmMessage)) return;
+
+        const card = form.closest('.pending-item');
+        const status = card?.querySelector('.pending-item__status');
+        const buttons = card ? Array.from(card.querySelectorAll('button')) : [];
+        buttons.forEach(button => button.disabled = true);
+        if (status) {
+            status.textContent = '処理中...';
+            status.className = 'pending-item__status';
+        }
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                body: new FormData(form),
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || '処理に失敗しました');
+            if (status) {
+                status.textContent = json.message || '完了しました';
+                status.className = 'pending-item__status is-ok';
+            }
+            card?.classList.add('is-removing');
+            setTimeout(() => {
+                card?.remove();
+                updatePendingCount(-1);
+            }, 180);
+        } catch (error) {
+            if (status) {
+                status.textContent = error.message || '処理に失敗しました';
+                status.className = 'pending-item__status is-error';
+            }
+            buttons.forEach(button => button.disabled = false);
+        }
+    });
+});
 
 function toggleEdit(id) {
     const el = document.getElementById('edit-' + id);
