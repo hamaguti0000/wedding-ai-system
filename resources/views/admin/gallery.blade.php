@@ -24,6 +24,78 @@
     gap: 14px;
     margin-top: 8px;
 }
+.official-section {
+    margin-top: 22px;
+    border: 1px solid #efe3d4;
+    border-radius: 16px;
+    background: #fffdf9;
+    box-shadow: 0 10px 28px rgba(61,47,37,.06);
+    overflow: hidden;
+}
+.official-section[open] { padding-bottom: 14px; }
+.official-section__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+.official-section__summary::-webkit-details-marker { display: none; }
+.official-section__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.official-section__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f6ead8;
+    color: #b38b59;
+    flex: 0 0 auto;
+}
+.official-section__title strong {
+    display: block;
+    color: #3d2f25;
+    font-size: .94rem;
+}
+.official-section__copy {
+    display: block;
+    margin-top: 2px;
+    color: #9b8573;
+    font-size: .76rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.official-section__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+.official-section__pill {
+    border: 1px solid #e8d5b7;
+    border-radius: 999px;
+    padding: 5px 10px;
+    color: #7a5b32;
+    background: #fff;
+    font-size: .76rem;
+    font-weight: 700;
+}
+.official-section__chevron {
+    color: #b38b59;
+    transition: transform .18s ease;
+}
+.official-section[open] .official-section__chevron { transform: rotate(180deg); }
+.official-section__inner { padding: 0 18px; }
 .gl-admin-item {
     background: #fff; border-radius: 10px; overflow: hidden;
     border: 1px solid #f0ebe3; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -68,7 +140,7 @@
 .gl-toolbar {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     padding: 12px 14px; margin-bottom: 10px;
-    background: #fff; border-radius: 10px; border: 1px solid #f0ebe3;
+    background: #fff; border-radius: 12px; border: 1px solid #f0ebe3;
 }
 .gl-search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 260px; }
 .gl-search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c0b0a0; font-size: 0.85rem; pointer-events: none; }
@@ -76,7 +148,7 @@
 .gl-search:focus { border-color: #b38b59; outline: none; }
 .gl-clear { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c0b0a0; font-size: 1rem; line-height: 1; }
 .gl-clear.visible { display: block; }
-.gl-filter-btn { padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.gl-filter-btn { min-height: 36px; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; border: 1px solid #e8d5b7; color: #b38b59; background: #fef9f0; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
 .gl-filter-btn.active, .gl-filter-btn:hover { background: #b38b59; color: #fff; border-color: #b38b59; }
 .gl-result-count { font-size: 0.82rem; color: #999; margin-bottom: 8px; }
 .gl-no-results { display: none; text-align: center; padding: 40px 20px; color: #aaa; }
@@ -126,6 +198,32 @@
 .gl-tag-panel__list { max-height: 160px; overflow-y: auto; border: 1px solid #e0d0bc; border-radius: 6px; padding: 6px 8px; background: #fff; margin-bottom: 8px; }
 .gl-tag-panel__list label { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; padding: 3px 0; cursor: pointer; }
 .gl-tag-panel__list label.is-hidden { display: none; }
+@media (max-width: 640px) {
+    .upload-zone { padding: 22px 14px; }
+    .gl-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .gl-admin-item { border-radius: 14px; }
+    .gl-admin-item__img { height: 128px; }
+    .gl-admin-item__body { padding: 10px; }
+    .gl-admin-item__actions { gap: 7px; }
+    .gl-admin-item__actions .btn-sm {
+        min-width: 42px;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .official-section { margin-left: -2px; margin-right: -2px; border-radius: 18px; }
+    .official-section__summary { padding: 15px 14px; align-items: flex-start; }
+    .official-section__copy { white-space: normal; }
+    .official-section__meta { flex-direction: column; align-items: flex-end; gap: 6px; }
+    .official-section__pill { font-size: .72rem; padding: 4px 9px; }
+    .official-section__inner { padding: 0 12px 12px; }
+    .gl-toolbar { gap: 8px; padding: 12px; }
+    .gl-search-wrap { flex-basis: 100%; max-width: none; }
+    .gl-search { min-height: 42px; font-size: 16px; border-radius: 10px; }
+    .gl-filter-btn { flex: 1 1 auto; }
+    .gl-result-count { margin: 10px 2px; }
+}
 </style>
 @endpush
 
@@ -200,9 +298,21 @@
     </div>
 
     {{-- 公式写真一覧 --}}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-size:0.88rem;font-weight:600;color:#3d2f25;">公式写真</span>
-    </div>
+    <details class="official-section" id="officialPhotosSection" open>
+        <summary class="official-section__summary">
+            <span class="official-section__title">
+                <span class="official-section__icon"><i class="fa-solid fa-image"></i></span>
+                <span class="official-section__copy">
+                    <strong>公式写真</strong>
+                    <span>検索・表示切替・並び替え・人物タグを管理</span>
+                </span>
+            </span>
+            <span class="official-section__meta">
+                <span class="official-section__pill" id="officialVisiblePill">{{ $photos->count() }}枚</span>
+                <i class="fa-solid fa-chevron-down official-section__chevron" aria-hidden="true"></i>
+            </span>
+        </summary>
+        <div class="official-section__inner">
 
     @if ($photos->isEmpty())
     <div class="empty-state">
@@ -273,6 +383,8 @@
         <p style="font-weight:600;color:#888;">該当する写真が見つかりません</p>
     </div>
     @endif
+        </div>
+    </details>
 
     {{-- 承認済み・却下済みゲスト投稿（折りたたみ） --}}
     @if ($guestApproved->isNotEmpty())
@@ -354,6 +466,11 @@
             if (show) visible++;
         });
         if (countEl) countEl.innerHTML = `<strong>${visible}</strong>枚`;
+        const officialPill = document.getElementById('officialVisiblePill');
+        if (officialPill) {
+            const total = items.length;
+            officialPill.textContent = visible === total ? `${total}枚` : `${visible} / ${total}枚`;
+        }
         if (noRes)   noRes.classList.toggle('visible', visible === 0);
     }
 
@@ -376,6 +493,18 @@
         });
     });
     applyAll();
+})();
+
+(function () {
+    const section = document.getElementById('officialPhotosSection');
+    if (!section) return;
+    const key = 'adminGalleryOfficialPhotosOpen';
+    const saved = localStorage.getItem(key);
+    if (saved === '0') section.open = false;
+    if (saved === '1') section.open = true;
+    section.addEventListener('toggle', () => {
+        localStorage.setItem(key, section.open ? '1' : '0');
+    });
 })();
 
 
