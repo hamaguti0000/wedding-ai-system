@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class AdminSeatingController extends Controller
@@ -59,8 +60,13 @@ class AdminSeatingController extends Controller
 
         $typeConfig = Seat::typeConfig();
         $setting    = WeddingSetting::first();
+        if ($hasGuestGroups) {
+            $this->ensureDefaultGuestGroups();
+        }
+
         $seatingGroups = $hasGuestGroups
-            ? GuestGroup::with(['primaryGuest', 'assignedSeatingTables'])
+            ? GuestGroup::with(['primaryGuest', 'members.guestProfile', 'members.seatAssignment.seat.seatingTable', 'assignedSeatingTables'])
+                ->orderBy('sort_order')
                 ->get()
                 ->sortBy(fn (GuestGroup $group) => $group->displayName())
                 ->values()
@@ -433,25 +439,150 @@ class AdminSeatingController extends Controller
             'seating_table_id' => 'nullable|integer|exists:seating_tables,id',
         ]);
 
-        DB::table('seating_table_group_assignments')
-            ->where('guest_group_id', $request->guest_group_id)
-            ->delete();
+        $assignedCount = 0;
 
-        if ($request->filled('seating_table_id')) {
+        DB::transaction(function () use ($request, &$assignedCount) {
+            DB::table('seating_table_group_assignments')
+                ->where('guest_group_id', $request->guest_group_id)
+                ->delete();
+
+            if (! $request->filled('seating_table_id')) {
+                return;
+            }
+
             DB::table('seating_table_group_assignments')->insert([
                 'guest_group_id' => $request->guest_group_id,
                 'seating_table_id' => (int) $request->seating_table_id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-        }
+
+            $group = GuestGroup::with(['members.guestProfile', 'members.seatAssignment'])
+                ->findOrFail($request->guest_group_id);
+            $members = $group->members
+                ->filter(fn (User $user) => $user->guestProfile?->participation === 'attending')
+                ->values();
+
+            if ($members->isEmpty()) {
+                return;
+            }
+
+            $memberIds = $members->pluck('id')->all();
+            $table = SeatingTable::with('seats.assignment')
+                ->findOrFail((int) $request->seating_table_id);
+            $availableSeats = $table->seats
+                ->filter(fn (Seat $seat) => $seat->assignment === null || in_array($seat->assignment->user_id, $memberIds, true))
+                ->sortBy('id')
+                ->values();
+
+            if ($availableSeats->count() < $members->count()) {
+                abort(422, $group->displayName() . ' の人数に対して、このテーブルの空席が足りません');
+            }
+
+            SeatAssignment::whereIn('user_id', $memberIds)->delete();
+
+            foreach ($members as $index => $member) {
+                SeatAssignment::create([
+                    'seat_id' => $availableSeats[$index]->id,
+                    'user_id' => $member->id,
+                ]);
+                $assignedCount++;
+            }
+        });
 
         return response()->json([
             'success' => true,
             'guest_group_id' => $request->guest_group_id,
             'seating_table_id' => $request->input('seating_table_id'),
+            'assigned_count' => $assignedCount,
         ]);
     }
+
+    public function regenerateGroups(): JsonResponse
+    {
+        if (! Schema::hasTable('guest_groups')) {
+            return response()->json(['error' => 'グループ機能はまだ利用できません'], 422);
+        }
+
+        $count = $this->ensureDefaultGuestGroups(true);
+
+        return response()->json([
+            'success' => true,
+            'count' => $count,
+        ]);
+    }
+
+
+    private function ensureDefaultGuestGroups(bool $refresh = false): int
+    {
+        if (! Schema::hasTable('guest_group_members')) {
+            return GuestGroup::count();
+        }
+
+        $guests = User::query()
+            ->where('role', 'guest')
+            ->whereHas('guestProfile', fn ($q) => $q->where('participation', 'attending'))
+            ->with('guestProfile')
+            ->get()
+            ->filter(fn (User $user) => $user->guestProfile !== null)
+            ->values();
+
+        if (! $refresh && GuestGroup::exists()) {
+            return GuestGroup::count();
+        }
+
+        $groups = $guests->groupBy(fn (User $user) => $this->guestGroupKey($user));
+        $sortOrder = 1;
+
+        DB::transaction(function () use ($groups, &$sortOrder) {
+            foreach ($groups as $key => $members) {
+                $first = $members->first();
+                $profile = $first->guestProfile;
+                $group = GuestGroup::updateOrCreate(
+                    ['id' => 'grp_' . substr(sha1($key), 0, 16)],
+                    [
+                        'name' => $this->guestGroupName($first),
+                        'guest_side' => $profile?->guest_side,
+                        'relationship' => $profile?->relationship,
+                        'primary_guest_id' => $profile?->id,
+                        'sort_order' => $sortOrder++,
+                    ]
+                );
+
+                $group->members()->sync($members->pluck('id')->all());
+            }
+        });
+
+        return GuestGroup::count();
+    }
+
+    private function guestGroupKey(User $user): string
+    {
+        $profile = $user->guestProfile;
+        $side = $profile?->guest_side ?: 'unknown';
+        $relationship = $profile?->relationship ?: 'other';
+        $detail = trim((string) ($profile?->relationship_detail ?: ''));
+
+        if ($relationship === 'family') {
+            $detail = $profile?->last_name ?: $detail;
+        }
+
+        return Str::lower($side . '|' . $relationship . '|' . ($detail ?: 'default'));
+    }
+
+    private function guestGroupName(User $user): string
+    {
+        $profile = $user->guestProfile;
+        $side = $profile?->guestSideLabel();
+        $relationship = $profile?->relationshipLabel();
+
+        if ($profile?->relationship === 'family' && $profile->last_name) {
+            return trim(($side ?: '') . ' ' . $profile->last_name . '家');
+        }
+
+        return trim(($side ?: '') . ' ' . ($relationship ?: 'ゲスト'));
+    }
+
 
     /** ゲストを席に配置（移動も兼ねる）*/
     public function assign(Request $request): JsonResponse

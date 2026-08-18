@@ -7,10 +7,12 @@
 .sx-group-assign { margin-top: 18px; padding: 14px; border: 1px solid #eadccd; border-radius: 12px; background: #fffdf9; }
 .sx-group-assign__head { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 10px; }
 .sx-group-assign__head strong { color: #3d2f25; font-size: .9rem; }
-.sx-group-assign__head span { color: #9b8573; font-size: .76rem; }
+.sx-group-assign__head span { display: block; margin-top: 2px; color: #9b8573; font-size: .76rem; }
 .sx-group-assign__list { display: grid; gap: 8px; max-height: 260px; overflow-y: auto; }
 .sx-group-assign__row { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 8px; align-items: center; }
 .sx-group-assign__name { min-width: 0; color: #5d4635; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sx-group-assign__name small { margin-left: 6px; color: #a6907c; font-size: .7rem; }
+.sx-group-assign__refresh { border: 1px solid #d4b68c; border-radius: 999px; background: #fff; color: #8a642e; padding: 7px 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .sx-group-assign__select { width: 100%; padding: 7px 9px; border: 1px solid #e0d0bc; border-radius: 8px; background: #fff; color: #3d2f25; font-size: .82rem; }
 .sx-group-assign__status { min-height: 18px; margin-top: 8px; color: #9b8573; font-size: .76rem; }
 .sx-group-assign__status.is-ok { color: #15803d; }
@@ -227,14 +229,20 @@
             @if ($seatingGroups->isNotEmpty())
             <section class="sx-group-assign" aria-label="グループのテーブル振り分け">
                 <div class="sx-group-assign__head">
-                    <strong>グループ振り分け</strong>
-                    <span>グループごとにテーブルを選択</span>
+                    <div>
+                        <strong>グループ振り分け</strong>
+                        <span>グループごとにテーブルを選ぶと、空席へまとめて配置します</span>
+                    </div>
+                    <button type="button" class="sx-group-assign__refresh" id="groupRefreshBtn">グループ更新</button>
                 </div>
                 <div class="sx-group-assign__list">
                     @foreach ($seatingGroups as $group)
                     @php $currentTableId = $group->assignedSeatingTables->first()?->id; @endphp
                     <label class="sx-group-assign__row">
-                        <span class="sx-group-assign__name">{{ $group->displayName() }}</span>
+                        <span class="sx-group-assign__name">
+                            {{ $group->displayName() }}
+                            <small>{{ $group->members->count() }}名</small>
+                        </span>
                         <select class="sx-group-assign__select" data-group-id="{{ $group->id }}">
                             <option value="">未設定</option>
                             @foreach ($tables as $table)
@@ -420,10 +428,32 @@
         status.className = `sx-group-assign__status ${cls}`.trim();
     };
 
+    document.getElementById('groupRefreshBtn')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        setStatus('更新中...');
+        try {
+            const res = await fetch('{{ route('admin.seating.groups.regenerate') }}', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrf(),
+                },
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok || !json.success) throw new Error(json.message || json.error || '更新に失敗しました');
+            setStatus(`${json.count}グループに更新しました。画面を再読み込みします`, 'is-ok');
+            window.location.reload();
+        } catch (error) {
+            setStatus(error.message || '更新に失敗しました', 'is-error');
+            button.disabled = false;
+        }
+    });
+
     document.querySelectorAll('.sx-group-assign__select').forEach(select => {
         select.addEventListener('change', async () => {
             select.disabled = true;
-            setStatus('保存中...');
+            setStatus('配置中...');
             try {
                 const res = await fetch('{{ route('admin.seating.groups.assign') }}', {
                     method: 'POST',
@@ -439,7 +469,8 @@
                 });
                 const json = await res.json().catch(() => ({}));
                 if (!res.ok || !json.success) throw new Error(json.message || json.error || '保存に失敗しました');
-                setStatus('保存しました', 'is-ok');
+                const suffix = json.assigned_count ? `（${json.assigned_count}名を配置）` : '';
+                setStatus(`配置しました${suffix}`, 'is-ok');
             } catch (error) {
                 setStatus(error.message || '保存に失敗しました', 'is-error');
             } finally {

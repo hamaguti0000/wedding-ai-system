@@ -260,6 +260,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/seating/seats/{seatId}',            [AdminSeatingController::class, 'updateSeat'])    ->name('seating.seats.update');
     Route::delete('/seating/seats/{seatId}',           [AdminSeatingController::class, 'destroySeat'])   ->name('seating.seats.destroy');
     Route::post('/seating/groups/assign',             [AdminSeatingController::class, 'assignGroup'])   ->name('seating.groups.assign');
+    Route::post('/seating/groups/regenerate',         [AdminSeatingController::class, 'regenerateGroups'])->name('seating.groups.regenerate');
     Route::post('/seating/assign',                     [AdminSeatingController::class, 'assign'])        ->name('seating.assign');
     Route::delete('/seating/unassign/{userId}',        [AdminSeatingController::class, 'unassign'])      ->name('seating.unassign');
 });
