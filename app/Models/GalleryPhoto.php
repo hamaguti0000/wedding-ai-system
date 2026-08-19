@@ -10,6 +10,7 @@ class GalleryPhoto extends Model
 {
     protected $fillable = [
         'file_path',
+        'display_file_path',
         'caption',
         'sort_order',
         'is_active',
@@ -30,7 +31,7 @@ class GalleryPhoto extends Model
 
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->file_path);
+        return asset('storage/' . ($this->display_file_path ?: $this->file_path));
     }
 
     public function uploader(): BelongsTo

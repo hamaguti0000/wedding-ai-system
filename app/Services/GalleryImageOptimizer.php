@@ -33,25 +33,26 @@ class GalleryImageOptimizer
         return $path;
     }
 
-    public function optimizeExistingPublicFile(string $relativePath): bool
+    public function optimizedCopyForPublicFile(string $relativePath, string $directory = 'gallery/display'): ?string
     {
         if (! extension_loaded('gd')) {
-            return false;
+            return null;
         }
 
         $absolutePath = Storage::disk('public')->path($relativePath);
         if (! is_file($absolutePath)) {
-            return false;
+            return null;
         }
 
         $optimized = $this->optimizeToJpeg($absolutePath);
         if ($optimized === null) {
-            return false;
+            return null;
         }
 
-        file_put_contents($absolutePath, $optimized);
+        $path = trim($directory, '/') . '/' . Str::random(40) . '.jpg';
+        Storage::disk('public')->put($path, $optimized);
 
-        return true;
+        return $path;
     }
 
     private function optimizeToJpeg(string $absolutePath): ?string

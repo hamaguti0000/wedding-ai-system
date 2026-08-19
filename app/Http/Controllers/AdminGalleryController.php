@@ -125,7 +125,10 @@ class AdminGalleryController extends Controller
     public function destroy(int $id)
     {
         $photo = GalleryPhoto::findOrFail($id);
-        Storage::disk('public')->delete($photo->file_path);
+        Storage::disk('public')->delete(array_filter([
+            $photo->file_path,
+            $photo->display_file_path,
+        ]));
         $photo->delete();
         return back()->with('success', '削除しました');
     }
