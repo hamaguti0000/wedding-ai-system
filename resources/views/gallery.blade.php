@@ -157,22 +157,49 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         background: linear-gradient(180deg, rgba(16,12,9,.84), rgba(16,12,9,0));
     }
     .gl-lightbox__stage {
+        position: relative;
         min-height: 0;
         height: 100%;
-        padding: calc(env(safe-area-inset-top) + 68px) 12px 150px;
+        padding: calc(env(safe-area-inset-top) + 68px) 12px 166px;
         box-sizing: border-box;
         background: #100c09;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .gl-lightbox__stage::after {
+        content: '読み込み中';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(255,255,255,.58);
+        font-size: .78rem;
+        letter-spacing: 2px;
+        opacity: 0;
+        transition: opacity .12s ease;
+        pointer-events: none;
+    }
+    .gl-lightbox__stage.is-loading::after { opacity: 1; }
+    .gl-lightbox__stage.is-error::after {
+        content: '写真を読み込めませんでした';
+        opacity: 1;
+        color: rgba(255,255,255,.76);
     }
     .gl-lightbox__img {
-        width: 100%;
-        height: 100%;
+        width: auto;
+        height: auto;
         max-width: 100%;
-        max-height: 100%;
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 250px);
         object-fit: contain;
-        border-radius: 12px;
-        box-shadow: 0 18px 48px rgba(0,0,0,.32);
-        background: #050403;
+        border-radius: 10px;
+        box-shadow: 0 18px 48px rgba(0,0,0,.24);
+        background: transparent;
+        opacity: 1;
+        transition: opacity .14s ease;
     }
+    .gl-lightbox__img.is-loading,
+    .gl-lightbox__img.is-error { opacity: 0; }
     .gl-lightbox__info {
         position: absolute;
         left: 10px;
@@ -404,7 +431,23 @@ function closeLightboxOnOverlay(e) {
 }
 function showPhoto() {
     const p = photos[current];
-    document.getElementById('glLightboxImg').src = p.url;
+    const img = document.getElementById('glLightboxImg');
+    const stage = img.closest('.gl-lightbox__stage');
+    stage?.classList.remove('is-error');
+    stage?.classList.add('is-loading');
+    img.classList.remove('is-error');
+    img.classList.add('is-loading');
+    img.onload = () => {
+        img.classList.remove('is-loading');
+        stage?.classList.remove('is-loading');
+    };
+    img.onerror = () => {
+        img.classList.remove('is-loading');
+        img.classList.add('is-error');
+        stage?.classList.remove('is-loading');
+        stage?.classList.add('is-error');
+    };
+    img.src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption || '';
     document.getElementById('glLightboxDownload').href = p.url;
     document.getElementById('glLightboxIndex').textContent = `Photo ${current + 1} / ${photos.length}`;
