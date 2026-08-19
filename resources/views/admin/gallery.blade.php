@@ -18,6 +18,22 @@
 .photo-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .photo-preview { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; border: 1px solid #e8d5b7; }
 
+.gl-admin-quick { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 18px; }
+.gl-admin-quick__btn { min-height: 42px; padding: 0 15px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e8d5b7; background: #fffdf9; color: #7a5b32; text-decoration: none; font-size: .84rem; font-weight: 800; }
+.gl-admin-quick__btn--primary { background: #b38b59; border-color: #b38b59; color: #fff; }
+.gl-upload-section { margin-bottom: 22px; border: 1px solid #efe3d4; border-radius: 16px; background: #fffdf9; box-shadow: 0 10px 28px rgba(61,47,37,.06); overflow: hidden; }
+.gl-upload-section__summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; cursor: pointer; list-style: none; user-select: none; }
+.gl-upload-section__summary::-webkit-details-marker { display: none; }
+.gl-upload-section__summary strong { display: block; color: #3d2f25; font-size: .95rem; }
+.gl-upload-section__summary span { display: block; margin-top: 2px; color: #9b8573; font-size: .76rem; line-height: 1.55; }
+.gl-upload-section__summary i { color: #b38b59; transition: transform .18s ease; }
+.gl-upload-section[open] .gl-upload-section__summary i { transform: rotate(180deg); }
+.gl-upload-section__inner { padding: 0 18px 18px; }
+.upload-zone { min-height: 150px; display: grid; place-items: center; }
+.upload-zone__summary { display: none; margin-top: 10px; color: #7a6048; font-size: .82rem; font-weight: 800; }
+.photo-previews { align-items: center; }
+.photo-preview-more { width: 80px; height: 80px; border-radius: 8px; border: 1px dashed #d9c6ad; display: inline-flex; align-items: center; justify-content: center; color: #9b8573; background: #fffaf2; font-size: .82rem; font-weight: 800; }
+
 .gl-admin-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -278,7 +294,14 @@
 .gl-admin-item__source { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 7px; color: #9b8573; font-size: .72rem; font-weight: 800; }
 
 @media (max-width: 640px) {
-    .upload-zone { padding: 22px 14px; }
+    .upload-zone { min-height: 118px; padding: 18px 14px; }
+    .upload-zone__icon { font-size: 1.65rem; margin-bottom: 4px; }
+    .upload-zone__text { margin: 0; font-size: .84rem; }
+    .upload-zone__sub { margin-top: 3px; font-size: .68rem; }
+    .gl-admin-quick { padding: 4px 0 8px; }
+    .gl-admin-quick__btn { flex: 1 1 auto; }
+    .gl-upload-section__summary { padding: 14px; }
+    .gl-upload-section__inner { padding: 0 14px 14px; }
     .gl-admin-grid { grid-template-columns: 1fr; gap: 18px; }
     .gl-admin-item { border-radius: 18px; }
     .gl-admin-item__img { height: 220px; }
@@ -304,7 +327,7 @@
     .official-section__meta { flex-direction: column; align-items: flex-end; gap: 6px; }
     .official-section__pill { font-size: .72rem; padding: 4px 9px; }
     .official-section__inner { padding: 0 12px 12px; }
-    .gl-toolbar { gap: 8px; padding: 12px; }
+    .gl-toolbar { position: sticky; top: 72px; z-index: 4; gap: 8px; padding: 12px; box-shadow: 0 8px 24px rgba(61,47,37,.08); }
     .gl-search-wrap { flex-basis: 100%; max-width: none; }
     .gl-search { min-height: 42px; font-size: 16px; border-radius: 10px; }
     .gl-filter-btn { flex: 1 1 auto; }
@@ -333,6 +356,11 @@
                 <span>席の配置は席次表管理で行います。グループ振り分けも同じ画面にあります。</span>
             </span>
         </a>
+    </div>
+
+    <div class="gl-admin-quick">
+        <a href="#officialPhotosSection" class="gl-admin-quick__btn gl-admin-quick__btn--primary"><i class="fa-solid fa-images"></i>写真一覧へ</a>
+        <a href="#uploadPhotosSection" class="gl-admin-quick__btn" onclick="document.getElementById('uploadPhotosSection')?.setAttribute('open', 'open')"><i class="fa-solid fa-cloud-arrow-up"></i>写真を追加</a>
     </div>
 
     @if (session('success'))
@@ -376,29 +404,40 @@
     @endif
 
     {{-- アップロードフォーム --}}
-    <div class="add-card">
-        <h3>写真をアップロード</h3>
-        <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data" id="galleryForm">
-            @csrf
-            <div class="upload-zone" id="uploadZone">
-                <input type="file" name="photos[]" multiple accept="image/*"
-                       onchange="previewPhotos(this)">
-                <div class="upload-zone__icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                <p class="upload-zone__text">クリックまたはドラッグ＆ドロップ</p>
-                <p class="upload-zone__sub">JPG / PNG / WebP・1枚10MB以内・最大20枚</p>
-            </div>
-            <div class="photo-previews" id="photoPreviews"></div>
+    <details class="gl-upload-section" id="uploadPhotosSection">
+        <summary class="gl-upload-section__summary">
+            <span>
+                <strong>写真を追加</strong>
+                <span>必要な時だけ開いてアップロードします</span>
+            </span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+        </summary>
+        <div class="gl-upload-section__inner">
+            <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data" id="galleryForm">
+                @csrf
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" name="photos[]" multiple accept="image/*"
+                           onchange="previewPhotos(this)">
+                    <div>
+                        <div class="upload-zone__icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <p class="upload-zone__text">写真を選択</p>
+                        <p class="upload-zone__sub">JPG / PNG / WebP・1枚10MB以内・最大20枚</p>
+                        <p class="upload-zone__summary" id="uploadSummary"></p>
+                    </div>
+                </div>
+                <div class="photo-previews" id="photoPreviews"></div>
 
-            <div id="captionFields" style="display:none;margin-top:14px;">
-                <p style="font-size:0.8rem;color:#9b8573;margin-bottom:8px;">キャプション（任意）</p>
-                <div id="captionInputs"></div>
-            </div>
+                <div id="captionFields" style="display:none;margin-top:14px;">
+                    <p style="font-size:0.8rem;color:#9b8573;margin-bottom:8px;">キャプション（任意）</p>
+                    <div id="captionInputs"></div>
+                </div>
 
-            <button type="submit" class="btn-primary" style="margin-top:16px;" id="uploadBtn" disabled>
-                <i class="fa-solid fa-upload"></i> アップロードする
-            </button>
-        </form>
-    </div>
+                <button type="submit" class="btn-primary" style="margin-top:16px;width:100%;min-height:46px;" id="uploadBtn" disabled>
+                    <i class="fa-solid fa-upload"></i> アップロードする
+                </button>
+            </form>
+        </div>
+    </details>
 
     {{-- 公式写真一覧 --}}
     <details class="official-section" id="officialPhotosSection" open>
@@ -888,10 +927,23 @@ function previewPhotos(input) {
     const captionFields = document.getElementById('captionFields');
     const captionInputs = document.getElementById('captionInputs');
     const btn = document.getElementById('uploadBtn');
+    const summary = document.getElementById('uploadSummary');
+    const files = Array.from(input.files || []);
     previews.innerHTML = '';
     captionInputs.innerHTML = '';
-    if (!input.files.length) { btn.disabled = true; captionFields.style.display = 'none'; return; }
-    Array.from(input.files).forEach((f, i) => {
+    if (!files.length) {
+        btn.disabled = true;
+        captionFields.style.display = 'none';
+        if (summary) { summary.textContent = ''; summary.style.display = 'none'; }
+        return;
+    }
+
+    if (summary) {
+        summary.textContent = `${files.length}枚選択中`;
+        summary.style.display = 'block';
+    }
+
+    files.slice(0, 6).forEach(f => {
         const reader = new FileReader();
         reader.onload = e => {
             const img = document.createElement('img');
@@ -900,10 +952,29 @@ function previewPhotos(input) {
             previews.appendChild(img);
         };
         reader.readAsDataURL(f);
-        const div = document.createElement('div');
-        div.style.cssText = 'margin-bottom:8px;';
-        div.innerHTML = `<label style="font-size:0.76rem;color:#9b8573;display:block;margin-bottom:3px;">${f.name}</label><input type="text" name="captions[]" placeholder="キャプション（任意）" style="width:100%;padding:7px 10px;border:1px solid #e0d0bc;border-radius:5px;font-size:0.85rem;">`;
-        captionInputs.appendChild(div);
+    });
+    if (files.length > 6) {
+        const more = document.createElement('span');
+        more.className = 'photo-preview-more';
+        more.textContent = `+${files.length - 6}枚`;
+        previews.appendChild(more);
+    }
+
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:8px;';
+    div.innerHTML = `<label style="font-size:0.76rem;color:#9b8573;display:block;margin-bottom:3px;">全写真に同じキャプションを付ける</label><input type="text" name="captions[]" placeholder="キャプション（任意）" style="width:100%;padding:9px 10px;border:1px solid #e0d0bc;border-radius:8px;font-size:16px;">`;
+    captionInputs.appendChild(div);
+    const sharedCaptionInput = div.querySelector('input');
+    const hiddenCaptionInputs = [];
+    for (let i = 1; i < files.length; i++) {
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'captions[]';
+        hiddenCaptionInputs.push(hidden);
+        captionInputs.appendChild(hidden);
+    }
+    sharedCaptionInput?.addEventListener('input', () => {
+        hiddenCaptionInputs.forEach(hidden => hidden.value = sharedCaptionInput.value);
     });
     btn.disabled = false;
     captionFields.style.display = 'block';
