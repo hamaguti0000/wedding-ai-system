@@ -20,8 +20,8 @@
 
 .gl-admin-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
     margin-top: 8px;
 }
 .official-section {
@@ -97,15 +97,38 @@
 .official-section[open] .official-section__chevron { transform: rotate(180deg); }
 .official-section__inner { padding: 0 18px; }
 .gl-admin-item {
-    background: #fff; border-radius: 10px; overflow: hidden;
-    border: 1px solid #f0ebe3; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: #fff; border-radius: 16px; overflow: hidden;
+    border: 1px solid #eee4d8; box-shadow: 0 12px 30px rgba(61,47,37,0.08);
     display: flex; flex-direction: column; min-width: 0;
 }
-.gl-admin-item.inactive { opacity: 0.5; }
-.gl-admin-item__img { width: 100%; height: 130px; object-fit: cover; display: block; flex: 0 0 auto; }
-.gl-admin-item__body { padding: 10px 12px; }
-.gl-admin-item__caption { font-size: 0.78rem; color: #7a6a5a; margin: 0 0 8px; line-height: 1.5; min-height: 1.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gl-admin-item__actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.gl-admin-item.inactive { opacity: 0.56; }
+.gl-admin-item__photo { position: relative; background: #f2ece4; }
+.gl-admin-item__img { width: 100%; height: 172px; object-fit: cover; display: block; flex: 0 0 auto; }
+.gl-order-badge {
+    position: absolute; left: 10px; top: 10px; min-width: 32px; height: 32px; padding: 0 9px;
+    display: inline-flex; align-items: center; justify-content: center; border-radius: 999px;
+    background: rgba(255,255,255,.92); color: #7a5b32; font-size: .8rem; font-weight: 800;
+    box-shadow: 0 8px 22px rgba(0,0,0,.14);
+}
+.gl-admin-item__body { padding: 12px 14px 14px; }
+.gl-admin-item__caption { font-size: 0.86rem; color: #5d4635; margin: 0 0 12px; line-height: 1.55; min-height: 1.55em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gl-admin-item__caption.is-empty { color: #b7a897; font-weight: 500; }
+.gl-admin-item__actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; }
+.gl-admin-item__primary { min-height: 42px; justify-content: center; font-weight: 800; }
+.gl-admin-more { position: relative; }
+.gl-admin-more[open] { grid-column: 1 / -1; }
+.gl-admin-more[open] summary { width: 100%; box-sizing: border-box; }
+.gl-admin-more summary {
+    min-height: 42px; padding: 0 12px; border: 1px solid #e8d5b7; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    background: #fffdf9; color: #8a642e; font-size: .8rem; font-weight: 800; cursor: pointer; list-style: none;
+}
+.gl-admin-more summary::-webkit-details-marker { display: none; }
+.gl-admin-more__panel {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+    margin-top: 9px; padding: 10px; border: 1px solid #eadccd; border-radius: 12px; background: #fffaf2;
+}
+.gl-order-compact { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; color: #806a55; font-size: .76rem; font-weight: 700; }
 .gl-admin-guide {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -229,8 +252,8 @@
 .gl-tag-status.is-ok { color: #15803d; }
 .gl-tag-status.is-error { color: #dc2626; }
 .gl-admin-item__tags {
-    min-height: 24px; max-height: 78px; overflow-y: auto; overscroll-behavior: contain;
-    padding: 0 12px 10px; font-size: 0.72rem; color: #9b8573; line-height: 1.6;
+    min-height: 24px; max-height: 38px; overflow: hidden; overscroll-behavior: contain;
+    padding: 0 14px 12px; font-size: 0.72rem; color: #9b8573; line-height: 1.6;
     background: #fff; flex: 0 0 auto;
 }
 .gl-tag-chip--group { background: #eef7ff; border-color: #bfdbfe; color: #2563eb; }
@@ -252,25 +275,25 @@
 .gl-order-status { color: #8a7969; font-size: .78rem; }
 .gl-order-status.is-ok { color: #15803d; }
 .gl-order-status.is-error { color: #dc2626; }
-.gl-admin-item__source { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; color: #9b8573; font-size: .7rem; font-weight: 700; }
+.gl-admin-item__source { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 7px; color: #9b8573; font-size: .72rem; font-weight: 800; }
 
 @media (max-width: 640px) {
     .upload-zone { padding: 22px 14px; }
-    .gl-admin-grid { grid-template-columns: 1fr; gap: 14px; }
-    .gl-admin-item { border-radius: 14px; }
-    .gl-admin-item__img { height: 188px; }
-    .gl-admin-item__body { padding: 10px; }
-    .gl-admin-item__actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-    .gl-admin-item__actions .btn-sm {
-        min-width: 42px;
-        min-height: 36px;
+    .gl-admin-grid { grid-template-columns: 1fr; gap: 18px; }
+    .gl-admin-item { border-radius: 18px; }
+    .gl-admin-item__img { height: 220px; }
+    .gl-admin-item__body { padding: 13px 14px 15px; }
+    .gl-admin-item__actions .btn-sm,
+    .gl-admin-more summary {
+        min-height: 42px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
     }
+    .gl-admin-more__panel .btn-sm { width: 100%; }
     .gl-admin-guide { grid-template-columns: 1fr; }
     .gl-admin-guide__card { align-items: flex-start; padding: 13px 14px; }
-    .gl-admin-item__tag-btn { grid-column: 1 / -1; justify-content: center; min-width: 100%; }
+    .gl-admin-item__tag-btn { justify-content: center; min-width: 100%; }
     .gl-tag-panel { padding: 12px; }
     .gl-tag-panel__list { max-height: 260px; }
     .gl-tag-panel__list label { min-height: 42px; padding: 6px 0; font-size: .86rem; }
@@ -425,20 +448,28 @@
              data-caption="{{ strtolower($photo->caption ?? '') }}"
              data-active="{{ $photo->is_active ? '1' : '0' }}"
              data-id="{{ $photo->id }}">
-            <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
+            <div class="gl-admin-item__photo">
+                <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
+                <span class="gl-order-badge">{{ $loop->iteration }}</span>
+            </div>
             <div class="gl-admin-item__body">
                 <span class="gl-admin-item__source">
                     <i class="fa-solid {{ $photo->is_guest_upload ? 'fa-user' : 'fa-camera' }}"></i>
                     {{ $photo->is_guest_upload ? (($photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: 'ゲスト') . ' さんの投稿') : '管理者アップロード' }}
                 </span>
-                <p class="gl-admin-item__caption" title="{{ $photo->caption }}">{{ $photo->caption ?: '—' }}</p>
+                <p class="gl-admin-item__caption {{ $photo->caption ? '' : 'is-empty' }}" title="{{ $photo->caption }}">{{ $photo->caption ?: 'キャプションなし' }}</p>
                 <div class="gl-admin-item__actions">
-                    <input type="number" class="gl-order-input" min="1" value="{{ $loop->iteration }}" aria-label="表示順" data-order-input>
-                    <form method="POST" action="{{ route('admin.gallery.move-up', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="上へ"><i class="fa-solid fa-chevron-up"></i></button></form>
-                    <form method="POST" action="{{ route('admin.gallery.move-down', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="下へ"><i class="fa-solid fa-chevron-down"></i></button></form>
-                    <button class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})" title="編集"><i class="fa-solid fa-pen"></i></button>
-                    <button class="btn-sm btn-sm-pw gl-admin-item__tag-btn" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
-                    <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button></form>
+                    <button type="button" class="btn-sm btn-sm-pw gl-admin-item__tag-btn gl-admin-item__primary" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
+                    <details class="gl-admin-more">
+                        <summary><i class="fa-solid fa-ellipsis"></i>操作</summary>
+                        <div class="gl-admin-more__panel">
+                            <label class="gl-order-compact">表示順<input type="number" class="gl-order-input" min="1" value="{{ $loop->iteration }}" aria-label="表示順" data-order-input></label>
+                            <form method="POST" action="{{ route('admin.gallery.move-up', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="上へ"><i class="fa-solid fa-chevron-up"></i></button></form>
+                            <form method="POST" action="{{ route('admin.gallery.move-down', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="下へ"><i class="fa-solid fa-chevron-down"></i></button></form>
+                            <button type="button" class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})" title="編集"><i class="fa-solid fa-pen"></i></button>
+                            <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del" title="削除"><i class="fa-solid fa-trash"></i></button></form>
+                        </div>
+                    </details>
                 </div>
             </div>
             @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
