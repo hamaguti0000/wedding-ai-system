@@ -106,6 +106,54 @@
 .gl-admin-item__body { padding: 10px 12px; }
 .gl-admin-item__caption { font-size: 0.78rem; color: #7a6a5a; margin: 0 0 8px; line-height: 1.5; min-height: 1.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gl-admin-item__actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.gl-admin-guide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0 0 20px;
+}
+.gl-admin-guide__card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid #eadccd;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fffdf9 0%, #fff8ee 100%);
+    box-shadow: 0 8px 24px rgba(61,47,37,.05);
+    color: #5d4635;
+    text-decoration: none;
+}
+.gl-admin-guide__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: #f1e3ce;
+    color: #9b6d35;
+}
+.gl-admin-guide__card strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #3d2f25;
+    font-size: .9rem;
+}
+.gl-admin-guide__card span {
+    display: block;
+    color: #8a7969;
+    font-size: .76rem;
+    line-height: 1.55;
+}
+.gl-admin-guide__card:hover { border-color: #c9a56f; }
+.gl-admin-item__tag-btn {
+    gap: 5px;
+    min-width: 82px;
+    padding-left: 9px;
+    padding-right: 9px;
+}
 
 /* ゲスト投稿承認セクション */
 .pending-section {
@@ -212,6 +260,9 @@
         align-items: center;
         justify-content: center;
     }
+    .gl-admin-guide { grid-template-columns: 1fr; }
+    .gl-admin-guide__card { align-items: flex-start; padding: 13px 14px; }
+    .gl-admin-item__tag-btn { flex: 1 1 100%; justify-content: center; min-width: 100%; }
     .official-section { margin-left: -2px; margin-right: -2px; border-radius: 18px; }
     .official-section__summary { padding: 15px 14px; align-items: flex-start; }
     .official-section__copy { white-space: normal; }
@@ -231,6 +282,23 @@
 <div class="admin-wrap">
     <h1><i class="fa-solid fa-images" style="font-size:1.2rem;opacity:0.7;margin-right:8px;"></i>ギャラリー管理</h1>
     <p class="page-desc">ゲストに公開する写真を管理します。複数枚まとめてアップロードできます。</p>
+
+    <div class="gl-admin-guide">
+        <div class="gl-admin-guide__card">
+            <span class="gl-admin-guide__icon"><i class="fa-solid fa-user-tag"></i></span>
+            <span>
+                <strong>写真の人物・グループ紐付け</strong>
+                <span>各写真カードの「タグ付け」から、写っているゲストやグループを選びます。</span>
+            </span>
+        </div>
+        <a href="{{ route('admin.seating') }}" class="gl-admin-guide__card">
+            <span class="gl-admin-guide__icon"><i class="fa-solid fa-chair"></i></span>
+            <span>
+                <strong>席・テーブルの振り分け</strong>
+                <span>席の配置は席次表管理で行います。グループ振り分けも同じ画面にあります。</span>
+            </span>
+        </a>
+    </div>
 
     @if (session('success'))
     <div class="alert-success" style="margin-bottom:20px;">{{ session('success') }}</div>
@@ -346,7 +414,7 @@
                     <form method="POST" action="{{ route('admin.gallery.move-up', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="上へ"><i class="fa-solid fa-chevron-up"></i></button></form>
                     <form method="POST" action="{{ route('admin.gallery.move-down', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="下へ"><i class="fa-solid fa-chevron-down"></i></button></form>
                     <button class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})" title="編集"><i class="fa-solid fa-pen"></i></button>
-                    <button class="btn-sm btn-sm-pw" onclick="toggleTag({{ $photo->id }})" title="人物タグ"><i class="fa-solid fa-user-tag"></i></button>
+                    <button class="btn-sm btn-sm-pw gl-admin-item__tag-btn" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
                     <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del"><i class="fa-solid fa-trash"></i></button></form>
                 </div>
             </div>
@@ -403,7 +471,7 @@
                     </p>
                     <div class="gl-admin-item__actions">
                         @if ($photo->status === 'approved')
-                        <button class="btn-sm btn-sm-pw" onclick="toggleTag({{ $photo->id }})" title="人物タグ"><i class="fa-solid fa-user-tag"></i></button>
+                        <button class="btn-sm btn-sm-pw gl-admin-item__tag-btn" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
                         <form method="POST" action="{{ route('admin.gallery.reject', $photo->id) }}" class="gallery-status-form" data-confirm="却下しますか？">
                             @csrf
                             <button class="btn-sm btn-reject" title="却下">却下</button>
