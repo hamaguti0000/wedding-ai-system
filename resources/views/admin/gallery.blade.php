@@ -246,13 +246,21 @@
 .gl-tag-panel__list { max-height: 160px; overflow-y: auto; border: 1px solid #e0d0bc; border-radius: 6px; padding: 6px 8px; background: #fff; margin-bottom: 8px; }
 .gl-tag-panel__list label { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; padding: 3px 0; cursor: pointer; }
 .gl-tag-panel__list label.is-hidden { display: none; }
+.gl-order-form { margin: 0 0 12px; }
+.gl-order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+.gl-order-input { width: 58px; min-height: 34px; padding: 5px 8px; border: 1px solid #e0d0bc; border-radius: 7px; background: #fffdf9; font-size: .82rem; text-align: center; }
+.gl-order-status { color: #8a7969; font-size: .78rem; }
+.gl-order-status.is-ok { color: #15803d; }
+.gl-order-status.is-error { color: #dc2626; }
+.gl-admin-item__source { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; color: #9b8573; font-size: .7rem; font-weight: 700; }
+
 @media (max-width: 640px) {
     .upload-zone { padding: 22px 14px; }
-    .gl-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .gl-admin-grid { grid-template-columns: 1fr; gap: 14px; }
     .gl-admin-item { border-radius: 14px; }
-    .gl-admin-item__img { height: 128px; }
+    .gl-admin-item__img { height: 188px; }
     .gl-admin-item__body { padding: 10px; }
-    .gl-admin-item__actions { gap: 7px; }
+    .gl-admin-item__actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     .gl-admin-item__actions .btn-sm {
         min-width: 42px;
         min-height: 36px;
@@ -262,7 +270,11 @@
     }
     .gl-admin-guide { grid-template-columns: 1fr; }
     .gl-admin-guide__card { align-items: flex-start; padding: 13px 14px; }
-    .gl-admin-item__tag-btn { flex: 1 1 100%; justify-content: center; min-width: 100%; }
+    .gl-admin-item__tag-btn { grid-column: 1 / -1; justify-content: center; min-width: 100%; }
+    .gl-tag-panel { padding: 12px; }
+    .gl-tag-panel__list { max-height: 260px; }
+    .gl-tag-panel__list label { min-height: 42px; padding: 6px 0; font-size: .86rem; }
+    .gl-tag-panel__list input[type="checkbox"] { width: 20px; height: 20px; }
     .official-section { margin-left: -2px; margin-right: -2px; border-radius: 18px; }
     .official-section__summary { padding: 15px 14px; align-items: flex-start; }
     .official-section__copy { white-space: normal; }
@@ -371,8 +383,8 @@
             <span class="official-section__title">
                 <span class="official-section__icon"><i class="fa-solid fa-image"></i></span>
                 <span class="official-section__copy">
-                    <strong>公式写真</strong>
-                    <span>検索・表示切替・並び替え・人物タグを管理</span>
+                    <strong>公開写真</strong>
+                    <span>ゲストに見せる順番・表示切替・人物タグを管理</span>
                 </span>
             </span>
             <span class="official-section__meta">
@@ -401,6 +413,12 @@
         <button class="gl-filter-btn" data-active="0">非表示</button>
     </div>
     <div class="gl-result-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚</div>
+    <div class="gl-order-form" id="galleryOrderControls" data-action="{{ route('admin.gallery.reorder') }}" data-token="{{ csrf_token() }}">
+        <div class="gl-order-actions">
+            <button type="button" class="btn-primary" style="padding:7px 16px;font-size:.82rem;" id="galleryOrderSave">表示順を保存</button>
+            <span class="gl-order-status" id="galleryOrderStatus" aria-live="polite">番号を変えて保存できます</span>
+        </div>
+    </div>
     <div class="gl-admin-grid" id="galleryGrid">
         @foreach ($photos as $photo)
         <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
@@ -409,8 +427,13 @@
              data-id="{{ $photo->id }}">
             <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
             <div class="gl-admin-item__body">
+                <span class="gl-admin-item__source">
+                    <i class="fa-solid {{ $photo->is_guest_upload ? 'fa-user' : 'fa-camera' }}"></i>
+                    {{ $photo->is_guest_upload ? (($photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: 'ゲスト') . ' さんの投稿') : '管理者アップロード' }}
+                </span>
                 <p class="gl-admin-item__caption" title="{{ $photo->caption }}">{{ $photo->caption ?: '—' }}</p>
                 <div class="gl-admin-item__actions">
+                    <input type="number" class="gl-order-input" min="1" value="{{ $loop->iteration }}" aria-label="表示順" data-order-input>
                     <form method="POST" action="{{ route('admin.gallery.move-up', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="上へ"><i class="fa-solid fa-chevron-up"></i></button></form>
                     <form method="POST" action="{{ route('admin.gallery.move-down', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="下へ"><i class="fa-solid fa-chevron-down"></i></button></form>
                     <button class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})" title="編集"><i class="fa-solid fa-pen"></i></button>
@@ -762,6 +785,73 @@ function filterTagList(input) {
         label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
     });
 }
+
+(function () {
+    const controls = document.getElementById('galleryOrderControls');
+    const saveButton = document.getElementById('galleryOrderSave');
+    const grid = document.getElementById('galleryGrid');
+    const status = document.getElementById('galleryOrderStatus');
+    if (!controls || !saveButton || !grid) return;
+
+    function syncOrderFromInputs() {
+        const items = Array.from(grid.querySelectorAll('.gl-admin-item'));
+        items.sort((a, b) => {
+            const av = Number(a.querySelector('[data-order-input]')?.value || 9999);
+            const bv = Number(b.querySelector('[data-order-input]')?.value || 9999);
+            if (av !== bv) return av - bv;
+            return Number(a.dataset.id || 0) - Number(b.dataset.id || 0);
+        });
+        items.forEach((item, index) => {
+            grid.appendChild(item);
+            const input = item.querySelector('[data-order-input]');
+            if (input) input.value = index + 1;
+        });
+    }
+
+    grid.querySelectorAll('[data-order-input]').forEach(input => {
+        input.addEventListener('change', () => {
+            syncOrderFromInputs();
+            if (status) {
+                status.textContent = '未保存の表示順があります';
+                status.className = 'gl-order-status';
+            }
+        });
+    });
+
+    saveButton.addEventListener('click', async () => {
+        syncOrderFromInputs();
+        if (status) {
+            status.textContent = '保存中...';
+            status.className = 'gl-order-status';
+        }
+        try {
+            const data = new FormData();
+            data.append('_token', controls.dataset.token || '');
+            data.append('_method', 'PATCH');
+            Array.from(grid.querySelectorAll('.gl-admin-item')).forEach(item => data.append('order[]', item.dataset.id));
+
+            const res = await fetch(controls.dataset.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                body: data,
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) throw new Error(json.message || '保存に失敗しました');
+            if (status) {
+                status.textContent = '表示順を保存しました';
+                status.className = 'gl-order-status is-ok';
+            }
+        } catch (error) {
+            if (status) {
+                status.textContent = error.message || '保存に失敗しました';
+                status.className = 'gl-order-status is-error';
+            }
+        }
+    });
+})();
 function previewPhotos(input) {
     const previews = document.getElementById('photoPreviews');
     const captionFields = document.getElementById('captionFields');

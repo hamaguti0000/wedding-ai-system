@@ -158,6 +158,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // ギャラリー管理
     Route::get('/gallery',                   [AdminGalleryController::class, 'index'])    ->name('gallery');
     Route::post('/gallery',                  [AdminGalleryController::class, 'store'])    ->name('gallery.store');
+    Route::patch('/gallery/reorder',         [AdminGalleryController::class, 'reorder'])  ->name('gallery.reorder');
     Route::patch('/gallery/{id}',            [AdminGalleryController::class, 'update'])   ->name('gallery.update');
     Route::delete('/gallery/{id}',           [AdminGalleryController::class, 'destroy'])  ->name('gallery.destroy');
     Route::patch('/gallery/{id}/move-up',    [AdminGalleryController::class, 'moveUp'])   ->name('gallery.move-up');

@@ -20,8 +20,8 @@ class AdminGalleryController extends Controller
             $galleryRelations[] = 'taggedGroups.primaryGuest';
         }
 
-        $photos  = GalleryPhoto::where('is_guest_upload', false)
-            ->with($galleryRelations)
+        $photos  = GalleryPhoto::where('status', 'approved')
+            ->with(array_merge($galleryRelations, ['uploader']))
             ->orderBy('sort_order')->orderBy('id')->get();
         if (! $hasGuestGroups) {
             $photos->each->setRelation('taggedGroups', collect());
@@ -38,7 +38,7 @@ class AdminGalleryController extends Controller
         }
 
         $guestApproved = GalleryPhoto::where('is_guest_upload', true)
-            ->whereIn('status', ['approved', 'rejected'])
+            ->where('status', 'rejected')
             ->with($guestApprovedRelations)
             ->orderByDesc('created_at')->get();
         if (! $hasGuestGroups) {
@@ -78,15 +78,16 @@ class AdminGalleryController extends Controller
             'photos.*.max'      => '1枚10MB以内にしてください',
         ]);
 
-        $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
+        $files = $request->file('photos');
         $count = 0;
+        GalleryPhoto::where('status', 'approved')->increment('sort_order', count($files));
 
-        foreach ($request->file('photos') as $i => $file) {
+        foreach ($files as $i => $file) {
             $path = $imageOptimizer->store($file, 'gallery');
             GalleryPhoto::create([
                 'file_path'  => $path,
                 'caption'    => $request->captions[$i] ?? null,
-                'sort_order' => $maxOrder + $count + 1,
+                'sort_order' => $count + 1,
                 'is_active'  => true,
                 'status'     => 'approved',
             ]);
@@ -124,12 +125,12 @@ class AdminGalleryController extends Controller
     public function approve(Request $request, int $id)
     {
         $photo = GalleryPhoto::where('is_guest_upload', true)->findOrFail($id);
-        $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
+        GalleryPhoto::where('status', 'approved')->increment('sort_order');
 
         $photo->update([
             'status'     => 'approved',
             'is_active'  => true,
-            'sort_order' => $maxOrder + 1,
+            'sort_order' => 1,
         ]);
 
         $message = '写真を承認してギャラリーに追加しました';
@@ -242,10 +243,31 @@ class AdminGalleryController extends Controller
             ->all();
     }
 
+    public function reorder(Request $request)
+    {
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:gallery_photos,id',
+        ]);
+
+        foreach (array_values($validated['order']) as $index => $photoId) {
+            GalleryPhoto::where('status', 'approved')
+                ->whereKey($photoId)
+                ->update(['sort_order' => $index + 1]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => '表示順を保存しました']);
+        }
+
+        return back()->with('success', '表示順を保存しました');
+    }
+
     public function moveUp(int $id)
     {
-        $photo = GalleryPhoto::findOrFail($id);
-        $prev  = GalleryPhoto::where('sort_order', '<', $photo->sort_order)
+        $photo = GalleryPhoto::where('status', 'approved')->findOrFail($id);
+        $prev  = GalleryPhoto::where('status', 'approved')
+            ->where('sort_order', '<', $photo->sort_order)
             ->orderByDesc('sort_order')->first();
         if ($prev) {
             [$photo->sort_order, $prev->sort_order] = [$prev->sort_order, $photo->sort_order];
@@ -256,8 +278,9 @@ class AdminGalleryController extends Controller
 
     public function moveDown(int $id)
     {
-        $photo = GalleryPhoto::findOrFail($id);
-        $next  = GalleryPhoto::where('sort_order', '>', $photo->sort_order)
+        $photo = GalleryPhoto::where('status', 'approved')->findOrFail($id);
+        $next  = GalleryPhoto::where('status', 'approved')
+            ->where('sort_order', '>', $photo->sort_order)
             ->orderBy('sort_order')->first();
         if ($next) {
             [$photo->sort_order, $next->sort_order] = [$next->sort_order, $photo->sort_order];
