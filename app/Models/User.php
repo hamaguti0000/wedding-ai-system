@@ -164,6 +164,11 @@ class User extends Authenticatable
         return $this->belongsToMany(GalleryPhoto::class, 'gallery_photo_taggings');
     }
 
+    public function guestGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(GuestGroup::class, 'guest_group_members', 'user_id', 'guest_group_id');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

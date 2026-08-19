@@ -61,6 +61,8 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 }
 .gl-card__body { padding: 12px 12px 14px; }
 .gl-card__caption { margin: 0 0 10px; color: #3d2f25; font-size: .9rem; font-weight: 700; line-height: 1.55; }
+.gl-card__uploader { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 9px; color: #8c7965; font-size: .74rem; font-weight: 700; }
+.gl-card__uploader i { color: #b38b59; font-size: .68rem; }
 .gl-card__caption.is-empty { color: #b0a090; font-weight: 500; }
 .gl-card__tags { display: flex; flex-wrap: wrap; gap: 6px; max-height: 58px; overflow: hidden; }
 .gl-person-chip {
@@ -94,7 +96,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-lightbox__img { max-width: 100%; max-height: 90vh; object-fit: contain; display: block; }
 .gl-lightbox__info { padding: 24px; background: #fffaf3; color: #3d2f25; overflow-y: auto; }
 .gl-lightbox__label { color: #b38b59; font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; }
-.gl-lightbox__caption { margin: 12px 0 18px; font-size: 1rem; font-weight: 700; line-height: 1.7; }
+.gl-lightbox__caption { margin: 12px 0 12px; font-size: 1rem; font-weight: 700; line-height: 1.7; }
+.gl-lightbox__uploader { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 16px; color: #806a55; font-size: .82rem; font-weight: 700; }
+.gl-lightbox__uploader i { color: #b38b59; }
 .gl-lightbox__tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .gl-lightbox__tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: #fff; border: 1px solid #eadccd; color: #755f48; text-decoration: none; font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gl-lightbox__tag.is-current { color: #b42318; border-color: #ffd0d0; background: #fff1f1; font-weight: 700; }
@@ -126,6 +130,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     .gl-card__photo { aspect-ratio: 1 / 1; }
     .gl-card__body { padding: 9px; }
     .gl-card__caption { font-size: .78rem; margin-bottom: 7px; }
+    .gl-card__uploader { font-size: .68rem; margin-bottom: 7px; }
     .gl-card__tags { gap: 4px; max-height: 48px; }
     .gl-person-chip { padding: 3px 7px; font-size: .66rem; }
     .gl-lightbox {
@@ -229,6 +234,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         line-height: 1.55;
     }
     .gl-lightbox__caption:empty { display: none; }
+    .gl-lightbox__uploader { margin-bottom: 10px; font-size: .76rem; }
     .gl-lightbox__tags {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -286,8 +292,11 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 @section('content')
 @php
     $currentUserId = auth()->id();
+    $currentUserGroupIds = isset($currentUserGroupIds) ? collect($currentUserGroupIds) : collect();
     $taggedPhotoCount = $photos->filter(fn($photo) => $photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())->count();
     $myPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId))->count() : 0;
+    $relatedPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId) || $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty())->count() : 0;
+    $defaultFilter = $relatedPhotoCount > 0 ? 'related' : 'all';
 @endphp
 
 <section class="gl-hero">
@@ -296,18 +305,18 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     <div class="gl-hero__inner">
         <span class="gl-hero__eyebrow">Wedding Gallery</span>
         <h1 class="gl-hero__title">Photo Gallery</h1>
-        <p class="gl-hero__lead">当日の写真を一覧で見られます。名前が紐付いている写真は、ゲストごとの思い出としても確認できます。</p>
+        <p class="gl-hero__lead">自分が写っている写真や、同じグループの写真を見つけやすくしました。</p>
         <div class="gl-hero__actions">
             <a href="{{ route('gallery.upload') }}" class="gl-btn gl-btn--gold"><i class="fa-solid fa-cloud-arrow-up"></i> 写真を投稿する</a>
-            @if ($myPhotoCount > 0)
-            <button type="button" class="gl-btn" data-filter-trigger="mine"><i class="fa-solid fa-user-check"></i> 自分の写真を見る</button>
+            @if ($relatedPhotoCount > 0)
+            <button type="button" class="gl-btn" data-filter-trigger="related"><i class="fa-solid fa-user-check"></i> あなた関連を見る</button>
             @endif
         </div>
         <div class="gl-stats">
             <div class="gl-stat"><strong>{{ $photos->count() }}</strong><span>公開写真</span></div>
             <div class="gl-stat"><strong>{{ $taggedPhotoCount }}</strong><span>人物タグあり</span></div>
             @if ($currentUserId)
-            <div class="gl-stat"><strong>{{ $myPhotoCount }}</strong><span>あなたの写真</span></div>
+            <div class="gl-stat"><strong>{{ $relatedPhotoCount }}</strong><span>あなた関連</span></div>
             @endif
         </div>
     </div>
@@ -323,11 +332,12 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     <div class="gl-toolbar" aria-label="ギャラリーの絞り込み">
         <div class="gl-toolbar__main">
             <div class="gl-filter">
-                <button type="button" class="is-active" data-filter="all">すべて</button>
-                <button type="button" data-filter="tagged">人物タグあり</button>
                 @if ($currentUserId)
-                <button type="button" data-filter="mine">あなたの写真</button>
+                <button type="button" class="{{ $defaultFilter === 'related' ? 'is-active' : '' }}" data-filter="related">あなた関連</button>
+                <button type="button" data-filter="mine">自分が写ってる</button>
                 @endif
+                <button type="button" class="{{ $defaultFilter === 'all' ? 'is-active' : '' }}" data-filter="all">すべて</button>
+                <button type="button" data-filter="tagged">人物タグあり</button>
             </div>
             <div class="gl-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚表示</div>
         </div>
@@ -337,18 +347,25 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     <div class="gl-grid" id="glGrid">
         @foreach ($photos as $i => $photo)
         @php
-            $tagNames = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->displayName(), 'type' => 'group'])->concat($photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name, 'type' => 'user']))->values();
+            $groupTags = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->displayName(), 'type' => 'group'])->unique('name')->values();
+            $userTags = $photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name, 'type' => 'user'])->values();
+            $tagNames = $groupTags->concat($userTags)->values();
             $isMine = $currentUserId && $photo->taggedUsers->contains('id', $currentUserId);
+            $isRelated = $isMine || ($currentUserId && $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty());
+            $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" onclick="openLightbox({{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" onclick="openLightbox({{ $i }})">
             <div class="gl-card__photo">
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
                 @if ($isMine)
                 <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> あなた</span>
                 @endif
             </div>
-            @if ($photo->caption || $tagNames->isNotEmpty())
+            @if ($photo->caption || $uploaderName || $tagNames->isNotEmpty())
             <div class="gl-card__body">
+                @if ($uploaderName)
+                <p class="gl-card__uploader"><i class="fa-solid fa-camera"></i>{{ $uploaderName }} さんが投稿</p>
+                @endif
                 @if ($photo->caption)
                 <p class="gl-card__caption">{{ $photo->caption }}</p>
                 @endif
@@ -382,21 +399,22 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         <aside class="gl-lightbox__info">
             <span class="gl-lightbox__label" id="glLightboxIndex">Photo</span>
             <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
+            <div class="gl-lightbox__uploader" id="glLightboxUploader"></div>
             <div class="gl-lightbox__tags" id="glLightboxTags"></div>
         </aside>
     </div>
 </div>
 
 @php
-    $photosJson = $photos->map(function ($p) use ($currentUserId) {
-        $tags = $p->taggedGroups->map(function ($g) {
+    $photosJson = $photos->map(function ($p) use ($currentUserId, $currentUserGroupIds) {
+        $tags = $p->taggedGroups->map(function ($g) use ($currentUserGroupIds) {
             return [
                 'id' => $g->id,
                 'name' => $g->displayName(),
-                'is_current' => false,
+                'is_current' => $currentUserGroupIds->contains($g->id),
                 'type' => 'group',
             ];
-        })->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
+        })->unique('name')->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
             return [
                 'id' => $u->id,
                 'name' => $u->guestProfile?->fullName() ?: $u->name,
@@ -404,13 +422,15 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
                 'type' => 'user',
             ];
         }))->values();
+        $uploaderName = $p->uploader?->guestProfile?->fullName() ?: $p->uploader?->name;
 
-        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];
+        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags, 'uploader' => $uploaderName];
     })->values();
 @endphp
 <script>
 const peopleBaseUrl = "{{ url('/people') }}";
 const photos = @json($photosJson);
+const defaultGalleryFilter = @json($defaultFilter);
 let current = 0;
 
 function escapeHtml(value) {
@@ -450,6 +470,8 @@ function showPhoto() {
     img.src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption || '';
     document.getElementById('glLightboxDownload').href = p.url;
+    const uploaderEl = document.getElementById('glLightboxUploader');
+    uploaderEl.innerHTML = p.uploader ? `<i class="fa-solid fa-camera"></i>${escapeHtml(p.uploader)} さんが投稿` : '';
     document.getElementById('glLightboxIndex').textContent = `Photo ${current + 1} / ${photos.length}`;
     document.getElementById('glLightboxTopIndex').textContent = `${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
@@ -460,21 +482,24 @@ function showPhoto() {
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
 function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
 
-function applyGalleryFilter(filter) {
+function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
     cards.forEach(card => {
-        const show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1');
+        const show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1');
         card.classList.toggle('is-hidden', !show);
         if (show) visible++;
     });
     document.getElementById('glCount').innerHTML = `<strong>${visible}</strong>枚表示`;
     document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.toggle('is-active', btn.dataset.filter === filter));
-    document.getElementById('glGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (shouldScroll) {
+        document.getElementById('glGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filter)));
 document.querySelectorAll('[data-filter-trigger]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filterTrigger)));
+if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, false);
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb || !lb.classList.contains('is-open')) return;

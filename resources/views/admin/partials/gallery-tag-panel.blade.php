@@ -4,6 +4,7 @@
 @php
     $taggedIds = $photo->taggedUsers->pluck('id')->all();
     $taggedGroupIds = $photo->taggedGroups->pluck('id')->all();
+    $taggedGroupNames = $photo->taggedGroups->map(fn($group) => $group->displayName())->unique()->values()->all();
 @endphp
 <div id="tag-{{ $photo->id }}" class="gl-tag-panel" data-photo-id="{{ $photo->id }}">
     <form method="POST" action="{{ route('admin.gallery.tag', $photo->id) }}" class="gl-tag-form" data-photo-id="{{ $photo->id }}">
@@ -20,7 +21,7 @@
             @foreach ($photo->taggedUsers as $tagged)
             <span class="gl-tag-chip" data-user-id="{{ $tagged->id }}">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
             @endforeach
-            @foreach ($photo->taggedGroups as $group)
+            @foreach ($photo->taggedGroups->unique(fn($group) => $group->displayName()) as $group)
             <span class="gl-tag-chip gl-tag-chip--group" data-group-id="{{ $group->id }}">{{ $group->displayName() }}</span>
             @endforeach
         </div>
@@ -39,7 +40,7 @@
             @endphp
             <label data-name="{{ $searchName }}" data-group-id="{{ $group->id }}" data-label="{{ $groupName }}">
                 <input type="checkbox" name="group_ids[]" value="{{ $group->id }}"
-                       {{ in_array($group->id, $taggedGroupIds, true) ? 'checked' : '' }}>
+                       {{ in_array($group->id, $taggedGroupIds, true) || in_array($groupName, $taggedGroupNames, true) ? 'checked' : '' }}>
                 <span><strong>{{ $groupName }}</strong></span>
             </label>
             @endforeach

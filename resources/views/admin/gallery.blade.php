@@ -420,7 +420,7 @@
             </div>
             @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
             <div class="gl-admin-item__tags">
-                @foreach ($photo->taggedGroups as $group)
+                @foreach ($photo->taggedGroups->unique(fn($group) => $group->displayName()) as $group)
                 <span class="gl-tag-chip gl-tag-chip--group">{{ $group->displayName() }}</span>
                 @endforeach
                 @foreach ($photo->taggedUsers as $tagged)
@@ -491,7 +491,7 @@
                 </div>
                 @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
                 <div class="gl-admin-item__tags">
-                    @foreach ($photo->taggedGroups as $group)
+                    @foreach ($photo->taggedGroups->unique(fn($group) => $group->displayName()) as $group)
                     <span class="gl-tag-chip gl-tag-chip--group">{{ $group->displayName() }}</span>
                     @endforeach
                     @foreach ($photo->taggedUsers as $tagged)

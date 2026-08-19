@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
 use App\Services\GalleryImageOptimizer;
-use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -13,20 +12,28 @@ class GalleryController extends Controller
 {
     public function index()
     {
-        $relations = ['taggedUsers.guestProfile'];
-        if (Schema::hasTable('guest_groups')) {
+        $relations = ['uploader.guestProfile', 'taggedUsers.guestProfile'];
+        $hasGuestGroups = Schema::hasTable('guest_groups');
+        if ($hasGuestGroups) {
             $relations[] = 'taggedGroups.primaryGuest';
+            $relations[] = 'taggedGroups.members';
         }
 
         $photos = GalleryPhoto::where('is_active', true)
             ->where('status', 'approved')
             ->with($relations)
             ->orderBy('sort_order')->orderBy('id')->get();
-        if (! Schema::hasTable('guest_groups')) {
+        if (! $hasGuestGroups) {
             $photos->each->setRelation('taggedGroups', collect());
         }
 
-        return view('gallery', compact('photos'));
+        $currentUser = Auth::user();
+        $currentUserGroupIds = collect();
+        if ($currentUser && $hasGuestGroups) {
+            $currentUserGroupIds = $currentUser->guestGroups()->pluck('guest_groups.id');
+        }
+
+        return view('gallery', compact('photos', 'currentUserGroupIds'));
     }
 
     public function uploadForm()
@@ -34,7 +41,7 @@ class GalleryController extends Controller
         return view('gallery-upload');
     }
 
-    public function upload(Request $request, ImageDuplicateDetector $duplicateDetector, GalleryImageOptimizer $imageOptimizer)
+    public function upload(Request $request, GalleryImageOptimizer $imageOptimizer)
     {
         $request->validate([
             'photos'     => 'required|array|max:10',
@@ -48,17 +55,9 @@ class GalleryController extends Controller
         ]);
 
         $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
-        $count           = 0;
-        $duplicateCount  = 0;
+        $count = 0;
 
         foreach ($request->file('photos') as $file) {
-            // 誰かから回ってきた同じ写真を複数人が投稿するケースがあるため、
-            // 完全一致・見た目がほぼ同じ写真は新規登録せずスキップする。
-            if ($duplicateDetector->findDuplicate($file->getRealPath()) !== null) {
-                $duplicateCount++;
-                continue;
-            }
-
             $path = $imageOptimizer->store($file, 'gallery/guest');
             GalleryPhoto::create([
                 'file_path'           => $path,
@@ -68,36 +67,26 @@ class GalleryController extends Controller
                 'uploaded_by_user_id' => Auth::id(),
                 'status'              => 'pending',
                 'is_guest_upload'     => true,
-                'file_hash'           => $duplicateDetector->fileHash($file->getRealPath()),
-                'phash'               => $duplicateDetector->perceptualHash($file->getRealPath()),
             ]);
             $count++;
         }
 
-        $message = $this->uploadResultMessage($count, $duplicateCount);
+        $message = $this->uploadResultMessage($count);
 
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => $message,
                 'uploaded_count' => $count,
-                'duplicate_count' => $duplicateCount,
             ]);
         }
 
         return back()->with('success', $message);
     }
 
-    private function uploadResultMessage(int $count, int $duplicateCount): string
+    private function uploadResultMessage(int $count): string
     {
-        if ($count === 0 && $duplicateCount > 0) {
-            return 'その写真はすでに他の方が投稿済みでした。別の写真を投稿してください。';
-        }
-
-        if ($duplicateCount > 0) {
-            return "{$count}枚の写真を投稿しました！(既に投稿済みの写真と同じものが{$duplicateCount}枚あったため除外しました)管理者の確認後に公開されます🎉";
-        }
-
         return "{$count}枚の写真を投稿しました！管理者の確認後に公開されます🎉";
     }
+
 }

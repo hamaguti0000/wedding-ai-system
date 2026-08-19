@@ -6,7 +6,6 @@ use App\Models\GalleryPhoto;
 use App\Models\GuestGroup;
 use App\Models\User;
 use App\Services\GalleryImageOptimizer;
-use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -59,13 +58,14 @@ class AdminGalleryController extends Controller
             ? GuestGroup::with('primaryGuest')
                 ->get()
                 ->sortBy(fn (GuestGroup $group) => $group->displayName())
+                ->unique(fn (GuestGroup $group) => $group->displayName())
                 ->values()
             : collect();
 
         return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests', 'taggableGroups'));
     }
 
-    public function store(Request $request, ImageDuplicateDetector $duplicateDetector, GalleryImageOptimizer $imageOptimizer)
+    public function store(Request $request, GalleryImageOptimizer $imageOptimizer)
     {
         $request->validate([
             'photos'          => 'required|array|max:20',
@@ -80,14 +80,8 @@ class AdminGalleryController extends Controller
 
         $maxOrder = GalleryPhoto::max('sort_order') ?? 0;
         $count = 0;
-        $duplicateCount = 0;
 
         foreach ($request->file('photos') as $i => $file) {
-            if ($duplicateDetector->findDuplicate($file->getRealPath()) !== null) {
-                $duplicateCount++;
-                continue;
-            }
-
             $path = $imageOptimizer->store($file, 'gallery');
             GalleryPhoto::create([
                 'file_path'  => $path,
@@ -95,18 +89,11 @@ class AdminGalleryController extends Controller
                 'sort_order' => $maxOrder + $count + 1,
                 'is_active'  => true,
                 'status'     => 'approved',
-                'file_hash'  => $duplicateDetector->fileHash($file->getRealPath()),
-                'phash'      => $duplicateDetector->perceptualHash($file->getRealPath()),
             ]);
             $count++;
         }
 
-        $message = "{$count}枚の写真を追加しました";
-        if ($duplicateCount > 0) {
-            $message .= "(既存の写真と同じものが{$duplicateCount}枚あったため除外しました)";
-        }
-
-        return back()->with('success', $message);
+        return back()->with('success', "{$count}枚の写真を追加しました");
     }
 
     public function update(Request $request, int $id)
@@ -199,7 +186,7 @@ class AdminGalleryController extends Controller
 
         $photo->taggedUsers()->sync($request->input('user_ids', []));
         if ($hasGuestGroups) {
-            $photo->taggedGroups()->sync($request->input('group_ids', []));
+            $photo->taggedGroups()->sync($this->expandGroupIdsByDisplayName($request->input('group_ids', [])));
             $photo->load(['taggedUsers.guestProfile', 'taggedGroups.primaryGuest']);
         } else {
             $photo->load('taggedUsers.guestProfile');
@@ -216,15 +203,43 @@ class AdminGalleryController extends Controller
                     'name' => $user->guestProfile?->fullName() ?: $user->name,
                     'type' => 'user',
                 ])->values(),
-                'groups' => $photo->taggedGroups->map(fn (GuestGroup $group) => [
-                    'id' => $group->id,
-                    'name' => $group->displayName(),
-                    'type' => 'group',
-                ])->values(),
+                'groups' => $photo->taggedGroups
+                    ->map(fn (GuestGroup $group) => [
+                        'id' => $group->id,
+                        'name' => $group->displayName(),
+                        'type' => 'group',
+                    ])
+                    ->unique('name')
+                    ->values(),
             ]);
         }
 
         return back()->with('success', '写真のタグ付けを更新しました');
+    }
+
+
+    /**
+     * 管理画面では同じ表示名のグループを1つにまとめて見せる。
+     * 保存時は同名グループをすべて紐付け、同じ関係グループのゲスト全員に写真が届くようにする。
+     */
+    private function expandGroupIdsByDisplayName(array $groupIds): array
+    {
+        if (empty($groupIds)) {
+            return [];
+        }
+
+        $allGroups = GuestGroup::with('primaryGuest')->get();
+        $selectedNames = $allGroups
+            ->whereIn('id', $groupIds)
+            ->map(fn (GuestGroup $group) => $group->displayName())
+            ->unique()
+            ->values();
+
+        return $allGroups
+            ->filter(fn (GuestGroup $group) => $selectedNames->contains($group->displayName()))
+            ->pluck('id')
+            ->values()
+            ->all();
     }
 
     public function moveUp(int $id)
