@@ -180,7 +180,8 @@
     color: #3d2f25;
     font-size: .9rem;
 }
-.gl-admin-guide__card span {
+.gl-admin-guide__body { display: block; min-width: 0; }
+.gl-admin-guide__body span {
     display: block;
     color: #8a7969;
     font-size: .76rem;
@@ -287,6 +288,10 @@
 .gl-tag-panel__list label.is-hidden { display: none; }
 .gl-order-form { margin: 0 0 12px; }
 .gl-order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+.gl-order-presets { display: flex; gap: 7px; overflow-x: auto; padding: 0 0 10px; scrollbar-width: none; }
+.gl-order-presets::-webkit-scrollbar { display: none; }
+.gl-order-preset { min-height: 36px; padding: 0 12px; border: 1px solid #e8d5b7; border-radius: 999px; background: #fffdf9; color: #7a5b32; font-size: .78rem; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.gl-order-preset:hover { background: #f6ead8; }
 .gl-order-input { width: 58px; min-height: 34px; padding: 5px 8px; border: 1px solid #e0d0bc; border-radius: 7px; background: #fffdf9; font-size: .82rem; text-align: center; }
 .gl-order-status { color: #8a7969; font-size: .78rem; }
 .gl-order-status.is-ok { color: #15803d; }
@@ -315,7 +320,7 @@
     }
     .gl-admin-more__panel .btn-sm { width: 100%; }
     .gl-admin-guide { grid-template-columns: 1fr; }
-    .gl-admin-guide__card { align-items: flex-start; padding: 13px 14px; }
+    .gl-admin-guide__card { align-items: center; padding: 13px 14px; }
     .gl-admin-item__tag-btn { justify-content: center; min-width: 100%; }
     .gl-tag-panel { padding: 12px; }
     .gl-tag-panel__list { max-height: 260px; }
@@ -344,14 +349,14 @@
     <div class="gl-admin-guide">
         <div class="gl-admin-guide__card">
             <span class="gl-admin-guide__icon"><i class="fa-solid fa-user-tag"></i></span>
-            <span>
+            <span class="gl-admin-guide__body">
                 <strong>写真の人物・グループ紐付け</strong>
                 <span>各写真カードの「タグ付け」から、写っているゲストやグループを選びます。</span>
             </span>
         </div>
         <a href="{{ route('admin.seating') }}" class="gl-admin-guide__card">
             <span class="gl-admin-guide__icon"><i class="fa-solid fa-chair"></i></span>
-            <span>
+            <span class="gl-admin-guide__body">
                 <strong>席・テーブルの振り分け</strong>
                 <span>席の配置は席次表管理で行います。グループ振り分けも同じ画面にあります。</span>
             </span>
@@ -476,9 +481,15 @@
     </div>
     <div class="gl-result-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚</div>
     <div class="gl-order-form" id="galleryOrderControls" data-action="{{ route('admin.gallery.reorder') }}" data-token="{{ csrf_token() }}">
+        <div class="gl-order-presets" aria-label="表示順の一括変更">
+            <button type="button" class="gl-order-preset" data-order-preset="newest"><i class="fa-solid fa-arrow-down-short-wide"></i> 新しい順</button>
+            <button type="button" class="gl-order-preset" data-order-preset="oldest"><i class="fa-solid fa-arrow-up-wide-short"></i> 古い順</button>
+            <button type="button" class="gl-order-preset" data-order-preset="official-first"><i class="fa-solid fa-camera"></i> 管理者→ゲスト</button>
+            <button type="button" class="gl-order-preset" data-order-preset="guest-first"><i class="fa-solid fa-user"></i> ゲスト→管理者</button>
+        </div>
         <div class="gl-order-actions">
             <button type="button" class="btn-primary" style="padding:7px 16px;font-size:.82rem;" id="galleryOrderSave">表示順を保存</button>
-            <span class="gl-order-status" id="galleryOrderStatus" aria-live="polite">番号を変えて保存できます</span>
+            <span class="gl-order-status" id="galleryOrderStatus" aria-live="polite">一括で並べて、必要な写真だけ番号調整できます</span>
         </div>
     </div>
     <div class="gl-admin-grid" id="galleryGrid">
@@ -486,6 +497,8 @@
         <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
              data-caption="{{ strtolower($photo->caption ?? '') }}"
              data-active="{{ $photo->is_active ? '1' : '0' }}"
+             data-source="{{ $photo->is_guest_upload ? 'guest' : 'official' }}"
+             data-created="{{ optional($photo->created_at)->timestamp ?? 0 }}"
              data-id="{{ $photo->id }}">
             <div class="gl-admin-item__photo">
                 <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
@@ -863,6 +876,23 @@ function filterTagList(input) {
     const status = document.getElementById('galleryOrderStatus');
     if (!controls || !saveButton || !grid) return;
 
+    function renumberVisibleOrder(items = Array.from(grid.querySelectorAll('.gl-admin-item'))) {
+        items.forEach((item, index) => {
+            grid.appendChild(item);
+            const input = item.querySelector('[data-order-input]');
+            const badge = item.querySelector('.gl-order-badge');
+            if (input) input.value = index + 1;
+            if (badge) badge.textContent = index + 1;
+        });
+    }
+
+    function markOrderDirty(message = '未保存の表示順があります') {
+        if (status) {
+            status.textContent = message;
+            status.className = 'gl-order-status';
+        }
+    }
+
     function syncOrderFromInputs() {
         const items = Array.from(grid.querySelectorAll('.gl-admin-item'));
         items.sort((a, b) => {
@@ -871,20 +901,33 @@ function filterTagList(input) {
             if (av !== bv) return av - bv;
             return Number(a.dataset.id || 0) - Number(b.dataset.id || 0);
         });
-        items.forEach((item, index) => {
-            grid.appendChild(item);
-            const input = item.querySelector('[data-order-input]');
-            if (input) input.value = index + 1;
-        });
+        renumberVisibleOrder(items);
     }
+
+    function applyPreset(type) {
+        const items = Array.from(grid.querySelectorAll('.gl-admin-item'));
+        items.sort((a, b) => {
+            if (type === 'newest') return Number(b.dataset.created || 0) - Number(a.dataset.created || 0);
+            if (type === 'oldest') return Number(a.dataset.created || 0) - Number(b.dataset.created || 0);
+            if (type === 'official-first' && a.dataset.source !== b.dataset.source) return a.dataset.source === 'official' ? -1 : 1;
+            if (type === 'guest-first' && a.dataset.source !== b.dataset.source) return a.dataset.source === 'guest' ? -1 : 1;
+            const av = Number(a.querySelector('[data-order-input]')?.value || 9999);
+            const bv = Number(b.querySelector('[data-order-input]')?.value || 9999);
+            if (av !== bv) return av - bv;
+            return Number(a.dataset.id || 0) - Number(b.dataset.id || 0);
+        });
+        renumberVisibleOrder(items);
+        markOrderDirty('一括並び替えを適用しました。保存してください');
+    }
+
+    controls.querySelectorAll('[data-order-preset]').forEach(button => {
+        button.addEventListener('click', () => applyPreset(button.dataset.orderPreset));
+    });
 
     grid.querySelectorAll('[data-order-input]').forEach(input => {
         input.addEventListener('change', () => {
             syncOrderFromInputs();
-            if (status) {
-                status.textContent = '未保存の表示順があります';
-                status.className = 'gl-order-status';
-            }
+            markOrderDirty();
         });
     });
 
