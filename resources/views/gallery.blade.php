@@ -63,6 +63,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-card__caption { margin: 0 0 10px; color: #3d2f25; font-size: .9rem; font-weight: 700; line-height: 1.55; }
 .gl-card__uploader { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 9px; color: #8c7965; font-size: .74rem; font-weight: 700; }
 .gl-card__uploader i { color: #b38b59; font-size: .68rem; }
+.gl-card__labels { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
+.gl-card__label { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: #f7f1e9; color: #755f48; border: 1px solid #eadccd; font-size: .66rem; font-weight: 800; }
+.gl-card__label--source { background: #eef7ff; border-color: #bfdbfe; color: #2563eb; }
 .gl-card__caption.is-empty { color: #b0a090; font-weight: 500; }
 .gl-card__tags { display: flex; flex-wrap: wrap; gap: 6px; max-height: 58px; overflow: hidden; }
 .gl-person-chip {
@@ -97,8 +100,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-lightbox__info { padding: 24px; background: #fffaf3; color: #3d2f25; overflow-y: auto; }
 .gl-lightbox__label { color: #b38b59; font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; }
 .gl-lightbox__caption { margin: 12px 0 12px; font-size: 1rem; font-weight: 700; line-height: 1.7; }
-.gl-lightbox__uploader { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 16px; color: #806a55; font-size: .82rem; font-weight: 700; }
+.gl-lightbox__uploader { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 12px; color: #806a55; font-size: .82rem; font-weight: 700; }
 .gl-lightbox__uploader i { color: #b38b59; }
+.gl-lightbox__labels { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
 .gl-lightbox__tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .gl-lightbox__tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: #fff; border: 1px solid #eadccd; color: #755f48; text-decoration: none; font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gl-lightbox__tag.is-current { color: #b42318; border-color: #ffd0d0; background: #fff1f1; font-weight: 700; }
@@ -337,6 +341,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
                 <button type="button" data-filter="mine">自分が写ってる</button>
                 @endif
                 <button type="button" class="{{ $defaultFilter === 'all' ? 'is-active' : '' }}" data-filter="all">すべて</button>
+                <button type="button" data-filter="ceremony">挙式</button>
+                <button type="button" data-filter="reception">披露宴</button>
+                <button type="button" data-filter="photographer">カメラマン</button>
                 <button type="button" data-filter="tagged">人物タグあり</button>
             </div>
             <div class="gl-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚表示</div>
@@ -354,7 +361,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
             $isRelated = $isMine || ($currentUserId && $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty());
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" onclick="openLightbox({{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="openLightbox({{ $i }})">
             <div class="gl-card__photo">
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
                 @if ($isMine)
@@ -363,6 +370,10 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
             </div>
             @if ($photo->caption || $uploaderName || $tagNames->isNotEmpty())
             <div class="gl-card__body">
+                <div class="gl-card__labels">
+                    <span class="gl-card__label"><i class="fa-solid fa-layer-group"></i>{{ $photo->categoryLabel() }}</span>
+                    <span class="gl-card__label gl-card__label--source"><i class="fa-solid {{ $photo->photo_source === 'photographer' ? 'fa-camera-retro' : ($photo->is_guest_upload ? 'fa-user' : 'fa-camera') }}"></i>{{ $photo->sourceLabel() }}</span>
+                </div>
                 @if ($uploaderName)
                 <p class="gl-card__uploader"><i class="fa-solid fa-camera"></i>{{ $uploaderName }} さんが投稿</p>
                 @endif
@@ -399,6 +410,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         <aside class="gl-lightbox__info">
             <span class="gl-lightbox__label" id="glLightboxIndex">Photo</span>
             <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
+            <div class="gl-lightbox__labels" id="glLightboxLabels"></div>
             <div class="gl-lightbox__uploader" id="glLightboxUploader"></div>
             <div class="gl-lightbox__tags" id="glLightboxTags"></div>
         </aside>
@@ -424,7 +436,16 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         }))->values();
         $uploaderName = $p->uploader?->guestProfile?->fullName() ?: $p->uploader?->name;
 
-        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags, 'uploader' => $uploaderName];
+        return [
+            'url' => $p->url,
+            'caption' => $p->caption,
+            'tags' => $tags,
+            'uploader' => $uploaderName,
+            'category' => $p->gallery_category ?: 'other',
+            'category_label' => $p->categoryLabel(),
+            'source' => $p->photo_source ?: ($p->is_guest_upload ? 'guest' : 'admin'),
+            'source_label' => $p->sourceLabel(),
+        ];
     })->values();
 @endphp
 <script>
@@ -470,6 +491,8 @@ function showPhoto() {
     img.src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption || '';
     document.getElementById('glLightboxDownload').href = p.url;
+    const labelsEl = document.getElementById('glLightboxLabels');
+    labelsEl.innerHTML = `<span class="gl-card__label"><i class="fa-solid fa-layer-group"></i>${escapeHtml(p.category_label || 'その他')}</span><span class="gl-card__label gl-card__label--source"><i class="fa-solid ${p.source === 'photographer' ? 'fa-camera-retro' : (p.source === 'guest' ? 'fa-user' : 'fa-camera')}"></i>${escapeHtml(p.source_label || '')}</span>`;
     const uploaderEl = document.getElementById('glLightboxUploader');
     uploaderEl.innerHTML = p.uploader ? `<i class="fa-solid fa-camera"></i>${escapeHtml(p.uploader)} さんが投稿` : '';
     document.getElementById('glLightboxIndex').textContent = `Photo ${current + 1} / ${photos.length}`;
@@ -486,7 +509,7 @@ function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
     cards.forEach(card => {
-        const show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1');
+        const show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
         card.classList.toggle('is-hidden', !show);
         if (show) visible++;
     });

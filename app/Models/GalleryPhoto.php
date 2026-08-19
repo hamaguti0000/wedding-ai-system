@@ -12,6 +12,8 @@ class GalleryPhoto extends Model
         'file_path',
         'display_file_path',
         'caption',
+        'gallery_category',
+        'photo_source',
         'sort_order',
         'is_active',
         'uploaded_by_user_id',
@@ -54,6 +56,39 @@ class GalleryPhoto extends Model
             'id',
             'id'
         );
+    }
+
+
+    public static function categoryOptions(): array
+    {
+        return [
+            'ceremony' => '挙式',
+            'reception' => '披露宴',
+            'other' => 'その他',
+        ];
+    }
+
+    public static function sourceOptions(): array
+    {
+        return [
+            'photographer' => 'カメラマン撮影',
+            'admin' => '管理者アップロード',
+            'guest' => 'ゲスト投稿',
+        ];
+    }
+
+    public function categoryLabel(): string
+    {
+        return self::categoryOptions()[$this->gallery_category ?: 'other'] ?? 'その他';
+    }
+
+    public function sourceLabel(): string
+    {
+        if ($this->is_guest_upload) {
+            return 'ゲスト投稿';
+        }
+
+        return self::sourceOptions()[$this->photo_source ?: 'admin'] ?? '管理者アップロード';
     }
 
     public function isPending(): bool

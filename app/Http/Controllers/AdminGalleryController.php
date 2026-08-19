@@ -62,7 +62,10 @@ class AdminGalleryController extends Controller
                 ->values()
             : collect();
 
-        return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests', 'taggableGroups'));
+        $categoryOptions = GalleryPhoto::categoryOptions();
+        $sourceOptions = GalleryPhoto::sourceOptions();
+
+        return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests', 'taggableGroups', 'categoryOptions', 'sourceOptions'));
     }
 
     public function store(Request $request, GalleryImageOptimizer $imageOptimizer)
@@ -72,6 +75,8 @@ class AdminGalleryController extends Controller
             'photos.*'        => 'required|image|mimes:jpeg,png,webp,gif|max:10240',
             'captions'        => 'nullable|array',
             'captions.*'      => 'nullable|string|max:200',
+            'gallery_category'=> 'nullable|string|in:' . implode(',', array_keys(GalleryPhoto::categoryOptions())),
+            'photo_source'    => 'nullable|string|in:photographer,admin',
         ], [
             'photos.required'   => '画像を選択してください',
             'photos.*.image'    => '画像ファイルを選択してください',
@@ -87,6 +92,8 @@ class AdminGalleryController extends Controller
             GalleryPhoto::create([
                 'file_path'  => $path,
                 'caption'    => $request->captions[$i] ?? null,
+                'gallery_category' => $request->input('gallery_category', 'other'),
+                'photo_source' => $request->input('photo_source', 'photographer'),
                 'sort_order' => $count + 1,
                 'is_active'  => true,
                 'status'     => 'approved',
@@ -100,10 +107,16 @@ class AdminGalleryController extends Controller
     public function update(Request $request, int $id)
     {
         $photo = GalleryPhoto::findOrFail($id);
-        $request->validate(['caption' => 'nullable|string|max:200']);
+        $request->validate([
+            'caption' => 'nullable|string|max:200',
+            'gallery_category' => 'nullable|string|in:' . implode(',', array_keys(GalleryPhoto::categoryOptions())),
+            'photo_source' => 'nullable|string|in:photographer,admin,guest',
+        ]);
 
         $photo->update([
             'caption'   => $request->caption ?: null,
+            'gallery_category' => $request->input('gallery_category', $photo->gallery_category ?: 'other'),
+            'photo_source' => $photo->is_guest_upload ? 'guest' : $request->input('photo_source', $photo->photo_source ?: 'admin'),
             'is_active' => $request->boolean('is_active', true),
         ]);
 
@@ -130,6 +143,7 @@ class AdminGalleryController extends Controller
         $photo->update([
             'status'     => 'approved',
             'is_active'  => true,
+            'photo_source' => 'guest',
             'sort_order' => 1,
         ]);
 

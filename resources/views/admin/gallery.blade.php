@@ -298,6 +298,14 @@
 .gl-order-status.is-error { color: #dc2626; }
 .gl-admin-item__source { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 7px; color: #9b8573; font-size: .72rem; font-weight: 800; }
 
+.gl-admin-item__meta { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
+.gl-photo-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: #f7f1e9; border: 1px solid #eadccd; color: #806a55; font-size: .68rem; font-weight: 800; }
+.gl-photo-chip--source { background: #eef7ff; border-color: #bfdbfe; color: #2563eb; }
+.gl-upload-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
+.gl-upload-options label, .gl-edit-options label { display: grid; gap: 4px; color: #8a7969; font-size: .74rem; font-weight: 800; }
+.gl-upload-options select, .gl-edit-options select { width: 100%; min-height: 40px; padding: 7px 10px; border: 1px solid #e0d0bc; border-radius: 8px; background: #fff; color: #3d2f25; font-size: .86rem; }
+.gl-edit-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+
 @media (max-width: 640px) {
     .upload-zone { min-height: 118px; padding: 18px 14px; }
     .upload-zone__icon { font-size: 1.65rem; margin-bottom: 4px; }
@@ -336,6 +344,7 @@
     .gl-search-wrap { flex-basis: 100%; max-width: none; }
     .gl-search { min-height: 42px; font-size: 16px; border-radius: 10px; }
     .gl-filter-btn { flex: 1 1 auto; }
+    .gl-upload-options, .gl-edit-options { grid-template-columns: 1fr; }
     .gl-result-count { margin: 10px 2px; }
 }
 </style>
@@ -420,6 +429,21 @@
         <div class="gl-upload-section__inner">
             <form method="POST" action="{{ route('admin.gallery.store') }}" enctype="multipart/form-data" id="galleryForm">
                 @csrf
+                <div class="gl-upload-options">
+                    <label>シーン
+                        <select name="gallery_category">
+                            @foreach ($categoryOptions as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label>撮影者
+                        <select name="photo_source">
+                            <option value="photographer">カメラマン撮影</option>
+                            <option value="admin">管理者アップロード</option>
+                        </select>
+                    </label>
+                </div>
                 <div class="upload-zone" id="uploadZone">
                     <input type="file" name="photos[]" multiple accept="image/*"
                            onchange="previewPhotos(this)">
@@ -475,9 +499,12 @@
             <input type="search" id="glSearch" class="gl-search" placeholder="キャプションで検索" autocomplete="off">
             <button type="button" id="glClear" class="gl-clear" aria-label="クリア">✕</button>
         </div>
-        <button class="gl-filter-btn active" data-active="all">すべて</button>
-        <button class="gl-filter-btn" data-active="1">表示中</button>
-        <button class="gl-filter-btn" data-active="0">非表示</button>
+        <button class="gl-filter-btn active" data-filter-kind="active" data-active="all">すべて</button>
+        <button class="gl-filter-btn" data-filter-kind="active" data-active="1">表示中</button>
+        <button class="gl-filter-btn" data-filter-kind="active" data-active="0">非表示</button>
+        <button class="gl-filter-btn" data-filter-kind="category" data-category="ceremony">挙式</button>
+        <button class="gl-filter-btn" data-filter-kind="category" data-category="reception">披露宴</button>
+        <button class="gl-filter-btn" data-filter-kind="source" data-source="photographer">カメラマン</button>
     </div>
     <div class="gl-result-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚</div>
     <div class="gl-order-form" id="galleryOrderControls" data-action="{{ route('admin.gallery.reorder') }}" data-token="{{ csrf_token() }}">
@@ -497,7 +524,9 @@
         <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
              data-caption="{{ strtolower($photo->caption ?? '') }}"
              data-active="{{ $photo->is_active ? '1' : '0' }}"
-             data-source="{{ $photo->is_guest_upload ? 'guest' : 'official' }}"
+             data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}"
+             data-upload-kind="{{ $photo->is_guest_upload ? 'guest' : 'official' }}"
+             data-category="{{ $photo->gallery_category ?: 'other' }}"
              data-created="{{ optional($photo->created_at)->timestamp ?? 0 }}"
              data-id="{{ $photo->id }}">
             <div class="gl-admin-item__photo">
@@ -507,8 +536,12 @@
             <div class="gl-admin-item__body">
                 <span class="gl-admin-item__source">
                     <i class="fa-solid {{ $photo->is_guest_upload ? 'fa-user' : 'fa-camera' }}"></i>
-                    {{ $photo->is_guest_upload ? (($photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: 'ゲスト') . ' さんの投稿') : '管理者アップロード' }}
+                    {{ $photo->is_guest_upload ? (($photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: 'ゲスト') . ' さんの投稿') : $photo->sourceLabel() }}
                 </span>
+                <div class="gl-admin-item__meta">
+                    <span class="gl-photo-chip"><i class="fa-solid fa-layer-group"></i>{{ $photo->categoryLabel() }}</span>
+                    <span class="gl-photo-chip gl-photo-chip--source"><i class="fa-solid {{ $photo->is_guest_upload ? 'fa-user' : ($photo->photo_source === 'photographer' ? 'fa-camera-retro' : 'fa-camera') }}"></i>{{ $photo->sourceLabel() }}</span>
+                </div>
                 <p class="gl-admin-item__caption {{ $photo->caption ? '' : 'is-empty' }}" title="{{ $photo->caption }}">{{ $photo->caption ?: 'キャプションなし' }}</p>
                 <div class="gl-admin-item__actions">
                     <button type="button" class="btn-sm btn-sm-pw gl-admin-item__tag-btn gl-admin-item__primary" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
@@ -540,6 +573,26 @@
                     <div class="form-group" style="margin-bottom:8px;">
                         <label style="font-size:0.76rem;">キャプション</label>
                         <input type="text" name="caption" value="{{ $photo->caption }}" maxlength="200" placeholder="写真の説明">
+                    </div>
+                    <div class="gl-edit-options">
+                        <label>シーン
+                            <select name="gallery_category">
+                                @foreach ($categoryOptions as $value => $label)
+                                <option value="{{ $value }}" @selected(($photo->gallery_category ?: 'other') === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        <label>撮影者
+                            @if ($photo->is_guest_upload)
+                            <select name="photo_source" disabled><option value="guest">ゲスト投稿</option></select>
+                            <input type="hidden" name="photo_source" value="guest">
+                            @else
+                            <select name="photo_source">
+                                <option value="photographer" @selected($photo->photo_source === 'photographer')>カメラマン撮影</option>
+                                <option value="admin" @selected(($photo->photo_source ?: 'admin') === 'admin')>管理者アップロード</option>
+                            </select>
+                            @endif
+                        </label>
                     </div>
                     <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;margin-bottom:8px;cursor:pointer;">
                         <input type="checkbox" name="is_active" value="1" {{ $photo->is_active ? 'checked' : '' }}>
@@ -618,7 +671,7 @@
 <script>
 // ── ギャラリー検索・フィルター ────────────────────────────
 (function () {
-    const state  = { q: '', active: 'all' };
+    const state  = { q: '', active: 'all', category: 'all', source: 'all' };
     const grid   = document.getElementById('galleryGrid');
     const srch   = document.getElementById('glSearch');
     const clrBtn = document.getElementById('glClear');
@@ -636,6 +689,8 @@
             let show = true;
             if (state.q && !d.caption.includes(state.q)) show = false;
             if (state.active !== 'all' && d.active !== state.active) show = false;
+            if (state.category !== 'all' && d.category !== state.category) show = false;
+            if (state.source !== 'all' && d.source !== state.source) show = false;
             item.style.display = show ? '' : 'none';
             if (show) visible++;
         });
@@ -658,11 +713,24 @@
         clrBtn.classList.remove('visible');
         srch.focus(); applyAll();
     });
-    document.querySelectorAll('.gl-filter-btn[data-active]').forEach(btn => {
+    document.querySelectorAll('.gl-filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.gl-filter-btn[data-active]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.active = btn.dataset.active;
+            const kind = btn.dataset.filterKind || 'active';
+            if (kind === 'active') {
+                document.querySelectorAll('.gl-filter-btn[data-filter-kind="active"]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.active = btn.dataset.active || 'all';
+            }
+            if (kind === 'category') {
+                const next = state.category === btn.dataset.category ? 'all' : btn.dataset.category;
+                state.category = next;
+                document.querySelectorAll('.gl-filter-btn[data-filter-kind="category"]').forEach(b => b.classList.toggle('active', next !== 'all' && b.dataset.category === next));
+            }
+            if (kind === 'source') {
+                const next = state.source === btn.dataset.source ? 'all' : btn.dataset.source;
+                state.source = next;
+                document.querySelectorAll('.gl-filter-btn[data-filter-kind="source"]').forEach(b => b.classList.toggle('active', next !== 'all' && b.dataset.source === next));
+            }
             applyAll();
         });
     });
@@ -909,8 +977,8 @@ function filterTagList(input) {
         items.sort((a, b) => {
             if (type === 'newest') return Number(b.dataset.created || 0) - Number(a.dataset.created || 0);
             if (type === 'oldest') return Number(a.dataset.created || 0) - Number(b.dataset.created || 0);
-            if (type === 'official-first' && a.dataset.source !== b.dataset.source) return a.dataset.source === 'official' ? -1 : 1;
-            if (type === 'guest-first' && a.dataset.source !== b.dataset.source) return a.dataset.source === 'guest' ? -1 : 1;
+            if (type === 'official-first' && a.dataset.uploadKind !== b.dataset.uploadKind) return a.dataset.uploadKind === 'official' ? -1 : 1;
+            if (type === 'guest-first' && a.dataset.uploadKind !== b.dataset.uploadKind) return a.dataset.uploadKind === 'guest' ? -1 : 1;
             const av = Number(a.querySelector('[data-order-input]')?.value || 9999);
             const bv = Number(b.querySelector('[data-order-input]')?.value || 9999);
             if (av !== bv) return av - bv;

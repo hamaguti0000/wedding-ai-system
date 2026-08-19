@@ -62,6 +62,8 @@ class GalleryController extends Controller
             GalleryPhoto::create([
                 'file_path'           => $path,
                 'caption'             => $request->message ?: null,
+                'gallery_category'    => 'other',
+                'photo_source'        => 'guest',
                 'sort_order'          => $maxOrder + $count + 1,
                 'is_active'           => false,
                 'uploaded_by_user_id' => Auth::id(),
