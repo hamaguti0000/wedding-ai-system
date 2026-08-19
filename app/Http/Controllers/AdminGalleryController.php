@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\GalleryPhoto;
 use App\Models\GuestGroup;
 use App\Models\User;
+use App\Services\GalleryImageOptimizer;
 use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -64,7 +65,7 @@ class AdminGalleryController extends Controller
         return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests', 'taggableGroups'));
     }
 
-    public function store(Request $request, ImageDuplicateDetector $duplicateDetector)
+    public function store(Request $request, ImageDuplicateDetector $duplicateDetector, GalleryImageOptimizer $imageOptimizer)
     {
         $request->validate([
             'photos'          => 'required|array|max:20',
@@ -87,7 +88,7 @@ class AdminGalleryController extends Controller
                 continue;
             }
 
-            $path = $file->store('gallery', 'public');
+            $path = $imageOptimizer->store($file, 'gallery');
             GalleryPhoto::create([
                 'file_path'  => $path,
                 'caption'    => $request->captions[$i] ?? null,

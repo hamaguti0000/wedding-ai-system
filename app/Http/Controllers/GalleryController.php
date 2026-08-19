@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
+use App\Services\GalleryImageOptimizer;
 use App\Services\ImageDuplicateDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,7 @@ class GalleryController extends Controller
         return view('gallery-upload');
     }
 
-    public function upload(Request $request, ImageDuplicateDetector $duplicateDetector)
+    public function upload(Request $request, ImageDuplicateDetector $duplicateDetector, GalleryImageOptimizer $imageOptimizer)
     {
         $request->validate([
             'photos'     => 'required|array|max:10',
@@ -58,7 +59,7 @@ class GalleryController extends Controller
                 continue;
             }
 
-            $path = $file->store('gallery/guest', 'public');
+            $path = $imageOptimizer->store($file, 'gallery/guest');
             GalleryPhoto::create([
                 'file_path'           => $path,
                 'caption'             => $request->message ?: null,
