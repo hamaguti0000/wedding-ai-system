@@ -114,6 +114,17 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-lightbox__close { right: 14px; top: 14px; }
 .gl-lightbox__download { left: 14px; top: 14px; }
 .gl-lightbox__topcount { display: none; }
+.gl-save-sheet { position: absolute; inset: 0; z-index: 8; display: grid; place-items: end center; padding: 18px; pointer-events: none; opacity: 0; transition: opacity .16s ease; }
+.gl-save-sheet.is-open { pointer-events: auto; opacity: 1; }
+.gl-save-sheet__backdrop { position: absolute; inset: 0; background: rgba(8,6,5,.46); }
+.gl-save-sheet__panel { position: relative; width: min(360px, 100%); padding: 10px; border-radius: 18px; background: rgba(255,252,247,.98); border: 1px solid rgba(234,220,205,.8); box-shadow: 0 22px 58px rgba(0,0,0,.32); }
+.gl-save-sheet__title { margin: 4px 8px 10px; color: #806a55; font-size: .72rem; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; }
+.gl-save-option { width: 100%; min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: #3d2f25; display: flex; align-items: center; gap: 11px; padding: 8px 10px; font-size: .9rem; font-weight: 800; text-align: left; cursor: pointer; }
+.gl-save-option i { width: 34px; height: 34px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: #f3e6d5; color: #a77942; }
+.gl-save-option span { display: grid; gap: 2px; }
+.gl-save-option small { color: #9b8573; font-size: .7rem; font-weight: 600; line-height: 1.35; }
+.gl-save-option:hover { background: #fff6ea; }
+.gl-save-sheet__status { min-height: 18px; margin: 6px 8px 2px; color: #9b8573; font-size: .72rem; line-height: 1.45; }
 .gl-lightbox__nav { top: 50%; transform: translateY(-50%); }
 .gl-lightbox__prev { left: 14px; }
 .gl-lightbox__next { right: 344px; }
@@ -409,7 +420,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 @if ($photos->isNotEmpty())
 <div class="gl-lightbox" id="glLightbox" onclick="closeLightboxOnOverlay(event)">
     <div class="gl-lightbox__shell" onclick="event.stopPropagation()">
-        <a class="gl-lightbox__download" id="glLightboxDownload" href="" download aria-label="ダウンロード"><i class="fa-solid fa-download"></i></a>
+        <button class="gl-lightbox__download" id="glLightboxDownload" type="button" aria-label="ダウンロード"><i class="fa-solid fa-download"></i></button>
         <span class="gl-lightbox__topcount" id="glLightboxTopIndex">Photo</span>
         <button class="gl-lightbox__close" type="button" onclick="closeLightbox()" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
         <button class="gl-lightbox__nav gl-lightbox__prev" type="button" onclick="prevPhoto()" aria-label="前へ"><i class="fa-solid fa-chevron-left"></i></button>
@@ -422,6 +433,25 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
             <div class="gl-lightbox__uploader" id="glLightboxUploader"></div>
             <div class="gl-lightbox__tags" id="glLightboxTags"></div>
         </aside>
+        <div class="gl-save-sheet" id="glSaveSheet" aria-hidden="true">
+            <div class="gl-save-sheet__backdrop" data-save-close></div>
+            <div class="gl-save-sheet__panel" role="dialog" aria-modal="true" aria-label="保存方法を選択">
+                <p class="gl-save-sheet__title">保存方法を選択</p>
+                <button type="button" class="gl-save-option" id="saveToPhotos">
+                    <i class="fa-solid fa-images"></i>
+                    <span>写真アプリへ保存<small>共有シートから「画像を保存」を選びます</small></span>
+                </button>
+                <button type="button" class="gl-save-option" id="saveToFiles">
+                    <i class="fa-solid fa-folder-arrow-down"></i>
+                    <span>ファイルに保存<small>ブラウザのダウンロードとして保存します</small></span>
+                </button>
+                <button type="button" class="gl-save-option" data-save-close>
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>閉じる<small>写真を見る画面に戻ります</small></span>
+                </button>
+                <p class="gl-save-sheet__status" id="saveSheetStatus" aria-live="polite"></p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -453,6 +483,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
             'category_label' => $p->categoryLabel(),
             'source' => $p->photo_source ?: ($p->is_guest_upload ? 'guest' : 'admin'),
             'source_label' => $p->sourceLabel(),
+            'download_name' => 'wedding-photo-' . $p->id . '.jpg',
         ];
     })->values();
 @endphp
@@ -472,6 +503,7 @@ function openLightbox(index) {
     document.body.style.overflow = 'hidden';
 }
 function closeLightbox() {
+    closeSaveSheet();
     document.getElementById('glLightbox').classList.remove('is-open');
     document.body.style.overflow = '';
 }
@@ -498,7 +530,8 @@ function showPhoto() {
     };
     img.src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption || '';
-    document.getElementById('glLightboxDownload').href = p.url;
+    document.getElementById('glLightboxDownload').dataset.url = p.url;
+    document.getElementById('glLightboxDownload').dataset.filename = p.download_name || `wedding-photo-${current + 1}.jpg`;
     const labelsEl = document.getElementById('glLightboxLabels');
     labelsEl.innerHTML = `<span class="gl-card__label"><i class="fa-solid fa-layer-group"></i>${escapeHtml(p.category_label || 'その他')}</span><span class="gl-card__label gl-card__label--source"><i class="fa-solid ${p.source === 'photographer' ? 'fa-camera-retro' : (p.source === 'guest' ? 'fa-user' : 'fa-camera')}"></i>${escapeHtml(p.source_label || '')}</span>`;
     const uploaderEl = document.getElementById('glLightboxUploader');
@@ -512,6 +545,70 @@ function showPhoto() {
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
 function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
+
+function openSaveSheet() {
+    const sheet = document.getElementById('glSaveSheet');
+    const status = document.getElementById('saveSheetStatus');
+    if (status) status.textContent = '';
+    sheet?.classList.add('is-open');
+    sheet?.setAttribute('aria-hidden', 'false');
+}
+
+function closeSaveSheet() {
+    const sheet = document.getElementById('glSaveSheet');
+    sheet?.classList.remove('is-open');
+    sheet?.setAttribute('aria-hidden', 'true');
+}
+
+function currentDownloadMeta() {
+    const btn = document.getElementById('glLightboxDownload');
+    return {
+        url: btn?.dataset.url || photos[current]?.url || '',
+        filename: btn?.dataset.filename || `wedding-photo-${current + 1}.jpg`,
+    };
+}
+
+async function fetchPhotoFile(url, filename) {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error('写真を取得できませんでした');
+    const blob = await response.blob();
+    const type = blob.type || 'image/jpeg';
+    return new File([blob], filename, { type });
+}
+
+function downloadToFiles() {
+    const { url, filename } = currentDownloadMeta();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    closeSaveSheet();
+}
+
+async function saveToPhotos() {
+    const status = document.getElementById('saveSheetStatus');
+    const { url, filename } = currentDownloadMeta();
+    if (status) status.textContent = '共有シートを準備しています...';
+
+    try {
+        const file = await fetchPhotoFile(url, filename);
+        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+            await navigator.share({ files: [file], title: 'Wedding photo' });
+            closeSaveSheet();
+            return;
+        }
+        if (navigator.share) {
+            await navigator.share({ title: 'Wedding photo', url });
+            closeSaveSheet();
+            return;
+        }
+        if (status) status.textContent = 'このブラウザでは写真アプリ保存を直接開けません。ファイル保存を使ってください。';
+    } catch (error) {
+        if (status) status.textContent = error.message || '共有シートを開けませんでした。';
+    }
+}
 
 function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
@@ -531,6 +628,10 @@ function applyGalleryFilter(filter, shouldScroll = true) {
 document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filter)));
 document.querySelectorAll('[data-filter-trigger]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filterTrigger)));
 if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, false);
+document.getElementById('glLightboxDownload')?.addEventListener('click', openSaveSheet);
+document.getElementById('saveToFiles')?.addEventListener('click', downloadToFiles);
+document.getElementById('saveToPhotos')?.addEventListener('click', saveToPhotos);
+document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', closeSaveSheet));
 
 (function () {
     const lightbox = document.getElementById('glLightbox');
@@ -556,7 +657,7 @@ if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, fal
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb || !lb.classList.contains('is-open')) return;
-    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Escape') { closeSaveSheet(); closeLightbox(); }
     if (e.key === 'ArrowRight') nextPhoto();
     if (e.key === 'ArrowLeft') prevPhoto();
 });
