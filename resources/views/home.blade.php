@@ -32,7 +32,7 @@
 @endphp
 <section class="home-hero"
     data-hero-type="{{ $heroType }}"
-    data-interval="{{ $setting?->hero_interval ?? 5000 }}">
+    data-interval="3000">
 
     {{-- 動画 --}}
     @if ($heroType === 'video' && $setting?->hero_video_path)
