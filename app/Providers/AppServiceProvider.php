@@ -42,30 +42,35 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $siteBanner = SiteImage::forDisplay($locationMap[$name]);
-            $uploadedBanner = $name === 'login' ? null : $this->randomUploadedGalleryPhoto();
+            $uploadedBanners = $name === 'login' ? collect() : $this->randomUploadedGalleryPhotos(10);
+            $uploadedBanner = $uploadedBanners->first();
+            $bannerImages = $uploadedBanners->isNotEmpty()
+                ? $uploadedBanners
+                : collect($siteBanner ? [$siteBanner] : []);
 
             $view->with('siteBannerImage', $siteBanner);
             $view->with('randomBannerImage', $uploadedBanner);
             $view->with('bannerImage', $uploadedBanner ?: $siteBanner);
+            $view->with('bannerImages', $bannerImages);
         });
     }
 
-    private function randomUploadedGalleryPhoto(?int $limit = null)
+    private function randomUploadedGalleryPhotos(int $limit)
     {
         try {
             if (! Schema::hasTable('gallery_photos')) {
-                return $limit ? collect() : null;
+                return collect();
             }
 
-            $query = GalleryPhoto::query()
+            return GalleryPhoto::query()
                 ->where('is_active', true)
                 ->where('status', 'approved')
                 ->whereNotNull('file_path')
-                ->inRandomOrder();
-
-            return $limit ? $query->limit($limit)->get() : $query->first();
+                ->inRandomOrder()
+                ->limit($limit)
+                ->get();
         } catch (\Throwable) {
-            return $limit ? collect() : null;
+            return collect();
         }
     }
 }

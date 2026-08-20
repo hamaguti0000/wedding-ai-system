@@ -103,7 +103,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="fq-banner">
-    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="fq-banner__img">
+    @include('partials.rotating-banner', ['class' => 'fq-banner__img'])
     <div class="fq-banner__overlay"></div>
     <div class="fq-banner__text">
         <span class="fq-banner__eyebrow">FAQ · よくある質問</span>

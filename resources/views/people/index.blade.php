@@ -90,7 +90,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="gl-banner">
-    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="gl-banner__img">
+    @include('partials.rotating-banner', ['class' => 'gl-banner__img'])
     <div class="gl-banner__overlay"></div>
     <div class="gl-banner__text">
         <span class="gl-banner__eyebrow">People · 参加者一覧</span>

@@ -958,3 +958,12 @@
 .impersonation-bar__btn:hover {
     background: rgba(255, 255, 255, .16);
 }
+
+/* Shared page hero image rotation */
+.js-rotating-banner-slide {
+    opacity: 0;
+    transition: opacity 1.4s ease, transform 9s ease;
+}
+.js-rotating-banner-slide.is-active {
+    opacity: 1;
+}

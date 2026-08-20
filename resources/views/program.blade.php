@@ -130,7 +130,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="pg-banner">
-    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="pg-banner__img">
+    @include('partials.rotating-banner', ['class' => 'pg-banner__img'])
     <div class="pg-banner__overlay"></div>
     <div class="pg-banner__text">
         <span class="pg-banner__eyebrow">Program · プログラム</span>

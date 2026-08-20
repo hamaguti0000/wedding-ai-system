@@ -19,7 +19,7 @@
                 ->where('status', 'approved')
                 ->whereNotNull('file_path')
                 ->inRandomOrder()
-                ->limit(8)
+                ->limit(10)
                 ->get();
         }
     } catch (\Throwable) {

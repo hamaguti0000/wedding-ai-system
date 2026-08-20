@@ -36,7 +36,7 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="nw-banner">
-    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="nw-banner__img">
+    @include('partials.rotating-banner', ['class' => 'nw-banner__img'])
     <div class="nw-banner__overlay"></div>
     <div class="nw-banner__text">
         <span class="nw-banner__eyebrow">News · お知らせ</span>

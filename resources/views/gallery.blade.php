@@ -353,7 +353,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 @endphp
 
 <section class="gl-hero">
-    <img src="{{ ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt="" class="gl-hero__img">
+    @include('partials.rotating-banner', ['class' => 'gl-hero__img'])
     <div class="gl-hero__shade"></div>
     <div class="gl-hero__inner">
         <span class="gl-hero__eyebrow">Wedding Gallery</span>

@@ -118,8 +118,11 @@ main { padding: 0; text-align: initial; }
 {{-- バナー：画像ありならその画像、なければチャペル --}}
 @php $layout = $item->layout ?? 'text'; @endphp
 <section class="ns-banner">
-    <img src="{{ $item->image_url ?? ($bannerImage?->url ?? asset('img/チャペル.jpg')) }}" alt=""
-         class="ns-banner__img {{ $item->image_url ? 'ns-banner__img--article' : '' }}">
+    @if ($item->image_url)
+        <img src="{{ $item->image_url }}" alt="" class="ns-banner__img ns-banner__img--article">
+    @else
+        @include('partials.rotating-banner', ['class' => 'ns-banner__img'])
+    @endif
     <div class="ns-banner__overlay"></div>
     <div class="ns-banner__text">
         <span class="ns-banner__eyebrow">News · お知らせ</span>

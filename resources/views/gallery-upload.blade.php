@@ -65,12 +65,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 @section('content')
 <section class="upload-hero">
-    @php $bannerImg = $bannerImage ?? null; @endphp
-    @if($bannerImg)
-        <img class="upload-hero__img" src="{{ $bannerImg->url }}" alt="">
-    @else
-        <img class="upload-hero__img" src="{{ asset('img/チャペル.jpg') }}" alt="">
-    @endif
+    @include('partials.rotating-banner', ['class' => 'upload-hero__img'])
     <div class="upload-hero__shade"></div>
     <div class="upload-hero__inner">
         <span class="upload-hero__eyebrow">Share Memories</span>
