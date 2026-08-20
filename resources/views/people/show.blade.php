@@ -202,8 +202,18 @@ function closeLightbox() {
     document.body.style.overflow = '';
     scrollToCurrentItem();
 }
+function isLightboxControlTarget(target) {
+    return Boolean(target.closest('button, a, img, .gl-lightbox__meta'));
+}
+function handleLightboxSurfaceTap(event) {
+    if (isLightboxControlTarget(event.target)) return;
+    const edgeWidth = Math.min(104, window.innerWidth * 0.28);
+    if (event.clientX <= edgeWidth) { prevPhoto(); return; }
+    if (event.clientX >= window.innerWidth - edgeWidth) { nextPhoto(); return; }
+    closeLightbox();
+}
 function closeLightboxOnOverlay(e) {
-    if (e.target === document.getElementById('glLightbox') || e.target === document.querySelector('.gl-lightbox__inner')) closeLightbox();
+    if (e.target === document.getElementById('glLightbox')) handleLightboxSurfaceTap(e);
 }
 function showPhoto() {
     const p = photos[current];
@@ -226,13 +236,7 @@ function prevPhoto() { current = (current - 1 + photos.length) % photos.length; 
     if (!stage) return;
     let startX = 0;
     let startY = 0;
-    stage.addEventListener('click', event => {
-        if (event.target !== stage) return;
-        const edgeWidth = Math.min(92, window.innerWidth * 0.24);
-        if (event.clientX <= edgeWidth) { prevPhoto(); return; }
-        if (event.clientX >= window.innerWidth - edgeWidth) { nextPhoto(); return; }
-        closeLightbox();
-    });
+    stage.addEventListener('click', handleLightboxSurfaceTap);
     stage.addEventListener('touchstart', event => {
         const touch = event.changedTouches[0];
         startX = touch.clientX;
