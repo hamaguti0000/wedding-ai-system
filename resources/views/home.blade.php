@@ -29,13 +29,14 @@
     $heroImages = $uploadedHeroImages->isNotEmpty()
         ? $uploadedHeroImages
         : \App\Models\SiteImage::forHero();
+    $isVideoHero = $heroType === 'video' && filled($setting?->hero_video_path);
 @endphp
 <section class="home-hero"
-    data-hero-type="{{ $heroType }}"
+    data-hero-type="{{ $isVideoHero ? 'video' : 'slideshow' }}"
     data-interval="3000">
 
     {{-- 動画 --}}
-    @if ($heroType === 'video' && $setting?->hero_video_path)
+    @if ($isVideoHero)
     <video class="home-hero__video" autoplay muted loop playsinline>
         <source src="{{ asset('storage/' . $setting->hero_video_path) }}" type="video/mp4">
     </video>
