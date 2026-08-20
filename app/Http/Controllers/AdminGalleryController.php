@@ -45,7 +45,71 @@ class AdminGalleryController extends Controller
             $guestApproved->each->setRelation('taggedGroups', collect());
         }
 
-        $taggableGuests = User::where('role', 'guest')
+        $categoryOptions = GalleryPhoto::categoryOptions();
+        $sourceOptions = GalleryPhoto::sourceOptions();
+
+        // 「まだタグが付いていない写真」を一覧の先頭で案内し、そのままタグ付けに入れるようにする
+        $untaggedPhotos = $photos->filter(fn (GalleryPhoto $p) => $p->taggedUsers->isEmpty() && $p->taggedGroups->isEmpty());
+        $untaggedCount = $untaggedPhotos->count();
+        $firstUntaggedId = $untaggedPhotos->first()?->id;
+
+        return view('admin.gallery', compact(
+            'photos', 'pending', 'guestApproved', 'categoryOptions', 'sourceOptions',
+            'untaggedCount', 'firstUntaggedId'
+        ));
+    }
+
+    /**
+     * 1枚ずつタグ付けする専用画面。
+     * 一覧に全ゲスト分のチェックボックスを写真の数だけ描画すると
+     * ページが数千行規模になり操作できなくなるため、タグ付けはこの画面に分離している。
+     */
+    public function tagEditor(int $id)
+    {
+        $hasGuestGroups = Schema::hasTable('guest_groups');
+
+        $relations = ['taggedUsers.guestProfile'];
+        if ($hasGuestGroups) {
+            $relations[] = 'taggedGroups.primaryGuest';
+        }
+
+        $photo = GalleryPhoto::where('status', 'approved')->with($relations)->findOrFail($id);
+        if (! $hasGuestGroups) {
+            $photo->setRelation('taggedGroups', collect());
+        }
+
+        // 並び順どおりの「待ち行列」を作り、前後移動と進捗表示に使う
+        $queue = GalleryPhoto::where('status', 'approved')
+            ->withCount('taggedUsers')
+            ->orderBy('sort_order')->orderBy('id')
+            ->get(['id', 'sort_order']);
+
+        $position = $queue->search(fn ($item) => $item->id === $photo->id);
+        $prevPhoto = $position > 0 ? $queue[$position - 1] : null;
+        $nextPhoto = $position !== false && $position < $queue->count() - 1 ? $queue[$position + 1] : null;
+
+        // まだタグが付いていない次の写真（保存後のジャンプ先）
+        $nextUntagged = $queue
+            ->filter(fn ($item) => $item->tagged_users_count === 0 && $item->id !== $photo->id)
+            ->first();
+
+        return view('admin.gallery-tag', [
+            'photo'          => $photo,
+            'taggableGuests' => $this->taggableGuests(),
+            'taggableGroups' => $this->taggableGroups($hasGuestGroups),
+            'prevPhoto'      => $prevPhoto,
+            'nextPhoto'      => $nextPhoto,
+            'nextUntagged'   => $nextUntagged,
+            'position'       => $position === false ? 0 : $position + 1,
+            'totalCount'     => $queue->count(),
+            'untaggedCount'  => $queue->where('tagged_users_count', 0)->count(),
+        ]);
+    }
+
+    /** @return \Illuminate\Support\Collection<int, User> */
+    private function taggableGuests()
+    {
+        return User::where('role', 'guest')
             ->with('guestProfile')
             ->get()
             ->sortBy(function (User $u) {
@@ -53,19 +117,20 @@ class AdminGalleryController extends Controller
                 return $p ? $p->last_name . $p->first_name : $u->name;
             })
             ->values();
+    }
 
-        $taggableGroups = $hasGuestGroups
-            ? GuestGroup::with('primaryGuest')
-                ->get()
-                ->sortBy(fn (GuestGroup $group) => $group->displayName())
-                ->unique(fn (GuestGroup $group) => $group->displayName())
-                ->values()
-            : collect();
+    /** @return \Illuminate\Support\Collection<int, GuestGroup> */
+    private function taggableGroups(bool $hasGuestGroups)
+    {
+        if (! $hasGuestGroups) {
+            return collect();
+        }
 
-        $categoryOptions = GalleryPhoto::categoryOptions();
-        $sourceOptions = GalleryPhoto::sourceOptions();
-
-        return view('admin.gallery', compact('photos', 'pending', 'guestApproved', 'taggableGuests', 'taggableGroups', 'categoryOptions', 'sourceOptions'));
+        return GuestGroup::with('primaryGuest')
+            ->get()
+            ->sortBy(fn (GuestGroup $group) => $group->displayName())
+            ->unique(fn (GuestGroup $group) => $group->displayName())
+            ->values();
     }
 
     public function store(Request $request, GalleryImageOptimizer $imageOptimizer)
@@ -227,6 +292,19 @@ class AdminGalleryController extends Controller
                     ->unique('name')
                     ->values(),
             ]);
+        }
+
+        // タグ付け専用画面からは、続けて次の写真へ送る
+        if ($request->filled('next_photo_id')) {
+            return redirect()
+                ->route('admin.gallery.tag.edit', $request->input('next_photo_id'))
+                ->with('success', '保存しました');
+        }
+
+        if ($request->input('after_save') === 'index') {
+            return redirect()
+                ->route('admin.gallery')
+                ->with('success', '写真のタグ付けを更新しました');
         }
 
         return back()->with('success', '写真のタグ付けを更新しました');

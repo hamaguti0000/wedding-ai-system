@@ -181,3 +181,136 @@ describe('AdminGalleryController::tag グループ反映', function () {
             ->assertSee('家族グループ');
     });
 });
+
+describe('タグ付け専用画面', function () {
+
+    it('未認証 → /login にリダイレクト', function () {
+        $photo = GalleryPhoto::create([
+            'file_path' => 'gallery/a.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+
+        $this->get(route('admin.gallery.tag.edit', $photo))->assertRedirect('/login');
+    });
+
+    it('ゲストは開けず/homeへ戻される', function () {
+        $photo = GalleryPhoto::create([
+            'file_path' => 'gallery/a.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+
+        $this->actingAs(makeGuest('attending'))
+            ->get(route('admin.gallery.tag.edit', $photo))
+            ->assertRedirect(route('dashboard'));
+    });
+
+    it('管理者は写真と進捗を確認できる', function () {
+        $admin = makeAdmin();
+        $first = GalleryPhoto::create([
+            'file_path' => 'gallery/first.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+        GalleryPhoto::create([
+            'file_path' => 'gallery/second.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 2,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.gallery.tag.edit', $first))
+            ->assertOk();
+
+        expect($response->viewData('position'))->toBe(1)
+            ->and($response->viewData('totalCount'))->toBe(2)
+            ->and($response->viewData('untaggedCount'))->toBe(2);
+    });
+
+    it('未承認の写真は開けない', function () {
+        $pending = GalleryPhoto::create([
+            'file_path' => 'gallery/guest/p.jpg', 'is_active' => false,
+            'status' => 'pending', 'sort_order' => 1, 'is_guest_upload' => true,
+        ]);
+
+        $this->actingAs(makeAdmin())
+            ->get(route('admin.gallery.tag.edit', $pending))
+            ->assertNotFound();
+    });
+
+    it('次の未タグ写真が保存後のジャンプ先になる', function () {
+        $admin = makeAdmin();
+        $guest = makeGuest('attending');
+        $first = GalleryPhoto::create([
+            'file_path' => 'gallery/first.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+        $second = GalleryPhoto::create([
+            'file_path' => 'gallery/second.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 2,
+        ]);
+        $second->taggedUsers()->attach($guest->id);
+        $third = GalleryPhoto::create([
+            'file_path' => 'gallery/third.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 3,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.gallery.tag.edit', $first));
+
+        // 2枚目はタグ済みなので、飛び先は3枚目になる
+        expect($response->viewData('nextUntagged')?->id)->toBe($third->id);
+    });
+
+    it('next_photo_id を送ると保存後に次の写真の画面へ進む', function () {
+        $admin = makeAdmin();
+        $guest = makeGuest('attending');
+        $first = GalleryPhoto::create([
+            'file_path' => 'gallery/first.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+        $second = GalleryPhoto::create([
+            'file_path' => 'gallery/second.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 2,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.gallery.tag', $first), [
+                'user_ids' => [$guest->id],
+                'next_photo_id' => $second->id,
+            ])
+            ->assertRedirect(route('admin.gallery.tag.edit', $second->id));
+
+        expect($first->fresh()->taggedUsers->pluck('id')->all())->toBe([$guest->id]);
+    });
+
+    it('after_save=index なら一覧へ戻る', function () {
+        $admin = makeAdmin();
+        $photo = GalleryPhoto::create([
+            'file_path' => 'gallery/a.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.gallery.tag', $photo), ['after_save' => 'index'])
+            ->assertRedirect(route('admin.gallery'));
+    });
+});
+
+describe('一覧の未タグ集計', function () {
+
+    it('未タグ枚数と最初の未タグ写真をビューへ渡す', function () {
+        $admin = makeAdmin();
+        $guest = makeGuest('attending');
+        $tagged = GalleryPhoto::create([
+            'file_path' => 'gallery/tagged.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+        $tagged->taggedUsers()->attach($guest->id);
+        $untagged = GalleryPhoto::create([
+            'file_path' => 'gallery/untagged.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 2,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.gallery'))->assertOk();
+
+        expect($response->viewData('untaggedCount'))->toBe(1)
+            ->and($response->viewData('firstUntaggedId'))->toBe($untagged->id);
+    });
+});

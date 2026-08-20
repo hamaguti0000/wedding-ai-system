@@ -18,9 +18,29 @@
 .photo-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .photo-preview { width: 80px; height: 80px; border-radius: 6px; object-fit: cover; border: 1px solid #e8d5b7; }
 
-.gl-admin-quick { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 18px; }
-.gl-admin-quick__btn { min-height: 42px; padding: 0 15px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e8d5b7; background: #fffdf9; color: #7a5b32; text-decoration: none; font-size: .84rem; font-weight: 800; }
-.gl-admin-quick__btn--primary { background: #b38b59; border-color: #b38b59; color: #fff; }
+/* やることバー（未タグの案内） */
+.gl-todo {
+    display: flex; align-items: center; gap: 13px; margin: 0 0 18px;
+    padding: 15px 17px; border-radius: 14px; text-decoration: none;
+    border: 1px solid #e8d0a8; background: linear-gradient(135deg, #fffaf0 0%, #fdf2df 100%);
+    box-shadow: 0 8px 24px rgba(61,47,37,.06);
+}
+.gl-todo:hover { border-color: #d0a86a; }
+.gl-todo--done { border-color: #cfe6d3; background: linear-gradient(135deg, #f6fbf7 0%, #eef7f0 100%); }
+.gl-todo__icon {
+    width: 42px; height: 42px; border-radius: 999px; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #f1e0c2; color: #9b6d35;
+}
+.gl-todo--done .gl-todo__icon { background: #d9edde; color: #3f7d51; }
+.gl-todo__body { flex: 1; min-width: 0; }
+.gl-todo__body strong { display: block; color: #3d2f25; font-size: .92rem; margin-bottom: 2px; }
+.gl-todo__body span { display: block; color: #8a7969; font-size: .76rem; line-height: 1.5; }
+.gl-todo__go {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+    background: #b38b59; color: #fff; border-radius: 999px;
+    padding: 10px 16px; font-size: .82rem; font-weight: 800;
+}
 .gl-upload-section { margin-bottom: 22px; border: 1px solid #efe3d4; border-radius: 16px; background: #fffdf9; box-shadow: 0 10px 28px rgba(61,47,37,.06); overflow: hidden; }
 .gl-upload-section__summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; cursor: pointer; list-style: none; user-select: none; }
 .gl-upload-section__summary::-webkit-details-marker { display: none; }
@@ -126,6 +146,12 @@
     background: rgba(255,255,255,.92); color: #7a5b32; font-size: .8rem; font-weight: 800;
     box-shadow: 0 8px 22px rgba(0,0,0,.14);
 }
+.gl-untagged-badge {
+    position: absolute; right: 10px; top: 10px; padding: 5px 11px;
+    border-radius: 999px; background: #b8791f; color: #fff;
+    font-size: .74rem; font-weight: 800; letter-spacing: .5px;
+    box-shadow: 0 8px 22px rgba(0,0,0,.16);
+}
 .gl-admin-item__body { padding: 12px 14px 14px; }
 .gl-admin-item__caption { font-size: 0.86rem; color: #5d4635; margin: 0 0 12px; line-height: 1.55; min-height: 1.55em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .gl-admin-item__caption.is-empty { color: #b7a897; font-weight: 500; }
@@ -145,49 +171,6 @@
     margin-top: 9px; padding: 10px; border: 1px solid #eadccd; border-radius: 12px; background: #fffaf2;
 }
 .gl-order-compact { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; color: #806a55; font-size: .76rem; font-weight: 700; }
-.gl-admin-guide {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin: 0 0 20px;
-}
-.gl-admin-guide__card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    border: 1px solid #eadccd;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #fffdf9 0%, #fff8ee 100%);
-    box-shadow: 0 8px 24px rgba(61,47,37,.05);
-    color: #5d4635;
-    text-decoration: none;
-}
-.gl-admin-guide__icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    background: #f1e3ce;
-    color: #9b6d35;
-}
-.gl-admin-guide__card strong {
-    display: block;
-    margin-bottom: 3px;
-    color: #3d2f25;
-    font-size: .9rem;
-}
-.gl-admin-guide__body { display: block; min-width: 0; }
-.gl-admin-guide__body span {
-    display: block;
-    color: #8a7969;
-    font-size: .76rem;
-    line-height: 1.55;
-}
-.gl-admin-guide__card:hover { border-color: #c9a56f; }
 .gl-admin-item__tag-btn {
     gap: 5px;
     min-width: 82px;
@@ -247,27 +230,7 @@
 .guest-history-section summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #7a6a5a; padding: 10px 0; user-select: none; }
 .gl-admin-item.rejected { opacity: 0.4; }
 
-/* 人物タグ付け */
-
-.gl-tag-panel__head {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    margin-bottom: 8px; color: #5d4635; font-size: 0.82rem;
-}
-.gl-tag-selected-count { color: #b38b59; margin-left: 6px; font-size: 0.74rem; }
-.gl-tag-panel__subhead { margin: 8px 0 5px; color: #7a6a5a; font-size: 0.74rem; font-weight: 700; }
-.gl-tag-clear {
-    border: 1px solid #e8d5b7; background: #fff; color: #9b8573;
-    border-radius: 999px; padding: 3px 9px; font-size: 0.72rem; cursor: pointer;
-}
-.gl-tag-selected { min-height: 28px; max-height: 82px; overflow-y: auto; margin-bottom: 8px; }
-.gl-tag-selected:empty::before { content: 'まだ選択されていません'; color: #c0b0a0; font-size: 0.76rem; }
-.gl-tag-panel__list label span { display: grid; gap: 1px; }
-.gl-tag-panel__list label strong { font-weight: 600; color: #5d4635; }
-.gl-tag-panel__list label small { color: #a99888; font-size: 0.68rem; }
-.gl-tag-panel__actions { display: flex; align-items: center; gap: 8px; }
-.gl-tag-status { color: #9b8573; font-size: 0.76rem; }
-.gl-tag-status.is-ok { color: #15803d; }
-.gl-tag-status.is-error { color: #dc2626; }
+/* 人物タグのチップ表示（タグ付け操作は専用画面 admin/gallery-tag に分離） */
 .gl-admin-item__tags {
     min-height: 24px; max-height: 38px; overflow: hidden; overscroll-behavior: contain;
     padding: 0 14px 12px; font-size: 0.72rem; color: #9b8573; line-height: 1.6;
@@ -280,12 +243,6 @@
     padding: 1px 8px; margin: 2px 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     vertical-align: top;
 }
-.gl-tag-panel { display: none; padding: 10px 12px; background: #fef9f0; border-top: 1px solid #e8d5b7; }
-.gl-tag-search { width: 100%; box-sizing: border-box; padding: 6px 10px; margin-bottom: 8px; border: 1px solid #e0d0bc; border-radius: 6px; font-size: 0.8rem; background: #fffdf9; }
-.gl-tag-search:focus { border-color: #b38b59; outline: none; }
-.gl-tag-panel__list { max-height: 160px; overflow-y: auto; border: 1px solid #e0d0bc; border-radius: 6px; padding: 6px 8px; background: #fff; margin-bottom: 8px; }
-.gl-tag-panel__list label { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; padding: 3px 0; cursor: pointer; }
-.gl-tag-panel__list label.is-hidden { display: none; }
 .gl-order-form { margin: 0 0 12px; }
 .gl-order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
 .gl-order-presets { display: flex; gap: 7px; overflow-x: auto; padding: 0 0 10px; scrollbar-width: none; }
@@ -311,8 +268,6 @@
     .upload-zone__icon { font-size: 1.65rem; margin-bottom: 4px; }
     .upload-zone__text { margin: 0; font-size: .84rem; }
     .upload-zone__sub { margin-top: 3px; font-size: .68rem; }
-    .gl-admin-quick { padding: 4px 0 8px; }
-    .gl-admin-quick__btn { flex: 1 1 auto; }
     .gl-upload-section__summary { padding: 14px; }
     .gl-upload-section__inner { padding: 0 14px 14px; }
     .gl-admin-grid { grid-template-columns: 1fr; gap: 18px; }
@@ -327,13 +282,9 @@
         justify-content: center;
     }
     .gl-admin-more__panel .btn-sm { width: 100%; }
-    .gl-admin-guide { grid-template-columns: 1fr; }
-    .gl-admin-guide__card { align-items: center; padding: 13px 14px; }
+    .gl-todo { padding: 13px 14px; gap: 11px; flex-wrap: wrap; }
+    .gl-todo__go { width: 100%; justify-content: center; }
     .gl-admin-item__tag-btn { justify-content: center; min-width: 100%; }
-    .gl-tag-panel { padding: 12px; }
-    .gl-tag-panel__list { max-height: 260px; }
-    .gl-tag-panel__list label { min-height: 42px; padding: 6px 0; font-size: .86rem; }
-    .gl-tag-panel__list input[type="checkbox"] { width: 20px; height: 20px; }
     .official-section { margin-left: -2px; margin-right: -2px; border-radius: 18px; }
     .official-section__summary { padding: 15px 14px; align-items: flex-start; }
     .official-section__copy { white-space: normal; }
@@ -355,27 +306,24 @@
     <h1><i class="fa-solid fa-images" style="font-size:1.2rem;opacity:0.7;margin-right:8px;"></i>ギャラリー管理</h1>
     <p class="page-desc">ゲストに公開する写真を管理します。複数枚まとめてアップロードできます。</p>
 
-    <div class="gl-admin-guide">
-        <div class="gl-admin-guide__card">
-            <span class="gl-admin-guide__icon"><i class="fa-solid fa-user-tag"></i></span>
-            <span class="gl-admin-guide__body">
-                <strong>写真の人物・グループ紐付け</strong>
-                <span>各写真カードの「タグ付け」から、写っているゲストやグループを選びます。</span>
-            </span>
-        </div>
-        <a href="{{ route('admin.seating') }}" class="gl-admin-guide__card">
-            <span class="gl-admin-guide__icon"><i class="fa-solid fa-chair"></i></span>
-            <span class="gl-admin-guide__body">
-                <strong>席・テーブルの振り分け</strong>
-                <span>席の配置は席次表管理で行います。グループ振り分けも同じ画面にあります。</span>
-            </span>
-        </a>
+    @if ($untaggedCount > 0)
+    <a href="{{ route('admin.gallery.tag.edit', $firstUntaggedId) }}" class="gl-todo">
+        <span class="gl-todo__icon"><i class="fa-solid fa-user-tag"></i></span>
+        <span class="gl-todo__body">
+            <strong>タグが未設定の写真が {{ $untaggedCount }}枚 あります</strong>
+            <span>1枚ずつ表示して、写っている人を選んでいきます</span>
+        </span>
+        <span class="gl-todo__go">始める <i class="fa-solid fa-arrow-right"></i></span>
+    </a>
+    @else
+    <div class="gl-todo gl-todo--done">
+        <span class="gl-todo__icon"><i class="fa-solid fa-check"></i></span>
+        <span class="gl-todo__body">
+            <strong>すべての写真にタグが付いています</strong>
+            <span>各写真の「タグ付け」から内容を見直せます</span>
+        </span>
     </div>
-
-    <div class="gl-admin-quick">
-        <a href="#officialPhotosSection" class="gl-admin-quick__btn gl-admin-quick__btn--primary"><i class="fa-solid fa-images"></i>写真一覧へ</a>
-        <a href="#uploadPhotosSection" class="gl-admin-quick__btn" onclick="document.getElementById('uploadPhotosSection')?.setAttribute('open', 'open')"><i class="fa-solid fa-cloud-arrow-up"></i>写真を追加</a>
-    </div>
+    @endif
 
     @if (session('success'))
     <div class="alert-success" style="margin-bottom:20px;">{{ session('success') }}</div>
@@ -500,6 +448,7 @@
             <button type="button" id="glClear" class="gl-clear" aria-label="クリア">✕</button>
         </div>
         <button class="gl-filter-btn active" data-filter-kind="active" data-active="all">すべて</button>
+        <button class="gl-filter-btn" data-filter-kind="tagged" data-tagged="0">未タグ</button>
         <button class="gl-filter-btn" data-filter-kind="active" data-active="1">表示中</button>
         <button class="gl-filter-btn" data-filter-kind="active" data-active="0">非表示</button>
         <button class="gl-filter-btn" data-filter-kind="category" data-category="ceremony">挙式</button>
@@ -521,17 +470,22 @@
     </div>
     <div class="gl-admin-grid" id="galleryGrid">
         @foreach ($photos as $photo)
+        @php $isUntagged = $photo->taggedUsers->isEmpty() && $photo->taggedGroups->isEmpty(); @endphp
         <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
              data-caption="{{ strtolower($photo->caption ?? '') }}"
              data-active="{{ $photo->is_active ? '1' : '0' }}"
              data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}"
              data-upload-kind="{{ $photo->is_guest_upload ? 'guest' : 'official' }}"
              data-category="{{ $photo->gallery_category ?: 'other' }}"
+             data-tagged="{{ $isUntagged ? '0' : '1' }}"
              data-created="{{ optional($photo->created_at)->timestamp ?? 0 }}"
              data-id="{{ $photo->id }}">
             <div class="gl-admin-item__photo">
                 <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
                 <span class="gl-order-badge">{{ $loop->iteration }}</span>
+                @if ($isUntagged)
+                <span class="gl-untagged-badge">未タグ</span>
+                @endif
             </div>
             <div class="gl-admin-item__body">
                 <span class="gl-admin-item__source">
@@ -544,7 +498,7 @@
                 </div>
                 <p class="gl-admin-item__caption {{ $photo->caption ? '' : 'is-empty' }}" title="{{ $photo->caption }}">{{ $photo->caption ?: 'キャプションなし' }}</p>
                 <div class="gl-admin-item__actions">
-                    <button type="button" class="btn-sm btn-sm-pw gl-admin-item__tag-btn gl-admin-item__primary" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
+                    <a href="{{ route('admin.gallery.tag.edit', $photo->id) }}" class="btn-sm btn-sm-pw gl-admin-item__tag-btn gl-admin-item__primary" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></a>
                     <details class="gl-admin-more">
                         <summary><i class="fa-solid fa-ellipsis"></i>操作</summary>
                         <div class="gl-admin-more__panel">
@@ -601,7 +555,6 @@
                     <button type="submit" class="btn-primary" style="padding:6px 16px;font-size:0.82rem;">保存</button>
                 </form>
             </div>
-            @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests, 'taggableGroups' => $taggableGroups])
         </div>
         @endforeach
     </div>{{-- #galleryGrid --}}
@@ -630,7 +583,7 @@
                     </p>
                     <div class="gl-admin-item__actions">
                         @if ($photo->status === 'approved')
-                        <button class="btn-sm btn-sm-pw gl-admin-item__tag-btn" onclick="toggleTag({{ $photo->id }})" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></button>
+                        <a href="{{ route('admin.gallery.tag.edit', $photo->id) }}" class="btn-sm btn-sm-pw gl-admin-item__tag-btn" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></a>
                         <form method="POST" action="{{ route('admin.gallery.reject', $photo->id) }}" class="gallery-status-form" data-confirm="却下しますか？">
                             @csrf
                             <button class="btn-sm btn-reject" title="却下">却下</button>
@@ -658,9 +611,6 @@
                     @endforeach
                 </div>
                 @endif
-                @if ($photo->status === 'approved')
-                @include('admin.partials.gallery-tag-panel', ['photo' => $photo, 'taggableGuests' => $taggableGuests, 'taggableGroups' => $taggableGroups])
-                @endif
             </div>
             @endforeach
         </div>
@@ -671,7 +621,7 @@
 <script>
 // ── ギャラリー検索・フィルター ────────────────────────────
 (function () {
-    const state  = { q: '', active: 'all', category: 'all', source: 'all' };
+    const state  = { q: '', active: 'all', tagged: 'all', category: 'all', source: 'all' };
     const grid   = document.getElementById('galleryGrid');
     const srch   = document.getElementById('glSearch');
     const clrBtn = document.getElementById('glClear');
@@ -689,6 +639,7 @@
             let show = true;
             if (state.q && !d.caption.includes(state.q)) show = false;
             if (state.active !== 'all' && d.active !== state.active) show = false;
+            if (state.tagged !== 'all' && d.tagged !== state.tagged) show = false;
             if (state.category !== 'all' && d.category !== state.category) show = false;
             if (state.source !== 'all' && d.source !== state.source) show = false;
             item.style.display = show ? '' : 'none';
@@ -730,6 +681,11 @@
                 const next = state.source === btn.dataset.source ? 'all' : btn.dataset.source;
                 state.source = next;
                 document.querySelectorAll('.gl-filter-btn[data-filter-kind="source"]').forEach(b => b.classList.toggle('active', next !== 'all' && b.dataset.source === next));
+            }
+            if (kind === 'tagged') {
+                const next = state.tagged === btn.dataset.tagged ? 'all' : btn.dataset.tagged;
+                state.tagged = next;
+                document.querySelectorAll('.gl-filter-btn[data-filter-kind="tagged"]').forEach(b => b.classList.toggle('active', next !== 'all' && b.dataset.tagged === next));
             }
             applyAll();
         });
@@ -810,133 +766,6 @@ function toggleEdit(id) {
     const el = document.getElementById('edit-' + id);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
-function toggleTag(id) {
-    const el = document.getElementById('tag-' + id);
-    if (!el) return;
-    el.style.display = el.style.display === 'none' || !el.style.display ? 'block' : 'none';
-    el.querySelector('.gl-tag-search')?.focus();
-}
-
-function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, ch => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;',
-    }[ch]));
-}
-
-function galleryTagNames(form) {
-    return Array.from(form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]:checked')).map(input => {
-        const label = input.closest('label');
-        return { id: input.value, name: label?.dataset.label || label?.textContent.trim() || '', type: input.name === 'group_ids[]' ? 'group' : 'user' };
-    });
-}
-
-function renderSelectedTags(form) {
-    const selected = form.querySelector('.gl-tag-selected');
-    const count = form.querySelector('.gl-tag-selected-count');
-    const names = galleryTagNames(form);
-    if (selected) {
-        selected.innerHTML = names.map(tag => `<span class="gl-tag-chip ${tag.type === 'group' ? 'gl-tag-chip--group' : ''}" data-tag-id="${escapeHtml(tag.id)}">${escapeHtml(tag.name)}</span>`).join('');
-    }
-    if (count) count.textContent = `${names.length}名選択中`;
-}
-
-function updateCardTags(photoId, tags) {
-    const card = document.querySelector(`.gl-admin-item[data-id="${photoId}"]`) || document.querySelector(`#tag-${photoId}`)?.closest('.gl-admin-item');
-    if (!card) return;
-    let holder = card.querySelector('.gl-admin-item__tags');
-    const panel = card.querySelector(`#tag-${photoId}`);
-    if (!holder) {
-        holder = document.createElement('div');
-        holder.className = 'gl-admin-item__tags';
-        card.insertBefore(holder, panel || null);
-    }
-    const groups = arguments.length > 2 ? arguments[2] : [];
-    const chips = groups.map(group => `<span class="gl-tag-chip gl-tag-chip--group">${escapeHtml(group.name)}</span>`)
-        .concat(tags.map(tag => `<span class="gl-tag-chip">${escapeHtml(tag.name)}</span>`));
-    holder.innerHTML = chips.join('');
-}
-
-document.querySelectorAll('.gl-tag-form').forEach(form => {
-    const search = form.querySelector('.gl-tag-search');
-    const status = form.querySelector('.gl-tag-status');
-
-    search?.addEventListener('input', () => {
-        const q = search.value.toLowerCase().trim();
-        form.querySelectorAll('.gl-tag-panel__list label[data-name]').forEach(label => {
-            label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
-        });
-    });
-
-    form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]').forEach(input => {
-        input.addEventListener('change', () => {
-            renderSelectedTags(form);
-            if (status) {
-                status.textContent = '未保存の変更があります';
-                status.className = 'gl-tag-status';
-            }
-        });
-    });
-
-    form.querySelector('.gl-tag-clear')?.addEventListener('click', () => {
-        form.querySelectorAll('.gl-tag-panel__list input[type="checkbox"]').forEach(input => input.checked = false);
-        renderSelectedTags(form);
-        if (status) {
-            status.textContent = '未保存の変更があります';
-            status.className = 'gl-tag-status';
-        }
-    });
-
-    form.addEventListener('submit', async event => {
-        event.preventDefault();
-        const button = form.querySelector('.gl-tag-save');
-        const data = new FormData(form);
-        if (status) {
-            status.textContent = '保存中...';
-            status.className = 'gl-tag-status';
-        }
-        if (button) button.disabled = true;
-
-        try {
-            const res = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                },
-                body: data,
-            });
-            const json = await res.json();
-            if (!res.ok || !json.success) throw new Error(json.message || '保存に失敗しました');
-            updateCardTags(json.photo_id, json.tags || [], json.groups || []);
-            if (status) {
-                status.textContent = '保存しました';
-                status.className = 'gl-tag-status is-ok';
-            }
-        } catch (error) {
-            if (status) {
-                status.textContent = error.message || '保存に失敗しました';
-                status.className = 'gl-tag-status is-error';
-            }
-        } finally {
-            if (button) button.disabled = false;
-        }
-    });
-
-    renderSelectedTags(form);
-});
-
-function filterTagList(input) {
-    const q = input.value.toLowerCase().trim();
-    const form = input.closest('form');
-    form.querySelectorAll('.gl-tag-panel__list label[data-name]').forEach(label => {
-        label.classList.toggle('is-hidden', q.length > 0 && !label.dataset.name.includes(q));
-    });
-}
-
 (function () {
     const controls = document.getElementById('galleryOrderControls');
     const saveButton = document.getElementById('galleryOrderSave');

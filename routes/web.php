@@ -165,6 +165,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/gallery/{id}/move-down',  [AdminGalleryController::class, 'moveDown']) ->name('gallery.move-down');
     Route::post('/gallery/{id}/approve',     [AdminGalleryController::class, 'approve'])  ->name('gallery.approve');
     Route::post('/gallery/{id}/reject',      [AdminGalleryController::class, 'reject'])   ->name('gallery.reject');
+    Route::get('/gallery/{id}/tag',          [AdminGalleryController::class, 'tagEditor'])->name('gallery.tag.edit');
     Route::post('/gallery/{id}/tag',         [AdminGalleryController::class, 'tag'])      ->name('gallery.tag');
 
     // プロフィールブック管理
