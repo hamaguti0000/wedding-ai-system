@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\GalleryPhoto;
 use App\Models\SiteImage;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -29,14 +31,41 @@ class AppServiceProvider extends ServiceProvider
             'people.index'   => 'banner_gallery',
             'people.show'    => 'banner_gallery',
             'movies'         => 'banner_gallery',
+            'gallery-upload' => 'banner_gallery',
             'login'          => 'login_bg',
         ];
 
         View::composer(array_keys($locationMap), function ($view) use ($locationMap) {
             $name = $view->getName();
-            if (isset($locationMap[$name])) {
-                $view->with('bannerImage', SiteImage::forDisplay($locationMap[$name]));
+            if (! isset($locationMap[$name])) {
+                return;
             }
+
+            $siteBanner = SiteImage::forDisplay($locationMap[$name]);
+            $uploadedBanner = $name === 'login' ? null : $this->randomUploadedGalleryPhoto();
+
+            $view->with('siteBannerImage', $siteBanner);
+            $view->with('randomBannerImage', $uploadedBanner);
+            $view->with('bannerImage', $uploadedBanner ?: $siteBanner);
         });
+    }
+
+    private function randomUploadedGalleryPhoto(?int $limit = null)
+    {
+        try {
+            if (! Schema::hasTable('gallery_photos')) {
+                return $limit ? collect() : null;
+            }
+
+            $query = GalleryPhoto::query()
+                ->where('is_active', true)
+                ->where('status', 'approved')
+                ->whereNotNull('file_path')
+                ->inRandomOrder();
+
+            return $limit ? $query->limit($limit)->get() : $query->first();
+        } catch (\Throwable) {
+            return $limit ? collect() : null;
+        }
     }
 }

@@ -65,9 +65,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 @section('content')
 <section class="upload-hero">
-    @php $bannerImg = \App\Models\SiteImage::forDisplay('banner_gallery'); @endphp
+    @php $bannerImg = $bannerImage ?? null; @endphp
     @if($bannerImg)
-        <img class="upload-hero__img" src="{{ asset('storage/'.$bannerImg->file_path) }}" alt="">
+        <img class="upload-hero__img" src="{{ $bannerImg->url }}" alt="">
     @else
         <img class="upload-hero__img" src="{{ asset('img/チャペル.jpg') }}" alt="">
     @endif

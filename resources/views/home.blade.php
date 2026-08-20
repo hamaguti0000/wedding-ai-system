@@ -9,8 +9,26 @@
 
 {{-- ══ HERO ════════════════════════════════════════════════════════ --}}
 @php
-    $heroType   = $setting?->hero_type ?? 'slideshow';
-    $heroImages = \App\Models\SiteImage::forHero();
+    $heroType = $setting?->hero_type ?? 'slideshow';
+    $uploadedHeroImages = collect();
+
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('gallery_photos')) {
+            $uploadedHeroImages = \App\Models\GalleryPhoto::query()
+                ->where('is_active', true)
+                ->where('status', 'approved')
+                ->whereNotNull('file_path')
+                ->inRandomOrder()
+                ->limit(8)
+                ->get();
+        }
+    } catch (\Throwable) {
+        $uploadedHeroImages = collect();
+    }
+
+    $heroImages = $uploadedHeroImages->isNotEmpty()
+        ? $uploadedHeroImages
+        : \App\Models\SiteImage::forHero();
 @endphp
 <section class="home-hero"
     data-hero-type="{{ $heroType }}"
