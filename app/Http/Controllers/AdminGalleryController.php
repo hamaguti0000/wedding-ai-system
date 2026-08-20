@@ -128,8 +128,8 @@ class AdminGalleryController extends Controller
 
         return GuestGroup::with('primaryGuest')
             ->get()
-            ->sortBy(fn (GuestGroup $group) => $group->displayName())
-            ->unique(fn (GuestGroup $group) => $group->displayName())
+            ->sortBy(fn (GuestGroup $group) => sprintf('%02d-%s', $group->gallerySortRank(), $group->galleryDisplayName()))
+            ->unique(fn (GuestGroup $group) => $group->galleryDisplayName())
             ->values();
     }
 
@@ -286,7 +286,7 @@ class AdminGalleryController extends Controller
                 'groups' => $photo->taggedGroups
                     ->map(fn (GuestGroup $group) => [
                         'id' => $group->id,
-                        'name' => $group->displayName(),
+                        'name' => $group->galleryDisplayName(),
                         'type' => 'group',
                     ])
                     ->unique('name')
@@ -324,12 +324,12 @@ class AdminGalleryController extends Controller
         $allGroups = GuestGroup::with('primaryGuest')->get();
         $selectedNames = $allGroups
             ->whereIn('id', $groupIds)
-            ->map(fn (GuestGroup $group) => $group->displayName())
+            ->map(fn (GuestGroup $group) => $group->galleryDisplayName())
             ->unique()
             ->values();
 
         return $allGroups
-            ->filter(fn (GuestGroup $group) => $selectedNames->contains($group->displayName()))
+            ->filter(fn (GuestGroup $group) => $selectedNames->contains($group->galleryDisplayName()))
             ->pluck('id')
             ->values()
             ->all();

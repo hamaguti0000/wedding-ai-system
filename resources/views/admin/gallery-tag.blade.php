@@ -139,7 +139,7 @@
 @php
     $taggedIds = $photo->taggedUsers->pluck('id')->all();
     $taggedGroupIds = $photo->taggedGroups->pluck('id')->all();
-    $taggedGroupNames = $photo->taggedGroups->map(fn($g) => $g->displayName())->unique()->values()->all();
+    $taggedGroupNames = $photo->taggedGroups->map(fn($g) => $g->galleryDisplayName())->unique()->values()->all();
     $selectedCount = count($taggedIds) + count(array_unique($taggedGroupNames));
 @endphp
 
@@ -195,7 +195,7 @@
                     @if ($taggableGroups->isNotEmpty())
                     <div class="tag-list__label">グループ</div>
                     @foreach ($taggableGroups as $group)
-                    @php $groupName = $group->displayName(); @endphp
+                    @php $groupName = $group->galleryDisplayName(); @endphp
                     <label class="tag-option tag-option--group"
                            data-name="{{ strtolower($groupName . ' ' . $group->id) }}"
                            data-label="{{ $groupName }}" data-kind="group">

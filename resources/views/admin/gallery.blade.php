@@ -510,6 +510,7 @@
         <div class="gl-order-presets" aria-label="表示順の一括変更">
             <button type="button" class="gl-order-preset" data-order-preset="newest">新しい順</button>
             <button type="button" class="gl-order-preset" data-order-preset="oldest">古い順</button>
+            <button type="button" class="gl-order-preset" data-order-preset="group-order">グループ順</button>
             <button type="button" class="gl-order-preset" data-order-preset="official-first">管理者→ゲスト</button>
             <button type="button" class="gl-order-preset" data-order-preset="guest-first">ゲスト→管理者</button>
         </div>
@@ -520,7 +521,14 @@
     </details>
     <div class="gl-admin-grid" id="galleryGrid">
         @foreach ($photos as $photo)
-        @php $isUntagged = $photo->taggedUsers->isEmpty() && $photo->taggedGroups->isEmpty(); @endphp
+        @php
+            $isUntagged = $photo->taggedUsers->isEmpty() && $photo->taggedGroups->isEmpty();
+            $groupSortOrder = collect()
+                ->merge($photo->taggedGroups->map(fn($group) => $group->gallerySortRank()))
+                ->merge($photo->taggedUsers->map(fn($user) => \App\Models\GuestGroup::gallerySortRankForProfile($user->guestProfile)))
+                ->filter(fn($rank) => $rank < 99)
+                ->min() ?? 99;
+        @endphp
         <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
              data-caption="{{ strtolower($photo->caption ?? '') }}"
              data-active="{{ $photo->is_active ? '1' : '0' }}"
@@ -528,6 +536,7 @@
              data-upload-kind="{{ $photo->is_guest_upload ? 'guest' : 'official' }}"
              data-category="{{ $photo->gallery_category ?: 'other' }}"
              data-tagged="{{ $isUntagged ? '0' : '1' }}"
+             data-group-order="{{ $groupSortOrder }}"
              data-created="{{ optional($photo->created_at)->timestamp ?? 0 }}"
              data-id="{{ $photo->id }}">
             {{-- 写真をタップするとタグ付け画面へ。細かい操作は右下の「…」からシートで開く --}}
@@ -604,8 +613,8 @@
                 </div>
                 @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
                 <div class="gl-admin-item__tags">
-                    @foreach ($photo->taggedGroups->unique(fn($group) => $group->displayName()) as $group)
-                    <span class="gl-tag-chip gl-tag-chip--group">{{ $group->displayName() }}</span>
+                    @foreach ($photo->taggedGroups->unique(fn($group) => $group->galleryDisplayName()) as $group)
+                    <span class="gl-tag-chip gl-tag-chip--group">{{ $group->galleryDisplayName() }}</span>
                     @endforeach
                     @foreach ($photo->taggedUsers as $tagged)
                     <span class="gl-tag-chip">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
@@ -908,6 +917,11 @@ document.querySelectorAll('.pending-action-form, .gallery-status-form').forEach(
             if (type === 'oldest') return Number(a.dataset.created || 0) - Number(b.dataset.created || 0);
             if (type === 'official-first' && a.dataset.uploadKind !== b.dataset.uploadKind) return a.dataset.uploadKind === 'official' ? -1 : 1;
             if (type === 'guest-first' && a.dataset.uploadKind !== b.dataset.uploadKind) return a.dataset.uploadKind === 'guest' ? -1 : 1;
+            if (type === 'group-order') {
+                const ag = Number(a.dataset.groupOrder || 99);
+                const bg = Number(b.dataset.groupOrder || 99);
+                if (ag !== bg) return ag - bg;
+            }
             const av = Number(a.querySelector('[data-order-input]')?.value || 9999);
             const bv = Number(b.querySelector('[data-order-input]')?.value || 9999);
             if (av !== bv) return av - bv;

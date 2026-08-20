@@ -354,7 +354,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     <div class="gl-grid" id="glGrid">
         @foreach ($photos as $i => $photo)
         @php
-            $groupTags = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->displayName(), 'type' => 'group'])->unique('name')->values();
+            $groupTags = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->galleryDisplayName(), 'type' => 'group'])->unique('name')->values();
             $userTags = $photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name, 'type' => 'user'])->values();
             $tagNames = $groupTags->concat($userTags)->values();
             $isMine = $currentUserId && $photo->taggedUsers->contains('id', $currentUserId);
@@ -422,7 +422,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         $tags = $p->taggedGroups->map(function ($g) use ($currentUserGroupIds) {
             return [
                 'id' => $g->id,
-                'name' => $g->displayName(),
+                'name' => $g->galleryDisplayName(),
                 'is_current' => $currentUserGroupIds->contains($g->id),
                 'type' => 'group',
             ];

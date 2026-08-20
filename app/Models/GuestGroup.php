@@ -62,6 +62,42 @@ class GuestGroup extends Model
         )->withTimestamps();
     }
 
+    public static function galleryGroupLabels(): array
+    {
+        return [
+            'groom|family' => '濵口 親族',
+            'groom|friend' => '濵口 友人',
+            'groom|colleague' => '濵口 職場',
+            'bride|family' => '馬場 親族',
+            'bride|friend' => '馬場 友人',
+            'bride|colleague' => '馬場 職場',
+        ];
+    }
+
+    public static function galleryGroupOrder(): array
+    {
+        return array_flip(array_keys(self::galleryGroupLabels()));
+    }
+
+    public static function gallerySortRankFor(?string $guestSide, ?string $relationship): int
+    {
+        $key = ($guestSide ?: 'unknown') . '|' . ($relationship ?: 'other');
+
+        return self::galleryGroupOrder()[$key] ?? 99;
+    }
+
+    public static function galleryLabelFor(?string $guestSide, ?string $relationship): ?string
+    {
+        $key = ($guestSide ?: 'unknown') . '|' . ($relationship ?: 'other');
+
+        return self::galleryGroupLabels()[$key] ?? null;
+    }
+
+    public static function gallerySortRankForProfile(?GuestProfile $profile): int
+    {
+        return self::gallerySortRankFor($profile?->guest_side, $profile?->relationship);
+    }
+
     public function displayName(): string
     {
         if ($this->name) {
@@ -73,5 +109,15 @@ class GuestGroup extends Model
         }
 
         return 'グループ ' . $this->id;
+    }
+
+    public function galleryDisplayName(): string
+    {
+        return self::galleryLabelFor($this->guest_side, $this->relationship) ?: $this->displayName();
+    }
+
+    public function gallerySortRank(): int
+    {
+        return self::gallerySortRankFor($this->guest_side, $this->relationship);
     }
 }
