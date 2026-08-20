@@ -723,9 +723,14 @@ async function saveSelectedToPhotos() {
     if (!chosen.length) return;
     if (status) status.textContent = '共有シートを準備しています...';
 
+    if (chosen.length > 30) {
+        if (status) status.textContent = '写真アプリへ保存は一度に30枚までです。大量に保存する場合はZIP保存を使ってください。';
+        return;
+    }
+
     try {
         const files = [];
-        for (const photo of chosen.slice(0, 30)) {
+        for (const photo of chosen) {
             files.push(await fetchPhotoFile(photo.url, photo.download_name || `wedding-photo-${photo.id}.jpg`));
         }
         if (navigator.canShare && navigator.canShare({ files }) && navigator.share) {
@@ -741,7 +746,12 @@ async function saveSelectedToPhotos() {
 
 function saveSelectedToFiles() {
     const ids = selectedPhotoIds();
+    const status = document.getElementById('bulkSaveStatus');
     if (!ids.length) return;
+    if (ids.length > 80) {
+        if (status) status.textContent = 'ZIP保存は一度に80枚までです。少し分けて保存してください。';
+        return;
+    }
     const form = document.getElementById('bulkDownloadForm');
     form.querySelectorAll('input[name="photo_ids[]"]').forEach(input => input.remove());
     ids.forEach(id => {
