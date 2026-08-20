@@ -40,48 +40,48 @@ main { padding: 0; text-align: initial; }
 .gl-item:hover .gl-item__caption { opacity: 1; }
 
 .gl-lightbox {
-    position: fixed; inset: 0; z-index: 9000; background: rgba(10,5,0,0.92);
+    position: fixed; inset: 0; z-index: 9000; background: rgba(16,12,9,.95);
     display: flex; align-items: center; justify-content: center; padding: 20px;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    opacity: 0; pointer-events: none; transition: opacity 0.22s;
 }
 .gl-lightbox.is-open { opacity: 1; pointer-events: all; }
-.gl-lightbox__inner { position: relative; max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
+.gl-lightbox__inner { position: relative; width: min(1120px, 100%); height: min(90vh, 820px); display: grid; place-items: center; }
 .gl-lightbox__img {
-    max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 6px;
-    box-shadow: 0 16px 64px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.25s;
+    max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 14px;
+    box-shadow: 0 18px 58px rgba(0,0,0,.42); transform: scale(.98); transition: transform .22s, opacity .14s;
 }
 .gl-lightbox.is-open .gl-lightbox__img { transform: scale(1); }
-.gl-lightbox__caption { position: absolute; bottom: -32px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.7); font-size: 0.85rem; }
-.gl-lightbox__tags {
-    position: absolute; bottom: -64px; left: 0; right: 0;
-    text-align: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+.gl-lightbox__meta {
+    position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 3;
+    display: grid; gap: 8px; justify-items: center; pointer-events: none;
 }
+.gl-lightbox__caption { margin: 0; color: rgba(255,255,255,.82); font-size: .85rem; text-align: center; }
+.gl-lightbox__caption:empty { display: none; }
+.gl-lightbox__tags { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
 .gl-lightbox__tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: rgba(255,255,255,0.12); color: #fff; text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.3); border-radius: 20px;
-    padding: 4px 12px; font-size: 0.76rem; transition: background 0.15s;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,.14); color: #fff; text-decoration: none;
+    border: 1px solid rgba(255,255,255,.34); border-radius: 999px;
+    padding: 6px 12px; font-size: .76rem; transition: background .15s; pointer-events: auto;
 }
-.gl-lightbox__tag:hover { background: rgba(255,255,255,0.25); }
+.gl-lightbox__tag:hover { background: rgba(255,255,255,.24); }
 .gl-lightbox__download {
-    position: absolute; top: -44px; left: 0;
-    background: none; border: none; color: #fff;
-    font-size: 1.3rem; cursor: pointer; opacity: 0.7;
-    transition: opacity 0.15s; text-decoration: none;
+    position: absolute; top: 14px; left: 14px; z-index: 4;
+    width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.14); color: #fff;
+    font-size: 1rem; cursor: pointer; text-decoration: none; backdrop-filter: blur(12px);
 }
-.gl-lightbox__download:hover { opacity: 1; }
-.gl-lightbox__close { position: absolute; top: -44px; right: 0; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; opacity: 0.7; transition: opacity 0.15s; }
-.gl-lightbox__close:hover { opacity: 1; }
+.gl-lightbox__close { position: absolute; top: 14px; right: 14px; z-index: 4; width: 44px; height: 44px; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.14); color: #fff; font-size: 1.15rem; cursor: pointer; backdrop-filter: blur(12px); }
 .gl-lightbox__nav {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.15); border: none; color: #fff;
-    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 4;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.14); color: #fff;
+    width: 44px; height: 44px; border-radius: 999px; cursor: pointer;
     font-size: 1rem; display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s; backdrop-filter: blur(4px);
+    backdrop-filter: blur(12px);
 }
-.gl-lightbox__nav:hover { background: rgba(255,255,255,0.25); }
-.gl-lightbox__prev { left: -56px; }
-.gl-lightbox__next { right: -56px; }
+.gl-lightbox__prev { left: 14px; }
+.gl-lightbox__next { right: 14px; }
+.gl-lightbox__topcount { position: absolute; top: 23px; left: 72px; right: 72px; z-index: 4; text-align: center; color: rgba(255,255,255,.86); font-size: .76rem; font-weight: 800; letter-spacing: 2px; }
 
 .gl-empty { text-align: center; padding: 60px 20px; color: #c0b0a0; }
 .gl-empty i { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
@@ -89,9 +89,16 @@ main { padding: 0; text-align: initial; }
 @media (max-width: 767px) {
     .gl-grid { columns: 2 140px; column-gap: 10px; }
     .gl-item { margin-bottom: 10px; }
-    .gl-lightbox__prev { left: -10px; }
-    .gl-lightbox__next { right: -10px; }
-    .gl-lightbox__nav { width: 36px; height: 36px; }
+    .gl-lightbox { padding: 0; align-items: stretch; justify-content: stretch; }
+    .gl-lightbox__inner { width: 100%; height: 100dvh; max-height: none; padding: calc(env(safe-area-inset-top) + 66px) 12px 128px; box-sizing: border-box; }
+    .gl-lightbox__img { max-width: calc(100vw - 24px); max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 210px); border-radius: 14px; }
+    .gl-lightbox__download { display: none; }
+    .gl-lightbox__nav { display: none; }
+    .gl-lightbox__close { top: calc(env(safe-area-inset-top) + 14px); right: 14px; }
+    .gl-lightbox__topcount { top: calc(env(safe-area-inset-top) + 23px); }
+    .gl-lightbox__meta { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 18px); padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 16px; background: rgba(16,12,9,.72); backdrop-filter: blur(14px); }
+    .gl-lightbox__tags { max-height: 84px; overflow-y: auto; }
+    .gl-lightbox__tag { background: rgba(255,255,255,.12); }
 }
 @media (min-width: 768px) {
     .gl-banner { padding-top: 80px; }
@@ -147,18 +154,21 @@ main { padding: 0; text-align: initial; }
         <a class="gl-lightbox__download" id="glLightboxDownload" href="" download onclick="event.stopPropagation()" aria-label="ダウンロード">
             <i class="fa-solid fa-download"></i>
         </a>
+        <span class="gl-lightbox__topcount" id="glLightboxTopIndex">Photo</span>
         <button class="gl-lightbox__close" onclick="closeLightbox()" aria-label="閉じる">
             <i class="fa-solid fa-xmark"></i>
         </button>
         <button class="gl-lightbox__nav gl-lightbox__prev" onclick="event.stopPropagation();prevPhoto()" aria-label="前へ">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
-        <img class="gl-lightbox__img" id="glLightboxImg" src="" alt="">
+        <img class="gl-lightbox__img" id="glLightboxImg" src="" alt="" onclick="event.stopPropagation()">
         <button class="gl-lightbox__nav gl-lightbox__next" onclick="event.stopPropagation();nextPhoto()" aria-label="次へ">
             <i class="fa-solid fa-chevron-right"></i>
         </button>
-        <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
-        <div class="gl-lightbox__tags" id="glLightboxTags"></div>
+        <div class="gl-lightbox__meta">
+            <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
+            <div class="gl-lightbox__tags" id="glLightboxTags"></div>
+        </div>
     </div>
 </div>
 
@@ -168,7 +178,7 @@ main { padding: 0; text-align: initial; }
             return ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name];
         })->values();
 
-        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];
+        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags, 'download_name' => 'wedding-photo-' . $p->id . '.jpg'];
     })->values();
 @endphp
 <script>
@@ -182,18 +192,27 @@ function openLightbox(index) {
     document.getElementById('glLightbox').classList.add('is-open');
     document.body.style.overflow = 'hidden';
 }
+function scrollToCurrentItem() {
+    const item = document.querySelector(`.gl-item[data-index="${current}"]`);
+    if (!item) return;
+    window.setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+}
 function closeLightbox() {
     document.getElementById('glLightbox').classList.remove('is-open');
     document.body.style.overflow = '';
+    scrollToCurrentItem();
 }
 function closeLightboxOnOverlay(e) {
-    if (e.target === document.getElementById('glLightbox')) closeLightbox();
+    if (e.target === document.getElementById('glLightbox') || e.target === document.querySelector('.gl-lightbox__inner')) closeLightbox();
 }
 function showPhoto() {
     const p = photos[current];
     document.getElementById('glLightboxImg').src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption ?? '';
-    document.getElementById('glLightboxDownload').href = p.url;
+    const download = document.getElementById('glLightboxDownload');
+    download.href = p.url;
+    download.download = p.download_name || `wedding-photo-${current + 1}.jpg`;
+    document.getElementById('glLightboxTopIndex').textContent = `${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
     const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     tagsEl.innerHTML = (p.tags || []).map(t =>
@@ -202,6 +221,31 @@ function showPhoto() {
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
 function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
+(function () {
+    const stage = document.querySelector('.gl-lightbox__inner');
+    if (!stage) return;
+    let startX = 0;
+    let startY = 0;
+    stage.addEventListener('click', event => {
+        if (event.target !== stage) return;
+        const edgeWidth = Math.min(92, window.innerWidth * 0.24);
+        if (event.clientX <= edgeWidth) { prevPhoto(); return; }
+        if (event.clientX >= window.innerWidth - edgeWidth) { nextPhoto(); return; }
+        closeLightbox();
+    });
+    stage.addEventListener('touchstart', event => {
+        const touch = event.changedTouches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+    }, { passive: true });
+    stage.addEventListener('touchend', event => {
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        dx < 0 ? nextPhoto() : prevPhoto();
+    }, { passive: true });
+})();
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb.classList.contains('is-open')) return;
