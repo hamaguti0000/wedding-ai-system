@@ -801,7 +801,17 @@ document.getElementById('bulkSaveFiles')?.addEventListener('click', saveSelected
     let startX = 0;
     let startY = 0;
     stage.addEventListener('click', event => {
-        if (event.target === stage) closeLightbox();
+        if (event.target !== stage) return;
+        const edgeWidth = Math.min(92, window.innerWidth * 0.24);
+        if (event.clientX <= edgeWidth) {
+            prevPhoto();
+            return;
+        }
+        if (event.clientX >= window.innerWidth - edgeWidth) {
+            nextPhoto();
+            return;
+        }
+        closeLightbox();
     });
     stage.addEventListener('touchstart', event => {
         const touch = event.changedTouches[0];
