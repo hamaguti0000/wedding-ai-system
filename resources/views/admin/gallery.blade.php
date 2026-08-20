@@ -56,8 +56,8 @@
 
 .gl-admin-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 10px;
     margin-top: 8px;
 }
 .official-section {
@@ -132,51 +132,52 @@
 }
 .official-section[open] .official-section__chevron { transform: rotate(180deg); }
 .official-section__inner { padding: 0 18px; }
+/* ── 写真タイル（一覧は一覧に徹し、詳細操作はシートに逃がす） ── */
 .gl-admin-item {
-    background: #fff; border-radius: 16px; overflow: hidden;
-    border: 1px solid #eee4d8; box-shadow: 0 12px 30px rgba(61,47,37,0.08);
-    display: flex; flex-direction: column; min-width: 0;
+    position: relative; border-radius: 12px; overflow: hidden;
+    background: #f2ece4; aspect-ratio: 1; min-width: 0;
+    box-shadow: 0 4px 12px rgba(61,47,37,.07);
 }
-.gl-admin-item.inactive { opacity: 0.56; }
-.gl-admin-item__photo { position: relative; background: #f2ece4; }
-.gl-admin-item__img { width: 100%; height: 172px; object-fit: cover; display: block; flex: 0 0 auto; }
+.gl-admin-item.inactive { opacity: .5; }
+.gl-tile__link { display: block; width: 100%; height: 100%; }
+.gl-tile__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gl-order-badge {
-    position: absolute; left: 10px; top: 10px; min-width: 32px; height: 32px; padding: 0 9px;
+    position: absolute; left: 6px; top: 6px; min-width: 24px; height: 24px; padding: 0 7px;
     display: inline-flex; align-items: center; justify-content: center; border-radius: 999px;
-    background: rgba(255,255,255,.92); color: #7a5b32; font-size: .8rem; font-weight: 800;
-    box-shadow: 0 8px 22px rgba(0,0,0,.14);
+    background: rgba(255,255,255,.93); color: #7a5b32; font-size: .74rem; font-weight: 800;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
 }
 .gl-untagged-badge {
-    position: absolute; right: 10px; top: 10px; padding: 5px 11px;
+    position: absolute; left: 6px; bottom: 6px; padding: 3px 8px;
     border-radius: 999px; background: #b8791f; color: #fff;
-    font-size: .74rem; font-weight: 800; letter-spacing: .5px;
-    box-shadow: 0 8px 22px rgba(0,0,0,.16);
+    font-size: .68rem; font-weight: 800;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
-.gl-admin-item__body { padding: 12px 14px 14px; }
-.gl-admin-item__caption { font-size: 0.86rem; color: #5d4635; margin: 0 0 12px; line-height: 1.55; min-height: 1.55em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.gl-admin-item__caption.is-empty { color: #b7a897; font-weight: 500; }
-.gl-admin-item__actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; }
-.gl-admin-item__primary { min-height: 42px; justify-content: center; font-weight: 800; }
-.gl-admin-more { position: relative; }
-.gl-admin-more[open] { grid-column: 1 / -1; }
-.gl-admin-more[open] summary { width: 100%; box-sizing: border-box; }
-.gl-admin-more summary {
-    min-height: 42px; padding: 0 12px; border: 1px solid #e8d5b7; border-radius: 10px;
-    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-    background: #fffdf9; color: #8a642e; font-size: .8rem; font-weight: 800; cursor: pointer; list-style: none;
+.gl-tile__hidden-mark {
+    position: absolute; right: 6px; bottom: 6px; padding: 3px 8px;
+    display: inline-flex; align-items: center; gap: 4px;
+    border-radius: 999px; background: rgba(40,32,26,.82); color: #fff;
+    font-size: .66rem; font-weight: 700;
 }
-.gl-admin-more summary::-webkit-details-marker { display: none; }
-.gl-admin-more__panel {
-    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
-    margin-top: 9px; padding: 10px; border: 1px solid #eadccd; border-radius: 12px; background: #fffaf2;
+.gl-tile__menu {
+    position: absolute; right: 4px; top: 4px; width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: none; border-radius: 999px; cursor: pointer;
+    background: rgba(255,255,255,.9); color: #6d5540;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
 }
-.gl-order-compact { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; color: #806a55; font-size: .76rem; font-weight: 700; }
-.gl-admin-item__tag-btn {
-    gap: 5px;
-    min-width: 82px;
-    padding-left: 9px;
-    padding-right: 9px;
+.gl-tile__menu:hover { background: #fff; }
+.gl-order-input { display: none; }
+
+/* ── 承認・却下履歴（従来のカード表示のまま） ── */
+.gl-history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.gl-history-item {
+    background: #fff; border-radius: 14px; overflow: hidden;
+    border: 1px solid #eee4d8; box-shadow: 0 8px 20px rgba(61,47,37,.06);
 }
+.gl-history-item.rejected { opacity: .45; }
+.gl-history-item .gl-admin-item__img { width: 100%; height: 140px; object-fit: cover; display: block; }
+.gl-history-item .gl-admin-item__body { padding: 11px 13px 13px; }
 
 /* ゲスト投稿承認セクション */
 .pending-section {
@@ -243,7 +244,17 @@
     padding: 1px 8px; margin: 2px 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     vertical-align: top;
 }
-.gl-order-form { margin: 0 0 12px; }
+.gl-order-form { margin: 0 0 14px; border: 1px solid #efe3d4; border-radius: 12px; background: #fffdf9; overflow: hidden; }
+.gl-order-summary {
+    padding: 12px 14px; cursor: pointer; list-style: none; user-select: none;
+    color: #8a642e; font-size: .82rem; font-weight: 800;
+    display: flex; align-items: center; gap: 8px;
+}
+.gl-order-summary::-webkit-details-marker { display: none; }
+.gl-order-form[open] .gl-order-summary { border-bottom: 1px solid #f3ebe0; }
+.gl-order-form .gl-order-presets,
+.gl-order-form .gl-order-actions { padding: 12px 14px 0; }
+.gl-order-form .gl-order-actions { padding-bottom: 14px; }
 .gl-order-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
 .gl-order-presets { display: flex; gap: 7px; overflow-x: auto; padding: 0 0 10px; scrollbar-width: none; }
 .gl-order-presets::-webkit-scrollbar { display: none; }
@@ -253,15 +264,62 @@
 .gl-order-status { color: #8a7969; font-size: .78rem; }
 .gl-order-status.is-ok { color: #15803d; }
 .gl-order-status.is-error { color: #dc2626; }
-.gl-admin-item__source { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 7px; color: #9b8573; font-size: .72rem; font-weight: 800; }
 
-.gl-admin-item__meta { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
-.gl-photo-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: #f7f1e9; border: 1px solid #eadccd; color: #806a55; font-size: .68rem; font-weight: 800; }
-.gl-photo-chip--source { background: #eef7ff; border-color: #bfdbfe; color: #2563eb; }
+/* 履歴カードの中身 */
+.gl-history-item .gl-admin-item__caption { font-size: .8rem; color: #5d4635; margin: 0 0 10px; line-height: 1.5; }
+.gl-history-item .gl-admin-item__actions { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.gl-history-item .gl-admin-item__tag-btn { gap: 5px; }
+.gl-history-item .gl-admin-item__tags { padding: 0 13px 12px; font-size: .72rem; line-height: 1.6; }
 .gl-upload-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
 .gl-upload-options label, .gl-edit-options label { display: grid; gap: 4px; color: #8a7969; font-size: .74rem; font-weight: 800; }
 .gl-upload-options select, .gl-edit-options select { width: 100%; min-height: 40px; padding: 7px 10px; border: 1px solid #e0d0bc; border-radius: 8px; background: #fff; color: #3d2f25; font-size: .86rem; }
 .gl-edit-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+
+/* ── 写真の操作シート ── */
+.gl-sheet { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+.gl-sheet[hidden] { display: none; }
+.gl-sheet__backdrop { position: absolute; inset: 0; background: rgba(30,22,16,.45); }
+.gl-sheet__panel {
+    position: relative; width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+    background: #fffdf9; border-radius: 20px 20px 0 0;
+    padding: 8px 18px calc(22px + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 40px rgba(0,0,0,.22);
+    animation: sheet-up .18s ease;
+}
+@keyframes sheet-up { from { transform: translateY(18px); opacity: .6; } to { transform: none; opacity: 1; } }
+.gl-sheet__grip { width: 40px; height: 4px; border-radius: 999px; background: #e2d5c3; margin: 4px auto 12px; }
+.gl-sheet__head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.gl-sheet__thumb { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; flex: 0 0 auto; background: #f2ece4; }
+.gl-sheet__headtext { flex: 1; min-width: 0; }
+.gl-sheet__headtext strong { display: block; color: #3d2f25; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gl-sheet__headtext span { display: block; margin-top: 2px; color: #9b8573; font-size: .74rem; }
+.gl-sheet__close { border: none; background: none; color: #9b8573; font-size: 1.1rem; cursor: pointer; padding: 6px 8px; }
+.gl-sheet__primary {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; border-radius: 12px; margin-bottom: 16px;
+    background: #b38b59; color: #fff; text-decoration: none; font-size: .88rem; font-weight: 800;
+}
+.gl-sheet__primary:hover { background: #a37c4c; }
+.gl-sheet__form { display: grid; gap: 11px; padding-top: 14px; border-top: 1px solid #f0e6d8; }
+.gl-sheet__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gl-sheet__field { display: grid; gap: 5px; color: #7a6a5a; font-size: .76rem; font-weight: 700; }
+.gl-sheet__field input, .gl-sheet__field select {
+    width: 100%; box-sizing: border-box; padding: 11px 12px;
+    border: 1px solid #e0d0bc; border-radius: 10px; background: #fff; font-size: 16px; font-weight: 400;
+}
+.gl-sheet__check { display: flex; align-items: center; gap: 9px; color: #5d4635; font-size: .84rem; cursor: pointer; padding: 4px 0; }
+.gl-sheet__check input { width: 20px; height: 20px; accent-color: #b38b59; }
+.gl-sheet__save {
+    min-height: 46px; border-radius: 12px; border: 1px solid #b38b59;
+    background: #fff; color: #8a642e; font-size: .86rem; font-weight: 800; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
+.gl-sheet__delete {
+    width: 100%; min-height: 44px; margin-top: 14px; border-radius: 12px;
+    border: 1px solid #f0c9c9; background: #fff7f7; color: #c0392b;
+    font-size: .82rem; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
 
 @media (max-width: 640px) {
     .upload-zone { min-height: 118px; padding: 18px 14px; }
@@ -270,21 +328,11 @@
     .upload-zone__sub { margin-top: 3px; font-size: .68rem; }
     .gl-upload-section__summary { padding: 14px; }
     .gl-upload-section__inner { padding: 0 14px 14px; }
-    .gl-admin-grid { grid-template-columns: 1fr; gap: 18px; }
-    .gl-admin-item { border-radius: 18px; }
-    .gl-admin-item__img { height: 220px; }
-    .gl-admin-item__body { padding: 13px 14px 15px; }
-    .gl-admin-item__actions .btn-sm,
-    .gl-admin-more summary {
-        min-height: 42px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .gl-admin-more__panel .btn-sm { width: 100%; }
+    /* スマホでは3列のサムネイル一覧にして、一画面で多くの写真を見渡せるようにする */
+    .gl-admin-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .gl-history-grid { grid-template-columns: 1fr; }
     .gl-todo { padding: 13px 14px; gap: 11px; flex-wrap: wrap; }
     .gl-todo__go { width: 100%; justify-content: center; }
-    .gl-admin-item__tag-btn { justify-content: center; min-width: 100%; }
     .official-section { margin-left: -2px; margin-right: -2px; border-radius: 18px; }
     .official-section__summary { padding: 15px 14px; align-items: flex-start; }
     .official-section__copy { white-space: normal; }
@@ -456,18 +504,20 @@
         <button class="gl-filter-btn" data-filter-kind="source" data-source="photographer">カメラマン</button>
     </div>
     <div class="gl-result-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚</div>
-    <div class="gl-order-form" id="galleryOrderControls" data-action="{{ route('admin.gallery.reorder') }}" data-token="{{ csrf_token() }}">
+    {{-- 並び替えは毎回使うものではないので、既定では畳んでおく --}}
+    <details class="gl-order-form" id="galleryOrderControls" data-action="{{ route('admin.gallery.reorder') }}" data-token="{{ csrf_token() }}">
+        <summary class="gl-order-summary"><i class="fa-solid fa-arrow-down-short-wide"></i> 表示順をまとめて変える</summary>
         <div class="gl-order-presets" aria-label="表示順の一括変更">
-            <button type="button" class="gl-order-preset" data-order-preset="newest"><i class="fa-solid fa-arrow-down-short-wide"></i> 新しい順</button>
-            <button type="button" class="gl-order-preset" data-order-preset="oldest"><i class="fa-solid fa-arrow-up-wide-short"></i> 古い順</button>
-            <button type="button" class="gl-order-preset" data-order-preset="official-first"><i class="fa-solid fa-camera"></i> 管理者→ゲスト</button>
-            <button type="button" class="gl-order-preset" data-order-preset="guest-first"><i class="fa-solid fa-user"></i> ゲスト→管理者</button>
+            <button type="button" class="gl-order-preset" data-order-preset="newest">新しい順</button>
+            <button type="button" class="gl-order-preset" data-order-preset="oldest">古い順</button>
+            <button type="button" class="gl-order-preset" data-order-preset="official-first">管理者→ゲスト</button>
+            <button type="button" class="gl-order-preset" data-order-preset="guest-first">ゲスト→管理者</button>
         </div>
         <div class="gl-order-actions">
-            <button type="button" class="btn-primary" style="padding:7px 16px;font-size:.82rem;" id="galleryOrderSave">表示順を保存</button>
-            <span class="gl-order-status" id="galleryOrderStatus" aria-live="polite">一括で並べて、必要な写真だけ番号調整できます</span>
+            <button type="button" class="btn-primary" style="padding:9px 18px;font-size:.82rem;" id="galleryOrderSave">この順で保存</button>
+            <span class="gl-order-status" id="galleryOrderStatus" aria-live="polite"></span>
         </div>
-    </div>
+    </details>
     <div class="gl-admin-grid" id="galleryGrid">
         @foreach ($photos as $photo)
         @php $isUntagged = $photo->taggedUsers->isEmpty() && $photo->taggedGroups->isEmpty(); @endphp
@@ -480,81 +530,32 @@
              data-tagged="{{ $isUntagged ? '0' : '1' }}"
              data-created="{{ optional($photo->created_at)->timestamp ?? 0 }}"
              data-id="{{ $photo->id }}">
-            <div class="gl-admin-item__photo">
-                <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
+            {{-- 写真をタップするとタグ付け画面へ。細かい操作は右下の「…」からシートで開く --}}
+            <a href="{{ route('admin.gallery.tag.edit', $photo->id) }}" class="gl-tile__link" aria-label="{{ $photo->caption ?: '写真' }}のタグ付け">
+                <img src="{{ $photo->url }}" alt="" class="gl-tile__img" loading="lazy">
                 <span class="gl-order-badge">{{ $loop->iteration }}</span>
                 @if ($isUntagged)
-                <span class="gl-untagged-badge">未タグ</span>
+                <span class="gl-untagged-badge" title="タグ未設定">未タグ</span>
                 @endif
-            </div>
-            <div class="gl-admin-item__body">
-                <span class="gl-admin-item__source">
-                    <i class="fa-solid {{ $photo->is_guest_upload ? 'fa-user' : 'fa-camera' }}"></i>
-                    {{ $photo->is_guest_upload ? (($photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: 'ゲスト') . ' さんの投稿') : $photo->sourceLabel() }}
-                </span>
-                <div class="gl-admin-item__meta">
-                    <span class="gl-photo-chip"><i class="fa-solid fa-layer-group"></i>{{ $photo->categoryLabel() }}</span>
-                    <span class="gl-photo-chip gl-photo-chip--source"><i class="fa-solid {{ $photo->is_guest_upload ? 'fa-user' : ($photo->photo_source === 'photographer' ? 'fa-camera-retro' : 'fa-camera') }}"></i>{{ $photo->sourceLabel() }}</span>
-                </div>
-                <p class="gl-admin-item__caption {{ $photo->caption ? '' : 'is-empty' }}" title="{{ $photo->caption }}">{{ $photo->caption ?: 'キャプションなし' }}</p>
-                <div class="gl-admin-item__actions">
-                    <a href="{{ route('admin.gallery.tag.edit', $photo->id) }}" class="btn-sm btn-sm-pw gl-admin-item__tag-btn gl-admin-item__primary" title="人物・グループを紐付け"><i class="fa-solid fa-user-tag"></i><span>タグ付け</span></a>
-                    <details class="gl-admin-more">
-                        <summary><i class="fa-solid fa-ellipsis"></i>操作</summary>
-                        <div class="gl-admin-more__panel">
-                            <label class="gl-order-compact">表示順<input type="number" class="gl-order-input" min="1" value="{{ $loop->iteration }}" aria-label="表示順" data-order-input></label>
-                            <form method="POST" action="{{ route('admin.gallery.move-up', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="上へ"><i class="fa-solid fa-chevron-up"></i></button></form>
-                            <form method="POST" action="{{ route('admin.gallery.move-down', $photo->id) }}">@csrf @method('PATCH')<button class="btn-sm btn-sm-pw" title="下へ"><i class="fa-solid fa-chevron-down"></i></button></form>
-                            <button type="button" class="btn-sm btn-sm-pw" onclick="toggleEdit({{ $photo->id }})" title="編集"><i class="fa-solid fa-pen"></i></button>
-                            <form method="POST" action="{{ route('admin.gallery.destroy', $photo->id) }}" onsubmit="return confirm('削除しますか？')">@csrf @method('DELETE')<button class="btn-sm btn-sm-del" title="削除"><i class="fa-solid fa-trash"></i></button></form>
-                        </div>
-                    </details>
-                </div>
-            </div>
-            @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
-            <div class="gl-admin-item__tags">
-                @foreach ($photo->taggedGroups->unique(fn($group) => $group->displayName()) as $group)
-                <span class="gl-tag-chip gl-tag-chip--group">{{ $group->displayName() }}</span>
-                @endforeach
-                @foreach ($photo->taggedUsers as $tagged)
-                <span class="gl-tag-chip">{{ $tagged->guestProfile?->fullName() ?: $tagged->name }}</span>
-                @endforeach
-            </div>
-            @endif
-            <div id="edit-{{ $photo->id }}" style="display:none;padding:10px 12px;background:#fef9f0;border-top:1px solid #e8d5b7;">
-                <form method="POST" action="{{ route('admin.gallery.update', $photo->id) }}">
-                    @csrf @method('PATCH')
-                    <div class="form-group" style="margin-bottom:8px;">
-                        <label style="font-size:0.76rem;">キャプション</label>
-                        <input type="text" name="caption" value="{{ $photo->caption }}" maxlength="200" placeholder="写真の説明">
-                    </div>
-                    <div class="gl-edit-options">
-                        <label>シーン
-                            <select name="gallery_category">
-                                @foreach ($categoryOptions as $value => $label)
-                                <option value="{{ $value }}" @selected(($photo->gallery_category ?: 'other') === $value)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </label>
-                        <label>撮影者
-                            @if ($photo->is_guest_upload)
-                            <select name="photo_source" disabled><option value="guest">ゲスト投稿</option></select>
-                            <input type="hidden" name="photo_source" value="guest">
-                            @else
-                            <select name="photo_source">
-                                <option value="photographer" @selected($photo->photo_source === 'photographer')>カメラマン撮影</option>
-                                <option value="admin" @selected(($photo->photo_source ?: 'admin') === 'admin')>管理者アップロード</option>
-                            </select>
-                            @endif
-                        </label>
-                    </div>
-                    <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;margin-bottom:8px;cursor:pointer;">
-                        <input type="checkbox" name="is_active" value="1" {{ $photo->is_active ? 'checked' : '' }}>
-                        表示する
-                    </label>
-                    <button type="submit" class="btn-primary" style="padding:6px 16px;font-size:0.82rem;">保存</button>
-                </form>
-            </div>
+                @unless ($photo->is_active)
+                <span class="gl-tile__hidden-mark"><i class="fa-solid fa-eye-slash"></i>非表示</span>
+                @endunless
+            </a>
+            <button type="button" class="gl-tile__menu" title="この写真の操作"
+                    data-photo-menu
+                    data-id="{{ $photo->id }}"
+                    data-url="{{ $photo->url }}"
+                    data-caption="{{ $photo->caption }}"
+                    data-category="{{ $photo->gallery_category ?: 'other' }}"
+                    data-source="{{ $photo->is_guest_upload ? 'guest' : ($photo->photo_source ?: 'admin') }}"
+                    data-guest-upload="{{ $photo->is_guest_upload ? '1' : '0' }}"
+                    data-active="{{ $photo->is_active ? '1' : '0' }}"
+                    data-tag-url="{{ route('admin.gallery.tag.edit', $photo->id) }}"
+                    data-update-url="{{ route('admin.gallery.update', $photo->id) }}"
+                    data-destroy-url="{{ route('admin.gallery.destroy', $photo->id) }}">
+                <i class="fa-solid fa-ellipsis"></i>
+            </button>
+            <input type="hidden" class="gl-order-input" value="{{ $loop->iteration }}" data-order-input>
         </div>
         @endforeach
     </div>{{-- #galleryGrid --}}
@@ -570,9 +571,9 @@
     @if ($guestApproved->isNotEmpty())
     <details class="guest-history-section" style="margin-top:32px;">
         <summary>ゲスト投稿の承認・却下済み（{{ $guestApproved->count() }}件）</summary>
-        <div class="gl-admin-grid" style="margin-top:12px;">
+        <div class="gl-history-grid" style="margin-top:12px;">
             @foreach ($guestApproved as $photo)
-            <div class="gl-admin-item {{ $photo->status === 'rejected' ? 'rejected' : '' }}">
+            <div class="gl-history-item {{ $photo->status === 'rejected' ? 'rejected' : '' }}">
                 <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
                 <div class="gl-admin-item__body">
                     <p class="gl-admin-item__caption" title="{{ $photo->caption }}">
@@ -616,6 +617,58 @@
         </div>
     </details>
     @endif
+
+    {{-- 写真の操作シート（全写真で1つを使い回す） --}}
+    <div class="gl-sheet" id="photoSheet" hidden>
+        <div class="gl-sheet__backdrop" data-sheet-close></div>
+        <div class="gl-sheet__panel" role="dialog" aria-modal="true" aria-label="写真の操作">
+            <div class="gl-sheet__grip"></div>
+            <div class="gl-sheet__head">
+                <img src="" alt="" id="sheetThumb" class="gl-sheet__thumb">
+                <div class="gl-sheet__headtext">
+                    <strong id="sheetTitle">写真の操作</strong>
+                    <span id="sheetSub"></span>
+                </div>
+                <button type="button" class="gl-sheet__close" data-sheet-close aria-label="閉じる">✕</button>
+            </div>
+
+            <a href="#" class="gl-sheet__primary" id="sheetTagLink">
+                <i class="fa-solid fa-user-tag"></i> タグ付けする
+            </a>
+
+            <form method="POST" id="sheetEditForm" class="gl-sheet__form">
+                @csrf @method('PATCH')
+                <label class="gl-sheet__field">キャプション
+                    <input type="text" name="caption" id="sheetCaption" maxlength="200" placeholder="写真の説明">
+                </label>
+                <div class="gl-sheet__row">
+                    <label class="gl-sheet__field">シーン
+                        <select name="gallery_category" id="sheetCategory">
+                            @foreach ($categoryOptions as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="gl-sheet__field">撮影者
+                        <select name="photo_source" id="sheetSource">
+                            <option value="photographer">カメラマン撮影</option>
+                            <option value="admin">管理者アップロード</option>
+                            <option value="guest">ゲスト投稿</option>
+                        </select>
+                    </label>
+                </div>
+                <label class="gl-sheet__check">
+                    <input type="checkbox" name="is_active" value="1" id="sheetActive"> ゲストに表示する
+                </label>
+                <button type="submit" class="gl-sheet__save"><i class="fa-solid fa-check"></i> 保存する</button>
+            </form>
+
+            <form method="POST" id="sheetDeleteForm" onsubmit="return confirm('この写真を削除しますか？');">
+                @csrf @method('DELETE')
+                <button type="submit" class="gl-sheet__delete"><i class="fa-solid fa-trash"></i> この写真を削除</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -762,10 +815,57 @@ document.querySelectorAll('.pending-action-form, .gallery-status-form').forEach(
     });
 });
 
-function toggleEdit(id) {
-    const el = document.getElementById('edit-' + id);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
+// ── 写真の操作シート ──────────────────────────────────────
+(function () {
+    const sheet = document.getElementById('photoSheet');
+    if (!sheet) return;
+
+    const thumb      = document.getElementById('sheetThumb');
+    const title      = document.getElementById('sheetTitle');
+    const sub        = document.getElementById('sheetSub');
+    const tagLink    = document.getElementById('sheetTagLink');
+    const editForm   = document.getElementById('sheetEditForm');
+    const deleteForm = document.getElementById('sheetDeleteForm');
+    const caption    = document.getElementById('sheetCaption');
+    const category   = document.getElementById('sheetCategory');
+    const source     = document.getElementById('sheetSource');
+    const active     = document.getElementById('sheetActive');
+
+    function open(btn) {
+        const d = btn.dataset;
+        thumb.src         = d.url;
+        title.textContent = d.caption || 'キャプションなし';
+        sub.textContent   = d.guestUpload === '1' ? 'ゲスト投稿' : '管理者アップロード';
+        tagLink.href      = d.tagUrl;
+        editForm.action   = d.updateUrl;
+        deleteForm.action = d.destroyUrl;
+        caption.value     = d.caption || '';
+        category.value    = d.category || 'other';
+        source.value      = d.source || 'admin';
+        active.checked    = d.active === '1';
+        // ゲスト投稿の撮影者は変更させない（投稿者が固定のため）
+        source.disabled   = d.guestUpload === '1';
+
+        sheet.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+        sheet.hidden = true;
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-photo-menu]').forEach(btn => {
+        btn.addEventListener('click', () => open(btn));
+    });
+    sheet.querySelectorAll('[data-sheet-close]').forEach(el => {
+        el.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !sheet.hidden) close();
+    });
+})();
+
 (function () {
     const controls = document.getElementById('galleryOrderControls');
     const saveButton = document.getElementById('galleryOrderSave');
