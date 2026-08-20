@@ -103,6 +103,8 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-lightbox__uploader { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 12px; color: #806a55; font-size: .82rem; font-weight: 700; }
 .gl-lightbox__uploader i { color: #b38b59; }
 .gl-lightbox__labels { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.gl-lightbox__info-head { display: block; }
+.gl-lightbox__save-inline { display: none; }
 .gl-lightbox__tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .gl-lightbox__tag { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: #fff; border: 1px solid #eadccd; color: #755f48; text-decoration: none; font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gl-lightbox__tag.is-current { color: #b42318; border-color: #ffd0d0; background: #fff1f1; font-weight: 700; }
@@ -180,7 +182,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         position: relative;
         min-height: 0;
         height: 100%;
-        padding: calc(env(safe-area-inset-top) + 62px) 10px 210px;
+        padding: calc(env(safe-area-inset-top) + 66px) 12px 188px;
         box-sizing: border-box;
         background:
             radial-gradient(circle at 50% 38%, rgba(255,255,255,.055), transparent 42%),
@@ -212,7 +214,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         width: auto;
         height: auto;
         max-width: calc(100vw - 20px);
-        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 286px);
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 254px);
         object-fit: contain;
         border-radius: 14px;
         box-shadow: 0 18px 54px rgba(0,0,0,.32);
@@ -226,13 +228,13 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         position: absolute;
         left: 12px;
         right: 12px;
-        bottom: calc(env(safe-area-inset-bottom) + 14px);
+        bottom: calc(env(safe-area-inset-bottom) + 18px);
         z-index: 4;
-        max-height: 178px;
-        padding: 14px 16px 16px;
+        max-height: 152px;
+        padding: 13px 14px 14px;
         border: 1px solid rgba(234,220,205,.78);
-        border-radius: 18px;
-        background: rgba(255,252,247,.96);
+        border-radius: 16px;
+        background: rgba(255,252,247,.97);
         color: #3d2f25;
         overflow-y: auto;
         box-shadow: 0 18px 42px rgba(0,0,0,.24);
@@ -240,10 +242,32 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     }
     .gl-lightbox__label {
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 0;
         color: #9a7445;
         font-size: .64rem;
         letter-spacing: 2.5px;
+    }
+    .gl-lightbox__info-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .gl-lightbox__save-inline {
+        border: 1px solid #e2d0bb;
+        border-radius: 999px;
+        background: #3d2f25;
+        color: #fff;
+        min-height: 34px;
+        padding: 0 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: .76rem;
+        font-weight: 800;
+        white-space: nowrap;
     }
     .gl-lightbox__caption {
         margin: 0 0 10px;
@@ -275,7 +299,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         border: 1px solid rgba(255,255,255,.14);
     }
     .gl-lightbox__close { right: 14px; }
-    .gl-lightbox__download { left: 14px; }
+    .gl-lightbox__download { display: none; }
     .gl-lightbox__topcount {
         display: inline-flex;
         position: absolute;
@@ -293,20 +317,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         text-transform: uppercase;
         pointer-events: none;
     }
-    .gl-lightbox__nav {
-        top: auto;
-        bottom: calc(env(safe-area-inset-bottom) + 206px);
-        transform: none;
-        width: 38px;
-        height: 38px;
-        color: rgba(255,255,255,.86);
-        background: rgba(255,255,255,.12);
-        border: 1px solid rgba(255,255,255,.12);
-        box-shadow: none;
-    }
-    .gl-lightbox__nav:hover { background: rgba(255,255,255,.2); }
-    .gl-lightbox__prev { left: 18px; }
-    .gl-lightbox__next { right: 18px; }
+    .gl-lightbox__nav { display: none; }
 
 }
 </style>
@@ -427,7 +438,10 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         <button class="gl-lightbox__nav gl-lightbox__next" type="button" onclick="nextPhoto()" aria-label="次へ"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="gl-lightbox__stage"><img class="gl-lightbox__img" id="glLightboxImg" src="" alt=""></div>
         <aside class="gl-lightbox__info">
-            <span class="gl-lightbox__label" id="glLightboxIndex">Photo</span>
+            <div class="gl-lightbox__info-head">
+                <span class="gl-lightbox__label" id="glLightboxIndex">Photo</span>
+                <button type="button" class="gl-lightbox__save-inline" id="glLightboxSaveInline"><i class="fa-solid fa-download"></i>保存</button>
+            </div>
             <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
             <div class="gl-lightbox__labels" id="glLightboxLabels"></div>
             <div class="gl-lightbox__uploader" id="glLightboxUploader"></div>
@@ -629,6 +643,7 @@ document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('
 document.querySelectorAll('[data-filter-trigger]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filterTrigger)));
 if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, false);
 document.getElementById('glLightboxDownload')?.addEventListener('click', openSaveSheet);
+document.getElementById('glLightboxSaveInline')?.addEventListener('click', openSaveSheet);
 document.getElementById('saveToFiles')?.addEventListener('click', downloadToFiles);
 document.getElementById('saveToPhotos')?.addEventListener('click', saveToPhotos);
 document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', closeSaveSheet));
