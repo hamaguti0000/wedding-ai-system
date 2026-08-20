@@ -516,10 +516,19 @@ function openLightbox(index) {
     document.getElementById('glLightbox').classList.add('is-open');
     document.body.style.overflow = 'hidden';
 }
-function closeLightbox() {
+function scrollToCurrentCard() {
+    const card = document.querySelector(`.gl-card[data-index="${current}"]`);
+    if (!card || card.classList.contains('is-hidden')) return;
+    window.setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+}
+
+function closeLightbox(shouldScroll = true) {
     closeSaveSheet();
     document.getElementById('glLightbox').classList.remove('is-open');
     document.body.style.overflow = '';
+    if (shouldScroll) scrollToCurrentCard();
 }
 function closeLightboxOnOverlay(e) {
     if (e.target === document.getElementById('glLightbox')) closeLightbox();
@@ -655,6 +664,9 @@ document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener
 
     let startX = 0;
     let startY = 0;
+    stage.addEventListener('click', event => {
+        if (event.target === stage) closeLightbox();
+    });
     stage.addEventListener('touchstart', event => {
         const touch = event.changedTouches[0];
         startX = touch.clientX;
@@ -672,7 +684,7 @@ document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb || !lb.classList.contains('is-open')) return;
-    if (e.key === 'Escape') { closeSaveSheet(); closeLightbox(); }
+    if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowRight') nextPhoto();
     if (e.key === 'ArrowLeft') prevPhoto();
 });
