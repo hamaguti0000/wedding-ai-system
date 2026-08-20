@@ -435,8 +435,8 @@
                     </label>
                     <label>撮影者
                         <select name="photo_source">
-                            <option value="photographer">カメラマン撮影</option>
                             <option value="admin">管理者アップロード</option>
+                            <option value="photographer">カメラマン撮影</option>
                         </select>
                     </label>
                 </div>

@@ -158,7 +158,7 @@ class AdminGalleryController extends Controller
                 'file_path'  => $path,
                 'caption'    => $request->captions[$i] ?? null,
                 'gallery_category' => $request->input('gallery_category', 'other'),
-                'photo_source' => $request->input('photo_source', 'photographer'),
+                'photo_source' => $request->input('photo_source', 'admin'),
                 'sort_order' => $count + 1,
                 'is_active'  => true,
                 'status'     => 'approved',
