@@ -226,11 +226,19 @@ function showPhoto() {
     const tagsEl = document.getElementById('glLightboxTags');
     const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     tagsEl.innerHTML = (p.tags || []).map(t =>
-        `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}" onclick="event.stopPropagation()"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
+        `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}" data-people-link="${peopleBaseUrl}/${t.id}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
     ).join('');
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
 function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
+document.addEventListener('click', event => {
+    const link = event.target.closest('.gl-lightbox__tag');
+    if (!link) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const href = link.dataset.peopleLink;
+    if (href) window.location.assign(href);
+});
 (function () {
     const stage = document.querySelector('.gl-lightbox__inner');
     if (!stage) return;

@@ -630,7 +630,11 @@ function showPhoto() {
     document.getElementById('glLightboxTopIndex').textContent = `${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
     tagsEl.innerHTML = (p.tags || []).length
-        ? p.tags.map(t => `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${t.type === 'group' ? '#' : peopleBaseUrl + '/' + t.id}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`).join('')
+        ? p.tags.map(t => {
+            const href = t.type === 'group' ? '' : `${peopleBaseUrl}/${t.id}`;
+            const attrs = href ? `href="${href}" data-people-link="${href}"` : 'href="#" aria-disabled="true"';
+            return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" ${attrs}><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`;
+        }).join('')
         : '<span class="gl-person-chip">人物タグはまだありません</span>';
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
@@ -803,6 +807,14 @@ document.getElementById('glLightboxSaveInline')?.addEventListener('click', openS
 document.getElementById('saveToFiles')?.addEventListener('click', downloadToFiles);
 document.getElementById('saveToPhotos')?.addEventListener('click', saveToPhotos);
 document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', closeSaveSheet));
+document.addEventListener('click', event => {
+    const link = event.target.closest('.gl-lightbox__tag');
+    if (!link) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const href = link.dataset.peopleLink;
+    if (href) window.location.assign(href);
+});
 document.getElementById('gallerySelectToggle')?.addEventListener('click', () => setSelectionMode(!document.body.classList.contains('gl-selecting')));
 document.querySelectorAll('[data-photo-select]').forEach(input => input.addEventListener('change', updateSelectionState));
 document.getElementById('bulkClearSelection')?.addEventListener('click', () => setSelectionMode(false));
