@@ -169,9 +169,11 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         position: relative;
         min-height: 0;
         height: 100%;
-        padding: calc(env(safe-area-inset-top) + 68px) 12px 166px;
+        padding: calc(env(safe-area-inset-top) + 62px) 10px 210px;
         box-sizing: border-box;
-        background: #100c09;
+        background:
+            radial-gradient(circle at 50% 38%, rgba(255,255,255,.055), transparent 42%),
+            #100c09;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -198,11 +200,11 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     .gl-lightbox__img {
         width: auto;
         height: auto;
-        max-width: 100%;
-        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 250px);
+        max-width: calc(100vw - 20px);
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 286px);
         object-fit: contain;
-        border-radius: 10px;
-        box-shadow: 0 18px 48px rgba(0,0,0,.24);
+        border-radius: 14px;
+        box-shadow: 0 18px 54px rgba(0,0,0,.32);
         background: transparent;
         opacity: 1;
         transition: opacity .14s ease;
@@ -211,18 +213,18 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     .gl-lightbox__img.is-error { opacity: 0; }
     .gl-lightbox__info {
         position: absolute;
-        left: 10px;
-        right: 10px;
-        bottom: calc(env(safe-area-inset-bottom) + 12px);
+        left: 12px;
+        right: 12px;
+        bottom: calc(env(safe-area-inset-bottom) + 14px);
         z-index: 4;
-        max-height: 142px;
-        padding: 13px 14px 14px;
-        border: 1px solid rgba(234,220,205,.72);
+        max-height: 178px;
+        padding: 14px 16px 16px;
+        border: 1px solid rgba(234,220,205,.78);
         border-radius: 18px;
-        background: rgba(255,250,243,.94);
+        background: rgba(255,252,247,.96);
         color: #3d2f25;
         overflow-y: auto;
-        box-shadow: 0 18px 42px rgba(0,0,0,.26);
+        box-shadow: 0 18px 42px rgba(0,0,0,.24);
         backdrop-filter: blur(18px);
     }
     .gl-lightbox__label {
@@ -234,26 +236,26 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     }
     .gl-lightbox__caption {
         margin: 0 0 10px;
-        font-size: .86rem;
+        font-size: .9rem;
         line-height: 1.55;
     }
     .gl-lightbox__caption:empty { display: none; }
     .gl-lightbox__uploader { margin-bottom: 10px; font-size: .76rem; }
+    .gl-lightbox__labels { gap: 6px; margin-bottom: 10px; }
+    .gl-lightbox__labels .gl-card__label { max-width: 100%; }
     .gl-lightbox__tags {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 8px;
+        flex-wrap: wrap;
+        overflow: visible;
+        gap: 7px;
         padding-bottom: 1px;
-        scrollbar-width: none;
     }
-    .gl-lightbox__tags::-webkit-scrollbar { display: none; }
     .gl-lightbox__tag,
     .gl-lightbox__tags .gl-person-chip {
-        flex: 0 0 auto;
-        max-width: 72vw;
-        padding: 8px 12px;
+        min-width: 0;
+        max-width: 100%;
+        padding: 8px 11px;
         font-size: .78rem;
-        background: rgba(255,255,255,.88);
+        background: rgba(255,255,255,.9);
     }
     .gl-lightbox__close,
     .gl-lightbox__download {
@@ -281,13 +283,19 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         pointer-events: none;
     }
     .gl-lightbox__nav {
-        width: 46px;
-        height: 46px;
-        background: rgba(255,255,255,.18);
+        top: auto;
+        bottom: calc(env(safe-area-inset-bottom) + 206px);
+        transform: none;
+        width: 38px;
+        height: 38px;
+        color: rgba(255,255,255,.86);
+        background: rgba(255,255,255,.12);
         border: 1px solid rgba(255,255,255,.12);
+        box-shadow: none;
     }
-    .gl-lightbox__prev { left: 12px; }
-    .gl-lightbox__next { right: 12px; }
+    .gl-lightbox__nav:hover { background: rgba(255,255,255,.2); }
+    .gl-lightbox__prev { left: 18px; }
+    .gl-lightbox__next { right: 18px; }
 
 }
 </style>
@@ -523,6 +531,28 @@ function applyGalleryFilter(filter, shouldScroll = true) {
 document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filter)));
 document.querySelectorAll('[data-filter-trigger]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filterTrigger)));
 if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, false);
+
+(function () {
+    const lightbox = document.getElementById('glLightbox');
+    const stage = document.querySelector('.gl-lightbox__stage');
+    if (!lightbox || !stage) return;
+
+    let startX = 0;
+    let startY = 0;
+    stage.addEventListener('touchstart', event => {
+        const touch = event.changedTouches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+    }, { passive: true });
+    stage.addEventListener('touchend', event => {
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        dx < 0 ? nextPhoto() : prevPhoto();
+    }, { passive: true });
+})();
+
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb || !lb.classList.contains('is-open')) return;
