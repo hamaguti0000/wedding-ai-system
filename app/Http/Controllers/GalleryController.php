@@ -7,6 +7,8 @@ use App\Services\GalleryImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class GalleryController extends Controller
 {
@@ -34,6 +36,52 @@ class GalleryController extends Controller
         }
 
         return view('gallery', compact('photos', 'currentUserGroupIds'));
+    }
+
+
+    public function downloadSelected(Request $request)
+    {
+        $validated = $request->validate([
+            'photo_ids' => 'required|array|min:1|max:80',
+            'photo_ids.*' => 'integer',
+        ]);
+
+        $photos = GalleryPhoto::where('is_active', true)
+            ->where('status', 'approved')
+            ->whereIn('id', $validated['photo_ids'])
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        abort_if($photos->isEmpty(), 404);
+
+        $zipPath = storage_path('app/tmp/gallery-selected-' . Auth::id() . '-' . now()->format('YmdHis') . '.zip');
+        if (! is_dir(dirname($zipPath))) {
+            mkdir(dirname($zipPath), 0775, true);
+        }
+
+        $zip = new ZipArchive();
+        abort_if($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true, 500);
+
+        $added = 0;
+        foreach ($photos as $index => $photo) {
+            $relativePath = $photo->display_file_path ?: $photo->file_path;
+            if (! $relativePath || ! Storage::disk('public')->exists($relativePath)) {
+                continue;
+            }
+
+            $extension = pathinfo($relativePath, PATHINFO_EXTENSION) ?: 'jpg';
+            $zip->addFile(
+                Storage::disk('public')->path($relativePath),
+                sprintf('wedding-photo-%03d-%d.%s', $index + 1, $photo->id, $extension)
+            );
+            $added++;
+        }
+        $zip->close();
+
+        abort_if($added === 0, 404);
+
+        return response()->download($zipPath, 'wedding-photos-' . now()->format('YmdHis') . '.zip')->deleteFileAfterSend(true);
     }
 
     public function uploadForm()

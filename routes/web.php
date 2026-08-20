@@ -110,6 +110,7 @@ Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () 
     Route::get('/gallery',              [GalleryController::class,   'index'])->name('gallery');
     Route::get('/gallery/upload',       [GalleryController::class,   'uploadForm'])->name('gallery.upload');
     Route::post('/gallery/upload',      [GalleryController::class,   'upload'])->name('gallery.upload.post');
+    Route::post('/gallery/download',    [GalleryController::class,   'downloadSelected'])->name('gallery.download');
     Route::get('/people',               [PeopleController::class,    'index'])->name('people.index');
     Route::get('/people/{user}',        [PeopleController::class,    'show'])->name('people.show');
     Route::get('/movies',               [MovieController::class, 'show'])->name('movies');

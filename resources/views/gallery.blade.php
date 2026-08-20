@@ -43,6 +43,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-filter button.is-active { background: #3d2f25; border-color: #3d2f25; color: #fff; }
 .gl-count { margin-top: 9px; color: #8a7a68; font-size: .8rem; white-space: nowrap; }
 .gl-toolbar__upload { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #b38b59; color: #fff; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: .82rem; font-weight: 800; white-space: nowrap; }
+.gl-toolbar__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.gl-select-toggle { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #e7d6c1; background: #fff; color: #7a6048; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: .82rem; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.gl-select-toggle.is-active { background: #3d2f25; border-color: #3d2f25; color: #fff; }
 
 .gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; align-items: start; }
 .gl-card {
@@ -54,6 +57,12 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-card__photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #efe9df; }
 .gl-card__photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s ease; }
 .gl-card:hover .gl-card__photo img { transform: scale(1.035); }
+.gl-card.is-selected { outline: 3px solid #b38b59; outline-offset: 2px; }
+.gl-card__select { position: absolute; right: 10px; top: 10px; z-index: 2; width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.78); border-radius: 999px; background: rgba(255,255,255,.9); display: none; align-items: center; justify-content: center; box-shadow: 0 8px 22px rgba(0,0,0,.12); }
+.gl-card__select input { width: 20px; height: 20px; margin: 0; accent-color: #b38b59; }
+body.gl-selecting .gl-card__select { display: inline-flex; }
+body.gl-selecting .gl-card:hover { transform: none; }
+body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 .gl-card__badge {
     position: absolute; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.9); color: #b42318; font-size: .75rem; font-weight: 700;
@@ -77,6 +86,15 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 .gl-empty { text-align: center; padding: 70px 20px; color: #a69583; background: #fff; border: 1px solid #eee6dc; border-radius: 18px; }
 .gl-empty i { display: block; margin-bottom: 14px; font-size: 2.4rem; color: #d6c7b7; }
+.gl-selection-bar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 16px); z-index: 8990; width: min(640px, calc(100% - 24px)); transform: translate(-50%, 140%); opacity: 0; pointer-events: none; transition: transform .18s ease, opacity .18s ease; padding: 10px; border: 1px solid rgba(234,220,205,.82); border-radius: 18px; background: rgba(255,252,247,.97); box-shadow: 0 18px 48px rgba(61,47,37,.2); backdrop-filter: blur(18px); }
+.gl-selection-bar.is-open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.gl-selection-bar__main { display: grid; grid-template-columns: 1fr; gap: 9px; }
+.gl-selection-bar__count { color: #3d2f25; font-size: .84rem; font-weight: 900; }
+.gl-selection-bar__actions { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+.gl-selection-action { min-height: 42px; border: 1px solid #e2d0bb; border-radius: 12px; background: #fff; color: #755f48; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; font-size: .78rem; font-weight: 900; white-space: nowrap; cursor: pointer; }
+.gl-selection-action--primary { background: #3d2f25; border-color: #3d2f25; color: #fff; }
+.gl-selection-action:disabled { opacity: .45; cursor: not-allowed; }
+.gl-selection-status { min-height: 17px; color: #9b8573; font-size: .72rem; line-height: 1.35; }
 
 .gl-lightbox {
     position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; padding: 22px;
@@ -140,7 +158,8 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
     .gl-stat { min-width: 0; padding: 8px 10px; border-radius: 12px; }
     .gl-wrap { width: min(100% - 20px, 1120px); padding-top: 18px; padding-bottom: 44px; }
     .gl-toolbar { grid-template-columns: 1fr; align-items: stretch; border-radius: 14px; margin-bottom: 14px; }
-    .gl-toolbar__upload { min-height: 42px; width: 100%; box-sizing: border-box; }
+    .gl-toolbar__actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+    .gl-toolbar__upload, .gl-select-toggle { min-height: 42px; width: 100%; box-sizing: border-box; }
     .gl-count { padding-left: 4px; }
     .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .gl-card { border-radius: 14px; box-shadow: 0 8px 22px rgba(61,47,37,.07); }
@@ -378,7 +397,10 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
             </div>
             <div class="gl-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚表示</div>
         </div>
-        <a href="{{ route('gallery.upload') }}" class="gl-toolbar__upload"><i class="fa-solid fa-cloud-arrow-up"></i> 投稿</a>
+        <div class="gl-toolbar__actions">
+            <button type="button" class="gl-select-toggle" id="gallerySelectToggle"><i class="fa-regular fa-square-check"></i> 選択</button>
+            <a href="{{ route('gallery.upload') }}" class="gl-toolbar__upload"><i class="fa-solid fa-cloud-arrow-up"></i> 投稿</a>
+        </div>
     </div>
 
     <div class="gl-grid" id="glGrid">
@@ -391,8 +413,9 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
             $isRelated = $isMine || ($currentUserId && $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty());
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="openLightbox({{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-photo-id="{{ $photo->id }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
             <div class="gl-card__photo">
+                <label class="gl-card__select" aria-label="写真を選択" onclick="event.stopPropagation()"><input type="checkbox" data-photo-select value="{{ $photo->id }}"></label>
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
                 @if ($isMine)
                 <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> あなた</span>
@@ -429,6 +452,21 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 </div>
 
 @if ($photos->isNotEmpty())
+<div class="gl-selection-bar" id="gallerySelectionBar" aria-live="polite">
+    <div class="gl-selection-bar__main">
+        <div class="gl-selection-bar__count"><span id="gallerySelectedCount">0</span>枚を選択中</div>
+        <div class="gl-selection-bar__actions">
+            <button type="button" class="gl-selection-action gl-selection-action--primary" id="bulkSavePhotos"><i class="fa-solid fa-images"></i>写真へ保存</button>
+            <button type="button" class="gl-selection-action" id="bulkSaveFiles"><i class="fa-solid fa-file-zipper"></i>ZIP保存</button>
+            <button type="button" class="gl-selection-action" id="bulkClearSelection" aria-label="選択解除"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="gl-selection-status" id="bulkSaveStatus"></div>
+    </div>
+</div>
+<form method="POST" action="{{ route('gallery.download') }}" id="bulkDownloadForm" hidden>
+    @csrf
+</form>
+
 <div class="gl-lightbox" id="glLightbox" onclick="closeLightboxOnOverlay(event)">
     <div class="gl-lightbox__shell" onclick="event.stopPropagation()">
         <button class="gl-lightbox__download" id="glLightboxDownload" type="button" aria-label="ダウンロード"><i class="fa-solid fa-download"></i></button>
@@ -489,6 +527,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
         $uploaderName = $p->uploader?->guestProfile?->fullName() ?: $p->uploader?->name;
 
         return [
+            'id' => $p->id,
             'url' => $p->url,
             'caption' => $p->caption,
             'tags' => $tags,
@@ -532,6 +571,18 @@ function closeLightbox(shouldScroll = true) {
 }
 function closeLightboxOnOverlay(e) {
     if (e.target === document.getElementById('glLightbox')) closeLightbox();
+}
+function handleCardClick(event, index) {
+    const card = event.currentTarget;
+    if (document.body.classList.contains('gl-selecting')) {
+        const checkbox = card.querySelector('[data-photo-select]');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            updateSelectionState();
+        }
+        return;
+    }
+    openLightbox(index);
 }
 function showPhoto() {
     const p = photos[current];
@@ -633,6 +684,76 @@ async function saveToPhotos() {
     }
 }
 
+function selectedPhotoIds() {
+    return Array.from(document.querySelectorAll('[data-photo-select]:checked')).map(input => Number(input.value));
+}
+
+function selectedPhotos() {
+    const ids = new Set(selectedPhotoIds());
+    return photos.filter(photo => ids.has(Number(photo.id)));
+}
+
+function setSelectionMode(enabled) {
+    document.body.classList.toggle('gl-selecting', enabled);
+    document.getElementById('gallerySelectToggle')?.classList.toggle('is-active', enabled);
+    if (!enabled) {
+        document.querySelectorAll('[data-photo-select]').forEach(input => input.checked = false);
+    }
+    updateSelectionState();
+}
+
+function updateSelectionState() {
+    const count = selectedPhotoIds().length;
+    document.querySelectorAll('.gl-card').forEach(card => {
+        const input = card.querySelector('[data-photo-select]');
+        card.classList.toggle('is-selected', Boolean(input?.checked));
+    });
+    const bar = document.getElementById('gallerySelectionBar');
+    const countEl = document.getElementById('gallerySelectedCount');
+    if (countEl) countEl.textContent = count;
+    bar?.classList.toggle('is-open', count > 0);
+    document.getElementById('bulkSavePhotos')?.toggleAttribute('disabled', count === 0);
+    document.getElementById('bulkSaveFiles')?.toggleAttribute('disabled', count === 0);
+    if (count === 0) document.getElementById('bulkSaveStatus').textContent = '';
+}
+
+async function saveSelectedToPhotos() {
+    const chosen = selectedPhotos();
+    const status = document.getElementById('bulkSaveStatus');
+    if (!chosen.length) return;
+    if (status) status.textContent = '共有シートを準備しています...';
+
+    try {
+        const files = [];
+        for (const photo of chosen.slice(0, 30)) {
+            files.push(await fetchPhotoFile(photo.url, photo.download_name || `wedding-photo-${photo.id}.jpg`));
+        }
+        if (navigator.canShare && navigator.canShare({ files }) && navigator.share) {
+            await navigator.share({ files, title: 'Wedding photos' });
+            if (status) status.textContent = '共有シートを開きました';
+            return;
+        }
+        if (status) status.textContent = 'このブラウザでは複数写真の写真アプリ保存に対応していません。ZIP保存を使ってください。';
+    } catch (error) {
+        if (status) status.textContent = error.message || '複数写真の保存を準備できませんでした。';
+    }
+}
+
+function saveSelectedToFiles() {
+    const ids = selectedPhotoIds();
+    if (!ids.length) return;
+    const form = document.getElementById('bulkDownloadForm');
+    form.querySelectorAll('input[name="photo_ids[]"]').forEach(input => input.remove());
+    ids.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'photo_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
+    form.submit();
+}
+
 function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
@@ -656,6 +777,11 @@ document.getElementById('glLightboxSaveInline')?.addEventListener('click', openS
 document.getElementById('saveToFiles')?.addEventListener('click', downloadToFiles);
 document.getElementById('saveToPhotos')?.addEventListener('click', saveToPhotos);
 document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', closeSaveSheet));
+document.getElementById('gallerySelectToggle')?.addEventListener('click', () => setSelectionMode(!document.body.classList.contains('gl-selecting')));
+document.querySelectorAll('[data-photo-select]').forEach(input => input.addEventListener('change', updateSelectionState));
+document.getElementById('bulkClearSelection')?.addEventListener('click', () => setSelectionMode(false));
+document.getElementById('bulkSavePhotos')?.addEventListener('click', saveSelectedToPhotos);
+document.getElementById('bulkSaveFiles')?.addEventListener('click', saveSelectedToFiles);
 
 (function () {
     const lightbox = document.getElementById('glLightbox');

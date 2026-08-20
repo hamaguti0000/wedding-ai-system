@@ -98,3 +98,31 @@ describe('管理者の公式写真アップロード', function () {
         expect(GalleryPhoto::count())->toBe(2);
     });
 });
+
+describe('ギャラリー複数保存', function () {
+    it('選択した公開写真をzipでダウンロードできる', function () {
+        Storage::fake('public');
+        $guest = makeGuest('attending');
+
+        Storage::disk('public')->put('gallery/one.jpg', 'one');
+        Storage::disk('public')->put('gallery/two.jpg', 'two');
+
+        $first = GalleryPhoto::create([
+            'file_path' => 'gallery/one.jpg',
+            'sort_order' => 1,
+            'is_active' => true,
+            'status' => 'approved',
+        ]);
+        $second = GalleryPhoto::create([
+            'file_path' => 'gallery/two.jpg',
+            'sort_order' => 2,
+            'is_active' => true,
+            'status' => 'approved',
+        ]);
+
+        $this->actingAs($guest)
+            ->post(route('gallery.download'), ['photo_ids' => [$first->id, $second->id]])
+            ->assertOk()
+            ->assertHeader('content-type', 'application/zip');
+    });
+});
