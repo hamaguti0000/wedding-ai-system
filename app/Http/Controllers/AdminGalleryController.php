@@ -79,19 +79,26 @@ class AdminGalleryController extends Controller
         }
 
         // 並び順どおりの「待ち行列」を作り、前後移動と進捗表示に使う
-        $queue = GalleryPhoto::where('status', 'approved')
+        $queueQuery = GalleryPhoto::where('status', 'approved')
             ->withCount('taggedUsers')
-            ->orderBy('sort_order')->orderBy('id')
-            ->get(['id', 'sort_order']);
+            ->orderBy('sort_order')->orderBy('id');
+        if ($hasGuestGroups) {
+            $queueQuery->withCount('taggedGroups');
+        }
+        $queue = $queueQuery->get(['id', 'sort_order']);
+
+        $isUntagged = fn ($item) => (int) $item->tagged_users_count === 0
+            && (! $hasGuestGroups || (int) $item->tagged_groups_count === 0);
 
         $position = $queue->search(fn ($item) => $item->id === $photo->id);
         $prevPhoto = $position > 0 ? $queue[$position - 1] : null;
         $nextPhoto = $position !== false && $position < $queue->count() - 1 ? $queue[$position + 1] : null;
 
-        // まだタグが付いていない次の写真（保存後のジャンプ先）
-        $nextUntagged = $queue
-            ->filter(fn ($item) => $item->tagged_users_count === 0 && $item->id !== $photo->id)
-            ->first();
+        // スキップ時に先頭へ戻ってループしないよう、現在位置より後ろだけから探す。
+        $nextUntagged = $position === false
+            ? $queue->first($isUntagged)
+            : $queue->slice($position + 1)->first($isUntagged);
+        $untaggedCount = $queue->filter($isUntagged)->count();
 
         return view('admin.gallery-tag', [
             'photo'          => $photo,
@@ -102,7 +109,7 @@ class AdminGalleryController extends Controller
             'nextUntagged'   => $nextUntagged,
             'position'       => $position === false ? 0 : $position + 1,
             'totalCount'     => $queue->count(),
-            'untaggedCount'  => $queue->where('tagged_users_count', 0)->count(),
+            'untaggedCount'  => $untaggedCount,
         ]);
     }
 

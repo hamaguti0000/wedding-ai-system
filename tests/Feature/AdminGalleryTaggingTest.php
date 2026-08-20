@@ -235,6 +235,24 @@ describe('タグ付け専用画面', function () {
             ->assertNotFound();
     });
 
+    it('未タグをスキップしても前の未タグへ戻らない', function () {
+        $admin = makeAdmin();
+        $first = GalleryPhoto::create([
+            'file_path' => 'gallery/first.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 1,
+        ]);
+        $second = GalleryPhoto::create([
+            'file_path' => 'gallery/second.jpg', 'is_active' => true,
+            'status' => 'approved', 'sort_order' => 2,
+        ]);
+
+        $firstResponse = $this->actingAs($admin)->get(route('admin.gallery.tag.edit', $first));
+        expect($firstResponse->viewData('nextUntagged')?->id)->toBe($second->id);
+
+        $secondResponse = $this->actingAs($admin)->get(route('admin.gallery.tag.edit', $second));
+        expect($secondResponse->viewData('nextUntagged'))->toBeNull();
+    });
+
     it('次の未タグ写真が保存後のジャンプ先になる', function () {
         $admin = makeAdmin();
         $guest = makeGuest('attending');
