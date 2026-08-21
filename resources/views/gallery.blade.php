@@ -134,6 +134,36 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 .gl-lightbox__close { right: 14px; top: 14px; }
 .gl-lightbox__download { left: 14px; top: 14px; }
 .gl-lightbox__topcount { display: none; }
+.gl-lightbox__hint { display: none; }
+.gl-lightbox__edge-zone {
+    display: none;
+    position: absolute;
+    top: 72px;
+    bottom: 170px;
+    z-index: 3;
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,.88);
+    cursor: pointer;
+}
+.gl-lightbox__edge-zone--prev { left: 0; width: 30%; }
+.gl-lightbox__edge-zone--next { right: 320px; width: 30%; }
+.gl-lightbox__edge-zone span {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29,22,17,.42);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.22);
+}
+.gl-lightbox__edge-zone--prev span { left: 14px; }
+.gl-lightbox__edge-zone--next span { right: 14px; }
 .gl-save-sheet { position: absolute; inset: 0; z-index: 8; display: grid; place-items: end center; padding: 18px; pointer-events: none; opacity: 0; transition: opacity .16s ease; }
 .gl-save-sheet.is-open { pointer-events: auto; opacity: 1; }
 .gl-save-sheet__backdrop { position: absolute; inset: 0; background: rgba(8,6,5,.46); }
@@ -201,7 +231,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         position: relative;
         min-height: 0;
         height: 100%;
-        padding: calc(env(safe-area-inset-top) + 66px) 12px 188px;
+        padding: calc(env(safe-area-inset-top) + 74px) 12px 206px;
         box-sizing: border-box;
         background:
             radial-gradient(circle at 50% 38%, rgba(255,255,255,.055), transparent 42%),
@@ -233,7 +263,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         width: auto;
         height: auto;
         max-width: calc(100vw - 20px);
-        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 254px);
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 286px);
         object-fit: contain;
         border-radius: 14px;
         box-shadow: 0 18px 54px rgba(0,0,0,.32);
@@ -248,8 +278,8 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         left: 12px;
         right: 12px;
         bottom: calc(env(safe-area-inset-bottom) + 18px);
-        z-index: 4;
-        max-height: 152px;
+        z-index: 6;
+        max-height: 168px;
         padding: 13px 14px 14px;
         border: 1px solid rgba(234,220,205,.78);
         border-radius: 16px;
@@ -337,6 +367,39 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         pointer-events: none;
     }
     .gl-lightbox__nav { display: none; }
+    .gl-lightbox__edge-zone {
+        display: block;
+        top: calc(env(safe-area-inset-top) + 76px);
+        bottom: calc(env(safe-area-inset-bottom) + 208px);
+        width: 27%;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .gl-lightbox__edge-zone--next { right: 0; }
+    .gl-lightbox__edge-zone span {
+        width: 38px;
+        height: 38px;
+        background: rgba(255,255,255,.16);
+        border: 1px solid rgba(255,255,255,.13);
+        opacity: .78;
+    }
+    .gl-lightbox__edge-zone--prev span { left: 10px; }
+    .gl-lightbox__edge-zone--next span { right: 10px; }
+    .gl-lightbox__hint {
+        display: block;
+        position: absolute;
+        left: 50%;
+        bottom: calc(env(safe-area-inset-bottom) + 194px);
+        z-index: 5;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.12);
+        color: rgba(255,255,255,.72);
+        font-size: .66rem;
+        letter-spacing: .08em;
+        pointer-events: none;
+        white-space: nowrap;
+    }
 
 }
 </style>
@@ -484,9 +547,12 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         <button class="gl-lightbox__download" id="glLightboxDownload" type="button" aria-label="ダウンロード"><i class="fa-solid fa-download"></i></button>
         <span class="gl-lightbox__topcount" id="glLightboxTopIndex">Photo</span>
         <button class="gl-lightbox__close" type="button" onclick="closeLightbox()" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
-        <button class="gl-lightbox__nav gl-lightbox__prev" type="button" onclick="prevPhoto()" aria-label="前へ"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="gl-lightbox__nav gl-lightbox__next" type="button" onclick="nextPhoto()" aria-label="次へ"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="gl-lightbox__nav gl-lightbox__prev" type="button" onclick="prevPhoto(event)" aria-label="前へ"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="gl-lightbox__nav gl-lightbox__next" type="button" onclick="nextPhoto(event)" aria-label="次へ"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="gl-lightbox__stage"><img class="gl-lightbox__img" id="glLightboxImg" src="" alt=""></div>
+        <button class="gl-lightbox__edge-zone gl-lightbox__edge-zone--prev" type="button" onclick="prevPhoto(event)" aria-label="前の写真"><span><i class="fa-solid fa-chevron-left"></i></span></button>
+        <button class="gl-lightbox__edge-zone gl-lightbox__edge-zone--next" type="button" onclick="nextPhoto(event)" aria-label="次の写真"><span><i class="fa-solid fa-chevron-right"></i></span></button>
+        <span class="gl-lightbox__hint">左右端で写真移動・×で閉じる</span>
         <aside class="gl-lightbox__info">
             <div class="gl-lightbox__info-head">
                 <span class="gl-lightbox__label" id="glLightboxIndex">Photo</span>
@@ -587,19 +653,10 @@ function isLightboxControlTarget(target) {
 }
 function handleLightboxSurfaceTap(event) {
     if (isLightboxControlTarget(event.target)) return;
-    const edgeWidth = Math.min(104, window.innerWidth * 0.28);
-    if (event.clientX <= edgeWidth) {
-        prevPhoto();
-        return;
-    }
-    if (event.clientX >= window.innerWidth - edgeWidth) {
-        nextPhoto();
-        return;
-    }
-    closeLightbox();
+    // 中央タップでは何もしない。写真送りは左右の明示的な端ボタンだけにする。
 }
 function closeLightboxOnOverlay(e) {
-    if (e.target === document.getElementById('glLightbox')) handleLightboxSurfaceTap(e);
+    if (e.target === document.getElementById('glLightbox')) closeLightbox();
 }
 function handleCardClick(event, index) {
     const card = event.currentTarget;
@@ -650,8 +707,19 @@ function showPhoto() {
         }).join('')
         : '<span class="gl-person-chip">人物タグはまだありません</span>';
 }
-function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
-function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
+function nextPhoto(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    current = (current + 1) % photos.length;
+    showPhoto();
+}
+function prevPhoto(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    current = (current - 1 + photos.length) % photos.length;
+    showPhoto();
+}
+
 
 function openSaveSheet() {
     const sheet = document.getElementById('glSaveSheet');
@@ -828,10 +896,10 @@ document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('
 document.querySelectorAll('[data-group-filter]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(`group:${btn.dataset.groupFilter}`)));
 document.querySelectorAll('[data-filter-trigger]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filterTrigger)));
 if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, false);
-document.getElementById('glLightboxDownload')?.addEventListener('click', openSaveSheet);
-document.getElementById('glLightboxSaveInline')?.addEventListener('click', openSaveSheet);
-document.getElementById('saveToFiles')?.addEventListener('click', downloadToFiles);
-document.getElementById('saveToPhotos')?.addEventListener('click', saveToPhotos);
+document.getElementById('glLightboxDownload')?.addEventListener('click', event => { event.stopPropagation(); openSaveSheet(); });
+document.getElementById('glLightboxSaveInline')?.addEventListener('click', event => { event.stopPropagation(); openSaveSheet(); });
+document.getElementById('saveToFiles')?.addEventListener('click', event => { event.stopPropagation(); downloadToFiles(); });
+document.getElementById('saveToPhotos')?.addEventListener('click', event => { event.stopPropagation(); saveToPhotos(); });
 document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', closeSaveSheet));
 document.addEventListener('click', event => {
     const link = event.target.closest('.gl-lightbox__tag');
@@ -873,8 +941,8 @@ document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb || !lb.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowRight') nextPhoto();
-    if (e.key === 'ArrowLeft') prevPhoto();
+    if (e.key === 'ArrowRight') nextPhoto(e);
+    if (e.key === 'ArrowLeft') prevPhoto(e);
 });
 </script>
 @endif
