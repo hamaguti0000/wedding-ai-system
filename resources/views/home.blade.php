@@ -10,40 +10,7 @@
 {{-- ══ HERO ════════════════════════════════════════════════════════ --}}
 @php
     $heroType = $setting?->hero_type ?? 'slideshow';
-    $uploadedHeroImages = collect();
-
-    try {
-        if (\Illuminate\Support\Facades\Schema::hasTable('gallery_photos')) {
-            $taggedHeroImages = \App\Models\GalleryPhoto::query()
-                ->where('is_active', true)
-                ->where('status', 'approved')
-                ->whereNotNull('file_path')
-                ->where(function ($query) {
-                    $query->whereHas('taggedUsers')
-                        ->orWhereHas('taggedGroups');
-                })
-                ->inRandomOrder()
-                ->limit(10)
-                ->get();
-
-            if ($taggedHeroImages->count() >= 10) {
-                $uploadedHeroImages = $taggedHeroImages;
-            } else {
-                $fallbackHeroImages = \App\Models\GalleryPhoto::query()
-                    ->where('is_active', true)
-                    ->where('status', 'approved')
-                    ->whereNotNull('file_path')
-                    ->whereNotIn('id', $taggedHeroImages->pluck('id'))
-                    ->inRandomOrder()
-                    ->limit(10 - $taggedHeroImages->count())
-                    ->get();
-
-                $uploadedHeroImages = $taggedHeroImages->concat($fallbackHeroImages)->values();
-            }
-        }
-    } catch (\Throwable) {
-        $uploadedHeroImages = collect();
-    }
+    $uploadedHeroImages = app(\App\Services\RandomGalleryPhotoPicker::class)->pick(10, auth()->user());
 
     $heroImages = $uploadedHeroImages->isNotEmpty()
         ? $uploadedHeroImages

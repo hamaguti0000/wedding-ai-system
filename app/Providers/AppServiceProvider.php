@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\GalleryPhoto;
 use App\Models\SiteImage;
-use Illuminate\Support\Facades\Schema;
+use App\Services\RandomGalleryPhotoPicker;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $siteBanner = SiteImage::forDisplay($locationMap[$name]);
-            $uploadedBanners = $name === 'login' ? collect() : $this->randomUploadedGalleryPhotos(10);
+            $uploadedBanners = $name === 'login' ? collect() : app(RandomGalleryPhotoPicker::class)->pick(10, Auth::user());
             $uploadedBanner = $uploadedBanners->first();
             $bannerImages = $uploadedBanners->isNotEmpty()
                 ? $uploadedBanners
@@ -53,44 +53,5 @@ class AppServiceProvider extends ServiceProvider
             $view->with('bannerImage', $uploadedBanner ?: $siteBanner);
             $view->with('bannerImages', $bannerImages);
         });
-    }
-
-    private function randomUploadedGalleryPhotos(int $limit)
-    {
-        try {
-            if (! Schema::hasTable('gallery_photos')) {
-                return collect();
-            }
-
-            $taggedPhotos = GalleryPhoto::query()
-                ->where('is_active', true)
-                ->where('status', 'approved')
-                ->whereNotNull('file_path')
-                ->where(function ($query) {
-                    $query->whereHas('taggedUsers')
-                        ->orWhereHas('taggedGroups');
-                })
-                ->inRandomOrder()
-                ->limit($limit)
-                ->get();
-
-            if ($taggedPhotos->count() >= $limit) {
-                return $taggedPhotos;
-            }
-
-            $remaining = $limit - $taggedPhotos->count();
-            $fallbackPhotos = GalleryPhoto::query()
-                ->where('is_active', true)
-                ->where('status', 'approved')
-                ->whereNotNull('file_path')
-                ->whereNotIn('id', $taggedPhotos->pluck('id'))
-                ->inRandomOrder()
-                ->limit($remaining)
-                ->get();
-
-            return $taggedPhotos->concat($fallbackPhotos)->values();
-        } catch (\Throwable) {
-            return collect();
-        }
     }
 }
