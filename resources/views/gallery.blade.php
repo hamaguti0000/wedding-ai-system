@@ -591,7 +591,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                     <span>写真アプリへ保存<small>共有シートから「画像を保存」を選びます</small></span>
                 </button>
                 <button type="button" class="gl-save-option" id="saveToFiles">
-                    <i class="fa-solid fa-folder-arrow-down"></i>
+                    <i class="fa-solid fa-download"></i>
                     <span>ファイルに保存<small>ブラウザのダウンロードとして保存します</small></span>
                 </button>
                 <button type="button" class="gl-save-option" data-save-close>
