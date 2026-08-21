@@ -227,8 +227,14 @@
             </li>
             <li>
                 <a href="{{ route('admin.users') }}"
-                   class="{{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+                   class="{{ request()->routeIs('admin.users') || request()->routeIs('admin.users.*') && ! request()->routeIs('admin.users.event-day') ? 'active' : '' }}">
                     <i class="fa-solid fa-user-pen" aria-hidden="true"></i>ユーザー管理
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.users.event-day') }}"
+                   class="{{ request()->routeIs('admin.users.event-day') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>参加日振り分け
                 </a>
             </li>
             <li>

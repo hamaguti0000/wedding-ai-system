@@ -224,6 +224,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // ユーザー管理
     Route::get('/users',             [AdminUserController::class, 'index'])        ->name('users');
+    Route::get('/users/event-day',   [AdminUserController::class, 'eventDayAssignment'])->name('users.event-day');
     Route::post('/users',            [AdminUserController::class, 'store'])        ->name('users.store');
     Route::get('/users/import/preview', fn () => redirect()->route('admin.users'));
     Route::post('/users/import/preview', [AdminUserController::class, 'previewImport'])->name('users.import.preview');

@@ -27,6 +27,32 @@ class AdminUserController extends Controller
         return view('admin.users', compact('users'));
     }
 
+    public function eventDayAssignment()
+    {
+        $users = User::where('role', 'guest')
+            ->with('guestProfile')
+            ->get()
+            ->sortBy(function (User $user) {
+                $profile = $user->guestProfile;
+                $dayRank = ($profile?->event_day ?: 'day2') === 'day1' ? 0 : 1;
+                $emailRank = $user->email ? 0 : 1;
+                $name = $profile ? trim(($profile->last_name ?? '') . ($profile->first_name ?? '')) : $user->name;
+
+                return sprintf('%d-%d-%s-%05d', $dayRank, $emailRank, $name ?: $user->username, $user->id);
+            })
+            ->values();
+
+        $stats = [
+            'total' => $users->count(),
+            'day1' => $users->filter(fn (User $user) => $user->guestProfile?->event_day === 'day1')->count(),
+            'day2' => $users->filter(fn (User $user) => ($user->guestProfile?->event_day ?: 'day2') === 'day2')->count(),
+            'with_email' => $users->filter(fn (User $user) => filled($user->email))->count(),
+            'without_email' => $users->filter(fn (User $user) => blank($user->email))->count(),
+        ];
+
+        return view('admin.users-event-day', compact('users', 'stats'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -636,6 +662,7 @@ class AdminUserController extends Controller
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['integer', 'exists:users,id'],
             'event_day' => ['required', 'in:day1,day2'],
+            'return_to' => ['nullable', 'string', 'in:admin.users,admin.users.event-day'],
         ], [
             'user_ids.required' => '参加日を変更するゲストを選択してください',
             'event_day.required' => '参加日を選択してください',
@@ -666,7 +693,11 @@ class AdminUserController extends Controller
 
         $label = $request->event_day === 'day1' ? '1日目' : '2日目';
 
-        return redirect()->route('admin.users')
+        $returnRoute = $request->input('return_to') === 'admin.users.event-day'
+            ? 'admin.users.event-day'
+            : 'admin.users';
+
+        return redirect()->route($returnRoute)
             ->with('success', $users->count() . "名を{$label}に変更しました");
     }
 
