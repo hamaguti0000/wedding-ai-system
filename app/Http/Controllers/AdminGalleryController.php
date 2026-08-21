@@ -160,9 +160,10 @@ class AdminGalleryController extends Controller
         GalleryPhoto::where('status', 'approved')->increment('sort_order', count($files));
 
         foreach ($files as $i => $file) {
-            $path = $imageOptimizer->store($file, 'gallery');
+            $stored = $imageOptimizer->storeOriginalWithDisplay($file, 'gallery');
             GalleryPhoto::create([
-                'file_path'  => $path,
+                'file_path'  => $stored['original'],
+                'display_file_path' => $stored['display'],
                 'caption'    => $request->captions[$i] ?? null,
                 'gallery_category' => $request->input('gallery_category', 'other'),
                 'photo_source' => $request->input('photo_source', 'admin'),

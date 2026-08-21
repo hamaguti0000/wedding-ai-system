@@ -13,24 +13,26 @@ class GalleryImageOptimizer
 
     public function store(UploadedFile $file, string $directory): string
     {
-        if (! extension_loaded('gd')) {
-            return $file->store($directory, 'public');
-        }
+        return $file->store($directory, 'public');
+    }
 
-        $sourcePath = $file->getRealPath();
-        if (! $sourcePath || ! is_file($sourcePath)) {
-            return $file->store($directory, 'public');
-        }
+    /**
+     * Store the uploaded file without changing quality, plus a lighter copy for page display.
+     *
+     * @return array{original:string,display:?string}
+     */
+    public function storeOriginalWithDisplay(UploadedFile $file, string $directory): array
+    {
+        $originalPath = $this->store($file, $directory);
+        $displayPath = $this->optimizedCopyForPublicFile(
+            $originalPath,
+            trim($directory, '/') . '/display'
+        );
 
-        $optimized = $this->optimizeToJpeg($sourcePath);
-        if ($optimized === null) {
-            return $file->store($directory, 'public');
-        }
-
-        $path = trim($directory, '/') . '/' . Str::random(40) . '.jpg';
-        Storage::disk('public')->put($path, $optimized);
-
-        return $path;
+        return [
+            'original' => $originalPath,
+            'display' => $displayPath,
+        ];
     }
 
     public function optimizedCopyForPublicFile(string $relativePath, string $directory = 'gallery/display'): ?string

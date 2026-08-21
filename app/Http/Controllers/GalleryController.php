@@ -65,7 +65,7 @@ class GalleryController extends Controller
 
         $added = 0;
         foreach ($photos as $index => $photo) {
-            $relativePath = $photo->display_file_path ?: $photo->file_path;
+            $relativePath = $photo->file_path ?: $photo->display_file_path;
             if (! $relativePath || ! Storage::disk('public')->exists($relativePath)) {
                 continue;
             }
@@ -106,9 +106,10 @@ class GalleryController extends Controller
         $count = 0;
 
         foreach ($request->file('photos') as $file) {
-            $path = $imageOptimizer->store($file, 'gallery/guest');
+            $stored = $imageOptimizer->storeOriginalWithDisplay($file, 'gallery/guest');
             GalleryPhoto::create([
-                'file_path'           => $path,
+                'file_path'           => $stored['original'],
+                'display_file_path'   => $stored['display'],
                 'caption'             => $request->message ?: null,
                 'gallery_category'    => 'other',
                 'photo_source'        => 'guest',
