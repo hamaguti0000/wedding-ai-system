@@ -346,9 +346,17 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 @php
     $currentUserId = auth()->id();
     $currentUserGroupIds = isset($currentUserGroupIds) ? collect($currentUserGroupIds) : collect();
+    $currentUserGroupNames = isset($currentUserGroupNames) ? collect($currentUserGroupNames) : collect();
+    $galleryGroupOptions = $photos
+        ->flatMap(fn($photo) => $photo->taggedGroups->map(fn($group) => $group->galleryDisplayName()))
+        ->filter()
+        ->unique()
+        ->values();
+    $photoMatchesCurrentGroups = fn($photo) => $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty()
+        || $photo->taggedGroups->map(fn($group) => $group->galleryDisplayName())->intersect($currentUserGroupNames)->isNotEmpty();
     $taggedPhotoCount = $photos->filter(fn($photo) => $photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())->count();
     $myPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId))->count() : 0;
-    $relatedPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId) || $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty())->count() : 0;
+    $relatedPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId) || $photoMatchesCurrentGroups($photo))->count() : 0;
     $defaultFilter = $relatedPhotoCount > 0 ? 'related' : 'all';
 @endphp
 
@@ -394,6 +402,9 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 <button type="button" data-filter="reception">披露宴</button>
                 <button type="button" data-filter="photographer">カメラマン</button>
                 <button type="button" data-filter="tagged">人物タグあり</button>
+                @foreach ($galleryGroupOptions as $groupName)
+                <button type="button" data-group-filter="{{ $groupName }}">{{ $groupName }}</button>
+                @endforeach
             </div>
             <div class="gl-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚表示</div>
         </div>
@@ -409,11 +420,12 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
             $groupTags = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->galleryDisplayName(), 'type' => 'group'])->unique('name')->values();
             $userTags = $photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name, 'type' => 'user'])->values();
             $tagNames = $groupTags->concat($userTags)->values();
+            $photoGroupNames = $photo->taggedGroups->map(fn($g) => $g->galleryDisplayName())->filter()->unique()->values();
             $isMine = $currentUserId && $photo->taggedUsers->contains('id', $currentUserId);
-            $isRelated = $isMine || ($currentUserId && $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty());
+            $isRelated = $isMine || ($currentUserId && ($photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty() || $photoGroupNames->intersect($currentUserGroupNames)->isNotEmpty()));
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-photo-id="{{ $photo->id }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-photo-id="{{ $photo->id }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-groups='@json($photoGroupNames)' data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
             <div class="gl-card__photo">
                 <label class="gl-card__select" aria-label="写真を選択" onclick="event.stopPropagation()"><input type="checkbox" data-photo-select value="{{ $photo->id }}"></label>
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
@@ -508,12 +520,13 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 </div>
 
 @php
-    $photosJson = $photos->map(function ($p) use ($currentUserId, $currentUserGroupIds) {
-        $tags = $p->taggedGroups->map(function ($g) use ($currentUserGroupIds) {
+    $photosJson = $photos->map(function ($p) use ($currentUserId, $currentUserGroupIds, $currentUserGroupNames) {
+        $tags = $p->taggedGroups->map(function ($g) use ($currentUserGroupIds, $currentUserGroupNames) {
+            $groupName = $g->galleryDisplayName();
             return [
                 'id' => $g->id,
-                'name' => $g->galleryDisplayName(),
-                'is_current' => $currentUserGroupIds->contains($g->id),
+                'name' => $groupName,
+                'is_current' => $currentUserGroupIds->contains($g->id) || $currentUserGroupNames->contains($groupName),
                 'type' => 'group',
             ];
         })->unique('name')->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
@@ -787,19 +800,32 @@ function saveSelectedToFiles() {
 function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
+    let groupFilter = null;
+    if (typeof filter === 'string' && filter.startsWith('group:')) {
+        groupFilter = filter.slice(6);
+    }
     cards.forEach(card => {
-        const show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
+        let show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
+        if (groupFilter !== null) {
+            try {
+                show = JSON.parse(card.dataset.groups || '[]').includes(groupFilter);
+            } catch (error) {
+                show = false;
+            }
+        }
         card.classList.toggle('is-hidden', !show);
         if (show) visible++;
     });
     document.getElementById('glCount').innerHTML = `<strong>${visible}</strong>枚表示`;
-    document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.toggle('is-active', btn.dataset.filter === filter));
+    document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.toggle('is-active', groupFilter === null && btn.dataset.filter === filter));
+    document.querySelectorAll('[data-group-filter]').forEach(btn => btn.classList.toggle('is-active', groupFilter !== null && btn.dataset.groupFilter === groupFilter));
     if (shouldScroll) {
         document.getElementById('glGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
 document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filter)));
+document.querySelectorAll('[data-group-filter]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(`group:${btn.dataset.groupFilter}`)));
 document.querySelectorAll('[data-filter-trigger]').forEach(btn => btn.addEventListener('click', () => applyGalleryFilter(btn.dataset.filterTrigger)));
 if (defaultGalleryFilter !== 'all') applyGalleryFilter(defaultGalleryFilter, false);
 document.getElementById('glLightboxDownload')?.addEventListener('click', openSaveSheet);

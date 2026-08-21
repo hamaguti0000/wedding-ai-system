@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
+use App\Models\GuestGroup;
 use App\Services\GalleryImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,11 +32,30 @@ class GalleryController extends Controller
 
         $currentUser = Auth::user();
         $currentUserGroupIds = collect();
+        $currentUserGroupNames = collect();
         if ($currentUser && $hasGuestGroups) {
-            $currentUserGroupIds = $currentUser->guestGroups()->pluck('guest_groups.id');
+            $currentUserGroups = $currentUser->guestGroups()->with('primaryGuest')->get();
+            $currentUserGroupIds = $currentUserGroups->pluck('id');
+            $currentUserGroupNames = $currentUserGroups
+                ->map(fn ($group) => $group->galleryDisplayName())
+                ->filter()
+                ->values();
         }
 
-        return view('gallery', compact('photos', 'currentUserGroupIds'));
+        if ($currentUser?->guestProfile && $hasGuestGroups) {
+            $profileGroupName = GuestGroup::galleryLabelFor(
+                $currentUser->guestProfile->guest_side,
+                $currentUser->guestProfile->relationship
+            );
+
+            if ($profileGroupName) {
+                $currentUserGroupNames->push($profileGroupName);
+            }
+        }
+
+        $currentUserGroupNames = $currentUserGroupNames->unique()->values();
+
+        return view('gallery', compact('photos', 'currentUserGroupIds', 'currentUserGroupNames'));
     }
 
 
