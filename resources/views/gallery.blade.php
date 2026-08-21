@@ -164,6 +164,8 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 }
 .gl-lightbox__edge-zone--prev span { left: 14px; }
 .gl-lightbox__edge-zone--next span { right: 14px; }
+.gl-lightbox.is-zoomed .gl-lightbox__edge-zone { opacity: 0; pointer-events: none; }
+.gl-lightbox.is-zoomed .gl-lightbox__hint { background: rgba(255,255,255,.18); color: rgba(255,255,255,.88); }
 .gl-save-sheet { position: absolute; inset: 0; z-index: 8; display: grid; place-items: end center; padding: 18px; pointer-events: none; opacity: 0; transition: opacity .16s ease; }
 .gl-save-sheet.is-open { pointer-events: auto; opacity: 1; }
 .gl-save-sheet__backdrop { position: absolute; inset: 0; background: rgba(8,6,5,.46); }
@@ -552,7 +554,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         <div class="gl-lightbox__stage"><img class="gl-lightbox__img" id="glLightboxImg" src="" alt=""></div>
         <button class="gl-lightbox__edge-zone gl-lightbox__edge-zone--prev" type="button" onclick="prevPhoto(event)" aria-label="前の写真"><span><i class="fa-solid fa-chevron-left"></i></span></button>
         <button class="gl-lightbox__edge-zone gl-lightbox__edge-zone--next" type="button" onclick="nextPhoto(event)" aria-label="次の写真"><span><i class="fa-solid fa-chevron-right"></i></span></button>
-        <span class="gl-lightbox__hint">左右端で写真移動・×で閉じる</span>
+        <span class="gl-lightbox__hint" id="glLightboxHint">左右端で写真移動・ピンチ拡大中は固定</span>
         <aside class="gl-lightbox__info">
             <div class="gl-lightbox__info-head">
                 <span class="gl-lightbox__label" id="glLightboxIndex">Photo</span>
@@ -624,15 +626,42 @@ const peopleBaseUrl = "{{ url('/people') }}";
 const photos = @json($photosJson);
 const defaultGalleryFilter = @json($defaultFilter);
 let current = 0;
+let lightboxGestureBlockUntil = 0;
+let lightboxTouchMoved = false;
 
 function escapeHtml(value) {
     return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+function isViewportZoomed() {
+    return Boolean(window.visualViewport && window.visualViewport.scale && window.visualViewport.scale > 1.04);
+}
+
+function markLightboxGestureBlocked(duration = 650) {
+    lightboxGestureBlockUntil = Math.max(lightboxGestureBlockUntil, Date.now() + duration);
+}
+
+function updateLightboxZoomState() {
+    const lb = document.getElementById('glLightbox');
+    const zoomed = isViewportZoomed();
+    lb?.classList.toggle('is-zoomed', zoomed);
+    const hint = document.getElementById('glLightboxHint');
+    if (hint) hint.textContent = zoomed ? '拡大中は写真送りを止めています' : '左右端で写真移動・ピンチ拡大中は固定';
+}
+
+function canNavigatePhoto(event) {
+    if (Date.now() < lightboxGestureBlockUntil) return false;
+    if (isViewportZoomed()) return false;
+    if (event?.type?.startsWith('touch')) return false;
+    return true;
+}
+
 function openLightbox(index) {
     current = index;
     showPhoto();
     document.getElementById('glLightbox').classList.add('is-open');
     document.body.style.overflow = 'hidden';
+    updateLightboxZoomState();
 }
 function scrollToCurrentCard() {
     const card = document.querySelector(`.gl-card[data-index="${current}"]`);
@@ -645,6 +674,7 @@ function scrollToCurrentCard() {
 function closeLightbox(shouldScroll = true) {
     closeSaveSheet();
     document.getElementById('glLightbox').classList.remove('is-open');
+    document.getElementById('glLightbox')?.classList.remove('is-zoomed');
     document.body.style.overflow = '';
     if (shouldScroll) scrollToCurrentCard();
 }
@@ -671,6 +701,7 @@ function handleCardClick(event, index) {
     openLightbox(index);
 }
 function showPhoto() {
+    updateLightboxZoomState();
     const p = photos[current];
     const img = document.getElementById('glLightboxImg');
     const stage = img.closest('.gl-lightbox__stage');
@@ -710,12 +741,20 @@ function showPhoto() {
 function nextPhoto(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+    if (!canNavigatePhoto(event)) {
+        updateLightboxZoomState();
+        return;
+    }
     current = (current + 1) % photos.length;
     showPhoto();
 }
 function prevPhoto(event) {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+    if (!canNavigatePhoto(event)) {
+        updateLightboxZoomState();
+        return;
+    }
     current = (current - 1 + photos.length) % photos.length;
     showPhoto();
 }
@@ -918,6 +957,7 @@ document.getElementById('bulkSaveFiles')?.addEventListener('click', saveSelected
 function resetGalleryTransientUi(clearSelection = true) {
     closeSaveSheet();
     document.getElementById('glLightbox')?.classList.remove('is-open');
+    document.getElementById('glLightbox')?.classList.remove('is-zoomed');
     document.body.style.overflow = '';
     if (clearSelection) {
         setSelectionMode(false);
@@ -932,6 +972,7 @@ window.addEventListener('pageshow', event => {
 window.addEventListener('pagehide', () => {
     closeSaveSheet();
     document.getElementById('glLightbox')?.classList.remove('is-open');
+    document.getElementById('glLightbox')?.classList.remove('is-zoomed');
     document.body.style.overflow = '';
 });
 
@@ -945,18 +986,37 @@ window.addEventListener('pagehide', () => {
     let startY = 0;
     stage.addEventListener('click', handleLightboxSurfaceTap);
     stage.addEventListener('touchstart', event => {
+        lightboxTouchMoved = false;
+        if (event.touches.length > 1) {
+            markLightboxGestureBlocked(900);
+            updateLightboxZoomState();
+            return;
+        }
         const touch = event.changedTouches[0];
         startX = touch.clientX;
         startY = touch.clientY;
     }, { passive: true });
+    stage.addEventListener('touchmove', event => {
+        lightboxTouchMoved = true;
+        if (event.touches.length > 1 || isViewportZoomed()) {
+            markLightboxGestureBlocked(900);
+            updateLightboxZoomState();
+        }
+    }, { passive: true });
     stage.addEventListener('touchend', event => {
+        updateLightboxZoomState();
+        if (Date.now() < lightboxGestureBlockUntil || isViewportZoomed()) return;
         const touch = event.changedTouches[0];
         const dx = touch.clientX - startX;
         const dy = touch.clientY - startY;
-        if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        if (Math.abs(dx) < 54 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+        markLightboxGestureBlocked(220);
         dx < 0 ? nextPhoto() : prevPhoto();
     }, { passive: true });
 })();
+
+window.visualViewport?.addEventListener('resize', updateLightboxZoomState);
+window.visualViewport?.addEventListener('scroll', updateLightboxZoomState);
 
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
