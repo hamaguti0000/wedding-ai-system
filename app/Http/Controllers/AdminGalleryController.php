@@ -27,23 +27,67 @@ class AdminGalleryController extends Controller
             $photos->each->setRelation('taggedGroups', collect());
         }
 
+        $guestSubmissionRelations = ['uploader.guestProfile', 'taggedUsers.guestProfile'];
+        if ($hasGuestGroups) {
+            $guestSubmissionRelations[] = 'taggedGroups.primaryGuest';
+        }
+
         $pending = GalleryPhoto::where('is_guest_upload', true)
             ->where('status', 'pending')
-            ->with('uploader')
+            ->with($guestSubmissionRelations)
             ->orderByDesc('created_at')->get();
 
-        $guestApprovedRelations = ['uploader', 'taggedUsers.guestProfile'];
-        if ($hasGuestGroups) {
-            $guestApprovedRelations[] = 'taggedGroups.primaryGuest';
-        }
+        $guestPublished = GalleryPhoto::where('is_guest_upload', true)
+            ->where('status', 'approved')
+            ->with($guestSubmissionRelations)
+            ->orderByDesc('created_at')->get();
 
-        $guestApproved = GalleryPhoto::where('is_guest_upload', true)
+        $guestRejected = GalleryPhoto::where('is_guest_upload', true)
             ->where('status', 'rejected')
-            ->with($guestApprovedRelations)
+            ->with($guestSubmissionRelations)
             ->orderByDesc('created_at')->get();
+
+        $guestSubmissions = $pending
+            ->concat($guestPublished)
+            ->concat($guestRejected)
+            ->sortByDesc('created_at')
+            ->values();
+
         if (! $hasGuestGroups) {
-            $guestApproved->each->setRelation('taggedGroups', collect());
+            $pending->each->setRelation('taggedGroups', collect());
+            $guestPublished->each->setRelation('taggedGroups', collect());
+            $guestRejected->each->setRelation('taggedGroups', collect());
         }
+
+        $guestSubmissionStats = [
+            'total' => $guestSubmissions->count(),
+            'pending' => $pending->count(),
+            'published' => $guestPublished->count(),
+            'rejected' => $guestRejected->count(),
+        ];
+
+        $guestUploaders = $guestSubmissions
+            ->groupBy(fn (GalleryPhoto $photo) => $photo->uploaded_by_user_id ?: 'unknown')
+            ->map(function ($items) {
+                $first = $items->first();
+                $uploader = $first?->uploader;
+                $name = $uploader?->guestProfile?->fullName() ?: $uploader?->name ?: '投稿者不明';
+
+                return [
+                    'name' => $name,
+                    'email' => $uploader?->email,
+                    'total' => $items->count(),
+                    'pending' => $items->where('status', 'pending')->count(),
+                    'published' => $items->where('status', 'approved')->count(),
+                    'rejected' => $items->where('status', 'rejected')->count(),
+                    'latest_at' => $items->max('created_at'),
+                ];
+            })
+            ->sortByDesc('latest_at')
+            ->values();
+
+        // 従来のBlade変数名を残しつつ、実体は却下済みとして扱う
+        $guestApproved = $guestRejected;
 
         $categoryOptions = GalleryPhoto::categoryOptions();
         $sourceOptions = GalleryPhoto::sourceOptions();
@@ -54,8 +98,9 @@ class AdminGalleryController extends Controller
         $firstUntaggedId = $untaggedPhotos->first()?->id;
 
         return view('admin.gallery', compact(
-            'photos', 'pending', 'guestApproved', 'categoryOptions', 'sourceOptions',
-            'untaggedCount', 'firstUntaggedId'
+            'photos', 'pending', 'guestApproved', 'guestPublished', 'guestRejected',
+            'guestSubmissions', 'guestSubmissionStats', 'guestUploaders',
+            'categoryOptions', 'sourceOptions', 'untaggedCount', 'firstUntaggedId'
         ));
     }
 

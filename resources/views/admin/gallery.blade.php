@@ -41,6 +41,47 @@
     background: #b38b59; color: #fff; border-radius: 999px;
     padding: 10px 16px; font-size: .82rem; font-weight: 800;
 }
+
+.gl-submission-panel {
+    margin: 0 0 20px;
+    border: 1px solid #eadbc8;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fffdf8 0%, #f9f1e7 100%);
+    box-shadow: 0 12px 30px rgba(61,47,37,.07);
+    overflow: hidden;
+}
+.gl-submission-panel__head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(179,139,89,.18);
+}
+.gl-submission-panel__head h2 { margin: 0 0 4px; color: #3d2f25; font-size: 1rem; }
+.gl-submission-panel__head p { margin: 0; color: #8a7969; font-size: .78rem; line-height: 1.6; }
+.gl-submission-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; padding: 14px 20px; }
+.gl-submission-stat {
+    padding: 11px 12px; border-radius: 14px; background: rgba(255,255,255,.76);
+    border: 1px solid rgba(232,213,183,.7);
+}
+.gl-submission-stat strong { display: block; color: #3d2f25; font-size: 1.25rem; line-height: 1; }
+.gl-submission-stat span { display: block; margin-top: 5px; color: #8a7969; font-size: .72rem; font-weight: 700; }
+.gl-uploader-summary { padding: 0 20px 18px; }
+.gl-uploader-summary__title { margin: 2px 0 10px; color: #5d4635; font-size: .82rem; font-weight: 800; }
+.gl-uploader-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.gl-uploader-card {
+    padding: 12px 13px; border-radius: 14px; background: #fff;
+    border: 1px solid #efe3d4; box-shadow: 0 5px 16px rgba(61,47,37,.05);
+}
+.gl-uploader-card__name { display: block; color: #3d2f25; font-size: .86rem; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gl-uploader-card__mail { display: block; margin-top: 2px; color: #a89582; font-size: .68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gl-uploader-card__counts { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.gl-uploader-pill { border-radius: 999px; padding: 3px 8px; font-size: .67rem; font-weight: 800; background: #f7efe5; color: #7a5b32; }
+.gl-uploader-pill--pending { background: #fff7d6; color: #9a6800; }
+.gl-uploader-pill--published { background: #eaf7ef; color: #21824b; }
+.gl-uploader-pill--rejected { background: #fff0f0; color: #c0392b; }
+.pending-item__meta { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0 9px; }
+.pending-meta-chip { border-radius: 999px; padding: 3px 7px; background: #f7efe5; color: #7a5b32; font-size: .66rem; font-weight: 800; }
+.pending-meta-chip--pending { background: #fff7d6; color: #9a6800; }
+.pending-meta-chip--tag { background: #eef7ff; color: #2563eb; }
 .gl-upload-section { margin-bottom: 22px; border: 1px solid #efe3d4; border-radius: 16px; background: #fffdf9; box-shadow: 0 10px 28px rgba(61,47,37,.06); overflow: hidden; }
 .gl-upload-section__summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; cursor: pointer; list-style: none; user-select: none; }
 .gl-upload-section__summary::-webkit-details-marker { display: none; }
@@ -159,6 +200,16 @@
     border-radius: 999px; background: rgba(40,32,26,.82); color: #fff;
     font-size: .66rem; font-weight: 700;
 }
+.gl-uploader-badge {
+    position: absolute; left: 6px; right: 6px; bottom: 6px;
+    display: inline-flex; align-items: center; gap: 4px;
+    border-radius: 999px; padding: 4px 8px;
+    background: rgba(255,255,255,.94); color: #6d5540;
+    font-size: .64rem; font-weight: 800;
+    box-shadow: 0 2px 8px rgba(0,0,0,.16);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.gl-uploader-badge i { color: #b38b59; flex: 0 0 auto; }
 .gl-tile__menu {
     position: absolute; right: 4px; top: 4px; width: 30px; height: 30px;
     display: inline-flex; align-items: center; justify-content: center;
@@ -333,6 +384,10 @@
     .gl-history-grid { grid-template-columns: 1fr; }
     .gl-todo { padding: 13px 14px; gap: 11px; flex-wrap: wrap; }
     .gl-todo__go { width: 100%; justify-content: center; }
+    .gl-submission-panel__head { padding: 16px 14px 12px; }
+    .gl-submission-stats { grid-template-columns: repeat(2, 1fr); padding: 12px 14px; }
+    .gl-uploader-summary { padding: 0 14px 14px; }
+    .gl-uploader-list { grid-template-columns: 1fr; }
     .official-section { margin-left: -2px; margin-right: -2px; border-radius: 18px; }
     .official-section__summary { padding: 15px 14px; align-items: flex-start; }
     .official-section__copy { white-space: normal; }
@@ -353,6 +408,42 @@
 <div class="admin-wrap">
     <h1><i class="fa-solid fa-images" style="font-size:1.2rem;opacity:0.7;margin-right:8px;"></i>ギャラリー管理</h1>
     <p class="page-desc">ゲストに公開する写真を管理します。複数枚まとめてアップロードできます。</p>
+
+    @if (($guestSubmissionStats['total'] ?? 0) > 0)
+    <section class="gl-submission-panel" aria-label="ゲスト投稿の管理状況">
+        <div class="gl-submission-panel__head">
+            <div>
+                <h2><i class="fa-solid fa-inbox" style="color:#b38b59;margin-right:7px;"></i>ゲスト投稿の状況</h2>
+                <p>誰が投稿した写真か、承認前・公開中・却下済みをまとめて確認できます。</p>
+            </div>
+        </div>
+        <div class="gl-submission-stats">
+            <div class="gl-submission-stat"><strong>{{ $guestSubmissionStats['total'] }}</strong><span>ゲスト投稿</span></div>
+            <div class="gl-submission-stat"><strong>{{ $guestSubmissionStats['pending'] }}</strong><span>承認待ち</span></div>
+            <div class="gl-submission-stat"><strong>{{ $guestSubmissionStats['published'] }}</strong><span>公開中</span></div>
+            <div class="gl-submission-stat"><strong>{{ $guestSubmissionStats['rejected'] }}</strong><span>却下済み</span></div>
+        </div>
+        @if ($guestUploaders->isNotEmpty())
+        <div class="gl-uploader-summary">
+            <div class="gl-uploader-summary__title">投稿者別</div>
+            <div class="gl-uploader-list">
+                @foreach ($guestUploaders as $uploader)
+                <div class="gl-uploader-card">
+                    <strong class="gl-uploader-card__name">{{ $uploader['name'] }}</strong>
+                    @if ($uploader['email'])<span class="gl-uploader-card__mail">{{ $uploader['email'] }}</span>@endif
+                    <div class="gl-uploader-card__counts">
+                        <span class="gl-uploader-pill">合計 {{ $uploader['total'] }}</span>
+                        @if ($uploader['pending'] > 0)<span class="gl-uploader-pill gl-uploader-pill--pending">承認待ち {{ $uploader['pending'] }}</span>@endif
+                        @if ($uploader['published'] > 0)<span class="gl-uploader-pill gl-uploader-pill--published">公開中 {{ $uploader['published'] }}</span>@endif
+                        @if ($uploader['rejected'] > 0)<span class="gl-uploader-pill gl-uploader-pill--rejected">却下 {{ $uploader['rejected'] }}</span>@endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </section>
+    @endif
 
     @if ($untaggedCount > 0)
     <a href="{{ route('admin.gallery.tag.edit', $firstUntaggedId) }}" class="gl-todo">
@@ -389,10 +480,19 @@
                 <div class="pending-item__body">
                     <p class="pending-item__uploader">
                         <i class="fa-solid fa-user" style="font-size:0.7rem;"></i>
-                        {{ $photo->uploader?->name ?? '不明' }}
-                        <span style="color:#c0b0a0;margin-left:4px;">{{ $photo->created_at->format('m/d') }}</span>
+                        {{ $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: '投稿者不明' }}
+                        <span style="color:#c0b0a0;margin-left:4px;">{{ $photo->created_at->format('m/d H:i') }}</span>
                     </p>
                     <p class="pending-item__caption">{{ $photo->caption ?: '（コメントなし）' }}</p>
+                    <div class="pending-item__meta">
+                        <span class="pending-meta-chip pending-meta-chip--pending">{{ $photo->statusLabel() }}</span>
+                        <span class="pending-meta-chip">{{ $photo->categoryLabel() }}</span>
+                        @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
+                        <span class="pending-meta-chip pending-meta-chip--tag">タグあり</span>
+                        @else
+                        <span class="pending-meta-chip">未タグ</span>
+                        @endif
+                    </div>
                     <div class="pending-item__actions">
                         <form method="POST" action="{{ route('admin.gallery.approve', $photo->id) }}" class="pending-action-form" data-action="approve">
                             @csrf
@@ -523,6 +623,8 @@
         @foreach ($photos as $photo)
         @php
             $isUntagged = $photo->taggedUsers->isEmpty() && $photo->taggedGroups->isEmpty();
+            $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
+            $searchText = strtolower(trim(($photo->caption ?? '') . ' ' . ($uploaderName ?? '')));
             $groupSortOrder = collect()
                 ->merge($photo->taggedGroups->map(fn($group) => $group->gallerySortRank()))
                 ->merge($photo->taggedUsers->map(fn($user) => \App\Models\GuestGroup::gallerySortRankForProfile($user->guestProfile)))
@@ -530,7 +632,7 @@
                 ->min() ?? 99;
         @endphp
         <div class="gl-admin-item {{ $photo->is_active ? '' : 'inactive' }}"
-             data-caption="{{ strtolower($photo->caption ?? '') }}"
+             data-search="{{ $searchText }}"
              data-active="{{ $photo->is_active ? '1' : '0' }}"
              data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}"
              data-upload-kind="{{ $photo->is_guest_upload ? 'guest' : 'official' }}"
@@ -543,7 +645,9 @@
             <a href="{{ route('admin.gallery.tag.edit', $photo->id) }}" class="gl-tile__link" aria-label="{{ $photo->caption ?: '写真' }}のタグ付け">
                 <img src="{{ $photo->url }}" alt="" class="gl-tile__img" loading="lazy">
                 <span class="gl-order-badge">{{ $loop->iteration }}</span>
-                @if ($isUntagged)
+                @if ($photo->is_guest_upload && $uploaderName)
+                <span class="gl-uploader-badge" title="投稿者: {{ $uploaderName }}"><i class="fa-solid fa-user"></i>{{ $uploaderName }}</span>
+                @elseif ($isUntagged)
                 <span class="gl-untagged-badge" title="タグ未設定">未タグ</span>
                 @endif
                 @unless ($photo->is_active)
@@ -579,14 +683,14 @@
     {{-- 承認済み・却下済みゲスト投稿（折りたたみ） --}}
     @if ($guestApproved->isNotEmpty())
     <details class="guest-history-section" style="margin-top:32px;">
-        <summary>ゲスト投稿の承認・却下済み（{{ $guestApproved->count() }}件）</summary>
+        <summary>ゲスト投稿の却下済み（{{ $guestApproved->count() }}件）</summary>
         <div class="gl-history-grid" style="margin-top:12px;">
             @foreach ($guestApproved as $photo)
             <div class="gl-history-item {{ $photo->status === 'rejected' ? 'rejected' : '' }}">
                 <img src="{{ $photo->url }}" alt="" class="gl-admin-item__img">
                 <div class="gl-admin-item__body">
                     <p class="gl-admin-item__caption" title="{{ $photo->caption }}">
-                        {{ $photo->uploader?->name ?? '不明' }} ·
+                        {{ $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name ?: '投稿者不明' }} ·
                         <span style="color:{{ $photo->status==='approved' ? '#16a34a' : '#dc2626' }};">
                             {{ $photo->statusLabel() }}
                         </span>
@@ -699,7 +803,7 @@
         items.forEach(item => {
             const d = item.dataset;
             let show = true;
-            if (state.q && !d.caption.includes(state.q)) show = false;
+            if (state.q && !(d.search || '').includes(state.q)) show = false;
             if (state.active !== 'all' && d.active !== state.active) show = false;
             if (state.tagged !== 'all' && d.tagged !== state.tagged) show = false;
             if (state.category !== 'all' && d.category !== state.category) show = false;
