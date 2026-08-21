@@ -241,6 +241,14 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>参加日</label>
+                        <select name="event_day">
+                            <option value="">— 未設定 —</option>
+                            <option value="day1" {{ old('event_day') === 'day1' ? 'selected' : '' }}>1日目</option>
+                            <option value="day2" {{ old('event_day') === 'day2' ? 'selected' : '' }}>2日目</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>ご関係</label>
                         <select name="relationship">
                             <option value="">— 未設定 —</option>
@@ -317,6 +325,7 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                     <th class="user-sortable" data-col="name">氏名 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="user-sortable" data-col="side">お立場 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="col-md-hide">ご関係</th>
+                    <th class="col-md-hide user-sortable" data-col="day">参加日 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="col-md-hide">メール</th>
                     <th class="col-md-hide user-sortable" data-col="role">ロール <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
                     <th class="col-md-hide user-sortable" data-col="rsvp">出欠 <span class="user-sort-icon"><i class="fa-solid fa-sort"></i></span></th>
@@ -338,7 +347,8 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                     data-email="{{ strtolower($user->email ?? '') }}"
                     data-role="{{ $user->role }}"
                     data-rsvp="{{ $status }}"
-                    data-side="{{ $p?->guest_side }}">
+                    data-side="{{ $p?->guest_side }}"
+                    data-day="{{ $p?->event_day }}">
                     <td class="select-col">
                         @if ($user->id !== auth()->id())
                             <input type="checkbox" name="user_ids[]" value="{{ $user->id }}"
@@ -380,6 +390,17 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                             <option value="family"    {{ $p?->relationship === 'family'    ? 'selected' : '' }}>親族</option>
                             <option value="colleague" {{ $p?->relationship === 'colleague' ? 'selected' : '' }}>職場関係</option>
                             <option value="other"     {{ $p?->relationship === 'other'     ? 'selected' : '' }}>その他</option>
+                        </select>
+                        @else
+                        <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    <td class="col-md-hide">
+                        @if (!$user->isAdmin())
+                        <select class="guest-info-select" data-user-id="{{ $user->id }}" data-field="event_day" aria-label="参加日">
+                            <option value="" {{ !$p?->event_day ? 'selected' : '' }}>未設定</option>
+                            <option value="day1" {{ $p?->event_day === 'day1' ? 'selected' : '' }}>1日目</option>
+                            <option value="day2" {{ $p?->event_day === 'day2' ? 'selected' : '' }}>2日目</option>
                         </select>
                         @else
                         <span class="text-muted">—</span>
@@ -444,7 +465,7 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                 </tr>
                 {{-- パスワード変更行 --}}
                 <tr class="pw-row" id="pw-row-{{ $user->id }}">
-                    <td colspan="9">
+                    <td colspan="10">
                         <form method="POST" action="{{ route('admin.users.password', $user->id) }}"
                               class="pw-form">
                             @csrf @method('PATCH')
@@ -515,6 +536,7 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
             case 'role':     va = da.role;     vb = db.role;     break;
             case 'rsvp':     va = rsvpOrder[da.rsvp] ?? 3; vb = rsvpOrder[db.rsvp] ?? 3; break;
             case 'side':     va = da.side || 'zzz'; vb = db.side || 'zzz'; break;
+            case 'day':      va = da.day || 'zzz'; vb = db.day || 'zzz'; break;
             default: return 0;
         }
         if (va < vb) return state.dir === 'asc' ? -1 :  1;
@@ -641,6 +663,9 @@ document.querySelectorAll('.guest-info-select').forEach(select => {
             if (field === 'guest_side') {
                 select.className = 'guest-info-select' + (data.guest_side ? ' side-' + data.guest_side : '');
                 if (row) row.dataset.side = data.guest_side || '';
+            }
+            if (field === 'event_day' && row) {
+                row.dataset.day = data.event_day || '';
             }
 
             row?.classList.remove('guest-info-saved-flash');

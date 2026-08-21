@@ -45,6 +45,38 @@ class AdminReminderSelectionTest extends TestCase
         Mail::assertNotSent(ReminderMail::class, fn (ReminderMail $mail) => $mail->hasTo('c@example.com'));
     }
 
+
+    public function test_admin_can_filter_reminder_recipients_by_event_day(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $day1 = User::factory()->create(['role' => 'guest', 'email' => 'day1@example.com']);
+        $day2 = User::factory()->create(['role' => 'guest', 'email' => 'day2@example.com']);
+
+        $day1->guestProfile()->create(['participation' => 'pending', 'event_day' => 'day1']);
+        $day2->guestProfile()->create(['participation' => 'pending', 'event_day' => 'day2']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.reminders.store'), [
+                'title' => '1日目だけ',
+                'target' => 'all',
+                'target_event_day' => 'day1',
+                'subject' => '1日目のお知らせ',
+                'message' => '1日目の方へ送ります。',
+                'send_now' => '1',
+            ])
+            ->assertRedirect();
+
+        $reminder = ReminderSchedule::firstOrFail();
+        $this->assertSame('day1', $reminder->target_event_day);
+        $this->assertSame(1, $reminder->sent_count);
+
+        Mail::assertSent(ReminderMail::class, 1);
+        Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail) => $mail->hasTo('day1@example.com'));
+        Mail::assertNotSent(ReminderMail::class, fn (ReminderMail $mail) => $mail->hasTo('day2@example.com'));
+    }
+
     public function test_selected_target_requires_at_least_one_guest(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

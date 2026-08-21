@@ -14,6 +14,7 @@ class GuestProfile extends Model
     protected $fillable = [
         'user_id',
         'guest_side',
+        'event_day',
         'relationship',
         'relationship_detail',
         'last_name',
@@ -74,6 +75,20 @@ class GuestProfile extends Model
             'declining' => '欠席',
             default     => '未回答',
         };
+    }
+
+
+    public static function eventDayOptions(): array
+    {
+        return [
+            'day1' => '1日目',
+            'day2' => '2日目',
+        ];
+    }
+
+    public function eventDayLabel(): string
+    {
+        return self::eventDayOptions()[$this->event_day] ?? '未設定';
     }
 
     public function guestSideLabel(): string

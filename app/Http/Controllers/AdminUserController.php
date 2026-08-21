@@ -67,6 +67,7 @@ class AdminUserController extends Controller
             'furigana_sei' => 'nullable|string|max:50',
             'furigana_mei' => 'nullable|string|max:50',
             'guest_side'   => 'nullable|in:groom,bride',
+            'event_day'    => 'nullable|in:day1,day2',
             'relationship' => 'nullable|in:friend,family,colleague,other',
         ], [
             'username.required' => 'ユーザー名は必須です',
@@ -135,6 +136,7 @@ class AdminUserController extends Controller
                 'furigana_sei'  => $request->furigana_sei,
                 'furigana_mei'  => $request->furigana_mei,
                 'guest_side'    => $request->guest_side ?: null,
+                'event_day'     => $request->event_day ?: null,
                 'relationship'  => $request->relationship ?: null,
                 'participation' => 'pending',
                 'checkin_token' => (string) Str::uuid(),
@@ -357,6 +359,7 @@ class AdminUserController extends Controller
             'furigana_mei'        => 'nullable|string|max:50',
             'guest_side'          => 'nullable|in:groom,bride',
             'relationship'        => 'nullable|in:friend,family,colleague,other',
+            'event_day'           => 'nullable|in:day1,day2',
             'relationship_detail' => 'nullable|string|max:100',
             'participation'       => 'nullable|in:attending,declining,pending',
             'attending_count'     => 'nullable|integer|min:0|max:20',
@@ -461,6 +464,7 @@ class AdminUserController extends Controller
                     'furigana_sei'        => $request->furigana_sei,
                     'furigana_mei'        => $request->furigana_mei,
                     'guest_side'          => $request->guest_side ?: null,
+                    'event_day'           => $request->event_day ?: null,
                     'relationship'        => $request->relationship ?: null,
                     'relationship_detail' => $request->relationship_detail,
                     'participation'       => $request->participation ?? 'pending',
@@ -523,6 +527,7 @@ class AdminUserController extends Controller
 
         $request->validate([
             'guest_side'   => 'nullable|in:groom,bride',
+            'event_day'    => 'nullable|in:day1,day2',
             'relationship' => 'nullable|in:friend,family,colleague,other',
         ]);
 
@@ -530,6 +535,7 @@ class AdminUserController extends Controller
             ['user_id' => $user->id],
             [
                 'guest_side'   => $request->guest_side ?: null,
+                'event_day'    => $request->event_day ?: null,
                 'relationship' => $request->relationship ?: null,
             ]
         );
@@ -538,6 +544,8 @@ class AdminUserController extends Controller
             'success'          => true,
             'guest_side'       => $profile->guest_side,
             'guest_side_label' => $profile->guestSideLabel(),
+            'event_day'        => $profile->event_day,
+            'event_day_label'  => $profile->eventDayLabel(),
             'relationship'         => $profile->relationship,
             'relationship_label'   => $profile->relationshipLabel(),
         ]);

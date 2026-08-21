@@ -185,6 +185,14 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>参加日</label>
+                    <select name="event_day">
+                        <option value="">— 未設定 —</option>
+                        <option value="day1" {{ old('event_day', $user->guestProfile?->event_day) === 'day1' ? 'selected' : '' }}>1日目</option>
+                        <option value="day2" {{ old('event_day', $user->guestProfile?->event_day) === 'day2' ? 'selected' : '' }}>2日目</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>ご関係</label>
                     <select name="relationship">
                         <option value="">— 未設定 —</option>

@@ -19,6 +19,7 @@
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:#b38b59; }
 .form-textarea { resize:vertical; min-height:120px; }
+.form-group.hidden { display:none; }
 
 .send-options { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
 .btn-send-now   { background:#b38b59; color:#fff; border:none; border-radius:8px; padding:11px 24px; font-size:0.88rem; font-weight:500; cursor:pointer; transition:background .15s; }
@@ -111,6 +112,15 @@
                 </div>
             </div>
 
+            <div class="form-group" id="eventDayFilterGroup">
+                <label class="form-label" for="target_event_day">参加日で絞る <span class="optional">任意</span></label>
+                <select id="target_event_day" name="target_event_day" class="form-select" style="max-width:240px;">
+                    <option value="" {{ old('target_event_day') === null || old('target_event_day') === '' ? 'selected' : '' }}>全日程</option>
+                    <option value="day1" {{ old('target_event_day') === 'day1' ? 'selected' : '' }}>1日目</option>
+                    <option value="day2" {{ old('target_event_day') === 'day2' ? 'selected' : '' }}>2日目</option>
+                </select>
+            </div>
+
             <div class="recipient-panel{{ old('target') === 'selected' ? ' open' : '' }}" id="recipientPanel">
                 <div class="recipient-tools">
                     <input type="search" class="form-input recipient-search" id="recipientSearch" placeholder="名前・ふりがな・メールで検索">
@@ -128,11 +138,12 @@
                             $hasEmail = filled($guest->email);
                             $participation = $profile?->participationLabel() ?? '未回答';
                             $side = $profile?->guestSideLabel() ?? '—';
+                            $eventDay = $profile?->eventDayLabel() ?? '未設定';
                             $furigana = $profile?->furigana() ?: '';
                         @endphp
                         <label class="recipient-item{{ $hasEmail ? '' : ' is-disabled' }}"
                                data-recipient-item
-                               data-search="{{ Str::lower($guest->name . ' ' . $furigana . ' ' . $guest->email . ' ' . $participation . ' ' . $side) }}">
+                               data-search="{{ Str::lower($guest->name . ' ' . $furigana . ' ' . $guest->email . ' ' . $participation . ' ' . $side . ' ' . $eventDay) }}">
                             <input type="checkbox" name="selected_user_ids[]" value="{{ $guest->id }}"
                                    data-recipient-checkbox
                                    {{ in_array($guest->id, $oldSelectedUserIds, true) ? 'checked' : '' }}
@@ -140,6 +151,7 @@
                             <span>
                                 <span class="recipient-name">{{ $guest->name }}</span>
                                 <span class="recipient-badge">{{ $participation }}</span>
+                                <span class="recipient-badge">{{ $eventDay }}</span>
                                 <span class="recipient-meta">
                                     {{ $side }} @if($furigana) / {{ $furigana }} @endif<br>
                                     {{ $hasEmail ? $guest->email : 'メール未登録のため送信不可' }}
@@ -224,6 +236,10 @@
                         <div class="reminder-item__title">{{ $r->title }}</div>
                         <div class="reminder-item__meta">
                             <span>{{ $r->targetLabel() }}</span>
+                            @if(!$r->selected_user_ids)
+                                <span>·</span>
+                                <span>{{ $r->targetEventDayLabel() }}</span>
+                            @endif
                             <span>·</span>
                             <span>件名: {{ Str::limit($r->subject, 40) }}</span>
                             @if($r->scheduled_at && $r->isPending())
@@ -287,6 +303,7 @@ const recipientNote = document.getElementById('recipientNote');
 function updateRecipientPanel() {
     if (!targetSelect || !recipientPanel) return;
     recipientPanel.classList.toggle('open', targetSelect.value === 'selected');
+    document.getElementById('eventDayFilterGroup')?.classList.toggle('hidden', targetSelect.value === 'selected');
     updateRecipientCount();
 }
 

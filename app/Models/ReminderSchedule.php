@@ -11,6 +11,7 @@ class ReminderSchedule extends Model
         'title',
         'target',
         'selected_user_ids',
+        'target_event_day',
         'subject',
         'message',
         'scheduled_at',
@@ -63,6 +64,15 @@ class ReminderSchedule extends Model
         };
     }
 
+    public function targetEventDayLabel(): string
+    {
+        return match ($this->target_event_day) {
+            'day1' => '1日目',
+            'day2' => '2日目',
+            default => '全日程',
+        };
+    }
+
     public function statusLabel(): string
     {
         return match ($this->status) {
@@ -91,6 +101,10 @@ class ReminderSchedule extends Model
 
         if (! empty($this->selected_user_ids)) {
             return $query->whereIn('id', $this->selected_user_ids)->get();
+        }
+
+        if (in_array($this->target_event_day, ['day1', 'day2'], true)) {
+            $query->whereHas('guestProfile', fn ($q) => $q->where('event_day', $this->target_event_day));
         }
 
         return match ($this->target) {
