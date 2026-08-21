@@ -103,7 +103,9 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
     position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; padding: 22px;
     background: radial-gradient(circle at center, rgba(46,34,25,.94), rgba(12,9,7,.96));
     opacity: 0; pointer-events: none; transition: opacity .2s ease;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
+.gl-lightbox * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .gl-lightbox.is-open { opacity: 1; pointer-events: all; }
 .gl-lightbox__shell {
     position: relative; width: min(1120px, 100%); max-height: 90vh;
@@ -117,7 +119,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)),
         #090705;
 }
-.gl-lightbox__img { max-width: 100%; max-height: 90vh; object-fit: contain; display: block; }
+.gl-lightbox__img { max-width: 100%; max-height: 90vh; object-fit: contain; display: block; -webkit-user-drag: none; }
 .gl-lightbox__info { padding: 24px; background: #fffaf3; color: #3d2f25; overflow-y: auto; }
 .gl-lightbox__label { color: #b38b59; font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; }
 .gl-lightbox__caption { margin: 12px 0 12px; font-size: 1rem; font-weight: 700; line-height: 1.7; }
@@ -698,7 +700,8 @@ function isLightboxControlTarget(target) {
 }
 function handleLightboxSurfaceTap(event) {
     if (isLightboxControlTarget(event.target)) return;
-    // 中央タップでは何もしない。写真送りは左右の明示的な端ボタンだけにする。
+    if (lightboxTouchMoved || Date.now() < lightboxGestureBlockUntil) return;
+    closeLightbox();
 }
 function closeLightboxOnOverlay(e) {
     if (e.target === document.getElementById('glLightbox')) closeLightbox();
@@ -1006,12 +1009,20 @@ window.addEventListener('pagehide', () => {
 
 (function () {
     const lightbox = document.getElementById('glLightbox');
+    const shell = document.querySelector('.gl-lightbox__shell');
     const stage = document.querySelector('.gl-lightbox__stage');
     if (!lightbox || !stage) return;
 
     let startX = 0;
     let startY = 0;
+    shell?.addEventListener('click', handleLightboxSurfaceTap);
     stage.addEventListener('click', handleLightboxSurfaceTap);
+    lightbox.addEventListener('contextmenu', event => {
+        event.preventDefault();
+    });
+    lightbox.addEventListener('dragstart', event => {
+        event.preventDefault();
+    });
     stage.addEventListener('touchstart', event => {
         lightboxTouchMoved = false;
         if (event.touches.length > 1) {

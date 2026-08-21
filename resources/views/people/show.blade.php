@@ -36,6 +36,7 @@ main { padding: 0; text-align: initial; }
     position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px;
     background: linear-gradient(to top, rgba(20,10,2,0.65), transparent);
     color: #fff; font-size: 0.8rem; opacity: 0; transition: opacity 0.25s; line-height: 1.5;
+    pointer-events: none; -webkit-user-select: none; user-select: none;
 }
 .gl-item:hover .gl-item__caption { opacity: 1; }
 
@@ -43,12 +44,14 @@ main { padding: 0; text-align: initial; }
     position: fixed; inset: 0; z-index: 9000; background: rgba(16,12,9,.95);
     display: flex; align-items: center; justify-content: center; padding: 20px;
     opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
+.gl-lightbox * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .gl-lightbox.is-open { opacity: 1; pointer-events: all; }
 .gl-lightbox__inner { position: relative; width: min(1120px, 100%); height: min(90vh, 820px); display: grid; place-items: center; }
 .gl-lightbox__img {
     max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 14px;
-    box-shadow: 0 18px 58px rgba(0,0,0,.42); transform: scale(.98); transition: transform .22s, opacity .14s;
+    box-shadow: 0 18px 58px rgba(0,0,0,.42); transform: scale(.98); transition: transform .22s, opacity .14s; -webkit-user-drag: none;
 }
 .gl-lightbox.is-open .gl-lightbox__img { transform: scale(1); }
 .gl-lightbox__meta {
@@ -99,6 +102,7 @@ main { padding: 0; text-align: initial; }
 @media (max-width: 767px) {
     .gl-grid { columns: 2 140px; column-gap: 10px; }
     .gl-item { margin-bottom: 10px; }
+    .gl-item__caption { display: none; }
     .gl-lightbox { padding: 0; align-items: stretch; justify-content: stretch; }
     .gl-lightbox__inner { width: 100%; height: 100dvh; max-height: none; padding: calc(env(safe-area-inset-top) + 70px) 12px 126px; box-sizing: border-box; }
     .gl-lightbox__img { max-width: calc(100vw - 24px); max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 220px); border-radius: 14px; }
@@ -199,6 +203,7 @@ const peopleBackSource = @json($backSource);
 const photos = @json($photosJson);
 let current = 0;
 let lightboxGestureBlockUntil = 0;
+let lightboxTouchMoved = false;
 
 function isViewportZoomed() {
     return Boolean(window.visualViewport && window.visualViewport.scale && window.visualViewport.scale > 1.04);
@@ -243,7 +248,8 @@ function isLightboxControlTarget(target) {
 }
 function handleLightboxSurfaceTap(event) {
     if (isLightboxControlTarget(event.target)) return;
-    // 中央タップでは何もしない。誤操作を避けるため閉じる操作は×と背景だけにする。
+    if (lightboxTouchMoved || Date.now() < lightboxGestureBlockUntil) return;
+    closeLightbox();
 }
 function closeLightboxOnOverlay(e) {
     if (e.target === document.getElementById('glLightbox')) closeLightbox();
@@ -291,7 +297,14 @@ document.addEventListener('click', event => {
     let startX = 0;
     let startY = 0;
     stage.addEventListener('click', handleLightboxSurfaceTap);
+    document.getElementById('glLightbox')?.addEventListener('contextmenu', event => {
+        event.preventDefault();
+    });
+    document.getElementById('glLightbox')?.addEventListener('dragstart', event => {
+        event.preventDefault();
+    });
     stage.addEventListener('touchstart', event => {
+        lightboxTouchMoved = false;
         if (event.target.closest('.gl-lightbox__meta')) return;
         if (event.touches.length > 1) {
             markLightboxGestureBlocked(900);
@@ -303,6 +316,7 @@ document.addEventListener('click', event => {
         startY = touch.clientY;
     }, { passive: true });
     stage.addEventListener('touchmove', event => {
+        lightboxTouchMoved = true;
         if (event.target.closest('.gl-lightbox__meta')) return;
         if (event.touches.length > 1 || isViewportZoomed()) {
             markLightboxGestureBlocked(900);
