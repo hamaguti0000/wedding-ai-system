@@ -46,10 +46,6 @@
         <tr>
           <td class="body-cell" style="padding:40px 40px 32px;">
 
-            <p style="font-size:16px;font-weight:600;color:#3d2f25;margin-bottom:20px;">
-              {{ $recipient->name }} 様
-            </p>
-
             {{-- カスタムメッセージ（改行を <br> に変換） --}}
             <div style="font-size:15px;line-height:2.0;color:#3d2f25;margin-bottom:32px;white-space:pre-line;">{{ $reminder->message }}</div>
 
