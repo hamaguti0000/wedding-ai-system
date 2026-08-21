@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
 class PeopleController extends Controller
@@ -23,7 +24,7 @@ class PeopleController extends Controller
         return view('people.index', compact('people'));
     }
 
-    public function show(User $user)
+    public function show(User $user, Request $request)
     {
         abort_if($user->isAdmin(), 404);
         abort_if($user->seatAssignment === null, 404);
@@ -35,6 +36,17 @@ class PeopleController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('people.show', compact('user', 'photos'));
+        $backSource = $request->query('from', 'people');
+        if (! in_array($backSource, ['gallery', 'seating', 'people'], true)) {
+            $backSource = 'people';
+        }
+
+        [$backUrl, $backLabel] = match ($backSource) {
+            'gallery' => [route('gallery'), 'ギャラリーに戻る'],
+            'seating' => [route('seating.guest'), '席次表に戻る'],
+            default => [route('people.index'), '参加者一覧に戻る'],
+        };
+
+        return view('people.show', compact('user', 'photos', 'backUrl', 'backLabel', 'backSource'));
     }
 }

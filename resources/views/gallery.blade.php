@@ -742,7 +742,7 @@ function showPhoto() {
             if (t.type === 'group') {
                 return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="#" data-gallery-group="${escapeHtml(t.name)}"><i class="fa-solid fa-layer-group"></i> ${escapeHtml(t.name)}</a>`;
             }
-            const href = `${peopleBaseUrl}/${t.id}`;
+            const href = `${peopleBaseUrl}/${t.id}?from=gallery`;
             return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${href}" data-people-link="${href}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`;
         }).join('')
         : '<span class="gl-person-chip">人物タグはまだありません</span>';

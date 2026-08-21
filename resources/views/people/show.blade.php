@@ -118,8 +118,8 @@ main { padding: 0; text-align: initial; }
 </section>
 
 <div class="gl-wrap">
-    <a href="{{ route('people.index') }}" class="people-back">
-        <i class="fa-solid fa-arrow-left"></i> 参加者一覧に戻る
+    <a href="{{ $backUrl }}" class="people-back">
+        <i class="fa-solid fa-arrow-left"></i> {{ $backLabel }}
     </a>
 
     @if ($photos->isEmpty())
@@ -183,6 +183,7 @@ main { padding: 0; text-align: initial; }
 @endphp
 <script>
 const peopleBaseUrl = "{{ url('/people') }}";
+const peopleBackSource = @json($backSource);
 const photos = @json($photosJson);
 let current = 0;
 
@@ -226,7 +227,7 @@ function showPhoto() {
     const tagsEl = document.getElementById('glLightboxTags');
     const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     tagsEl.innerHTML = (p.tags || []).map(t =>
-        `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}" data-people-link="${peopleBaseUrl}/${t.id}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
+        `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}?from=${encodeURIComponent(peopleBackSource)}" data-people-link="${peopleBaseUrl}/${t.id}?from=${encodeURIComponent(peopleBackSource)}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
     ).join('');
 }
 function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
