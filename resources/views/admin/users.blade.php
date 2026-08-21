@@ -243,9 +243,8 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                     <div class="form-group">
                         <label>参加日</label>
                         <select name="event_day">
-                            <option value="">— 未設定 —</option>
                             <option value="day1" {{ old('event_day') === 'day1' ? 'selected' : '' }}>1日目</option>
-                            <option value="day2" {{ old('event_day') === 'day2' ? 'selected' : '' }}>2日目</option>
+                            <option value="day2" {{ old('event_day', 'day2') === 'day2' ? 'selected' : '' }}>2日目</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -278,6 +277,11 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
               onsubmit="return confirmBulkDelete()" style="display:none;">
             @csrf @method('DELETE')
         </form>
+        <form method="POST" action="{{ route('admin.users.bulk-event-day') }}" id="bulkEventDayForm"
+              onsubmit="return confirmBulkEventDay()" style="display:none;">
+            @csrf @method('PATCH')
+            <input type="hidden" name="event_day" id="bulkEventDayInput" value="day1">
+        </form>
         {{-- ツールバー --}}
         <div class="user-toolbar">
             <div class="user-search-wrap">
@@ -308,11 +312,19 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
         <div class="bulk-toolbar">
             <div class="bulk-toolbar__left">
                 <span class="bulk-toolbar__count"><span id="selectedUserCount">0</span>名選択中</span>
-                <span>削除したいユーザーにチェックを入れてください。自分自身は選択できません。</span>
+                <span>参加日をまとめて変更したいゲストにチェックを入れてください。削除にも同じ選択を使えます。</span>
             </div>
-            <button type="submit" class="btn-bulk-del" id="bulkDeleteButton" form="bulkDeleteForm" disabled>
-                <i class="fa-solid fa-trash-can"></i> 選択したユーザーを削除
-            </button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="btn-sm btn-sm-pw" id="bulkDay1Button" onclick="submitBulkEventDay('day1')" disabled>
+                    <i class="fa-solid fa-calendar-day"></i> 選択を1日目にする
+                </button>
+                <button type="button" class="btn-sm btn-sm-pw" id="bulkDay2Button" onclick="submitBulkEventDay('day2')" disabled>
+                    <i class="fa-solid fa-calendar-check"></i> 選択を2日目に戻す
+                </button>
+                <button type="submit" class="btn-bulk-del" id="bulkDeleteButton" form="bulkDeleteForm" disabled>
+                    <i class="fa-solid fa-trash-can"></i> 選択したユーザーを削除
+                </button>
+            </div>
         </div>
         <div class="table-scroll">
         <table id="userTable">
@@ -398,9 +410,8 @@ th.user-sort-asc .user-sort-icon, th.user-sort-desc .user-sort-icon { color: #b3
                     <td class="col-md-hide">
                         @if (!$user->isAdmin())
                         <select class="guest-info-select" data-user-id="{{ $user->id }}" data-field="event_day" aria-label="参加日">
-                            <option value="" {{ !$p?->event_day ? 'selected' : '' }}>未設定</option>
                             <option value="day1" {{ $p?->event_day === 'day1' ? 'selected' : '' }}>1日目</option>
-                            <option value="day2" {{ $p?->event_day === 'day2' ? 'selected' : '' }}>2日目</option>
+                            <option value="day2" {{ ($p?->event_day ?: 'day2') === 'day2' ? 'selected' : '' }}>2日目</option>
                         </select>
                         @else
                         <span class="text-muted">—</span>
@@ -692,11 +703,15 @@ function updateBulkDeleteState() {
     const selected = document.querySelectorAll('.user-row-select:checked').length;
     const count = document.getElementById('selectedUserCount');
     const button = document.getElementById('bulkDeleteButton');
+    const day1Button = document.getElementById('bulkDay1Button');
+    const day2Button = document.getElementById('bulkDay2Button');
     const selectAll = document.getElementById('selectAllUsers');
     const selectable = document.querySelectorAll('.user-row-select');
 
     if (count) count.textContent = selected;
     if (button) button.disabled = selected === 0;
+    if (day1Button) day1Button.disabled = selected === 0;
+    if (day2Button) day2Button.disabled = selected === 0;
     if (selectAll) {
         selectAll.checked = selectable.length > 0 && selected === selectable.length;
         selectAll.indeterminate = selected > 0 && selected < selectable.length;

@@ -136,7 +136,7 @@ class AdminUserController extends Controller
                 'furigana_sei'  => $request->furigana_sei,
                 'furigana_mei'  => $request->furigana_mei,
                 'guest_side'    => $request->guest_side ?: null,
-                'event_day'     => $request->event_day ?: null,
+                'event_day'     => $request->event_day ?: 'day2',
                 'relationship'  => $request->relationship ?: null,
                 'participation' => 'pending',
                 'checkin_token' => (string) Str::uuid(),
@@ -250,6 +250,7 @@ class AdminUserController extends Controller
                     'last_name' => $lastName ?: null,
                     'first_name' => $firstName ?: null,
                     'guest_side' => $this->guestSideFromCsv($row),
+                    'event_day' => 'day2',
                     'relationship' => $this->relationshipFromCsv($row),
                     'relationship_detail' => $relationshipDetail ?: null,
                     'participation' => 'pending',
@@ -464,7 +465,7 @@ class AdminUserController extends Controller
                     'furigana_sei'        => $request->furigana_sei,
                     'furigana_mei'        => $request->furigana_mei,
                     'guest_side'          => $request->guest_side ?: null,
-                    'event_day'           => $request->event_day ?: null,
+                    'event_day'           => $request->event_day ?: 'day2',
                     'relationship'        => $request->relationship ?: null,
                     'relationship_detail' => $request->relationship_detail,
                     'participation'       => $request->participation ?? 'pending',
@@ -531,14 +532,29 @@ class AdminUserController extends Controller
             'relationship' => 'nullable|in:friend,family,colleague,other',
         ]);
 
-        $profile = GuestProfile::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'guest_side'   => $request->guest_side ?: null,
-                'event_day'    => $request->event_day ?: null,
-                'relationship' => $request->relationship ?: null,
-            ]
-        );
+        $profile = $user->guestProfile ?: GuestProfile::create([
+            'user_id'       => $user->id,
+            'participation' => 'pending',
+            'event_day'     => 'day2',
+            'checkin_token' => (string) Str::uuid(),
+        ]);
+
+        $updates = [];
+        if ($request->has('guest_side')) {
+            $updates['guest_side'] = $request->guest_side ?: null;
+        }
+        if ($request->has('event_day')) {
+            $updates['event_day'] = $request->event_day ?: 'day2';
+        }
+        if ($request->has('relationship')) {
+            $updates['relationship'] = $request->relationship ?: null;
+        }
+
+        if ($updates) {
+            $profile->update($updates);
+        }
+
+        $profile->ensureCheckInToken();
 
         return response()->json([
             'success'          => true,
@@ -611,6 +627,47 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.users')
             ->with('success', 'ユーザーを削除しました');
+    }
+
+
+    public function bulkUpdateEventDay(Request $request)
+    {
+        $request->validate([
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+            'event_day' => ['required', 'in:day1,day2'],
+        ], [
+            'user_ids.required' => '参加日を変更するゲストを選択してください',
+            'event_day.required' => '参加日を選択してください',
+        ]);
+
+        $ids = collect($request->input('user_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $users = User::with('guestProfile')
+            ->where('role', 'guest')
+            ->whereIn('id', $ids)
+            ->get();
+
+        foreach ($users as $user) {
+            $profile = GuestProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'event_day' => $request->event_day,
+                    'participation' => $user->guestProfile?->participation ?? 'pending',
+                    'checkin_token' => $user->guestProfile?->checkin_token ?: (string) Str::uuid(),
+                ]
+            );
+
+            $profile->ensureCheckInToken();
+        }
+
+        $label = $request->event_day === 'day1' ? '1日目' : '2日目';
+
+        return redirect()->route('admin.users')
+            ->with('success', $users->count() . "名を{$label}に変更しました");
     }
 
     public function bulkDestroy(Request $request)

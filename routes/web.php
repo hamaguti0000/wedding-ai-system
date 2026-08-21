@@ -230,6 +230,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/import', fn () => redirect()->route('admin.users'));
     Route::post('/users/import',     [AdminUserController::class, 'import'])       ->name('users.import');
     Route::delete('/users',          [AdminUserController::class, 'bulkDestroy'])  ->name('users.bulk-destroy');
+    Route::patch('/users/event-day', [AdminUserController::class, 'bulkUpdateEventDay'])->name('users.bulk-event-day');
     Route::get('/users/{id}',        [AdminUserController::class, 'show'])         ->whereNumber('id')->name('users.show');
     Route::get('/users/{id}/qr',     [AdminUserController::class, 'qr'])           ->whereNumber('id')->name('users.qr');
     Route::get('/users/{id}/edit',   [AdminUserController::class, 'edit'])         ->whereNumber('id')->name('users.edit');
