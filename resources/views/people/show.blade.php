@@ -52,17 +52,22 @@ main { padding: 0; text-align: initial; }
 }
 .gl-lightbox.is-open .gl-lightbox__img { transform: scale(1); }
 .gl-lightbox__meta {
-    position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 3;
-    display: grid; gap: 8px; justify-items: center; pointer-events: none;
+    position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 5;
+    display: grid; gap: 10px; justify-items: center; pointer-events: auto;
+    max-height: min(34vh, 210px); overflow-y: auto; overscroll-behavior: contain;
+    padding: 12px; border-radius: 18px;
+    background: rgba(16,12,9,.62); border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(16px);
 }
-.gl-lightbox__caption { margin: 0; color: rgba(255,255,255,.82); font-size: .85rem; text-align: center; }
+.gl-lightbox__caption { margin: 0; color: rgba(255,255,255,.86); font-size: .85rem; text-align: center; line-height: 1.55; }
 .gl-lightbox__caption:empty { display: none; }
-.gl-lightbox__tags { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+.gl-lightbox__tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
 .gl-lightbox__tag {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(255,255,255,.14); color: #fff; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    background: rgba(255,255,255,.16); color: #fff; text-decoration: none;
     border: 1px solid rgba(255,255,255,.34); border-radius: 999px;
-    padding: 6px 12px; font-size: .76rem; transition: background .15s; pointer-events: auto;
+    padding: 8px 12px; font-size: .78rem; transition: background .15s; pointer-events: auto;
+    min-height: 34px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .gl-lightbox__tag:hover { background: rgba(255,255,255,.24); }
 .gl-lightbox__download {
@@ -82,6 +87,8 @@ main { padding: 0; text-align: initial; }
 .gl-lightbox__prev { left: 14px; }
 .gl-lightbox__next { right: 14px; }
 .gl-lightbox__topcount { position: absolute; top: 23px; left: 72px; right: 72px; z-index: 4; text-align: center; color: rgba(255,255,255,.86); font-size: .76rem; font-weight: 800; letter-spacing: 2px; }
+.gl-lightbox__hint { position: absolute; left: 50%; bottom: 235px; z-index: 4; transform: translateX(-50%); padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.72); font-size: .66rem; letter-spacing: .08em; pointer-events: none; white-space: nowrap; }
+.gl-lightbox.is-zoomed .gl-lightbox__hint { background: rgba(255,255,255,.18); color: rgba(255,255,255,.9); }
 
 .gl-empty { text-align: center; padding: 60px 20px; color: #c0b0a0; }
 .gl-empty i { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 16px; }
@@ -90,15 +97,16 @@ main { padding: 0; text-align: initial; }
     .gl-grid { columns: 2 140px; column-gap: 10px; }
     .gl-item { margin-bottom: 10px; }
     .gl-lightbox { padding: 0; align-items: stretch; justify-content: stretch; }
-    .gl-lightbox__inner { width: 100%; height: 100dvh; max-height: none; padding: calc(env(safe-area-inset-top) + 66px) 12px 128px; box-sizing: border-box; }
-    .gl-lightbox__img { max-width: calc(100vw - 24px); max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 210px); border-radius: 14px; }
+    .gl-lightbox__inner { width: 100%; height: 100dvh; max-height: none; padding: calc(env(safe-area-inset-top) + 70px) 12px 190px; box-sizing: border-box; }
+    .gl-lightbox__img { max-width: calc(100vw - 24px); max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 300px); border-radius: 14px; }
     .gl-lightbox__download { display: none; }
     .gl-lightbox__nav { display: none; }
     .gl-lightbox__close { top: calc(env(safe-area-inset-top) + 14px); right: 14px; }
     .gl-lightbox__topcount { top: calc(env(safe-area-inset-top) + 23px); }
-    .gl-lightbox__meta { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 18px); padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 16px; background: rgba(16,12,9,.72); backdrop-filter: blur(14px); }
-    .gl-lightbox__tags { max-height: 84px; overflow-y: auto; }
-    .gl-lightbox__tag { background: rgba(255,255,255,.12); }
+    .gl-lightbox__meta { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 18px); max-height: 154px; padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; background: rgba(16,12,9,.78); backdrop-filter: blur(16px); }
+    .gl-lightbox__tags { max-height: none; overflow: visible; justify-content: flex-start; }
+    .gl-lightbox__tag { background: rgba(255,255,255,.13); flex: 1 1 calc(50% - 8px); min-width: 0; }
+    .gl-lightbox__hint { bottom: calc(env(safe-area-inset-bottom) + 182px); }
 }
 @media (min-width: 768px) {
     .gl-banner { padding-top: 80px; }
@@ -155,17 +163,18 @@ main { padding: 0; text-align: initial; }
             <i class="fa-solid fa-download"></i>
         </a>
         <span class="gl-lightbox__topcount" id="glLightboxTopIndex">Photo</span>
-        <button class="gl-lightbox__close" onclick="closeLightbox()" aria-label="閉じる">
+        <button class="gl-lightbox__close" onclick="event.stopPropagation();closeLightbox()" aria-label="閉じる">
             <i class="fa-solid fa-xmark"></i>
         </button>
-        <button class="gl-lightbox__nav gl-lightbox__prev" onclick="event.stopPropagation();prevPhoto()" aria-label="前へ">
+        <button class="gl-lightbox__nav gl-lightbox__prev" onclick="event.stopPropagation();prevPhoto(event)" aria-label="前へ">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
         <img class="gl-lightbox__img" id="glLightboxImg" src="" alt="" onclick="event.stopPropagation()">
-        <button class="gl-lightbox__nav gl-lightbox__next" onclick="event.stopPropagation();nextPhoto()" aria-label="次へ">
+        <button class="gl-lightbox__nav gl-lightbox__next" onclick="event.stopPropagation();nextPhoto(event)" aria-label="次へ">
             <i class="fa-solid fa-chevron-right"></i>
         </button>
-        <div class="gl-lightbox__meta">
+        <span class="gl-lightbox__hint" id="peopleLightboxHint">左右スワイプで移動・拡大中は固定</span>
+        <div class="gl-lightbox__meta" id="peopleLightboxMeta">
             <p class="gl-lightbox__caption" id="glLightboxCaption"></p>
             <div class="gl-lightbox__tags" id="glLightboxTags"></div>
         </div>
@@ -186,12 +195,34 @@ const peopleBaseUrl = "{{ url('/people') }}";
 const peopleBackSource = @json($backSource);
 const photos = @json($photosJson);
 let current = 0;
+let lightboxGestureBlockUntil = 0;
+
+function isViewportZoomed() {
+    return Boolean(window.visualViewport && window.visualViewport.scale && window.visualViewport.scale > 1.04);
+}
+function markLightboxGestureBlocked(duration = 650) {
+    lightboxGestureBlockUntil = Math.max(lightboxGestureBlockUntil, Date.now() + duration);
+}
+function updateLightboxZoomState() {
+    const lb = document.getElementById('glLightbox');
+    const zoomed = isViewportZoomed();
+    lb?.classList.toggle('is-zoomed', zoomed);
+    const hint = document.getElementById('peopleLightboxHint');
+    if (hint) hint.textContent = zoomed ? '拡大中は写真送りを止めています' : '左右スワイプで移動・拡大中は固定';
+}
+function canNavigatePhoto(event) {
+    if (Date.now() < lightboxGestureBlockUntil) return false;
+    if (isViewportZoomed()) return false;
+    if (event?.type?.startsWith('touch')) return false;
+    return true;
+}
 
 function openLightbox(index) {
     current = index;
     showPhoto();
     document.getElementById('glLightbox').classList.add('is-open');
     document.body.style.overflow = 'hidden';
+    updateLightboxZoomState();
 }
 function scrollToCurrentItem() {
     const item = document.querySelector(`.gl-item[data-index="${current}"]`);
@@ -200,6 +231,7 @@ function scrollToCurrentItem() {
 }
 function closeLightbox() {
     document.getElementById('glLightbox').classList.remove('is-open');
+    document.getElementById('glLightbox')?.classList.remove('is-zoomed');
     document.body.style.overflow = '';
     scrollToCurrentItem();
 }
@@ -208,15 +240,13 @@ function isLightboxControlTarget(target) {
 }
 function handleLightboxSurfaceTap(event) {
     if (isLightboxControlTarget(event.target)) return;
-    const edgeWidth = Math.min(104, window.innerWidth * 0.28);
-    if (event.clientX <= edgeWidth) { prevPhoto(); return; }
-    if (event.clientX >= window.innerWidth - edgeWidth) { nextPhoto(); return; }
-    closeLightbox();
+    // 中央タップでは何もしない。誤操作を避けるため閉じる操作は×と背景だけにする。
 }
 function closeLightboxOnOverlay(e) {
-    if (e.target === document.getElementById('glLightbox')) handleLightboxSurfaceTap(e);
+    if (e.target === document.getElementById('glLightbox')) closeLightbox();
 }
 function showPhoto() {
+    updateLightboxZoomState();
     const p = photos[current];
     document.getElementById('glLightboxImg').src = p.url;
     document.getElementById('glLightboxCaption').textContent = p.caption ?? '';
@@ -230,8 +260,20 @@ function showPhoto() {
         `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}?from=${encodeURIComponent(peopleBackSource)}" data-people-link="${peopleBaseUrl}/${t.id}?from=${encodeURIComponent(peopleBackSource)}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
     ).join('');
 }
-function nextPhoto() { current = (current + 1) % photos.length; showPhoto(); }
-function prevPhoto() { current = (current - 1 + photos.length) % photos.length; showPhoto(); }
+function nextPhoto(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!canNavigatePhoto(event)) { updateLightboxZoomState(); return; }
+    current = (current + 1) % photos.length;
+    showPhoto();
+}
+function prevPhoto(event) {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!canNavigatePhoto(event)) { updateLightboxZoomState(); return; }
+    current = (current - 1 + photos.length) % photos.length;
+    showPhoto();
+}
 document.addEventListener('click', event => {
     const link = event.target.closest('.gl-lightbox__tag');
     if (!link) return;
@@ -247,24 +289,43 @@ document.addEventListener('click', event => {
     let startY = 0;
     stage.addEventListener('click', handleLightboxSurfaceTap);
     stage.addEventListener('touchstart', event => {
+        if (event.target.closest('.gl-lightbox__meta')) return;
+        if (event.touches.length > 1) {
+            markLightboxGestureBlocked(900);
+            updateLightboxZoomState();
+            return;
+        }
         const touch = event.changedTouches[0];
         startX = touch.clientX;
         startY = touch.clientY;
     }, { passive: true });
+    stage.addEventListener('touchmove', event => {
+        if (event.target.closest('.gl-lightbox__meta')) return;
+        if (event.touches.length > 1 || isViewportZoomed()) {
+            markLightboxGestureBlocked(900);
+            updateLightboxZoomState();
+        }
+    }, { passive: true });
     stage.addEventListener('touchend', event => {
+        if (event.target.closest('.gl-lightbox__meta')) return;
+        updateLightboxZoomState();
+        if (Date.now() < lightboxGestureBlockUntil || isViewportZoomed()) return;
         const touch = event.changedTouches[0];
         const dx = touch.clientX - startX;
         const dy = touch.clientY - startY;
-        if (Math.abs(dx) < 44 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        if (Math.abs(dx) < 54 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+        markLightboxGestureBlocked(220);
         dx < 0 ? nextPhoto() : prevPhoto();
     }, { passive: true });
 })();
+window.visualViewport?.addEventListener('resize', updateLightboxZoomState);
+window.visualViewport?.addEventListener('scroll', updateLightboxZoomState);
 document.addEventListener('keydown', e => {
     const lb = document.getElementById('glLightbox');
     if (!lb.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowRight') nextPhoto();
-    if (e.key === 'ArrowLeft')  prevPhoto();
+    if (e.key === 'ArrowRight') nextPhoto(e);
+    if (e.key === 'ArrowLeft')  prevPhoto(e);
 });
 </script>
 @endif
