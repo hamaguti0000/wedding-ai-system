@@ -353,7 +353,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         ->unique()
         ->values();
     $photoMatchesCurrentGroups = fn($photo) => $photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty()
-        || $photo->taggedGroups->map(fn($group) => $group->galleryDisplayName())->intersect($currentUserGroupNames)->isNotEmpty();
+        || collect($photo->taggedGroups->map(fn($group) => $group->galleryDisplayName())->all())->intersect($currentUserGroupNames)->isNotEmpty();
     $taggedPhotoCount = $photos->filter(fn($photo) => $photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())->count();
     $myPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId))->count() : 0;
     $relatedPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId) || $photoMatchesCurrentGroups($photo))->count() : 0;
@@ -420,7 +420,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
             $groupTags = $photo->taggedGroups->map(fn($g) => ['id' => $g->id, 'name' => $g->galleryDisplayName(), 'type' => 'group'])->unique('name')->values();
             $userTags = $photo->taggedUsers->map(fn($u) => ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name, 'type' => 'user'])->values();
             $tagNames = $groupTags->concat($userTags)->values();
-            $photoGroupNames = $photo->taggedGroups->map(fn($g) => $g->galleryDisplayName())->filter()->unique()->values();
+            $photoGroupNames = collect($photo->taggedGroups->map(fn($g) => $g->galleryDisplayName())->all())->filter()->unique()->values();
             $isMine = $currentUserId && $photo->taggedUsers->contains('id', $currentUserId);
             $isRelated = $isMine || ($currentUserId && ($photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty() || $photoGroupNames->intersect($currentUserGroupNames)->isNotEmpty()));
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;

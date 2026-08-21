@@ -36,8 +36,9 @@ class GalleryController extends Controller
         if ($currentUser && $hasGuestGroups) {
             $currentUserGroups = $currentUser->guestGroups()->with('primaryGuest')->get();
             $currentUserGroupIds = $currentUserGroups->pluck('id');
-            $currentUserGroupNames = $currentUserGroups
+            $currentUserGroupNames = collect($currentUserGroups
                 ->map(fn ($group) => $group->galleryDisplayName())
+                ->all())
                 ->filter()
                 ->values();
         }
