@@ -370,14 +370,14 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         <div class="gl-hero__actions">
             <a href="{{ route('gallery.upload') }}" class="gl-btn gl-btn--gold"><i class="fa-solid fa-cloud-arrow-up"></i> 写真を投稿する</a>
             @if ($relatedPhotoCount > 0)
-            <button type="button" class="gl-btn" data-filter-trigger="related"><i class="fa-solid fa-user-check"></i> あなた関連を見る</button>
+            <button type="button" class="gl-btn" data-filter-trigger="related"><i class="fa-solid fa-user-check"></i> おすすめを見る</button>
             @endif
         </div>
         <div class="gl-stats">
             <div class="gl-stat"><strong>{{ $photos->count() }}</strong><span>公開写真</span></div>
-            <div class="gl-stat"><strong>{{ $taggedPhotoCount }}</strong><span>人物タグあり</span></div>
+            <div class="gl-stat"><strong>{{ $taggedPhotoCount }}</strong><span>タグ付き写真</span></div>
             @if ($currentUserId)
-            <div class="gl-stat"><strong>{{ $relatedPhotoCount }}</strong><span>あなた関連</span></div>
+            <div class="gl-stat"><strong>{{ $relatedPhotoCount }}</strong><span>おすすめ</span></div>
             @endif
         </div>
     </div>
@@ -394,14 +394,14 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         <div class="gl-toolbar__main">
             <div class="gl-filter">
                 @if ($currentUserId)
-                <button type="button" class="{{ $defaultFilter === 'related' ? 'is-active' : '' }}" data-filter="related">あなた関連</button>
-                <button type="button" data-filter="mine">自分が写ってる</button>
+                <button type="button" class="{{ $defaultFilter === 'related' ? 'is-active' : '' }}" data-filter="related">おすすめ</button>
+                <button type="button" data-filter="mine">自分の写真</button>
                 @endif
                 <button type="button" class="{{ $defaultFilter === 'all' ? 'is-active' : '' }}" data-filter="all">すべて</button>
                 <button type="button" data-filter="ceremony">挙式</button>
                 <button type="button" data-filter="reception">披露宴</button>
                 <button type="button" data-filter="photographer">カメラマン</button>
-                <button type="button" data-filter="tagged">人物タグあり</button>
+                <button type="button" data-filter="tagged">タグ付き写真</button>
                 @foreach ($galleryGroupOptions as $groupName)
                 <button type="button" data-group-filter="{{ $groupName }}">{{ $groupName }}</button>
                 @endforeach
@@ -430,7 +430,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 <label class="gl-card__select" aria-label="写真を選択" onclick="event.stopPropagation()"><input type="checkbox" data-photo-select value="{{ $photo->id }}"></label>
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
                 @if ($isMine)
-                <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> あなた</span>
+                <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> 自分の写真</span>
                 @endif
             </div>
             @if ($photo->caption || $uploaderName || $tagNames->isNotEmpty())
