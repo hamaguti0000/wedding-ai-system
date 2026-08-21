@@ -106,7 +106,7 @@ main { padding: 0; text-align: initial; }
     .gl-lightbox { padding: 0; align-items: stretch; justify-content: stretch; }
     .gl-lightbox__inner { width: 100%; height: 100dvh; max-height: none; padding: calc(env(safe-area-inset-top) + 70px) 12px 126px; box-sizing: border-box; }
     .gl-lightbox__img { max-width: calc(100vw - 24px); max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 220px); border-radius: 14px; }
-    .gl-lightbox__download { display: none; }
+    .gl-lightbox__download { left: 14px; display: inline-flex; }
     .gl-lightbox__nav { display: none; }
     .gl-lightbox__close { top: calc(env(safe-area-inset-top) + 14px); right: 14px; }
     .gl-lightbox__topcount { top: calc(env(safe-area-inset-top) + 23px); }

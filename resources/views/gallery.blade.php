@@ -363,7 +363,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         border: 1px solid rgba(255,255,255,.14);
     }
     .gl-lightbox__close { right: 14px; }
-    .gl-lightbox__download { display: none; }
+    .gl-lightbox__download { left: 14px; display: inline-flex; }
     .gl-lightbox__topcount {
         display: inline-flex;
         position: absolute;
