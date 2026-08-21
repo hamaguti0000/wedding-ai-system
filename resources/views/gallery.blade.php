@@ -80,8 +80,11 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 .gl-person-chip {
     display: inline-flex; align-items: center; max-width: 100%; padding: 4px 9px; border-radius: 999px;
     background: #f7f1e9; color: #755f48; font-size: .72rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border: 0; font-family: inherit;
 }
 .gl-person-chip.is-current { background: #fff1f1; color: #b42318; border: 1px solid #ffd0d0; font-weight: 700; }
+.gl-person-chip[data-card-group-filter], .gl-lightbox__tag[data-gallery-group] { cursor: pointer; }
+.gl-person-chip[data-card-group-filter] { border: 1px solid #eadccd; }
 .gl-more { color: #aa9278; font-size: .72rem; align-self: center; }
 
 .gl-empty { text-align: center; padding: 70px 20px; color: #a69583; background: #fff; border: 1px solid #eee6dc; border-radius: 18px; }
@@ -513,7 +516,11 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 @if ($tagNames->isNotEmpty())
                 <div class="gl-card__tags">
                     @foreach ($tagNames->take(3) as $tag)
-                    <span class="gl-person-chip {{ ($tag['type'] ?? 'user') === 'user' && $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
+                    @if (($tag['type'] ?? 'user') === 'group')
+                    <button type="button" class="gl-person-chip" data-card-group-filter="{{ $tag['name'] }}" onclick="event.stopPropagation(); applyGalleryFilter('group:' + this.dataset.cardGroupFilter);">{{ $tag['name'] }}</button>
+                    @else
+                    <span class="gl-person-chip {{ $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
+                    @endif
                     @endforeach
                     @if ($tagNames->count() > 3)
                     <span class="gl-more">+{{ $tagNames->count() - 3 }}名</span>
@@ -732,9 +739,11 @@ function showPhoto() {
     const tagsEl = document.getElementById('glLightboxTags');
     tagsEl.innerHTML = (p.tags || []).length
         ? p.tags.map(t => {
-            const href = t.type === 'group' ? '' : `${peopleBaseUrl}/${t.id}`;
-            const attrs = href ? `href="${href}" data-people-link="${href}"` : 'href="#" aria-disabled="true"';
-            return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" ${attrs}><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`;
+            if (t.type === 'group') {
+                return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="#" data-gallery-group="${escapeHtml(t.name)}"><i class="fa-solid fa-layer-group"></i> ${escapeHtml(t.name)}</a>`;
+            }
+            const href = `${peopleBaseUrl}/${t.id}`;
+            return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${href}" data-people-link="${href}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`;
         }).join('')
         : '<span class="gl-person-chip">人物タグはまだありません</span>';
 }
@@ -904,18 +913,22 @@ function saveSelectedToFiles() {
     form.submit();
 }
 
+function normalizeFilterValue(value) {
+    return String(value || '').normalize('NFKC').trim();
+}
+
 function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
     let groupFilter = null;
     if (typeof filter === 'string' && filter.startsWith('group:')) {
-        groupFilter = filter.slice(6);
+        groupFilter = normalizeFilterValue(filter.slice(6));
     }
     cards.forEach(card => {
         let show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
         if (groupFilter !== null) {
             try {
-                show = JSON.parse(card.dataset.groups || '[]').includes(groupFilter);
+                show = JSON.parse(card.dataset.groups || '[]').map(normalizeFilterValue).includes(groupFilter);
             } catch (error) {
                 show = false;
             }
@@ -925,7 +938,7 @@ function applyGalleryFilter(filter, shouldScroll = true) {
     });
     document.getElementById('glCount').innerHTML = `<strong>${visible}</strong>枚表示`;
     document.querySelectorAll('[data-filter]').forEach(btn => btn.classList.toggle('is-active', groupFilter === null && btn.dataset.filter === filter));
-    document.querySelectorAll('[data-group-filter]').forEach(btn => btn.classList.toggle('is-active', groupFilter !== null && btn.dataset.groupFilter === groupFilter));
+    document.querySelectorAll('[data-group-filter]').forEach(btn => btn.classList.toggle('is-active', groupFilter !== null && normalizeFilterValue(btn.dataset.groupFilter) === groupFilter));
     if (shouldScroll) {
         document.getElementById('glGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -945,6 +958,12 @@ document.addEventListener('click', event => {
     if (!link) return;
     event.preventDefault();
     event.stopPropagation();
+    const groupName = link.dataset.galleryGroup;
+    if (groupName) {
+        closeLightbox(false);
+        applyGalleryFilter(`group:${groupName}`);
+        return;
+    }
     const href = link.dataset.peopleLink;
     if (href) window.location.assign(href);
 });
