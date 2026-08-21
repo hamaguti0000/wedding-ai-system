@@ -14,13 +14,32 @@
 
     try {
         if (\Illuminate\Support\Facades\Schema::hasTable('gallery_photos')) {
-            $uploadedHeroImages = \App\Models\GalleryPhoto::query()
+            $taggedHeroImages = \App\Models\GalleryPhoto::query()
                 ->where('is_active', true)
                 ->where('status', 'approved')
                 ->whereNotNull('file_path')
+                ->where(function ($query) {
+                    $query->whereHas('taggedUsers')
+                        ->orWhereHas('taggedGroups');
+                })
                 ->inRandomOrder()
                 ->limit(10)
                 ->get();
+
+            if ($taggedHeroImages->count() >= 10) {
+                $uploadedHeroImages = $taggedHeroImages;
+            } else {
+                $fallbackHeroImages = \App\Models\GalleryPhoto::query()
+                    ->where('is_active', true)
+                    ->where('status', 'approved')
+                    ->whereNotNull('file_path')
+                    ->whereNotIn('id', $taggedHeroImages->pluck('id'))
+                    ->inRandomOrder()
+                    ->limit(10 - $taggedHeroImages->count())
+                    ->get();
+
+                $uploadedHeroImages = $taggedHeroImages->concat($fallbackHeroImages)->values();
+            }
         }
     } catch (\Throwable) {
         $uploadedHeroImages = collect();

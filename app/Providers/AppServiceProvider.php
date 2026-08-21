@@ -62,13 +62,33 @@ class AppServiceProvider extends ServiceProvider
                 return collect();
             }
 
-            return GalleryPhoto::query()
+            $taggedPhotos = GalleryPhoto::query()
                 ->where('is_active', true)
                 ->where('status', 'approved')
                 ->whereNotNull('file_path')
+                ->where(function ($query) {
+                    $query->whereHas('taggedUsers')
+                        ->orWhereHas('taggedGroups');
+                })
                 ->inRandomOrder()
                 ->limit($limit)
                 ->get();
+
+            if ($taggedPhotos->count() >= $limit) {
+                return $taggedPhotos;
+            }
+
+            $remaining = $limit - $taggedPhotos->count();
+            $fallbackPhotos = GalleryPhoto::query()
+                ->where('is_active', true)
+                ->where('status', 'approved')
+                ->whereNotNull('file_path')
+                ->whereNotIn('id', $taggedPhotos->pluck('id'))
+                ->inRandomOrder()
+                ->limit($remaining)
+                ->get();
+
+            return $taggedPhotos->concat($fallbackPhotos)->values();
         } catch (\Throwable) {
             return collect();
         }
