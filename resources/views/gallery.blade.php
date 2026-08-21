@@ -695,11 +695,18 @@ function closeLightbox(shouldScroll = true) {
     document.body.style.overflow = '';
     if (shouldScroll) scrollToCurrentCard();
 }
+function isSaveSheetOpen() {
+    return Boolean(document.getElementById('glSaveSheet')?.classList.contains('is-open'));
+}
 function isLightboxControlTarget(target) {
-    return Boolean(target.closest('button, a, img, .gl-lightbox__info, .gl-save-sheet__panel'));
+    return Boolean(target.closest('button, a, img, .gl-lightbox__info, .gl-save-sheet'));
 }
 function handleLightboxSurfaceTap(event) {
     if (isLightboxControlTarget(event.target)) return;
+    if (isSaveSheetOpen()) {
+        closeSaveSheet();
+        return;
+    }
     if (lightboxTouchMoved || Date.now() < lightboxGestureBlockUntil) return;
     closeLightbox();
 }
@@ -963,7 +970,14 @@ document.getElementById('glLightboxDownload')?.addEventListener('click', event =
 document.getElementById('glLightboxSaveInline')?.addEventListener('click', event => { event.stopPropagation(); openSaveSheet(); });
 document.getElementById('saveToFiles')?.addEventListener('click', event => { event.stopPropagation(); downloadToFiles(); });
 document.getElementById('saveToPhotos')?.addEventListener('click', event => { event.stopPropagation(); saveToPhotos(); });
-document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', closeSaveSheet));
+document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeSaveSheet();
+}));
+document.getElementById('glSaveSheet')?.addEventListener('click', event => {
+    event.stopPropagation();
+});
 document.addEventListener('click', event => {
     const link = event.target.closest('.gl-lightbox__tag');
     if (!link) return;
