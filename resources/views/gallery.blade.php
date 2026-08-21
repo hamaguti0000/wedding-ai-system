@@ -86,8 +86,8 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 
 .gl-empty { text-align: center; padding: 70px 20px; color: #a69583; background: #fff; border: 1px solid #eee6dc; border-radius: 18px; }
 .gl-empty i { display: block; margin-bottom: 14px; font-size: 2.4rem; color: #d6c7b7; }
-.gl-selection-bar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 16px); z-index: 8990; width: min(640px, calc(100% - 24px)); transform: translate(-50%, 140%); opacity: 0; pointer-events: none; transition: transform .18s ease, opacity .18s ease; padding: 10px; border: 1px solid rgba(234,220,205,.82); border-radius: 18px; background: rgba(255,252,247,.97); box-shadow: 0 18px 48px rgba(61,47,37,.2); backdrop-filter: blur(18px); }
-.gl-selection-bar.is-open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.gl-selection-bar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 16px); z-index: 8990; width: min(640px, calc(100% - 24px)); transform: translate(-50%, calc(100% + 48px)); opacity: 0; visibility: hidden; pointer-events: none; transition: transform .18s ease, opacity .18s ease, visibility 0s linear .18s; padding: 10px; border: 1px solid rgba(234,220,205,.82); border-radius: 18px; background: rgba(255,252,247,.97); box-shadow: 0 18px 48px rgba(61,47,37,.2); backdrop-filter: blur(18px); }
+.gl-selection-bar.is-open { transform: translate(-50%, 0); opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
 .gl-selection-bar__main { display: grid; grid-template-columns: 1fr; gap: 9px; }
 .gl-selection-bar__count { color: #3d2f25; font-size: .84rem; font-weight: 900; }
 .gl-selection-bar__actions { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
@@ -914,6 +914,27 @@ document.querySelectorAll('[data-photo-select]').forEach(input => input.addEvent
 document.getElementById('bulkClearSelection')?.addEventListener('click', () => setSelectionMode(false));
 document.getElementById('bulkSavePhotos')?.addEventListener('click', saveSelectedToPhotos);
 document.getElementById('bulkSaveFiles')?.addEventListener('click', saveSelectedToFiles);
+
+function resetGalleryTransientUi(clearSelection = true) {
+    closeSaveSheet();
+    document.getElementById('glLightbox')?.classList.remove('is-open');
+    document.body.style.overflow = '';
+    if (clearSelection) {
+        setSelectionMode(false);
+    } else {
+        updateSelectionState();
+    }
+}
+
+window.addEventListener('pageshow', event => {
+    if (event.persisted) resetGalleryTransientUi(true);
+});
+window.addEventListener('pagehide', () => {
+    closeSaveSheet();
+    document.getElementById('glLightbox')?.classList.remove('is-open');
+    document.body.style.overflow = '';
+});
+
 
 (function () {
     const lightbox = document.getElementById('glLightbox');
