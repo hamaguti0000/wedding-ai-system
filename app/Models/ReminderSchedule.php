@@ -10,6 +10,7 @@ class ReminderSchedule extends Model
     protected $fillable = [
         'title',
         'target',
+        'selected_user_ids',
         'subject',
         'message',
         'scheduled_at',
@@ -24,6 +25,7 @@ class ReminderSchedule extends Model
         return [
             'scheduled_at' => 'datetime',
             'sent_at'      => 'datetime',
+            'selected_user_ids' => 'array',
         ];
     }
 
@@ -49,6 +51,10 @@ class ReminderSchedule extends Model
 
     public function targetLabel(): string
     {
+        if (! empty($this->selected_user_ids)) {
+            return '個別選択（' . count($this->selected_user_ids) . '名）';
+        }
+
         return match ($this->target) {
             'all'           => '全ゲスト',
             'attending'     => '出席予定者のみ',
@@ -79,7 +85,13 @@ class ReminderSchedule extends Model
     /** 送信対象ユーザーを取得する */
     public function resolveRecipients(): \Illuminate\Support\Collection
     {
-        $query = User::where('role', 'guest')->whereNotNull('email');
+        $query = User::where('role', 'guest')
+            ->whereNotNull('email')
+            ->where('email', '!=', '');
+
+        if (! empty($this->selected_user_ids)) {
+            return $query->whereIn('id', $this->selected_user_ids)->get();
+        }
 
         return match ($this->target) {
             'attending'     => $query->whereHas('guestProfile', fn ($q) => $q->where('participation', 'attending'))->get(),

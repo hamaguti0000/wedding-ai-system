@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Mail\ReminderMail;
 use App\Models\ReminderSchedule;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class AdminReminderController extends Controller
 {
@@ -15,14 +17,21 @@ class AdminReminderController extends Controller
         $reminders = ReminderSchedule::with('creator')
             ->orderByDesc('created_at')->get();
 
-        return view('admin.reminders', compact('reminders'));
+        $guests = User::with('guestProfile')
+            ->where('role', 'guest')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.reminders', compact('reminders', 'guests'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'title'        => 'required|string|max:100',
-            'target'       => 'required|in:all,attending,not_responded',
+            'target'       => 'required|in:all,attending,not_responded,selected',
+            'selected_user_ids'   => 'required_if:target,selected|array',
+            'selected_user_ids.*' => ['integer', Rule::exists('users', 'id')->where('role', 'guest')],
             'subject'      => 'required|string|max:200',
             'message'      => 'required|string|max:3000',
             'scheduled_at' => 'nullable|date|after:now',
@@ -31,11 +40,19 @@ class AdminReminderController extends Controller
             'subject.required'      => '件名を入力してください',
             'message.required'      => '本文を入力してください',
             'scheduled_at.after'    => '予約日時は現在より未来を指定してください',
+            'selected_user_ids.required_if' => '個別選択の場合は送信するゲストを選んでください',
         ]);
+
+        $selectedUserIds = collect($request->input('selected_user_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
 
         $reminder = ReminderSchedule::create([
             'title'               => $request->title,
-            'target'              => $request->target,
+            'target'              => $request->target === 'selected' ? 'all' : $request->target,
+            'selected_user_ids'   => $request->target === 'selected' ? $selectedUserIds : null,
             'subject'             => $request->subject,
             'message'             => $request->message,
             'scheduled_at'        => $request->scheduled_at ?: null,

@@ -49,6 +49,26 @@
 
 .empty-state { text-align:center; padding:48px 20px; color:#b0a090; }
 .empty-state__icon { font-size:2.5rem; margin-bottom:12px; }
+
+.recipient-panel { display:none; margin-top:12px; border:1px solid #eadfce; border-radius:10px; background:#fffdf9; overflow:hidden; }
+.recipient-panel.open { display:block; }
+.recipient-tools { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:12px; border-bottom:1px solid #f0ebe3; }
+.recipient-search { flex:1 1 220px; min-width:0; }
+.recipient-count { color:#7a6654; font-size:.82rem; font-weight:600; }
+.recipient-count strong { color:#b38b59; font-size:1rem; }
+.recipient-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.recipient-action { border:1px solid #e1d4c3; background:#fff; color:#6d5843; border-radius:999px; padding:7px 12px; font-size:.76rem; cursor:pointer; }
+.recipient-action:hover { border-color:#b38b59; color:#8b683d; }
+.recipient-list { max-height:340px; overflow:auto; padding:10px; display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:8px; }
+.recipient-item { display:flex; gap:10px; align-items:flex-start; border:1px solid #f0e7dc; border-radius:10px; background:#fff; padding:10px; cursor:pointer; }
+.recipient-item:hover { border-color:#d5bd9c; background:#fffaf3; }
+.recipient-item.is-disabled { opacity:.48; cursor:not-allowed; }
+.recipient-name { color:#3d2f25; font-size:.86rem; font-weight:700; line-height:1.35; }
+.recipient-meta { margin-top:3px; color:#9b8573; font-size:.72rem; line-height:1.55; }
+.recipient-badge { display:inline-flex; margin-left:4px; padding:1px 6px; border-radius:999px; background:#f5eadb; color:#8b683d; font-size:.66rem; font-weight:700; }
+.recipient-note { padding:0 12px 12px; color:#9b8573; font-size:.76rem; line-height:1.6; }
+.recipient-warning { color:#b45309; font-weight:700; }
+@media(max-width:600px){ .recipient-list { grid-template-columns:1fr; max-height:420px; } }
 </style>
 @endpush
 
@@ -86,9 +106,51 @@
                         <option value="all"           {{ old('target')=='all'           ? 'selected' : '' }}>👥 全ゲスト</option>
                         <option value="attending"     {{ old('target')=='attending'     ? 'selected' : '' }}>✅ 出席予定者のみ</option>
                         <option value="not_responded" {{ old('target')=='not_responded' ? 'selected' : '' }}>❓ 未回答者のみ</option>
+                        <option value="selected"      {{ old('target')=='selected'      ? 'selected' : '' }}>☑️ ゲストを選択</option>
                     </select>
                 </div>
             </div>
+
+            <div class="recipient-panel{{ old('target') === 'selected' ? ' open' : '' }}" id="recipientPanel">
+                <div class="recipient-tools">
+                    <input type="search" class="form-input recipient-search" id="recipientSearch" placeholder="名前・ふりがな・メールで検索">
+                    <div class="recipient-count"><strong id="selectedRecipientCount">0</strong>人選択中</div>
+                    <div class="recipient-actions">
+                        <button type="button" class="recipient-action" data-recipient-action="visible">表示中を選択</button>
+                        <button type="button" class="recipient-action" data-recipient-action="clear">解除</button>
+                    </div>
+                </div>
+                <div class="recipient-list" id="recipientList">
+                    @php $oldSelectedUserIds = collect(old('selected_user_ids', []))->map(fn($id) => (int) $id)->all(); @endphp
+                    @foreach($guests as $guest)
+                        @php
+                            $profile = $guest->guestProfile;
+                            $hasEmail = filled($guest->email);
+                            $participation = $profile?->participationLabel() ?? '未回答';
+                            $side = $profile?->guestSideLabel() ?? '—';
+                            $furigana = $profile?->furigana() ?: '';
+                        @endphp
+                        <label class="recipient-item{{ $hasEmail ? '' : ' is-disabled' }}"
+                               data-recipient-item
+                               data-search="{{ Str::lower($guest->name . ' ' . $furigana . ' ' . $guest->email . ' ' . $participation . ' ' . $side) }}">
+                            <input type="checkbox" name="selected_user_ids[]" value="{{ $guest->id }}"
+                                   data-recipient-checkbox
+                                   {{ in_array($guest->id, $oldSelectedUserIds, true) ? 'checked' : '' }}
+                                   {{ $hasEmail ? '' : 'disabled' }}>
+                            <span>
+                                <span class="recipient-name">{{ $guest->name }}</span>
+                                <span class="recipient-badge">{{ $participation }}</span>
+                                <span class="recipient-meta">
+                                    {{ $side }} @if($furigana) / {{ $furigana }} @endif<br>
+                                    {{ $hasEmail ? $guest->email : 'メール未登録のため送信不可' }}
+                                </span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+                <p class="recipient-note" id="recipientNote">無料枠の目安は100通/日です。選択人数が100人を超える場合は分割送信をおすすめします。</p>
+            </div>
+
 
             <div class="form-group">
                 <label class="form-label" for="subject">件名</label>
@@ -214,6 +276,56 @@
 </div>
 
 <script>
+const targetSelect = document.getElementById('target');
+const recipientPanel = document.getElementById('recipientPanel');
+const recipientSearch = document.getElementById('recipientSearch');
+const recipientItems = Array.from(document.querySelectorAll('[data-recipient-item]'));
+const recipientCheckboxes = Array.from(document.querySelectorAll('[data-recipient-checkbox]'));
+const selectedRecipientCount = document.getElementById('selectedRecipientCount');
+const recipientNote = document.getElementById('recipientNote');
+
+function updateRecipientPanel() {
+    if (!targetSelect || !recipientPanel) return;
+    recipientPanel.classList.toggle('open', targetSelect.value === 'selected');
+    updateRecipientCount();
+}
+
+function updateRecipientCount() {
+    const count = recipientCheckboxes.filter(cb => cb.checked && !cb.disabled).length;
+    if (selectedRecipientCount) selectedRecipientCount.textContent = count;
+    if (recipientNote) {
+        recipientNote.innerHTML = count > 100
+            ? '<span class="recipient-warning">100人を超えています。</span> 無料枠では日を分けて送信してください。'
+            : '無料枠の目安は100通/日です。選択人数が100人を超える場合は分割送信をおすすめします。';
+    }
+}
+
+function filterRecipients() {
+    const query = (recipientSearch?.value || '').trim().toLowerCase();
+    recipientItems.forEach(item => {
+        item.style.display = !query || item.dataset.search.includes(query) ? '' : 'none';
+    });
+}
+
+targetSelect?.addEventListener('change', updateRecipientPanel);
+recipientSearch?.addEventListener('input', filterRecipients);
+recipientCheckboxes.forEach(cb => cb.addEventListener('change', updateRecipientCount));
+document.querySelectorAll('[data-recipient-action]').forEach(button => {
+    button.addEventListener('click', () => {
+        if (button.dataset.recipientAction === 'clear') {
+            recipientCheckboxes.forEach(cb => cb.checked = false);
+        } else {
+            recipientItems.forEach(item => {
+                if (item.style.display === 'none') return;
+                const cb = item.querySelector('[data-recipient-checkbox]');
+                if (cb && !cb.disabled) cb.checked = true;
+            });
+        }
+        updateRecipientCount();
+    });
+});
+updateRecipientPanel();
+
 function toggleSchedule(radio) {
     const box       = document.getElementById('scheduleBox');
     const sendNow   = document.getElementById('sendNowInput');
