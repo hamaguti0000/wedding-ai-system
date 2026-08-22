@@ -5,6 +5,10 @@ use App\Services\ImageDuplicateDetector;
 /** 座標に応じて色が変わるグラデーション画像を生成する（seedを変えると別の画像になる） */
 function makeHashTestImage(int $seed, int $size = 64): string
 {
+    if (! function_exists('imagecreatetruecolor')) {
+        test()->markTestSkipped('GD extension is required for generated hash images.');
+    }
+
     $path = tempnam(sys_get_temp_dir(), 'idd_test_') . '.jpg';
     $img  = imagecreatetruecolor($size, $size);
 

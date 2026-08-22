@@ -4,6 +4,10 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 
 it('REPRO: uploadedルール失敗時に日本語メッセージが表示される（英語デフォルトにならない）', function () {
+    if (! function_exists('imagecreatetruecolor')) {
+        test()->markTestSkipped('GD extension is required for fake image uploads.');
+    }
+
     // isValid() が false を返す（PHPレベルのアップロード失敗）ファイルを模倣する
     $file = UploadedFile::fake()->image('bride.jpg');
     $mock = Mockery::mock($file)->makePartial();
@@ -22,8 +26,6 @@ it('REPRO: uploadedルール失敗時に日本語メッセージが表示され�
 
     expect($validator->fails())->toBeTrue();
     $message = $validator->errors()->first('bride_photo');
-    dump('bride_photo error message', $message);
-
     expect($message)->not->toContain('failed to upload');
     expect($message)->toContain('アップロードに失敗しました');
 });

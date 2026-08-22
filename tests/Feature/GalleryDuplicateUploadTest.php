@@ -2,6 +2,7 @@
 
 use App\Models\GalleryPhoto;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 
 /** 座標に応じて色が変わるグラデーション画像を生成する（seedを変えると別の画像になる） */
@@ -121,7 +122,7 @@ describe('ギャラリー複数保存', function () {
         ]);
 
         $this->actingAs($guest)
-            ->post(route('gallery.download'), ['photo_ids' => [$first->id, $second->id]])
+            ->post(route('gallery.download'), ['photo_tokens' => [Crypt::encryptString((string) $first->id), Crypt::encryptString((string) $second->id)]])
             ->assertOk()
             ->assertHeader('content-type', 'application/zip');
     });

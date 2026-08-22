@@ -35,8 +35,8 @@ describe('未認証', function () {
         $this->get('/login')->assertStatus(200);
     });
 
-    it('/register は 200（登録ページが存在する）', function () {
-        $this->get('/register')->assertStatus(200);
+    it('/register は公開しない', function () {
+        $this->get('/register')->assertNotFound();
     });
 });
 
