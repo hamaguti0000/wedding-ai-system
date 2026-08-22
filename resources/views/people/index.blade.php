@@ -60,7 +60,7 @@ main { padding: 0; text-align: initial; }
 .ppl-avatar {
     width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #b38b59;
+    font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #fffaf2; font-weight: 600; text-shadow: 0 1px 3px rgba(72, 49, 28, 0.24);
     background: linear-gradient(135deg, #b38b59 0%, #d4a870 100%);
     border-style: solid;
 }
