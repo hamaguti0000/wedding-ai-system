@@ -192,7 +192,12 @@ ssh -i ~/.ssh/vps_key root@133.117.74.212 "
   php8.4 artisan config:cache
   php8.4 artisan route:cache
   php8.4 artisan view:cache
+
+  # IMPORTANT: artisanをrootで実行するとfile cacheがroot所有になり、画面が500になる。
+  # 必ず全artisan実行後の最後にWebサーバーユーザーへ戻すこと。
   chown -R www-data:www-data storage bootstrap/cache
+  find storage bootstrap/cache -type d -exec chmod 775 {} \;
+  find storage bootstrap/cache -type f -exec chmod 664 {} \;
 "
 ```
 
