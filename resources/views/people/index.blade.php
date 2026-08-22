@@ -170,7 +170,7 @@ main { padding: 0; text-align: initial; }
                    data-side="{{ $side }}"
                    data-name="{{ strtolower(($profile?->fullName() ?: $person->name) . ' ' . $profile?->furigana()) }}">
                     <div class="ppl-avatar"
-                         style="border-width:{{ $person->avatarBorderWidth() }}px; border-color:{{ $person->avatarBorderColor() }}; @if ($person->avatarType() === 'emoji') background: {{ $person->avatarBackgroundColor() }}; @endif">
+                         style="border-width:3px; border-color:{{ $person->avatarBorderColor() }}; @if ($person->avatarType() === 'emoji') background: {{ $person->avatarBackgroundColor() }}; @endif">
                         @if ($person->avatarType() === 'photo' && $person->avatarImageUrl())
                             <img src="{{ $person->avatarImageUrl() }}" alt="">
                         @elseif ($person->avatarType() === 'emoji' && $person->avatar_emoji)
