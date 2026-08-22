@@ -382,8 +382,9 @@
     /* スマホでは3列のサムネイル一覧にして、一画面で多くの写真を見渡せるようにする */
     .gl-admin-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
     .gl-history-grid { grid-template-columns: 1fr; }
-    .gl-todo { padding: 13px 14px; gap: 11px; flex-wrap: wrap; }
-    .gl-todo__go { width: 100%; justify-content: center; }
+    .gl-todo { padding: 13px 14px; gap: 11px; flex-wrap: wrap; box-sizing: border-box; overflow: hidden; align-items: stretch; }
+    .gl-todo__body { flex: 1 1 calc(100% - 58px); }
+    .gl-todo__go { flex: 1 0 100%; width: 100%; max-width: 100%; box-sizing: border-box; justify-content: center; }
     .gl-submission-panel__head { padding: 16px 14px 12px; }
     .gl-submission-stats { grid-template-columns: repeat(2, 1fr); padding: 12px 14px; }
     .gl-uploader-summary { padding: 0 14px 14px; }
