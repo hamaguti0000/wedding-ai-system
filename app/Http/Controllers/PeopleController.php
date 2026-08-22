@@ -56,7 +56,6 @@ class PeopleController extends Controller
                 $heroPhoto = $candidate;
             }
         }
-        $heroPhoto ??= $photos->first();
 
         $backSource = $request->query('from', 'people');
         if (! in_array($backSource, ['gallery', 'seating', 'people'], true)) {
