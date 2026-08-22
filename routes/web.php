@@ -67,8 +67,8 @@ Route::get('/', function () {
 // ── ログイン ──────────────────────────────────────────────
 Route::get('/login',    [AuthController::class,  'showLogin'])   ->name('login');
 Route::post('/login',   [AuthController::class,  'login'])        ->name('login.post');
-Route::get('/register', [AccountController::class,'showRegister'])->name('register');
-Route::post('/register',[AccountController::class,'register'])    ->name('register.post');
+Route::get('/register', fn () => abort(404))->name('register');
+Route::post('/register', fn () => abort(404))->name('register.post');
 Route::get('/forgot-email', [ForgotEmailController::class, 'show'])->name('email.forgot');
 Route::post('/forgot-email', [ForgotEmailController::class, 'lookup'])->name('email.forgot.lookup');
 Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
