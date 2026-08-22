@@ -7,6 +7,7 @@ use App\Models\GuestGroup;
 use App\Services\GalleryImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -63,13 +64,27 @@ class GalleryController extends Controller
     public function downloadSelected(Request $request)
     {
         $validated = $request->validate([
-            'photo_ids' => 'required|array|min:1|max:80',
-            'photo_ids.*' => 'integer',
+            'photo_tokens' => 'required|array|min:1|max:80',
+            'photo_tokens.*' => 'string',
         ]);
+
+        $photoIds = collect($validated['photo_tokens'])
+            ->map(function (string $token) {
+                try {
+                    return (int) Crypt::decryptString($token);
+                } catch (\Throwable) {
+                    return null;
+                }
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
+        abort_if($photoIds->isEmpty(), 404);
 
         $photos = GalleryPhoto::where('is_active', true)
             ->where('status', 'approved')
-            ->whereIn('id', $validated['photo_ids'])
+            ->whereIn('id', $photoIds)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();

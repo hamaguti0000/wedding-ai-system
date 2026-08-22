@@ -503,9 +503,9 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
             $isRelated = $isMine || ($currentUserId && ($photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty() || $photoGroupNames->intersect($currentUserGroupNames)->isNotEmpty()));
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-photo-id="{{ $photo->id }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-groups='@json($photoGroupNames)' data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-groups='@json($photoGroupNames)' data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
             <div class="gl-card__photo">
-                <label class="gl-card__select" aria-label="写真を選択" onclick="event.stopPropagation()"><input type="checkbox" data-photo-select value="{{ $photo->id }}"></label>
+                <label class="gl-card__select" aria-label="写真を選択" onclick="event.stopPropagation()"><input type="checkbox" data-photo-select data-index="{{ $i }}" value="{{ \Illuminate\Support\Facades\Crypt::encryptString((string) $photo->id) }}"></label>
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
                 @if ($isMine)
                 <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> 自分の写真</span>
@@ -625,7 +625,6 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         $uploaderName = $p->uploader?->guestProfile?->fullName() ?: $p->uploader?->name;
 
         return [
-            'id' => $p->id,
             'url' => $p->url,
             'caption' => $p->caption,
             'tags' => $tags,
@@ -634,7 +633,6 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
             'category_label' => $p->categoryLabel(),
             'source' => $p->photo_source ?: ($p->is_guest_upload ? 'guest' : 'admin'),
             'source_label' => $p->sourceLabel(),
-            'download_name' => 'wedding-photo-' . $p->id . '.jpg',
         ];
     })->values();
 @endphp
@@ -851,13 +849,17 @@ async function saveToPhotos() {
     }
 }
 
-function selectedPhotoIds() {
-    return Array.from(document.querySelectorAll('[data-photo-select]:checked')).map(input => Number(input.value));
+function selectedPhotoTokens() {
+    return Array.from(document.querySelectorAll('[data-photo-select]:checked')).map(input => input.value).filter(Boolean);
+}
+
+function selectedPhotoIndexes() {
+    return Array.from(document.querySelectorAll('[data-photo-select]:checked')).map(input => Number(input.dataset.index));
 }
 
 function selectedPhotos() {
-    const ids = new Set(selectedPhotoIds());
-    return photos.filter(photo => ids.has(Number(photo.id)));
+    const indexes = new Set(selectedPhotoIndexes());
+    return photos.filter((photo, index) => indexes.has(index));
 }
 
 function setSelectionMode(enabled) {
@@ -870,7 +872,7 @@ function setSelectionMode(enabled) {
 }
 
 function updateSelectionState() {
-    const count = selectedPhotoIds().length;
+    const count = selectedPhotoTokens().length;
     document.querySelectorAll('.gl-card').forEach(card => {
         const input = card.querySelector('[data-photo-select]');
         card.classList.toggle('is-selected', Boolean(input?.checked));
@@ -898,7 +900,7 @@ async function saveSelectedToPhotos() {
     try {
         const files = [];
         for (const photo of chosen) {
-            files.push(await fetchPhotoFile(photo.url, photo.download_name || `wedding-photo-${photo.id}.jpg`));
+            files.push(await fetchPhotoFile(photo.url, photo.download_name || `wedding-photo-${photos.indexOf(photo) + 1}.jpg`));
         }
         if (navigator.canShare && navigator.canShare({ files }) && navigator.share) {
             await navigator.share({ files, title: 'Wedding photos' });
@@ -912,20 +914,20 @@ async function saveSelectedToPhotos() {
 }
 
 function saveSelectedToFiles() {
-    const ids = selectedPhotoIds();
+    const tokens = selectedPhotoTokens();
     const status = document.getElementById('bulkSaveStatus');
-    if (!ids.length) return;
-    if (ids.length > 80) {
+    if (!tokens.length) return;
+    if (tokens.length > 80) {
         if (status) status.textContent = 'ZIP保存は一度に80枚までです。少し分けて保存してください。';
         return;
     }
     const form = document.getElementById('bulkDownloadForm');
-    form.querySelectorAll('input[name="photo_ids[]"]').forEach(input => input.remove());
-    ids.forEach(id => {
+    form.querySelectorAll('input[name="photo_tokens[]"]').forEach(input => input.remove());
+    tokens.forEach(token => {
         const input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'photo_ids[]';
-        input.value = id;
+        input.name = 'photo_tokens[]';
+        input.value = token;
         form.appendChild(input);
     });
     form.submit();
