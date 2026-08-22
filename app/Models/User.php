@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -286,6 +287,30 @@ class User extends Authenticatable
     public function avatarImageUrl(): ?string
     {
         return $this->avatar_image_path ? asset('storage/' . $this->avatar_image_path) : null;
+    }
+
+    public function publicReferenceToken(): string
+    {
+        $encrypted = Crypt::encryptString((string) $this->id);
+
+        return rtrim(strtr(base64_encode($encrypted), '+/', '-_'), '=');
+    }
+
+    public static function fromPublicReferenceToken(string $token): ?self
+    {
+        try {
+            $encrypted = base64_decode(strtr($token, '-_', '+/'), true);
+
+            if ($encrypted === false) {
+                return null;
+            }
+
+            $id = (int) Crypt::decryptString($encrypted);
+
+            return static::find($id);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public function avatarBackgroundColor(): string

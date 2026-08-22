@@ -189,16 +189,15 @@ main { padding: 0; text-align: initial; }
 </div>
 
 @php
-    $photosJson = $photos->map(function ($p) use ($user) {
-        $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) {
-            return ['id' => $u->id, 'name' => $u->guestProfile?->fullName() ?: $u->name];
+    $photosJson = $photos->map(function ($p) use ($user, $backSource) {
+        $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) use ($backSource) {
+            return ['name' => $u->guestProfile?->fullName() ?: $u->name, 'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => $backSource])];
         })->values();
 
-        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags, 'download_name' => 'wedding-photo-' . $p->id . '.jpg'];
+        return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];
     })->values();
 @endphp
 <script>
-const peopleBaseUrl = "{{ url('/people') }}";
 const peopleBackSource = @json($backSource);
 const photos = @json($photosJson);
 let current = 0;
@@ -261,12 +260,12 @@ function showPhoto() {
     document.getElementById('glLightboxCaption').textContent = p.caption ?? '';
     const download = document.getElementById('glLightboxDownload');
     download.href = p.url;
-    download.download = p.download_name || `wedding-photo-${current + 1}.jpg`;
+    download.download = `wedding-photo-${current + 1}.jpg`;
     document.getElementById('glLightboxTopIndex').textContent = `${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
     const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     tagsEl.innerHTML = (p.tags || []).map(t =>
-        `<a class="gl-lightbox__tag" href="${peopleBaseUrl}/${t.id}?from=${encodeURIComponent(peopleBackSource)}" data-people-link="${peopleBaseUrl}/${t.id}?from=${encodeURIComponent(peopleBackSource)}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
+        `<a class="gl-lightbox__tag" href="${t.href || '#'}" data-people-link="${t.href || '#'}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
     ).join('');
 }
 function nextPhoto(event) {

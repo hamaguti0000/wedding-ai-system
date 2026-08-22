@@ -166,7 +166,7 @@ main { padding: 0; text-align: initial; }
             <div class="ppl-list">
                 @foreach ($members as $person)
                 @php $profile = $person->guestProfile; @endphp
-                <a href="{{ route('people.show', ['user' => $person, 'from' => 'people']) }}" class="ppl-row"
+                <a href="{{ route('people.show-ref', ['token' => $person->publicReferenceToken(), 'from' => 'people']) }}" class="ppl-row"
                    data-side="{{ $side }}"
                    data-name="{{ strtolower(($profile?->fullName() ?: $person->name) . ' ' . $profile?->furigana()) }}">
                     <div class="ppl-avatar"

@@ -24,6 +24,14 @@ class PeopleController extends Controller
         return view('people.index', compact('people'));
     }
 
+    public function showByReference(string $token, Request $request)
+    {
+        $user = User::fromPublicReferenceToken($token);
+        abort_if(! $user, 404);
+
+        return $this->show($user, $request);
+    }
+
     public function show(User $user, Request $request)
     {
         abort_if($user->isAdmin(), 404);

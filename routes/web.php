@@ -112,6 +112,7 @@ Route::middleware(['auth', 'email.ready', 'password.ready'])->group(function () 
     Route::post('/gallery/upload',      [GalleryController::class,   'upload'])->name('gallery.upload.post');
     Route::post('/gallery/download',    [GalleryController::class,   'downloadSelected'])->name('gallery.download');
     Route::get('/people',               [PeopleController::class,    'index'])->name('people.index');
+    Route::get('/people/ref/{token}',   [PeopleController::class,    'showByReference'])->name('people.show-ref');
     Route::get('/people/{user}',        [PeopleController::class,    'show'])->name('people.show');
     Route::get('/movies',               [MovieController::class, 'show'])->name('movies');
     Route::redirect('/ending', '/movies');

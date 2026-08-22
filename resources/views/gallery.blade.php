@@ -609,15 +609,14 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         $tags = $p->taggedGroups->map(function ($g) use ($currentUserGroupIds, $currentUserGroupNames) {
             $groupName = $g->galleryDisplayName();
             return [
-                'id' => $g->id,
                 'name' => $groupName,
                 'is_current' => $currentUserGroupIds->contains($g->id) || $currentUserGroupNames->contains($groupName),
                 'type' => 'group',
             ];
         })->unique('name')->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
             return [
-                'id' => $u->id,
                 'name' => $u->guestProfile?->fullName() ?: $u->name,
+                'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => 'gallery']),
                 'is_current' => $currentUserId === $u->id,
                 'type' => 'user',
             ];
@@ -637,7 +636,6 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
     })->values();
 @endphp
 <script>
-const peopleBaseUrl = "{{ url('/people') }}";
 const photos = @json($photosJson);
 const defaultGalleryFilter = @json($defaultFilter);
 let current = 0;
@@ -758,7 +756,7 @@ function showPhoto() {
             if (t.type === 'group') {
                 return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="#" data-gallery-group="${escapeHtml(t.name)}"><i class="fa-solid fa-layer-group"></i> ${escapeHtml(t.name)}</a>`;
             }
-            const href = `${peopleBaseUrl}/${t.id}?from=gallery`;
+            const href = t.href || '#';
             return `<a class="gl-lightbox__tag ${t.is_current ? 'is-current' : ''}" href="${href}" data-people-link="${href}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`;
         }).join('')
         : '<span class="gl-person-chip">人物タグはまだありません</span>';
