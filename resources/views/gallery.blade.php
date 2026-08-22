@@ -527,7 +527,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 <div class="gl-card__tags">
                     @foreach ($tagNames->take(3) as $tag)
                     @if (($tag['type'] ?? 'user') === 'group')
-                    <button type="button" class="gl-person-chip" data-card-group-filter="{{ $tag['name'] }}" onclick="event.stopPropagation(); applyGalleryFilter('group:' + this.dataset.cardGroupFilter);">{{ $tag['name'] }}</button>
+                    <button type="button" class="gl-person-chip" data-card-group-filter="{{ $tag['name'] }}" onclick="event.stopPropagation(); setGalleryHeroFromCard(this.closest('.gl-card')); applyGalleryFilter('group:' + this.dataset.cardGroupFilter);">{{ $tag['name'] }}</button>
                     @else
                     <span class="gl-person-chip {{ $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
                     @endif
@@ -616,7 +616,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
         })->unique('name')->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
             return [
                 'name' => $u->guestProfile?->fullName() ?: $u->name,
-                'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => 'gallery']),
+                'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => 'gallery', 'hero' => $p->publicReferenceToken()]),
                 'is_current' => $currentUserId === $u->id,
                 'type' => 'user',
             ];
@@ -935,6 +935,25 @@ function normalizeFilterValue(value) {
     return String(value || '').normalize('NFKC').trim();
 }
 
+function setGalleryHeroImage(url) {
+    if (!url) return;
+    const hero = document.querySelector('.gl-hero');
+    const first = hero?.querySelector('.gl-hero__img');
+    if (!first) return;
+    hero.querySelectorAll('.gl-hero__img').forEach((img, index) => {
+        img.classList.toggle('is-active', index === 0);
+        if (index > 0) img.style.display = 'none';
+    });
+    first.src = url;
+    first.style.display = '';
+    first.classList.add('is-active');
+}
+
+function setGalleryHeroFromCard(card) {
+    const img = card?.querySelector('.gl-card__photo img');
+    setGalleryHeroImage(img?.currentSrc || img?.src || '');
+}
+
 function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
@@ -985,6 +1004,7 @@ document.addEventListener('click', event => {
     event.stopPropagation();
     const groupName = link.dataset.galleryGroup;
     if (groupName) {
+        setGalleryHeroImage(photos[current]?.url);
         closeLightbox(false);
         applyGalleryFilter(`group:${groupName}`);
         return;

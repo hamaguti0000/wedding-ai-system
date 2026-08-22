@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Crypt;
 
 class GalleryPhoto extends Model
 {
@@ -34,6 +35,30 @@ class GalleryPhoto extends Model
     public function getUrlAttribute(): string
     {
         return asset('storage/' . ($this->display_file_path ?: $this->file_path));
+    }
+
+    public function publicReferenceToken(): string
+    {
+        $encrypted = Crypt::encryptString((string) $this->id);
+
+        return rtrim(strtr(base64_encode($encrypted), '+/', '-_'), '=');
+    }
+
+    public static function fromPublicReferenceToken(string $token): ?self
+    {
+        try {
+            $encrypted = base64_decode(strtr($token, '-_', '+/'), true);
+
+            if ($encrypted === false) {
+                return null;
+            }
+
+            $id = (int) Crypt::decryptString($encrypted);
+
+            return static::find($id);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public function uploader(): BelongsTo

@@ -124,7 +124,11 @@ main { padding: 0; text-align: initial; }
 
 @section('content')
 <section class="gl-banner">
-    @include('partials.rotating-banner', ['class' => 'gl-banner__img'])
+    @if ($heroPhoto)
+        <img src="{{ $heroPhoto->url }}" alt="" class="gl-banner__img">
+    @else
+        @include('partials.rotating-banner', ['class' => 'gl-banner__img'])
+    @endif
     <div class="gl-banner__overlay"></div>
     <div class="gl-banner__text">
         <span class="gl-banner__eyebrow">People · 参加者一覧</span>
@@ -191,7 +195,7 @@ main { padding: 0; text-align: initial; }
 @php
     $photosJson = $photos->map(function ($p) use ($user, $backSource) {
         $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) use ($backSource) {
-            return ['name' => $u->guestProfile?->fullName() ?: $u->name, 'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => $backSource])];
+            return ['name' => $u->guestProfile?->fullName() ?: $u->name, 'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => $backSource, 'hero' => $p->publicReferenceToken()])];
         })->values();
 
         return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];

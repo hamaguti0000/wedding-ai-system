@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GalleryPhoto;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -44,6 +45,19 @@ class PeopleController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        $heroPhoto = null;
+        $heroToken = $request->query('hero');
+        if (is_string($heroToken) && $heroToken !== '') {
+            $candidate = GalleryPhoto::fromPublicReferenceToken($heroToken);
+            if ($candidate
+                && $candidate->is_active
+                && $candidate->status === 'approved'
+                && $photos->contains('id', $candidate->id)) {
+                $heroPhoto = $candidate;
+            }
+        }
+        $heroPhoto ??= $photos->first();
+
         $backSource = $request->query('from', 'people');
         if (! in_array($backSource, ['gallery', 'seating', 'people'], true)) {
             $backSource = 'people';
@@ -55,6 +69,6 @@ class PeopleController extends Controller
             default => [route('people.index'), '参加者一覧に戻る'],
         };
 
-        return view('people.show', compact('user', 'photos', 'backUrl', 'backLabel', 'backSource'));
+        return view('people.show', compact('user', 'photos', 'heroPhoto', 'backUrl', 'backLabel', 'backSource'));
     }
 }
