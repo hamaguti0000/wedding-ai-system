@@ -194,7 +194,7 @@ main { padding: 0; text-align: initial; }
 
 @php
     $photosJson = $photos->map(function ($p) use ($user, $backSource) {
-        $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) use ($backSource) {
+        $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) use ($backSource, $p) {
             return ['name' => $u->guestProfile?->fullName() ?: $u->name, 'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => $backSource, 'hero' => $p->publicReferenceToken()])];
         })->values();
 
