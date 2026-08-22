@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class NewsItem extends Model
 {
+    public function scopePublicOrder($query)
+    {
+        return $query->orderByDesc('published_date')
+            ->orderByDesc('id');
+    }
+
     protected $fillable = [
         'published_date', 'tag', 'title', 'body',
         'image_path', 'layout', 'is_active', 'sort_order',

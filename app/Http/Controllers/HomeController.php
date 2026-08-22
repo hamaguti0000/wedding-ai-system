@@ -33,7 +33,7 @@ class HomeController extends Controller
             'deadlinePassed' => $setting?->rsvp_deadline !== null
                 && today()->isAfter($setting->rsvp_deadline),
             'news' => NewsItem::where('is_active', true)
-                ->orderBy('sort_order')->orderByDesc('published_date')
+                ->publicOrder()
                 ->limit(5)->get(),
         ]);
     }

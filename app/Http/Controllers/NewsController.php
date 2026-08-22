@@ -9,8 +9,7 @@ class NewsController extends Controller
     public function index()
     {
         $news = NewsItem::where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderByDesc('published_date')
+            ->publicOrder()
             ->get();
 
         return view('news', compact('news'));
@@ -21,12 +20,27 @@ class NewsController extends Controller
         $item = NewsItem::where('is_active', true)->findOrFail($id);
 
         $prev = NewsItem::where('is_active', true)
-            ->where('id', '<', $id)
-            ->orderByDesc('id')->first();
+            ->where(function ($query) use ($item) {
+                $query->where('published_date', '>', $item->published_date)
+                    ->orWhere(function ($sameDate) use ($item) {
+                        $sameDate->whereDate('published_date', $item->published_date)
+                            ->where('id', '>', $item->id);
+                    });
+            })
+            ->orderBy('published_date')
+            ->orderBy('id')
+            ->first();
 
         $next = NewsItem::where('is_active', true)
-            ->where('id', '>', $id)
-            ->orderBy('id')->first();
+            ->where(function ($query) use ($item) {
+                $query->where('published_date', '<', $item->published_date)
+                    ->orWhere(function ($sameDate) use ($item) {
+                        $sameDate->whereDate('published_date', $item->published_date)
+                            ->where('id', '<', $item->id);
+                    });
+            })
+            ->publicOrder()
+            ->first();
 
         return view('news-show', compact('item', 'prev', 'next'));
     }
