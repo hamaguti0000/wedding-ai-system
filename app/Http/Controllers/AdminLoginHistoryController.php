@@ -23,7 +23,16 @@ class AdminLoginHistoryController extends Controller
         $query = LoginHistory::with('user.guestProfile')->latest('created_at');
 
         if ($q !== '') {
-            $query->where('username', 'like', '%' . $q . '%');
+            $query->where(function ($historyQuery) use ($q) {
+                $historyQuery->where('username', 'like', '%' . $q . '%')
+                    ->orWhereHas('user.guestProfile', function ($profileQuery) use ($q) {
+                        $profileQuery->where('last_name', 'like', '%' . $q . '%')
+                            ->orWhere('first_name', 'like', '%' . $q . '%')
+                            ->orWhereRaw("CONCAT(last_name, ' ', first_name) LIKE ?", ['%' . $q . '%'])
+                            ->orWhereRaw("CONCAT(last_name, first_name) LIKE ?", ['%' . $q . '%']);
+                    })
+                    ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', '%' . $q . '%'));
+            });
         }
         if ($from !== '' && strtotime($from) !== false) {
             $query->whereDate('created_at', '>=', $from);

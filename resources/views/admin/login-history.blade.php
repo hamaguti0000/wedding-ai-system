@@ -176,7 +176,7 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
                 <div class="search-field">
                     <label>ユーザー名</label>
                     <input type="search" name="q" value="{{ $q }}"
-                           placeholder="例：yamada_taro" autocomplete="off">
+                           placeholder="例：山田 太郎 / yamada_taro" autocomplete="off">
                 </div>
                 <div class="search-field">
                     <label>期間</label>
@@ -309,14 +309,25 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
             </thead>
             <tbody id="lhTbody">
                 @foreach ($histories as $h)
+                @php
+                    $profileName = $h->user?->guestProfile?->fullName();
+                    $displayName = $h->status === 'success'
+                        ? ($profileName ?: ($h->user?->name ?: $h->username))
+                        : $h->username;
+                @endphp
                 <tr data-datetime="{{ $h->created_at->timestamp }}"
-                    data-username="{{ $h->username }}"
+                    data-username="{{ $displayName }}"
                     data-status="{{ $h->status }}">
                     <td style="white-space:nowrap;">
                         <span style="font-size:0.82rem;">{{ $h->created_at->format('Y/m/d') }}</span>
                         <br><strong style="font-size:0.88rem;">{{ $h->created_at->format('H:i:s') }}</strong>
                     </td>
-                    <td><strong>{{ $h->username }}</strong></td>
+                    <td>
+                        <strong>{{ $displayName }}</strong>
+                        @if ($h->status === 'success' && $displayName !== $h->username)
+                            <br><span class="text-muted" style="font-size:0.72rem;">ID: {{ $h->username }}</span>
+                        @endif
+                    </td>
                     <td>
                         <span class="badge {{ $h->status }}">
                             {{ $h->status === 'success' ? '✓ 成功' : '✕ 失敗' }}
