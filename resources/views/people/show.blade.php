@@ -76,6 +76,10 @@ main { padding: 0; text-align: initial; }
     flex: 0 0 auto;
 }
 .gl-lightbox__tag:hover { background: rgba(255,255,255,.24); }
+.gl-lightbox__tag.is-current {
+    background: rgba(179,139,89,.28); border-color: rgba(222,191,145,.72); color: #fff7ea;
+}
+.gl-lightbox__tag-note { color: #e9cf9e; font-size: .62rem; font-weight: 700; margin-left: 1px; }
 .gl-lightbox__download {
     position: absolute; top: 14px; left: 14px; z-index: 4;
     width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
@@ -194,8 +198,14 @@ main { padding: 0; text-align: initial; }
 
 @php
     $photosJson = $photos->map(function ($p) use ($user, $backSource) {
-        $tags = $p->taggedUsers->where('id', '!=', $user->id)->map(function ($u) use ($backSource, $p) {
-            return ['name' => $u->guestProfile?->fullName() ?: $u->name, 'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => $backSource, 'hero' => $p->publicReferenceToken()])];
+        $tags = $p->taggedUsers->map(function ($u) use ($user, $backSource, $p) {
+            $isCurrent = $u->id === $user->id;
+
+            return [
+                'name' => $u->guestProfile?->fullName() ?: $u->name,
+                'href' => $isCurrent ? null : route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => $backSource, 'hero' => $p->publicReferenceToken()]),
+                'is_current' => $isCurrent,
+            ];
         })->values();
 
         return ['url' => $p->url, 'caption' => $p->caption, 'tags' => $tags];
@@ -268,9 +278,12 @@ function showPhoto() {
     document.getElementById('glLightboxTopIndex').textContent = `${current + 1} / ${photos.length}`;
     const tagsEl = document.getElementById('glLightboxTags');
     const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    tagsEl.innerHTML = (p.tags || []).map(t =>
-        `<a class="gl-lightbox__tag" href="${t.href || '#'}" data-people-link="${t.href || '#'}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}</a>`
-    ).join('');
+    tagsEl.innerHTML = (p.tags || []).map(t => {
+        const isCurrent = t.is_current ? '1' : '0';
+        const href = t.href || '#';
+        const label = t.is_current ? '<span class="gl-lightbox__tag-note">本人</span>' : '';
+        return `<a class="gl-lightbox__tag${t.is_current ? ' is-current' : ''}" href="${href}" data-people-link="${href}" data-current-person="${isCurrent}"><i class="fa-solid fa-user"></i> ${escapeHtml(t.name)}${label}</a>`;
+    }).join('');
 }
 function nextPhoto(event) {
     event?.preventDefault?.();
@@ -291,8 +304,9 @@ document.addEventListener('click', event => {
     if (!link) return;
     event.preventDefault();
     event.stopPropagation();
+    if (link.dataset.currentPerson === '1') return;
     const href = link.dataset.peopleLink;
-    if (href) window.location.assign(href);
+    if (href && href !== '#') window.location.assign(href);
 });
 (function () {
     const stage = document.querySelector('.gl-lightbox__inner');
