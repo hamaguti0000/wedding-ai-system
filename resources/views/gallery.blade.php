@@ -613,7 +613,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 'is_current' => $currentUserGroupIds->contains($g->id) || $currentUserGroupNames->contains($groupName),
                 'type' => 'group',
             ];
-        })->unique('name')->concat($p->taggedUsers->map(function ($u) use ($currentUserId) {
+        })->unique('name')->concat($p->taggedUsers->map(function ($u) use ($currentUserId, $p) {
             return [
                 'name' => $u->guestProfile?->fullName() ?: $u->name,
                 'href' => route('people.show-ref', ['token' => $u->publicReferenceToken(), 'from' => 'gallery', 'hero' => $p->publicReferenceToken()]),
