@@ -277,7 +277,10 @@ class User extends Authenticatable
 
     public function avatarInitial(): string
     {
-        return mb_substr($this->name ?? '?', 0, 1, 'UTF-8') ?: '?';
+        $firstName = $this->guestProfile?->first_name;
+        $source = filled($firstName) ? $firstName : ($this->name ?? '?');
+
+        return mb_substr($source, 0, 1, 'UTF-8') ?: '?';
     }
 
     public function avatarImageUrl(): ?string
