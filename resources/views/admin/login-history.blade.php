@@ -116,7 +116,16 @@ th.lh-sortable { cursor: pointer; user-select: none; }
 th.lh-sortable:hover { background: #f5ede0; }
 .lh-sort-icon { display: inline-block; margin-left: 4px; font-size: 0.74rem; color: #c0b0a0; }
 th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
-.lh-wrap table { min-width: 620px; }
+.lh-wrap table { min-width: 720px; width: 100%; border-collapse: separate; border-spacing: 0; }
+.lh-wrap thead th { background: #fff8ef; color: #9a7447; font-size: .78rem; letter-spacing: .04em; padding: 13px 14px; text-align: left; border-bottom: 1px solid #eadccd; }
+.lh-wrap tbody td { padding: 15px 14px; border-bottom: 1px solid #f0ebe3; vertical-align: middle; }
+.lh-wrap tbody tr { transition: background .16s ease; }
+.lh-wrap tbody tr:hover { background: #fffaf3; }
+.lh-user-name { font-size: .95rem; color: #2f251e; }
+.lh-user-id { display: inline-block; margin-top: 3px; color: #9b8573; font-size: .72rem; }
+.lh-time-date { display: block; color: #7f6f62; font-size: .78rem; }
+.lh-time-clock { display: block; margin-top: 3px; color: #2f251e; font-size: .95rem; font-weight: 800; }
+.lh-meta-line { display: none; }
 .ua-text { font-size: 0.74rem; color: #888; word-break: break-all; max-width: 240px; }
 .empty-icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.35; }
 
@@ -133,11 +142,51 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
 .pagination-wrap .pg-disabled { color: #ddd; border-color: #eee; background: #fafafa; }
 
 @media (max-width: 767px) {
-    .search-panel { padding: 16px; }
+    .lh-wrap h1 { font-size: 1.35rem; margin-bottom: 14px; }
+    .lh-summary { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .lh-card { padding: 12px 8px; min-height: 74px; }
+    .lh-card .num { font-size: 1.25rem; }
+    .lh-card .lbl { font-size: .68rem; line-height: 1.35; }
+    .search-panel { padding: 14px; border-radius: 12px; }
+    .search-panel-title { margin-bottom: 12px; }
+    .search-row { gap: 12px; margin-bottom: 12px; }
     .search-row-top, .search-row-bottom { grid-template-columns: 1fr; }
-    .ua-text { max-width: 140px; }
-    .search-actions { flex-direction: column; align-items: stretch; }
-    .btn-search, .btn-reset { justify-content: center; }
+    .date-range { display: grid; grid-template-columns: 1fr auto 1fr; }
+    .toggle-group label { padding: 10px 2px; font-size: .78rem; }
+    .ua-text { max-width: none; }
+    .search-actions { flex-direction: column; align-items: stretch; padding-top: 10px; }
+    .btn-search, .btn-reset { justify-content: center; width: 100%; }
+    .lh-table-wrap { background: transparent; border: 0; box-shadow: none; overflow: visible; }
+    .lh-table-head { margin-bottom: 10px; padding: 12px 2px; border-bottom: 0; color: #8d7c6d; }
+    .table-scroll { overflow: visible; }
+    .lh-wrap table { min-width: 0; width: 100%; border-collapse: collapse; }
+    .lh-wrap thead { display: none; }
+    .lh-wrap tbody { display: grid; gap: 10px; }
+    .lh-wrap tbody tr {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px 12px;
+        padding: 14px;
+        border: 1px solid #eadccd;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 10px 28px rgba(61,47,37,.07);
+    }
+    .lh-wrap tbody tr:hover { background: #fff; }
+    .lh-wrap tbody td { display: block; padding: 0; border: 0; }
+    .lh-cell-time { grid-column: 1 / 2; grid-row: 1; }
+    .lh-cell-status { grid-column: 2 / 3; grid-row: 1; justify-self: end; align-self: start; }
+    .lh-cell-user { grid-column: 1 / -1; grid-row: 2; }
+    .lh-cell-role { grid-column: 1 / -1; grid-row: 3; display: flex !important; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .lh-cell-role br { display: none; }
+    .lh-cell-ip, .lh-cell-browser { grid-column: 1 / -1; color: #9b8573; font-size: .72rem; }
+    .lh-cell-browser { padding-top: 2px; }
+    .lh-time-date { font-size: .76rem; color: #9b8573; }
+    .lh-time-clock { font-size: 1rem; }
+    .lh-user-name { font-size: 1.05rem; line-height: 1.35; }
+    .lh-user-id { font-size: .72rem; }
+    .lh-meta-line { display: inline; color: #b0a090; font-size: .72rem; font-weight: 700; margin-right: 6px; }
+    .badge { white-space: nowrap; }
 }
 </style>
 @endpush
@@ -318,22 +367,22 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
                 <tr data-datetime="{{ $h->created_at->timestamp }}"
                     data-username="{{ $displayName }}"
                     data-status="{{ $h->status }}">
-                    <td style="white-space:nowrap;">
-                        <span style="font-size:0.82rem;">{{ $h->created_at->format('Y/m/d') }}</span>
-                        <br><strong style="font-size:0.88rem;">{{ $h->created_at->format('H:i:s') }}</strong>
+                    <td class="lh-cell-time">
+                        <span class="lh-time-date">{{ $h->created_at->format('Y/m/d') }}</span>
+                        <span class="lh-time-clock">{{ $h->created_at->format('H:i:s') }}</span>
                     </td>
-                    <td>
-                        <strong>{{ $displayName }}</strong>
+                    <td class="lh-cell-user">
+                        <strong class="lh-user-name">{{ $displayName }}</strong>
                         @if ($h->status === 'success' && $displayName !== $h->username)
-                            <br><span class="text-muted" style="font-size:0.72rem;">ID: {{ $h->username }}</span>
+                            <br><span class="lh-user-id">ID: {{ $h->username }}</span>
                         @endif
                     </td>
-                    <td>
+                    <td class="lh-cell-status">
                         <span class="badge {{ $h->status }}">
                             {{ $h->status === 'success' ? '✓ 成功' : '✕ 失敗' }}
                         </span>
                     </td>
-                    <td>
+                    <td class="lh-cell-role">
                         @if ($h->user)
                             <span class="badge {{ $h->user->role }}-role">
                                 {{ $h->user->isAdmin() ? '管理者' : 'ゲスト' }}
@@ -347,10 +396,10 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
                             <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td><span style="font-size:0.84rem;">{{ $h->ip_address ?? '—' }}</span></td>
-                    <td>
+                    <td class="lh-cell-ip"><span class="lh-meta-line">IP</span>{{ $h->ip_address ?? '—' }}</td>
+                    <td class="lh-cell-browser">
                         @if ($h->user_agent)
-                        <span class="ua-text" title="{{ $h->user_agent }}">
+                        <span class="lh-meta-line">ブラウザ</span><span class="ua-text" title="{{ $h->user_agent }}">
                             {{ Str::limit($h->user_agent, 55) }}
                         </span>
                         @else
