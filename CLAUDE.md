@@ -197,7 +197,7 @@ ssh -i ~/.ssh/vps_key root@133.117.74.212 "
   # 必ず全artisan実行後の最後にWebサーバーユーザーへ戻すこと。
   chown -R www-data:www-data storage bootstrap/cache
   find storage bootstrap/cache -type d -exec chmod 775 {} \;
-  find storage bootstrap/cache -type f -exec chmod 664 {} \;
+  find storage bootstrap/cache -type f ! -name .gitignore -exec chmod 664 {} \;
 "
 ```
 
