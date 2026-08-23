@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ReminderMail;
+use App\Models\EmailAuditLog;
 use App\Models\ReminderSchedule;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -105,8 +106,10 @@ class AdminReminderController extends Controller
         foreach ($recipients as $user) {
             try {
                 Mail::to($user->email)->send(new ReminderMail($user, $reminder));
+                $this->recordDeliveryLog($reminder, $user, true);
                 $count++;
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
+                $this->recordDeliveryLog($reminder, $user, false, $e);
                 $errors++;
             }
         }
@@ -123,5 +126,32 @@ class AdminReminderController extends Controller
         }
 
         return back()->with('success', $msg);
+    }
+
+    private function recordDeliveryLog(
+        ReminderSchedule $reminder,
+        User $user,
+        bool $sent,
+        ?\Throwable $exception = null
+    ): void {
+        EmailAuditLog::create([
+            'user_id' => $user->id,
+            'actor_user_id' => Auth::id(),
+            'action' => $sent ? 'reminder_sent' : 'reminder_failed',
+            'old_email' => null,
+            'new_email' => $user->email,
+            'message' => $sent
+                ? "リマインダーメールを送信しました: {$reminder->subject}"
+                : "リマインダーメールの送信に失敗しました: {$reminder->subject}",
+            'meta' => [
+                'reminder_schedule_id' => $reminder->id,
+                'title' => $reminder->title,
+                'subject' => $reminder->subject,
+                'target' => $reminder->target,
+                'target_event_day' => $reminder->target_event_day,
+                'email' => $user->email,
+                'error' => $exception?->getMessage(),
+            ],
+        ]);
     }
 }

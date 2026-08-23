@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\ReminderMail;
+use App\Models\EmailAuditLog;
 use App\Models\ReminderSchedule;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,6 +44,15 @@ class AdminReminderSelectionTest extends TestCase
         Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail) => $mail->hasTo('a@example.com'));
         Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail) => $mail->hasTo('b@example.com'));
         Mail::assertNotSent(ReminderMail::class, fn (ReminderMail $mail) => $mail->hasTo('c@example.com'));
+
+        $this->assertSame(2, EmailAuditLog::where('action', 'reminder_sent')->count());
+        $this->assertSame(0, EmailAuditLog::where('action', 'reminder_failed')->count());
+        $this->assertDatabaseHas('email_audit_logs', [
+            'user_id' => $selectedA->id,
+            'actor_user_id' => $admin->id,
+            'action' => 'reminder_sent',
+            'new_email' => 'a@example.com',
+        ]);
     }
 
 

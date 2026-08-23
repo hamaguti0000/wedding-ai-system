@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\AdminReminderController;
+use App\Models\EmailAuditLog;
 use App\Models\ReminderSchedule;
 use Illuminate\Console\Command;
 
@@ -32,8 +33,10 @@ class SendScheduledReminders extends Command
                 try {
                     \Illuminate\Support\Facades\Mail::to($user->email)
                         ->send(new \App\Mail\ReminderMail($user, $reminder));
+                    $this->recordDeliveryLog($reminder, $user, true);
                     $count++;
                 } catch (\Throwable $e) {
+                    $this->recordDeliveryLog($reminder, $user, false, $e);
                     $this->warn("  送信失敗: {$user->email} — {$e->getMessage()}");
                 }
             }
@@ -48,5 +51,32 @@ class SendScheduledReminders extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function recordDeliveryLog(
+        ReminderSchedule $reminder,
+        \App\Models\User $user,
+        bool $sent,
+        ?\Throwable $exception = null
+    ): void {
+        EmailAuditLog::create([
+            'user_id' => $user->id,
+            'actor_user_id' => null,
+            'action' => $sent ? 'reminder_sent' : 'reminder_failed',
+            'old_email' => null,
+            'new_email' => $user->email,
+            'message' => $sent
+                ? "予約リマインダーメールを送信しました: {$reminder->subject}"
+                : "予約リマインダーメールの送信に失敗しました: {$reminder->subject}",
+            'meta' => [
+                'reminder_schedule_id' => $reminder->id,
+                'title' => $reminder->title,
+                'subject' => $reminder->subject,
+                'target' => $reminder->target,
+                'target_event_day' => $reminder->target_event_day,
+                'email' => $user->email,
+                'error' => $exception?->getMessage(),
+            ],
+        ]);
     }
 }
