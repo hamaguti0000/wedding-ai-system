@@ -24,6 +24,26 @@ it('メール未登録のユーザーはゲストページへ進めない', func
         ->assertRedirect(route('email.register'));
 });
 
+it('メール登録免除ユーザーはメールなしでゲストページへ進める', function () {
+    $user = makeGuest('attending');
+    $user->forceFill([
+        'email' => null,
+        'email_verified_at' => null,
+        'email_registration_exempt' => true,
+        'password_change_required' => false,
+        'password_changed_at' => now(),
+    ])->save();
+
+    $this->post('/login', [
+        'username' => $user->username,
+        'password' => 'password',
+    ])->assertRedirect(route('dashboard'));
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk();
+});
+
 it('メール未認証のユーザーは認証完了までゲストページへ進めない', function () {
     $user = makeGuest('attending');
     $user->forceFill(['email_verified_at' => null])->save();

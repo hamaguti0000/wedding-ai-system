@@ -29,6 +29,7 @@ class User extends Authenticatable
         'username',
         'email',
         'email_verified_at',
+        'email_registration_exempt',
         'password',
         'password_change_required',
         'password_changed_at',
@@ -54,6 +55,7 @@ class User extends Authenticatable
         return [
             'email_verified_at'          => 'datetime',
             'email_verification_sent_at' => 'datetime',
+            'email_registration_exempt'   => 'boolean',
             'password_change_required'   => 'boolean',
             'password_changed_at'        => 'datetime',
             'password'                   => 'hashed',
@@ -62,7 +64,7 @@ class User extends Authenticatable
 
     public function hasVerifiedEmail(): bool
     {
-        if ($this->isAdmin()) {
+        if ($this->isAdmin() || $this->isEmailRegistrationExempt()) {
             return true;
         }
 
@@ -71,11 +73,23 @@ class User extends Authenticatable
 
     public function isEmailUnverified(): bool
     {
-        if ($this->isAdmin()) {
+        if ($this->isAdmin() || $this->isEmailRegistrationExempt()) {
             return false;
         }
 
         return !blank($this->email) && is_null($this->email_verified_at);
+    }
+
+    public function isEmailRegistrationExempt(): bool
+    {
+        return (bool) $this->email_registration_exempt;
+    }
+
+    public function requiresEmailRegistration(): bool
+    {
+        return ! $this->isAdmin()
+            && ! $this->isEmailRegistrationExempt()
+            && blank($this->email);
     }
 
     /** Laravelのデフォルト英語通知の代わりに日本語カスタムメールを送る */

@@ -17,7 +17,7 @@ class ProfileController extends Controller
         $user = $request->user()->load(['guestProfile', 'taskAssignments.task.programItems']);
         $user->guestProfile?->ensureCheckInToken();
         $checkInUrl = $user->guestProfile?->checkInUrl();
-        $needsEmailRegistration = blank($user->email);
+        $needsEmailRegistration = $user->requiresEmailRegistration();
 
         return view('profile', [
             'user'    => $user,

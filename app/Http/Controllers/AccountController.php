@@ -12,7 +12,7 @@ class AccountController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
-            if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
+            if (! Auth::user()->isAdmin() && ! Auth::user()->isEmailRegistrationExempt() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
                 return redirect()->route('email.register');
             }
 

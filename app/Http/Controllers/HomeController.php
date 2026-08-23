@@ -20,7 +20,7 @@ class HomeController extends Controller
         $user->load(['guestProfile', 'taskAssignments.task.programItems']);
 
         $setting = WeddingSetting::first();
-        $needsEmailRegistration = blank($user->email);
+        $needsEmailRegistration = $user->requiresEmailRegistration();
 
         return view('home', [
             'user'           => $user,

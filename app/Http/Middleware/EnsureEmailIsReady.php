@@ -22,7 +22,7 @@ class EnsureEmailIsReady
             return $next($request);
         }
 
-        if ($this->isExemptRoute($request)) {
+        if ($this->isExemptRoute($request) || $user->isEmailRegistrationExempt()) {
             return $next($request);
         }
 
