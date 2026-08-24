@@ -145,7 +145,11 @@ class AdminPhotographerImportController extends Controller
             'item_ids.*' => 'integer',
         ]);
 
-        $items = $batch->items()->whereIn('id', $validated['item_ids'])->get();
+        $items = $batch->items()
+            ->whereIn('id', $validated['item_ids'])
+            ->orderByDesc('sort_order')
+            ->orderByDesc('id')
+            ->get();
         foreach ($items as $item) {
             $this->applyDecision($batch, $item, $validated['decision']);
         }
@@ -246,29 +250,36 @@ class AdminPhotographerImportController extends Controller
             throw new \RuntimeException('ZIPファイルを開けませんでした');
         }
 
-        $total = 0;
         $imported = 0;
-        $skipped = 0;
         $baseDir = 'photographer-imports/' . $batch->id;
+        $entries = [];
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
-            $total++;
 
             if ($this->shouldSkipZipEntry($name)) {
-                $skipped++;
                 continue;
             }
 
             $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
             if (! in_array($extension, self::IMAGE_EXTENSIONS, true)) {
-                $skipped++;
                 continue;
             }
 
+            $entries[] = [
+                'name' => $name,
+                'extension' => $extension,
+            ];
+        }
+
+        usort($entries, fn (array $a, array $b) => strnatcasecmp($a['name'], $b['name']));
+
+        foreach ($entries as $entry) {
+            $name = $entry['name'];
+            $extension = $entry['extension'];
+
             $stream = $zip->getStream($name);
             if (! $stream) {
-                $skipped++;
                 continue;
             }
 
@@ -295,7 +306,11 @@ class AdminPhotographerImportController extends Controller
 
         $zip->close();
 
-        return compact('total', 'imported', 'skipped');
+        return [
+            'total' => $zip->numFiles,
+            'imported' => $imported,
+            'skipped' => $zip->numFiles - $imported,
+        ];
     }
 
     private function shouldSkipZipEntry(string $name): bool
