@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
 use App\Models\GuestGroup;
+use App\Models\PhotographerImportItem;
 use App\Models\User;
 use App\Services\GalleryImageOptimizer;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class AdminGalleryController extends Controller
         $photos  = GalleryPhoto::where('status', 'approved')
             ->with(array_merge($galleryRelations, ['uploader']))
             ->orderBy('sort_order')->orderBy('id')->get();
+        $photos = $this->orderedGalleryPhotos($photos);
         if (! $hasGuestGroups) {
             $photos->each->setRelation('taggedGroups', collect());
         }
@@ -130,7 +132,7 @@ class AdminGalleryController extends Controller
         if ($hasGuestGroups) {
             $queueQuery->withCount('taggedGroups');
         }
-        $queue = $queueQuery->get(['id', 'sort_order']);
+        $queue = $this->orderedGalleryPhotos($queueQuery->get(['id', 'sort_order', 'photo_source']));
 
         $isUntagged = fn ($item) => (int) $item->tagged_users_count === 0
             && (! $hasGuestGroups || (int) $item->tagged_groups_count === 0);
@@ -156,6 +158,22 @@ class AdminGalleryController extends Controller
             'totalCount'     => $queue->count(),
             'untaggedCount'  => $untaggedCount,
         ]);
+    }
+
+    private function orderedGalleryPhotos($photos)
+    {
+        $photographerItems = PhotographerImportItem::whereNotNull('gallery_photo_id')
+            ->get(['gallery_photo_id', 'photographer_import_batch_id', 'sort_order'])
+            ->keyBy('gallery_photo_id');
+
+        return $photos->sortBy(function (GalleryPhoto $photo) use ($photographerItems) {
+            $item = $photographerItems->get($photo->id);
+            if ($photo->photo_source === 'photographer' && $item) {
+                return sprintf('0-%08d-%08d-%08d', 99999999 - (int) $item->photographer_import_batch_id, (int) $item->sort_order, $photo->id);
+            }
+
+            return sprintf('1-%08d-%08d', $photo->sort_order, $photo->id);
+        })->values();
     }
 
     /** @return \Illuminate\Support\Collection<int, User> */

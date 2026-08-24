@@ -29,15 +29,17 @@ class GalleryController extends Controller
             ->with($relations)
             ->orderBy('sort_order')->orderBy('id')->get();
 
-        $photographerOrders = PhotographerImportItem::whereNotNull('gallery_photo_id')
-            ->pluck('sort_order', 'gallery_photo_id');
+        $photographerItems = PhotographerImportItem::whereNotNull('gallery_photo_id')
+            ->get(['gallery_photo_id', 'photographer_import_batch_id', 'sort_order'])
+            ->keyBy('gallery_photo_id');
 
-        $photos = $photos->sortBy(function (GalleryPhoto $photo) use ($photographerOrders) {
-            if ($photo->photo_source === 'photographer') {
-                return sprintf('1-%08d-%08d', (int) ($photographerOrders[$photo->id] ?? $photo->sort_order), $photo->id);
+        $photos = $photos->sortBy(function (GalleryPhoto $photo) use ($photographerItems) {
+            $item = $photographerItems->get($photo->id);
+            if ($photo->photo_source === 'photographer' && $item) {
+                return sprintf('0-%08d-%08d-%08d', 99999999 - (int) $item->photographer_import_batch_id, (int) $item->sort_order, $photo->id);
             }
 
-            return sprintf('0-%08d-%08d', $photo->sort_order, $photo->id);
+            return sprintf('1-%08d-%08d', $photo->sort_order, $photo->id);
         })->values();
         if (! $hasGuestGroups) {
             $photos->each->setRelation('taggedGroups', collect());
