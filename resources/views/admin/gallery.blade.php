@@ -94,6 +94,8 @@
 .upload-zone__summary { display: none; margin-top: 10px; color: #7a6048; font-size: .82rem; font-weight: 800; }
 .photo-previews { align-items: center; }
 .photo-preview-more { width: 80px; height: 80px; border-radius: 8px; border: 1px dashed #d9c6ad; display: inline-flex; align-items: center; justify-content: center; color: #9b8573; background: #fffaf2; font-size: .82rem; font-weight: 800; }
+.gl-import-link { display:inline-flex; align-items:center; gap:8px; margin: 0 0 18px; padding: 12px 16px; border-radius:999px; background:#2f261f; color:#fff; text-decoration:none; font-weight:900; box-shadow:0 10px 22px rgba(47,38,31,.16); }
+.gl-import-link:hover { background:#4a392d; color:#fff; }
 
 .gl-admin-grid {
     display: grid;
@@ -409,6 +411,7 @@
 <div class="admin-wrap">
     <h1><i class="fa-solid fa-images" style="font-size:1.2rem;opacity:0.7;margin-right:8px;"></i>ギャラリー管理</h1>
     <p class="page-desc">ゲストに公開する写真を管理します。複数枚まとめてアップロードできます。</p>
+    <a class="gl-import-link" href="{{ route('admin.gallery.imports') }}"><i class="fa-solid fa-file-zipper"></i> カメラマンZIPを取り込む</a>
 
     @if (($guestSubmissionStats['total'] ?? 0) > 0)
     <section class="gl-submission-panel" aria-label="ゲスト投稿の管理状況">

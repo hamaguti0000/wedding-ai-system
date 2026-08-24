@@ -29,6 +29,7 @@ use App\Http\Controllers\AdminNewsController;
 use App\Http\Controllers\AdminTaskController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\AdminGalleryController;
+use App\Http\Controllers\AdminPhotographerImportController;
 use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileBookController;
@@ -49,7 +50,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 // ── トップページ ─────────────────────────────────────────
 Route::get('/', function () {
     if (Auth::check()) {
-        if (! Auth::user()->isAdmin() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
+        if (! Auth::user()->isAdmin() && ! Auth::user()->isEmailRegistrationExempt() && (blank(Auth::user()->email) || ! Auth::user()->hasVerifiedEmail())) {
             return redirect()->route('email.register');
         }
 
@@ -169,6 +170,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/gallery/{id}/reject',      [AdminGalleryController::class, 'reject'])   ->name('gallery.reject');
     Route::get('/gallery/{id}/tag',          [AdminGalleryController::class, 'tagEditor'])->name('gallery.tag.edit');
     Route::post('/gallery/{id}/tag',         [AdminGalleryController::class, 'tag'])      ->name('gallery.tag');
+    Route::get('/gallery/imports',          [AdminPhotographerImportController::class, 'index'])->name('gallery.imports');
+    Route::post('/gallery/imports',         [AdminPhotographerImportController::class, 'store'])->name('gallery.imports.store');
+    Route::get('/gallery/imports/{batch}/sort', [AdminPhotographerImportController::class, 'sort'])->name('gallery.imports.sort');
+    Route::patch('/gallery/imports/{batch}/items/{item}', [AdminPhotographerImportController::class, 'decide'])->name('gallery.imports.items.decide');
+    Route::post('/gallery/imports/{batch}/bulk', [AdminPhotographerImportController::class, 'bulkDecide'])->name('gallery.imports.bulk');
 
     // プロフィールブック管理
     Route::get('/profile-book',                  [AdminProfileBookController::class, 'edit'])       ->name('profile-book');
