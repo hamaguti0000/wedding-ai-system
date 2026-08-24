@@ -42,7 +42,7 @@ class AdminPhotographerImportController extends Controller
         $request->validate([
             'name' => 'nullable|string|max:120',
             'gallery_category' => 'required|string|in:' . implode(',', array_keys(GalleryPhoto::categoryOptions())),
-            'zip_file' => 'nullable|file|mimes:zip|max:2200000',
+            'zip_file' => 'nullable|file|mimes:zip|max:5500000',
             'server_zip_path' => 'nullable|string|max:1000',
         ], [
             'zip_file.max' => 'ZIPが大きすぎます。サーバに配置してパス指定で取り込んでください。',
