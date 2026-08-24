@@ -997,11 +997,12 @@ document.querySelectorAll('[data-save-close]').forEach(el => el.addEventListener
 document.getElementById('glSaveSheet')?.addEventListener('click', event => {
     event.stopPropagation();
 });
-document.addEventListener('click', event => {
+function handleLightboxTagNavigation(event) {
     const link = event.target.closest('.gl-lightbox__tag');
     if (!link) return;
     event.preventDefault();
     event.stopPropagation();
+
     const groupName = link.dataset.galleryGroup;
     if (groupName) {
         setGalleryHeroImage(photos[current]?.url);
@@ -1009,9 +1010,12 @@ document.addEventListener('click', event => {
         applyGalleryFilter(`group:${groupName}`);
         return;
     }
-    const href = link.dataset.peopleLink;
-    if (href) window.location.assign(href);
-});
+
+    const href = link.dataset.peopleLink || link.getAttribute('href');
+    if (href && href !== '#') window.location.assign(href);
+}
+document.getElementById('glLightboxTags')?.addEventListener('click', handleLightboxTagNavigation);
+document.getElementById('glLightboxTags')?.addEventListener('touchend', handleLightboxTagNavigation);
 document.getElementById('gallerySelectToggle')?.addEventListener('click', () => setSelectionMode(!document.body.classList.contains('gl-selecting')));
 document.querySelectorAll('[data-photo-select]').forEach(input => input.addEventListener('change', updateSelectionState));
 document.getElementById('bulkClearSelection')?.addEventListener('click', () => setSelectionMode(false));
