@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GalleryPhoto;
 use App\Models\GuestGroup;
+use App\Models\PhotographerImportItem;
 use App\Services\GalleryImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,17 @@ class GalleryController extends Controller
             ->where('status', 'approved')
             ->with($relations)
             ->orderBy('sort_order')->orderBy('id')->get();
+
+        $photographerOrders = PhotographerImportItem::whereNotNull('gallery_photo_id')
+            ->pluck('sort_order', 'gallery_photo_id');
+
+        $photos = $photos->sortBy(function (GalleryPhoto $photo) use ($photographerOrders) {
+            if ($photo->photo_source === 'photographer') {
+                return sprintf('1-%08d-%08d', (int) ($photographerOrders[$photo->id] ?? $photo->sort_order), $photo->id);
+            }
+
+            return sprintf('0-%08d-%08d', $photo->sort_order, $photo->id);
+        })->values();
         if (! $hasGuestGroups) {
             $photos->each->setRelation('taggedGroups', collect());
         }
