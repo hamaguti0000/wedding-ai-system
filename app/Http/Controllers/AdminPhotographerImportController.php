@@ -161,7 +161,7 @@ class AdminPhotographerImportController extends Controller
     {
         DB::transaction(function () use ($batch, $item, $decision) {
             if ($decision === 'accept') {
-                GalleryPhoto::where('status', 'approved')->increment('sort_order');
+                $sortOrder = $this->photographerGallerySortOrder($item);
 
                 $photo = $item->galleryPhoto ?: GalleryPhoto::create([
                     'file_path' => $item->file_path,
@@ -169,7 +169,7 @@ class AdminPhotographerImportController extends Controller
                     'caption' => null,
                     'gallery_category' => $batch->gallery_category,
                     'photo_source' => 'photographer',
-                    'sort_order' => 1,
+                    'sort_order' => $sortOrder,
                     'is_active' => true,
                     'status' => 'approved',
                     'is_guest_upload' => false,
@@ -181,7 +181,7 @@ class AdminPhotographerImportController extends Controller
                         'is_active' => true,
                         'photo_source' => 'photographer',
                         'gallery_category' => $batch->gallery_category,
-                        'sort_order' => 1,
+                        'sort_order' => $sortOrder,
                     ]);
                 }
 
@@ -208,6 +208,20 @@ class AdminPhotographerImportController extends Controller
                 'decided_by_user_id' => Auth::id(),
             ]);
         });
+    }
+
+    private function photographerGallerySortOrder(PhotographerImportItem $item): int
+    {
+        $baseOrder = (int) GalleryPhoto::where('status', 'approved')
+            ->where(function ($query) {
+                $query->where('photo_source', '!=', 'photographer')
+                    ->orWhereNull('photo_source');
+            })->max('sort_order');
+
+        $previousBatchOffset = (int) PhotographerImportBatch::where('id', '<', $item->photographer_import_batch_id)
+            ->sum('imported_count');
+
+        return $baseOrder + $previousBatchOffset + max(1, (int) $item->sort_order);
     }
 
     /**
