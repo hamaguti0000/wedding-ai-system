@@ -161,38 +161,41 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
     .table-scroll { overflow: visible; }
     .lh-wrap table { min-width: 0; width: 100%; border-collapse: collapse; }
     .lh-wrap thead { display: none; }
-    .lh-wrap tbody { display: grid; gap: 10px; background: transparent; }
+    .lh-wrap tbody { display: grid; gap: 0; border: 1px solid #eadccd; border-radius: 12px; overflow: hidden; background: #fff; }
     .lh-wrap tbody tr {
         position: relative;
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        gap: 7px 12px;
-        padding: 15px 16px 14px 18px;
-        border: 1px solid #eadccd;
-        border-radius: 14px;
+        grid-template-rows: auto auto;
+        gap: 2px 8px;
+        min-height: 58px;
+        padding: 8px 10px 8px 14px;
+        border: 0;
+        border-bottom: 1px solid #f1e8dc;
+        border-radius: 0;
         background: #fff;
-        box-shadow: 0 8px 18px rgba(61,47,37,.055);
+        box-shadow: none;
     }
-    .lh-wrap tbody tr::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; border-radius: 0 999px 999px 0; background: #d9c7b3; }
+    .lh-wrap tbody tr::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 999px 999px 0; background: #d9c7b3; }
     .lh-wrap tbody tr[data-status="success"]::before { background: #70bd91; }
     .lh-wrap tbody tr[data-status="failed"]::before { background: #df7f7f; }
+    .lh-wrap tbody tr:last-child { border-bottom: 0; }
     .lh-wrap tbody tr:hover { background: #fff; }
     .lh-wrap tbody td { display: block; padding: 0; border: 0; min-width: 0; }
-    .lh-cell-status { grid-column: 1 / 2; grid-row: 1; justify-self: start; align-self: center; }
-    .lh-cell-time { grid-column: 2 / 3; grid-row: 1; align-self: center; text-align: right; color: #75665a; }
-    .lh-cell-user { grid-column: 1 / -1; grid-row: 2; align-self: start; }
-    .lh-cell-role { grid-column: 1 / -1; grid-row: 3; display: flex !important; gap: 6px; flex-wrap: wrap; align-items: center; overflow: hidden; }
-    .lh-cell-role br { display: none; }
-    .lh-cell-ip { grid-column: 1 / -1; grid-row: 4; display: block !important; color: #a49486; font-size: .68rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lh-cell-user { grid-column: 1 / 2; grid-row: 1; align-self: end; }
+    .lh-cell-time { grid-column: 1 / 2; grid-row: 2; align-self: start; color: #75665a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lh-cell-status { grid-column: 2 / 3; grid-row: 1 / 3; justify-self: end; align-self: center; }
+    .lh-cell-role { grid-column: 2 / 3; grid-row: 2; display: none !important; }
+    .lh-cell-ip { display: none !important; }
     .lh-cell-browser { display: none !important; }
-    .lh-time-date { display: inline; font-size: .72rem; color: #9b8573; line-height: 1.2; letter-spacing: 0; }
-    .lh-time-clock { display: inline; margin-left: 5px; font-size: .86rem; line-height: 1.15; font-weight: 900; }
-    .lh-user-name { display: block; max-width: 100%; font-size: 1.2rem; line-height: 1.3; text-align: left; color: #2f251e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lh-user-id { display: block; max-width: 100%; margin-top: 4px; font-size: .78rem; line-height: 1.25; color: #8d7c6d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lh-meta-line { display: inline; color: #b0a090; font-size: .68rem; font-weight: 800; margin-right: 5px; }
-    .badge { white-space: nowrap; font-size: .75rem; padding: 4px 10px; line-height: 1.35; }
-    .lh-cell-role .badge { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-    .lh-cell-status .badge { font-size: .78rem; padding: 5px 11px; }
+    .lh-time-date { display: inline; font-size: .68rem; color: #9b8573; line-height: 1.15; letter-spacing: 0; }
+    .lh-time-clock { display: inline; margin-left: 5px; font-size: .78rem; line-height: 1.15; font-weight: 800; color: #3d2f25; }
+    .lh-user-name { display: inline; max-width: 58%; font-size: .96rem; line-height: 1.18; text-align: left; color: #2f251e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: baseline; }
+    .lh-user-id { display: inline; max-width: 38%; margin-left: 7px; font-size: .66rem; line-height: 1.1; color: #9b8573; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: baseline; }
+    .lh-user-id::before { content: ''; }
+    .lh-meta-line { display: none; }
+    .badge { white-space: nowrap; font-size: .66rem; padding: 3px 8px; line-height: 1.25; }
+    .lh-cell-status .badge { font-size: .68rem; padding: 4px 9px; }
 }
 </style>
 @endpush
