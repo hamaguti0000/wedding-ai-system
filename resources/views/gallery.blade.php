@@ -443,6 +443,8 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
     $taggedPhotoCount = $photos->filter(fn($photo) => $photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())->count();
     $myPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId))->count() : 0;
     $relatedPhotoCount = $currentUserId ? $photos->filter(fn($photo) => $photo->taggedUsers->contains('id', $currentUserId) || $photoMatchesCurrentGroups($photo))->count() : 0;
+    $categoryOptions = \App\Models\GalleryPhoto::categoryOptions();
+    $guestCategoryFilters = collect($categoryOptions)->except('other');
     $defaultFilter = $relatedPhotoCount > 0 ? 'related' : 'all';
 @endphp
 
@@ -485,8 +487,9 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 <button type="button" data-filter="group-related">同じグループ</button>
                 @endif
                 <button type="button" class="{{ $defaultFilter === 'all' ? 'is-active' : '' }}" data-filter="all">すべて</button>
-                <button type="button" data-filter="ceremony">挙式</button>
-                <button type="button" data-filter="reception">披露宴</button>
+                @foreach ($guestCategoryFilters as $value => $label)
+                <button type="button" data-filter="category:{{ $value }}">{{ $label }}</button>
+                @endforeach
                 <button type="button" data-filter="photographer">カメラマン</button>
                 <button type="button" data-filter="tagged">タグ付き写真</button>
                 @foreach ($galleryGroupOptions as $groupName)
@@ -965,11 +968,18 @@ function applyGalleryFilter(filter, shouldScroll = true) {
     const cards = Array.from(document.querySelectorAll('.gl-card'));
     let visible = 0;
     let groupFilter = null;
+    let categoryFilter = null;
     if (typeof filter === 'string' && filter.startsWith('group:')) {
         groupFilter = normalizeFilterValue(filter.slice(6));
     }
+    if (typeof filter === 'string' && filter.startsWith('category:')) {
+        categoryFilter = normalizeFilterValue(filter.slice(9));
+    }
     cards.forEach(card => {
-        let show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'group-related' && card.dataset.groupRelated === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
+        let show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'group-related' && card.dataset.groupRelated === '1') || (filter === 'photographer' && card.dataset.source === 'photographer');
+        if (categoryFilter !== null) {
+            show = normalizeFilterValue(card.dataset.category) === categoryFilter;
+        }
         if (groupFilter !== null) {
             try {
                 show = JSON.parse(card.dataset.groups || '[]').map(normalizeFilterValue).includes(groupFilter);

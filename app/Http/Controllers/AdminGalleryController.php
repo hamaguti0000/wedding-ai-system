@@ -95,7 +95,7 @@ class AdminGalleryController extends Controller
         $sourceOptions = GalleryPhoto::sourceOptions();
 
         // 「まだタグが付いていない写真」を一覧の先頭で案内し、そのままタグ付けに入れるようにする
-        $untaggedPhotos = $photos->filter(fn (GalleryPhoto $p) => $p->taggedUsers->isEmpty() && $p->taggedGroups->isEmpty());
+        $untaggedPhotos = $photos->filter(fn (GalleryPhoto $p) => $p->isUntaggedForManagement());
         $untaggedCount = $untaggedPhotos->count();
         $firstUntaggedId = $untaggedPhotos->first()?->id;
 
@@ -132,9 +132,11 @@ class AdminGalleryController extends Controller
         if ($hasGuestGroups) {
             $queueQuery->withCount('taggedGroups');
         }
-        $queue = $this->orderedGalleryPhotos($queueQuery->get(['id', 'sort_order', 'photo_source']));
+        $queue = $this->orderedGalleryPhotos($queueQuery->get(['id', 'sort_order', 'photo_source', 'gallery_category']));
 
-        $isUntagged = fn ($item) => (int) $item->tagged_users_count === 0
+        $noPeopleTagCategories = GalleryPhoto::noPeopleTagCategoryKeys();
+        $isUntagged = fn ($item) => ! in_array($item->gallery_category ?: 'other', $noPeopleTagCategories, true)
+            && (int) $item->tagged_users_count === 0
             && (! $hasGuestGroups || (int) $item->tagged_groups_count === 0);
 
         $position = $queue->search(fn ($item) => $item->id === $photo->id);
@@ -157,6 +159,7 @@ class AdminGalleryController extends Controller
             'position'       => $position === false ? 0 : $position + 1,
             'totalCount'     => $queue->count(),
             'untaggedCount'  => $untaggedCount,
+            'categoryOptions' => GalleryPhoto::categoryOptions(),
         ]);
     }
 
@@ -325,6 +328,7 @@ class AdminGalleryController extends Controller
         $request->validate([
             'user_ids'   => 'nullable|array',
             'user_ids.*' => 'integer|exists:users,id',
+            'gallery_category' => 'nullable|string|in:' . implode(',', array_keys(GalleryPhoto::categoryOptions())),
         ]);
 
         $hasGuestGroups = Schema::hasTable('guest_groups');
@@ -333,6 +337,10 @@ class AdminGalleryController extends Controller
                 'group_ids'   => 'nullable|array',
                 'group_ids.*' => 'string|exists:guest_groups,id',
             ]);
+        }
+
+        if ($request->filled('gallery_category')) {
+            $photo->update(['gallery_category' => $request->input('gallery_category')]);
         }
 
         $photo->taggedUsers()->sync($request->input('user_ids', []));

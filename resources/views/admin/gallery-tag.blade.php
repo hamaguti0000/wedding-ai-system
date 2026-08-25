@@ -58,6 +58,10 @@
     border-radius: 999px; padding: 7px 14px; font-size: .78rem; font-weight: 700; cursor: pointer;
 }
 .tag-clear:hover { background: #fef3e3; }
+.tag-scene { padding: 12px 16px; border-bottom: 1px solid #f3ebe0; background: #fffdf9; }
+.tag-scene label { display: grid; gap: 6px; color: #806a55; font-size: .76rem; font-weight: 800; }
+.tag-scene select { width: 100%; min-height: 42px; border: 1px solid #e0d0bc; border-radius: 11px; background: #fff; color: #3d2f25; padding: 0 12px; font-size: 16px; }
+.tag-scene small { color: #a99a89; font-size: .7rem; line-height: 1.45; font-weight: 600; }
 
 /* 選択済みチップ */
 .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px 0; }
@@ -181,6 +185,17 @@
                         <span class="tag-panel__count"><span id="tagCount">{{ $selectedCount }}</span>件を選択中</span>
                     </div>
                     <button type="button" class="tag-clear" id="tagClear">全解除</button>
+                </div>
+
+                <div class="tag-scene">
+                    <label>写真の種類
+                        <select name="gallery_category" id="tagCategory">
+                            @foreach ($categoryOptions as $value => $label)
+                            <option value="{{ $value }}" @selected(($photo->gallery_category ?: 'other') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <small>花・風景・料理・小物は、人物タグがなくても未タグ扱いにしません。</small>
+                    </label>
                 </div>
 
                 <div class="tag-chips" id="tagChips"></div>

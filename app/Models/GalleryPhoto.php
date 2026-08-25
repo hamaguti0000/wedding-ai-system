@@ -89,8 +89,30 @@ class GalleryPhoto extends Model
         return [
             'ceremony' => '挙式',
             'reception' => '披露宴',
+            'venue' => '会場',
+            'flowers' => '花',
+            'scenery' => '風景',
+            'food' => '料理',
+            'items' => '小物',
             'other' => 'その他',
         ];
+    }
+
+    public static function noPeopleTagCategoryKeys(): array
+    {
+        return ['venue', 'flowers', 'scenery', 'food', 'items'];
+    }
+
+    public function needsPeopleTag(): bool
+    {
+        return ! in_array($this->gallery_category ?: 'other', self::noPeopleTagCategoryKeys(), true);
+    }
+
+    public function isUntaggedForManagement(): bool
+    {
+        return $this->needsPeopleTag()
+            && $this->taggedUsers->isEmpty()
+            && $this->taggedGroups->isEmpty();
     }
 
     public static function sourceOptions(): array

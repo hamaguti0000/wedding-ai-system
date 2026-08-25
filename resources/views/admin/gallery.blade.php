@@ -493,6 +493,8 @@
                         <span class="pending-meta-chip">{{ $photo->categoryLabel() }}</span>
                         @if ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty())
                         <span class="pending-meta-chip pending-meta-chip--tag">タグあり</span>
+                        @elseif (! $photo->needsPeopleTag())
+                        <span class="pending-meta-chip">人物タグ不要</span>
                         @else
                         <span class="pending-meta-chip">未タグ</span>
                         @endif
@@ -603,8 +605,9 @@
         <button class="gl-filter-btn" data-filter-kind="tagged" data-tagged="0">未タグ</button>
         <button class="gl-filter-btn" data-filter-kind="active" data-active="1">表示中</button>
         <button class="gl-filter-btn" data-filter-kind="active" data-active="0">非表示</button>
-        <button class="gl-filter-btn" data-filter-kind="category" data-category="ceremony">挙式</button>
-        <button class="gl-filter-btn" data-filter-kind="category" data-category="reception">披露宴</button>
+        @foreach ($categoryOptions as $value => $label)
+        <button class="gl-filter-btn" data-filter-kind="category" data-category="{{ $value }}">{{ $label }}</button>
+        @endforeach
         <button class="gl-filter-btn" data-filter-kind="source" data-source="photographer">カメラマン</button>
     </div>
     <div class="gl-result-count" id="glCount"><strong>{{ $photos->count() }}</strong>枚</div>
@@ -626,7 +629,7 @@
     <div class="gl-admin-grid" id="galleryGrid">
         @foreach ($photos as $photo)
         @php
-            $isUntagged = $photo->taggedUsers->isEmpty() && $photo->taggedGroups->isEmpty();
+            $isUntagged = $photo->isUntaggedForManagement();
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
             $searchText = strtolower(trim(($photo->caption ?? '') . ' ' . ($uploaderName ?? '')));
             $groupSortOrder = collect()
