@@ -161,34 +161,34 @@ th.lh-sort-asc .lh-sort-icon, th.lh-sort-desc .lh-sort-icon { color: #b38b59; }
     .table-scroll { overflow: visible; }
     .lh-wrap table { min-width: 0; width: 100%; border-collapse: collapse; }
     .lh-wrap thead { display: none; }
-    .lh-wrap tbody { display: grid; gap: 7px; }
+    .lh-wrap tbody { display: grid; gap: 9px; }
     .lh-wrap tbody tr {
         display: grid;
-        grid-template-columns: 58px minmax(0, 1fr) auto;
-        gap: 3px 8px;
-        padding: 8px 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 5px 10px;
+        padding: 12px 14px;
         border: 1px solid #eadccd;
-        border-radius: 11px;
+        border-radius: 13px;
         background: #fff;
-        box-shadow: 0 5px 14px rgba(61,47,37,.045);
+        box-shadow: 0 6px 16px rgba(61,47,37,.05);
     }
     .lh-wrap tbody tr:hover { background: #fff; }
     .lh-wrap tbody td { display: block; padding: 0; border: 0; min-width: 0; }
-    .lh-cell-time { grid-column: 1 / 2; grid-row: 1 / 3; align-self: center; }
-    .lh-cell-user { grid-column: 2 / 3; grid-row: 1; align-self: end; }
-    .lh-cell-status { grid-column: 3 / 4; grid-row: 1 / 3; justify-self: end; align-self: center; }
-    .lh-cell-role { grid-column: 2 / 3; grid-row: 2; display: flex !important; gap: 4px; flex-wrap: nowrap; align-items: center; overflow: hidden; }
+    .lh-cell-user { grid-column: 1 / 2; grid-row: 1; align-self: start; }
+    .lh-cell-status { grid-column: 2 / 3; grid-row: 1 / 4; justify-self: end; align-self: center; }
+    .lh-cell-time { grid-column: 1 / 2; grid-row: 2; display: flex !important; gap: 8px; align-items: baseline; color: #75665a; }
+    .lh-cell-role { grid-column: 1 / 2; grid-row: 3; display: flex !important; gap: 6px; flex-wrap: wrap; align-items: center; overflow: hidden; }
     .lh-cell-role br { display: none; }
     .lh-cell-ip { display: none !important; }
     .lh-cell-browser { display: none !important; }
-    .lh-time-date { font-size: .58rem; color: #9b8573; line-height: 1.1; letter-spacing: 0; }
-    .lh-time-clock { margin-top: 2px; font-size: .82rem; line-height: 1.12; }
-    .lh-user-name { display: block; max-width: 100%; font-size: .9rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lh-user-id { max-width: 100%; margin-top: 0; font-size: .6rem; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lh-meta-line { display: inline; color: #b0a090; font-size: .6rem; font-weight: 700; margin-right: 4px; }
-    .badge { white-space: nowrap; font-size: .62rem; padding: 2px 7px; line-height: 1.35; }
+    .lh-time-date { font-size: .72rem; color: #9b8573; line-height: 1.2; letter-spacing: 0; }
+    .lh-time-clock { margin-top: 0; font-size: .92rem; line-height: 1.15; font-weight: 900; }
+    .lh-user-name { display: block; max-width: 100%; font-size: 1.08rem; line-height: 1.3; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lh-user-id { display: block; max-width: 100%; margin-top: 2px; font-size: .72rem; line-height: 1.2; color: #9b8573; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lh-meta-line { display: none; }
+    .badge { white-space: nowrap; font-size: .72rem; padding: 4px 9px; line-height: 1.35; }
     .lh-cell-role .badge { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-    .lh-cell-status .badge { font-size: .66rem; padding: 4px 8px; }
+    .lh-cell-status .badge { font-size: .78rem; padding: 6px 11px; }
 }
 </style>
 @endpush
