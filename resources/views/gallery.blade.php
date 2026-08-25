@@ -3,7 +3,7 @@
 
 @push('styles')
 <style>
-main { padding: 0; text-align: initial; background: #fbfaf7; }
+main { padding: 0; text-align: initial; background: linear-gradient(180deg, #fbfaf7 0%, #f7f1e9 100%); }
 
 .gl-hero {
     position: relative; min-height: 360px; overflow: hidden;
@@ -30,7 +30,7 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 .gl-wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 92px; }
 .gl-toolbar {
     display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px;
-    padding: 10px 12px; margin-bottom: 18px; border: 1px solid #eee5da; border-radius: 16px; background: rgba(255,255,255,.92);
+    padding: 12px; margin-bottom: 18px; border: 1px solid #eee5da; border-radius: 18px; background: rgba(255,255,255,.94);
     box-shadow: 0 10px 30px rgba(61,47,37,.07); backdrop-filter: blur(16px);
 }
 .gl-toolbar__main { min-width: 0; }
@@ -49,8 +49,8 @@ main { padding: 0; text-align: initial; background: #fbfaf7; }
 
 .gl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; align-items: start; }
 .gl-card {
-    overflow: hidden; border-radius: 18px; background: #fff; border: 1px solid #eee6dc;
-    box-shadow: 0 12px 34px rgba(61,47,37,.08); cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
+    overflow: hidden; border-radius: 16px; background: #fff; border: 1px solid #eee6dc;
+    box-shadow: 0 10px 28px rgba(61,47,37,.07); cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
 }
 .gl-card:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(61,47,37,.13); }
 .gl-card.is-hidden { display: none; }
@@ -68,15 +68,15 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
     padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.9); color: #b42318; font-size: .75rem; font-weight: 700;
     box-shadow: 0 8px 22px rgba(0,0,0,.12);
 }
-.gl-card__body { padding: 12px 12px 14px; }
+.gl-card__body { padding: 10px 11px 12px; }
 .gl-card__caption { margin: 0 0 10px; color: #3d2f25; font-size: .9rem; font-weight: 700; line-height: 1.55; }
 .gl-card__uploader { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 9px; color: #8c7965; font-size: .74rem; font-weight: 700; }
 .gl-card__uploader i { color: #b38b59; font-size: .68rem; }
-.gl-card__labels { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
-.gl-card__label { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: #f7f1e9; color: #755f48; border: 1px solid #eadccd; font-size: .66rem; font-weight: 800; }
+.gl-card__labels { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 8px; }
+.gl-card__label { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; padding: 3px 8px; border-radius: 999px; background: #f7f1e9; color: #755f48; border: 1px solid #eadccd; font-size: .66rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gl-card__label--source { background: #eef7ff; border-color: #bfdbfe; color: #2563eb; }
 .gl-card__caption.is-empty { color: #b0a090; font-weight: 500; }
-.gl-card__tags { display: flex; flex-wrap: wrap; gap: 6px; max-height: 58px; overflow: hidden; }
+.gl-card__tags { display: flex; flex-wrap: wrap; gap: 5px; max-height: 52px; overflow: hidden; }
 .gl-person-chip {
     display: inline-flex; align-items: center; max-width: 100%; padding: 4px 9px; border-radius: 999px;
     background: #f7f1e9; color: #755f48; font-size: .72rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -85,7 +85,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
 .gl-person-chip.is-current { background: #fff1f1; color: #b42318; border: 1px solid #ffd0d0; font-weight: 700; }
 .gl-person-chip[data-card-group-filter], .gl-lightbox__tag[data-gallery-group] { cursor: pointer; }
 .gl-person-chip[data-card-group-filter] { border: 1px solid #eadccd; }
-.gl-more { color: #aa9278; font-size: .72rem; align-self: center; }
+.gl-more { color: #9a8167; font-size: .72rem; font-weight: 800; align-self: center; }
 
 .gl-empty { text-align: center; padding: 70px 20px; color: #a69583; background: #fff; border: 1px solid #eee6dc; border-radius: 18px; }
 .gl-empty i { display: block; margin-bottom: 14px; font-size: 2.4rem; color: #d6c7b7; }
@@ -193,19 +193,27 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
     .gl-hero__actions { margin-top: 18px; }
     .gl-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .gl-stat { min-width: 0; padding: 8px 10px; border-radius: 12px; }
-    .gl-wrap { width: min(100% - 20px, 1120px); padding-top: 18px; padding-bottom: 44px; }
-    .gl-toolbar { grid-template-columns: 1fr; align-items: stretch; border-radius: 14px; margin-bottom: 14px; }
+    .gl-wrap { width: min(100% - 18px, 1120px); padding-top: 16px; padding-bottom: 44px; }
+    .gl-toolbar { grid-template-columns: 1fr; align-items: stretch; border-radius: 16px; margin-bottom: 12px; padding: 10px; position: sticky; top: 74px; z-index: 20; }
+    .gl-filter { gap: 7px; padding-bottom: 1px; }
+    .gl-filter button { padding: 8px 12px; font-size: .78rem; }
     .gl-toolbar__actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
-    .gl-toolbar__upload, .gl-select-toggle { min-height: 42px; width: 100%; box-sizing: border-box; }
-    .gl-count { padding-left: 4px; }
-    .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .gl-card { border-radius: 14px; box-shadow: 0 8px 22px rgba(61,47,37,.07); }
+    .gl-toolbar__upload, .gl-select-toggle { min-height: 40px; width: 100%; box-sizing: border-box; }
+    .gl-count { padding-left: 4px; margin-top: 8px; font-size: .76rem; }
+    .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .gl-card { border-radius: 13px; box-shadow: 0 7px 18px rgba(61,47,37,.06); }
+    .gl-card:hover, .gl-card:hover .gl-card__photo img { transform: none; }
     .gl-card__photo { aspect-ratio: 1 / 1; }
-    .gl-card__body { padding: 9px; }
-    .gl-card__caption { font-size: .78rem; margin-bottom: 7px; }
-    .gl-card__uploader { font-size: .68rem; margin-bottom: 7px; }
-    .gl-card__tags { gap: 4px; max-height: 48px; }
-    .gl-person-chip { padding: 3px 7px; font-size: .66rem; }
+    .gl-card__badge { left: 7px; top: 7px; padding: 4px 7px; font-size: .62rem; }
+    .gl-card__select { right: 7px; top: 7px; width: 32px; height: 32px; }
+    .gl-card__body { padding: 7px 8px 8px; min-height: 54px; }
+    .gl-card__caption, .gl-card__uploader { display: none; }
+    .gl-card__labels { gap: 4px; margin-bottom: 5px; flex-wrap: nowrap; overflow: hidden; }
+    .gl-card__label { max-width: 50%; padding: 3px 7px; font-size: .6rem; }
+    .gl-card__label--source { max-width: 58%; }
+    .gl-card__tags { flex-wrap: nowrap; gap: 4px; max-height: 24px; overflow: hidden; }
+    .gl-person-chip { max-width: 82px; padding: 3px 7px; font-size: .62rem; }
+    .gl-more { font-size: .62rem; white-space: nowrap; }
     .gl-lightbox {
         display: block;
         padding: 0;
@@ -473,7 +481,8 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
             <div class="gl-filter">
                 @if ($currentUserId)
                 <button type="button" class="{{ $defaultFilter === 'related' ? 'is-active' : '' }}" data-filter="related">おすすめ</button>
-                <button type="button" data-filter="mine">自分の写真</button>
+                <button type="button" data-filter="mine">自分</button>
+                <button type="button" data-filter="group-related">同じグループ</button>
                 @endif
                 <button type="button" class="{{ $defaultFilter === 'all' ? 'is-active' : '' }}" data-filter="all">すべて</button>
                 <button type="button" data-filter="ceremony">挙式</button>
@@ -503,7 +512,7 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
             $isRelated = $isMine || ($currentUserId && ($photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty() || $photoGroupNames->intersect($currentUserGroupNames)->isNotEmpty()));
             $uploaderName = $photo->uploader?->guestProfile?->fullName() ?: $photo->uploader?->name;
         @endphp
-        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-groups='@json($photoGroupNames)' data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
+        <article class="gl-card" data-index="{{ $i }}" data-tagged="{{ ($photo->taggedUsers->isNotEmpty() || $photo->taggedGroups->isNotEmpty()) ? '1' : '0' }}" data-mine="{{ $isMine ? '1' : '0' }}" data-related="{{ $isRelated ? '1' : '0' }}" data-group-related="{{ (!$isMine && $currentUserId && ($photo->taggedGroups->pluck('id')->intersect($currentUserGroupIds)->isNotEmpty() || $photoGroupNames->intersect($currentUserGroupNames)->isNotEmpty())) ? '1' : '0' }}" data-groups='@json($photoGroupNames)' data-category="{{ $photo->gallery_category ?: 'other' }}" data-source="{{ $photo->photo_source ?: ($photo->is_guest_upload ? 'guest' : 'admin') }}" onclick="handleCardClick(event, {{ $i }})">
             <div class="gl-card__photo">
                 <label class="gl-card__select" aria-label="写真を選択" onclick="event.stopPropagation()"><input type="checkbox" data-photo-select data-index="{{ $i }}" value="{{ \Illuminate\Support\Facades\Crypt::encryptString((string) $photo->id) }}"></label>
                 <img src="{{ $photo->url }}" alt="{{ $photo->caption ?? '写真' }}" loading="lazy">
@@ -511,7 +520,6 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 <span class="gl-card__badge"><i class="fa-solid fa-heart"></i> 自分の写真</span>
                 @endif
             </div>
-            @if ($photo->caption || $uploaderName || $tagNames->isNotEmpty())
             <div class="gl-card__body">
                 <div class="gl-card__labels">
                     <span class="gl-card__label"><i class="fa-solid fa-layer-group"></i>{{ $photo->categoryLabel() }}</span>
@@ -525,20 +533,19 @@ body.gl-selecting .gl-card:hover .gl-card__photo img { transform: none; }
                 @endif
                 @if ($tagNames->isNotEmpty())
                 <div class="gl-card__tags">
-                    @foreach ($tagNames->take(3) as $tag)
+                    @foreach ($tagNames->take(2) as $tag)
                     @if (($tag['type'] ?? 'user') === 'group')
                     <button type="button" class="gl-person-chip" data-card-group-filter="{{ $tag['name'] }}" onclick="event.stopPropagation(); setGalleryHeroFromCard(this.closest('.gl-card')); applyGalleryFilter('group:' + this.dataset.cardGroupFilter);">{{ $tag['name'] }}</button>
                     @else
                     <span class="gl-person-chip {{ $currentUserId === $tag['id'] ? 'is-current' : '' }}">{{ $tag['name'] }}</span>
                     @endif
                     @endforeach
-                    @if ($tagNames->count() > 3)
-                    <span class="gl-more">+{{ $tagNames->count() - 3 }}名</span>
+                    @if ($tagNames->count() > 2)
+                    <span class="gl-more">+{{ $tagNames->count() - 2 }}名</span>
                     @endif
                 </div>
                 @endif
             </div>
-            @endif
         </article>
         @endforeach
     </div>
@@ -962,7 +969,7 @@ function applyGalleryFilter(filter, shouldScroll = true) {
         groupFilter = normalizeFilterValue(filter.slice(6));
     }
     cards.forEach(card => {
-        let show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
+        let show = filter === 'all' || (filter === 'tagged' && card.dataset.tagged === '1') || (filter === 'mine' && card.dataset.mine === '1') || (filter === 'related' && card.dataset.related === '1') || (filter === 'group-related' && card.dataset.groupRelated === '1') || (filter === 'ceremony' && card.dataset.category === 'ceremony') || (filter === 'reception' && card.dataset.category === 'reception') || (filter === 'photographer' && card.dataset.source === 'photographer');
         if (groupFilter !== null) {
             try {
                 show = JSON.parse(card.dataset.groups || '[]').map(normalizeFilterValue).includes(groupFilter);
