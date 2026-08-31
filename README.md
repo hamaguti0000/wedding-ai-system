@@ -1,59 +1,64 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 結婚式招待サイト (wedding-ai-system)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+結婚式のゲストが招待状への出欠回答・アレルギー情報の入力・ゲストブックへの書き込みなどをオンラインで行える招待サイトです。新郎新婦側の管理者は、ゲスト情報からサイトのコンテンツ（お知らせ・ギャラリー・席次・プログラム等）まで、管理画面からすべて操作できます。
 
-## About Laravel
+- **本番URL**: https://k-m-wedding815.com （ゲスト用ログインが必要なページを含みます）
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 担当範囲
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+個人開発。企画・設計・実装・インフラ構築（ConoHa VPS上へのデプロイ）・運用まですべて一人で担当しました。
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 技術スタック
 
-## Learning Laravel
+| 項目 | 内容 |
+|---|---|
+| フレームワーク | Laravel 12 / PHP 8.4 |
+| DB | MySQL 8.4 |
+| テンプレート | Blade |
+| 認証 | 独自実装（username + password） |
+| メール | AWS SES（本番）/ Mailpit（開発） |
+| ローカル環境 | Laravel Sail（Docker） |
+| テスト | Pest |
+| CSS | 独自CSS（Tailwind不使用） |
+| インフラ | ConoHa VPS + Nginx、GitHub運用 |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 主な機能
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**ゲスト向け**
+- ログイン／自己登録（2ステップフォーム）／メール認証
+- 出欠回答（RSVP）、アレルギー・メッセージ入力
+- 式のプログラム、アクセス（会場・地図・交通案内）
+- ゲストブック（絵文字スタンプ付きメッセージ壁）
+- 写真ギャラリー、お知らせ、FAQ、カップルプロフィール
+- 席次確認（管理者が公開設定した場合のみ表示）
 
-## Laravel Sponsors
+**管理者向け**
+- ゲスト管理（CRUD）、RSVP集計・CSV出力
+- 受付チェックイン（QRコード）、監査ログ
+- 席次表管理、当日役割（タスク）の割り当て
+- お知らせ・ギャラリー・ゲストブック・プログラム・FAQ管理
+- ヒーロー画像／各ページバナー画像・動画の管理（スライドショー／動画背景の切替）
+- 式の情報設定（日時・会場・シャトルバス等）、ログイン履歴
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 工夫した点
 
-### Premium Partners
+- ゲストロールと管理者ロールを明確に分離し、ミドルウェアでアクセス制御
+- `SiteImage` による画像管理を location 単位で抽象化し、全ページのバナー画像をビュー側で自動注入（ViewComposer）
+- `WeddingSetting` の取得を60秒キャッシュしてN+1を回避
+- メール送信は try/catch で包み、SES未設定時でもゲストの操作を妨げない設計
+- バリデーションルール（パスワード・メール・氏名等）をコントローラー間で統一
+- Pestによるテスト（登録バリデーション、アバター機能、ルートアクセス権限、管理者操作など）を整備し、デプロイ前に全件実行するフローを徹底
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## ローカルでの起動方法
 
-## Contributing
+```bash
+cp .env.example .env
+vendor/bin/sail up -d
+vendor/bin/sail artisan migrate --seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+`http://localhost` で確認できます。
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+vendor/bin/sail artisan test   # テスト実行
+```
