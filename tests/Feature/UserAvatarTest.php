@@ -1,0 +1,225 @@
+<?php
+
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+
+describe('ユーザーアイコン', function () {
+
+    it('プロフィールから絵文字アイコンを保存できる', function () {
+        $user = makeGuest();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'avatar_type' => User::AVATAR_EMOJI,
+                'avatar_emoji' => '🐻',
+                'avatar_bg_color' => '#ffffff',
+                'avatar_border_color' => '#b38b59',
+                'avatar_border_width' => 5,
+            ])
+            ->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+        expect($user->avatar_type)->toBe(User::AVATAR_EMOJI);
+        expect($user->avatar_emoji)->toBe('🐻');
+        expect($user->avatar_image_path)->toBeNull();
+        expect($user->avatar_bg_color)->toBe('#ffffff');
+        expect($user->avatar_border_color)->toBe('#b38b59');
+        expect($user->avatar_border_width)->toBe(5);
+    });
+
+    it('プロフィールから背景色を指定して絵文字アイコンを保存できる', function () {
+        $user = makeGuest();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'avatar_type' => User::AVATAR_EMOJI,
+                'avatar_emoji' => '🌸',
+                'avatar_bg_color' => '#dbeafe',
+                'avatar_border_color' => '#3d2f25',
+                'avatar_border_width' => 2,
+            ])
+            ->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+        expect($user->avatar_type)->toBe(User::AVATAR_EMOJI);
+        expect($user->avatar_emoji)->toBe('🌸');
+        expect($user->avatar_bg_color)->toBe('#dbeafe');
+        expect($user->avatar_border_color)->toBe('#3d2f25');
+        expect($user->avatar_border_width)->toBe(2);
+    });
+
+    it('管理者のユーザー編集から写真アイコンを保存できる', function () {
+        Storage::fake('public');
+
+        $admin = makeAdmin();
+        $guest = makeGuest();
+        $photo = UploadedFile::fake()->createWithContent(
+            'avatar.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3Z4X0AAAAASUVORK5CYII=')
+        );
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $guest->id), [
+                'username' => $guest->username,
+                'role' => 'guest',
+                'avatar_type' => User::AVATAR_PHOTO,
+                'avatar_image' => $photo,
+                'avatar_border_color' => '#a8d8b9',
+                'avatar_border_width' => 4,
+            ])
+            ->assertRedirect(route('admin.users'));
+
+        $guest->refresh();
+        expect($guest->avatar_type)->toBe(User::AVATAR_PHOTO);
+        expect($guest->avatar_image_path)->not->toBeNull();
+        expect($guest->avatar_bg_color)->toBeNull();
+        expect($guest->avatar_border_color)->toBe('#a8d8b9');
+        expect($guest->avatar_border_width)->toBe(4);
+        Storage::disk('public')->assertExists($guest->avatar_image_path);
+    });
+
+    it('管理者のユーザー編集で絵文字背景色を保存できる', function () {
+        $admin = makeAdmin();
+        $guest = makeGuest();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $guest->id), [
+                'username' => $guest->username,
+                'role' => 'guest',
+                'avatar_type' => User::AVATAR_EMOJI,
+                'avatar_emoji' => '🐱',
+                'avatar_bg_color' => '#fecaca',
+                'avatar_border_color' => '#9b8573',
+                'avatar_border_width' => 6,
+            ])
+            ->assertRedirect(route('admin.users'));
+
+        $guest->refresh();
+        expect($guest->avatar_type)->toBe(User::AVATAR_EMOJI);
+        expect($guest->avatar_emoji)->toBe('🐱');
+        expect($guest->avatar_bg_color)->toBe('#fecaca');
+        expect($guest->avatar_border_color)->toBe('#9b8573');
+        expect($guest->avatar_border_width)->toBe(6);
+    });
+
+    it('絵文字アバターの背景色は白が既定値になる', function () {
+        $user = makeGuest();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'avatar_type' => User::AVATAR_EMOJI,
+                'avatar_emoji' => '✨',
+            ])
+            ->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+        expect($user->avatar_bg_color)->toBe('#ffffff');
+        expect($user->avatarBackgroundColor())->toBe('#ffffff');
+        expect($user->avatarBorderColor())->toBe('#f0e4d0');
+        expect($user->avatarBorderWidth())->toBe(3);
+    });
+
+    it('プロフィールから既存の写真アイコンを別の写真に差し替えできる', function () {
+        Storage::fake('public');
+        $user = makeGuest();
+
+        $firstPhoto = UploadedFile::fake()->createWithContent(
+            'first.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3Z4X0AAAAASUVORK5CYII=')
+        );
+        $this->actingAs($user)->patch(route('profile.update'), [
+            'avatar_type' => User::AVATAR_PHOTO,
+            'avatar_image' => $firstPhoto,
+        ])->assertRedirect(route('profile.edit'));
+
+        $firstPath = $user->refresh()->avatar_image_path;
+
+        $secondPhoto = UploadedFile::fake()->createWithContent(
+            'second.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO3Z4X0AAAAASUVORK5CYII=')
+        );
+        $this->actingAs($user)->patch(route('profile.update'), [
+            'avatar_type' => User::AVATAR_PHOTO,
+            'avatar_image' => $secondPhoto,
+        ])->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+        expect($user->avatar_image_path)->not->toBe($firstPath);
+        Storage::disk('public')->assertExists($user->avatar_image_path);
+        Storage::disk('public')->assertMissing($firstPath);
+    });
+
+    it('拡張子.heicのファイルはmimesバリデーションを通過する（iPhone写真を弾かない）', function () {
+        Storage::fake('public');
+        $user = makeGuest();
+
+        // このテスト環境のImageMagickはHEICのデコードのみ対応（エンコード不可）のため、
+        // 正常な変換までは検証できない。ここではバリデーションで即座に弾かれないこと
+        // （= .heicが許可mimesに含まれていること）と、変換失敗時に分かりやすい
+        // エラーメッセージへフォールバックすることを確認する。
+        $heicPhoto = UploadedFile::fake()->createWithContent('photo.heic', 'not a real heic image');
+
+        $response = $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'avatar_type' => User::AVATAR_PHOTO,
+                'avatar_image' => $heicPhoto,
+            ]);
+
+        // mimesバリデーション自体は通過し、Imagickでの変換に失敗した場合は
+        // 分かりやすい日本語エラーとともに元の画面へ戻る（500エラーにならない）
+        $response->assertSessionHasErrors(['avatar_image' => 'この画像形式（HEIC）を処理できません。JPEGまたはPNG形式でお試しください。']);
+
+        $user->refresh();
+        expect($user->avatar_type)->not->toBe(User::AVATAR_PHOTO);
+    });
+});
+
+describe('受付QR表示', function () {
+
+    it('挙式終了に伴いプロフィールには受付QRを表示しない', function () {
+        $guest = makeGuest('attending');
+
+        $this->actingAs($guest)
+            ->get(route('profile.edit'))
+            ->assertOk()
+            ->assertDontSee('受付QR');
+    });
+});
+
+describe('プロフィールメール', function () {
+
+    it('メール登録画面からメールアドレスを登録できる', function () {
+        Mail::fake();
+
+        $user = makeGuest('attending');
+        $user->forceFill(['email' => null])->save();
+
+        $this->actingAs($user)
+            ->patch(route('email.register.update'), [
+                'email' => 'guest@example.com',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('email_verification_sent');
+
+        $user->refresh();
+        expect($user->email)->toBe('guest@example.com');
+        expect($user->email_verified_at)->toBeNull();
+        $this->assertDatabaseHas('email_audit_logs', [
+            'user_id' => $user->id,
+            'actor_user_id' => $user->id,
+            'action' => 'self_set',
+            'new_email' => 'guest@example.com',
+        ]);
+    });
+
+    it('メール未登録のときプロフィール画面ではなくメール登録画面へ誘導される', function () {
+        $user = makeGuest('attending');
+        $user->forceFill(['email' => null])->save();
+
+        $this->actingAs($user)
+            ->get(route('profile.edit'))
+            ->assertRedirect(route('email.register'));
+    });
+});

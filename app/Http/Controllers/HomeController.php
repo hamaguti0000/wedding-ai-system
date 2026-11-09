@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\NewsItem;
+use App\Models\SiteImage;
+use App\Models\WeddingSetting;
+use Illuminate\Support\Facades\Auth;
+
+class HomeController extends Controller
+{
+    public function index()
+    {
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $user->load(['guestProfile', 'taskAssignments.task.programItems']);
+
+        $setting = WeddingSetting::first();
+        $needsEmailRegistration = $user->requiresEmailRegistration();
+
+        return view('home', [
+            'user'           => $user,
+            'profile'        => $user->guestProfile,
+            'setting'        => $setting,
+            'needsEmailRegistration' => $needsEmailRegistration,
+            'homeTasks'      => $user->taskAssignments->filter(
+                fn($a) => $a->task?->display_on_home
+            ),
+            'deadlinePassed' => $setting?->rsvp_deadline !== null
+                && today()->isAfter($setting->rsvp_deadline),
+            'news' => NewsItem::where('is_active', true)
+                ->publicOrder()
+                ->limit(5)->get(),
+        ]);
+    }
+}

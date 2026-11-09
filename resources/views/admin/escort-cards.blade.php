@@ -1,0 +1,215 @@
+@extends('layouts.app')
+@section('title', 'エスコートカード | Admin')
+
+@push('styles')
+<link rel="stylesheet" href="{{ versioned_asset('css/escort-cards.css') }}">
+@endpush
+
+@section('content')
+@php
+    $guestName = function ($user) {
+        $p = $user->guestProfile;
+        return $p ? trim($p->last_name . ' ' . $p->first_name) : $user->name;
+    };
+    $guestFurigana = function ($user) {
+        $p = $user->guestProfile;
+        return $p ? trim(($p->furigana_sei ?? '') . ' ' . ($p->furigana_mei ?? '')) : '';
+    };
+    $pdfUrl = route('admin.seating.escort-cards.pdf') . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
+@endphp
+
+<div class="ec-page">
+    <div class="ec-toolbar">
+        <a href="{{ route('admin.seating') }}">&larr; 席次表に戻る</a>
+        <span>{{ $guests->count() }}枚 / A4名刺10面・縦デザイン</span>
+    </div>
+
+    <section class="ec-selector" aria-label="印刷対象者選択">
+        <div class="ec-selector__head">
+            <div>
+                <p class="ec-selector__eyebrow">Print Target</p>
+                <h1>印刷するゲストを選択</h1>
+                <p>出席者・欠席者・未回答者をすべて表示しています。チェックしたゲストだけ下のプレビューに出ます。</p>
+            </div>
+            <div class="ec-selector__actions">
+                <button type="button" class="ec-secondary" id="ecSelectAll">全員チェック</button>
+                <button type="button" class="ec-secondary" id="ecSelectDefault">席あり出席者</button>
+                <button type="button" class="ec-secondary" id="ecClearAll">全解除</button>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ route('admin.seating.escort-cards') }}" id="escortTargetForm" data-pdf-base="{{ route('admin.seating.escort-cards.pdf') }}">
+            <input type="hidden" name="selection_submitted" value="1">
+            <div class="ec-selector__summary">
+                <span><strong id="ecSelectedCount">{{ $selectedIds->count() }}</strong>名を印刷対象に選択中</span>
+                <button type="button" id="ecRefreshPreview">選択した人でプレビューを作成</button>
+            </div>
+
+            <div class="ec-guest-list">
+                @foreach ($allGuests as $candidate)
+                @php
+                    $profile = $candidate->guestProfile;
+                    $candidateName = $profile ? trim(($profile->last_name ?? '') . ' ' . ($profile->first_name ?? '')) : $candidate->name;
+                    $candidateKana = $profile?->furigana() ?? '';
+                    $participation = $profile?->participation ?? 'pending';
+                    $participationLabel = $profile?->participationLabel() ?? '未回答';
+                    $table = $candidate->seatAssignment?->seat?->seatingTable;
+                    $tableMark = $table ? ($tableMarks[$table->id] ?? '') : '';
+                    $isDefaultTarget = $participation === 'attending' && $table;
+                @endphp
+                <label class="ec-guest-option ec-guest-option--{{ $participation }}">
+                    <input type="checkbox"
+                           name="print_user_ids[]"
+                           value="{{ $candidate->id }}"
+                           class="ec-target-check"
+                           data-default="{{ $isDefaultTarget ? '1' : '0' }}"
+                           {{ $selectedIds->contains($candidate->id) ? 'checked' : '' }}>
+                    <span class="ec-guest-option__body">
+                        <span class="ec-guest-option__name">{{ $candidateName ?: $candidate->username }}</span>
+                        @if ($candidateKana)
+                        <span class="ec-guest-option__kana">{{ $candidateKana }}</span>
+                        @endif
+                    </span>
+                    <span class="ec-guest-option__meta">
+                        <span class="ec-status ec-status--{{ $participation }}">{{ $participationLabel }}</span>
+                        <span class="ec-table-chip">{{ $tableMark ? 'TABLE ' . $tableMark : '席未配置' }}</span>
+                    </span>
+                </label>
+                @endforeach
+            </div>
+        </form>
+    </section>
+
+    <section class="ec-print-note">
+        <strong>印刷前の確認</strong>
+        <span>A4、倍率100%、余白なし、背景グラフィックONで印刷してください。最初は普通紙で1枚テストして、名刺用紙に重ねてズレを確認してください。</span>
+    </section>
+
+    @if ($guests->isNotEmpty())
+    <section class="ec-preview-action" aria-label="PDF印刷プレビュー">
+        <div>
+            <p class="ec-selector__eyebrow">PDF Preview</p>
+            <h2>このPDFが印刷用プレビューです</h2>
+            <p><span id="ecPreviewCount">{{ $guests->count() }}</span>枚をA4名刺10面に配置しています。下のPDFを確認してから印刷してください。</p>
+        </div>
+        <div class="ec-preview-action__buttons">
+            <button type="button" class="ec-preview-action__button ec-web-print">Webから印刷</button>
+            <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+        </div>
+    </section>
+    @endif
+
+    @if ($guests->isEmpty())
+    <section class="ec-empty">
+        <h1>印刷対象者が選択されていません</h1>
+        <p>上の一覧で印刷したいゲストにチェックを入れてください。</p>
+    </section>
+    @else
+    <section class="ec-pdf-preview" aria-label="PDFプレビュー">
+        <iframe id="ecPdfFrame" src="{{ $pdfUrl }}" title="エスコートカードPDFプレビュー"></iframe>
+        <div class="ec-pdf-preview__foot">
+            <span>PDFが表示されない場合は、ボタンから別画面で確認してください。</span>
+            <span class="ec-pdf-preview__buttons">
+                <button type="button" class="ec-preview-action__button ec-web-print">Webから印刷</button>
+                <a class="ec-preview-action__button ec-pdf-open" href="{{ $pdfUrl }}" target="_blank" rel="noopener">印刷プレビューPDFを開く</a>
+            </span>
+        </div>
+    </section>
+    @endif
+</div>
+
+<script>
+(() => {
+    const form = document.getElementById('escortTargetForm');
+    const checks = Array.from(document.querySelectorAll('.ec-target-check'));
+    const count = document.getElementById('ecSelectedCount');
+    const previewCount = document.getElementById('ecPreviewCount');
+    const pdfFrame = document.getElementById('ecPdfFrame');
+    const pdfLinks = Array.from(document.querySelectorAll('.ec-pdf-open'));
+    const webPrintButtons = Array.from(document.querySelectorAll('.ec-web-print'));
+    const refreshButton = document.getElementById('ecRefreshPreview');
+    let timer = null;
+
+    const buildPdfUrl = () => {
+        const params = new URLSearchParams();
+        params.set('selection_submitted', '1');
+        checks.filter((check) => check.checked).forEach((check) => {
+            params.append('print_user_ids[]', check.value);
+        });
+        return `${form.dataset.pdfBase}?${params.toString()}`;
+    };
+
+    const selectedCount = () => checks.filter((check) => check.checked).length;
+
+    const updateCounts = () => {
+        const total = selectedCount();
+        if (count) count.textContent = total;
+        if (previewCount) previewCount.textContent = total;
+        return total;
+    };
+
+    const refreshPreview = () => {
+        const total = updateCounts();
+        const url = buildPdfUrl();
+        pdfLinks.forEach((link) => {
+            link.href = url;
+            link.classList.toggle('is-disabled', total === 0);
+            link.setAttribute('aria-disabled', total === 0 ? 'true' : 'false');
+        });
+        webPrintButtons.forEach((button) => {
+            button.disabled = total === 0;
+            button.classList.toggle('is-disabled', total === 0);
+        });
+        if (pdfFrame) {
+            pdfFrame.src = total > 0 ? url : 'about:blank';
+        }
+    };
+
+    const scheduleRefresh = () => {
+        updateCounts();
+        window.clearTimeout(timer);
+        timer = window.setTimeout(refreshPreview, 650);
+    };
+
+    document.getElementById('ecSelectAll')?.addEventListener('click', () => {
+        checks.forEach((check) => check.checked = true);
+        refreshPreview();
+    });
+    document.getElementById('ecClearAll')?.addEventListener('click', () => {
+        checks.forEach((check) => check.checked = false);
+        refreshPreview();
+    });
+    document.getElementById('ecSelectDefault')?.addEventListener('click', () => {
+        checks.forEach((check) => check.checked = check.dataset.default === '1');
+        refreshPreview();
+    });
+    const printFromWeb = () => {
+        const total = updateCounts();
+        if (total === 0) return;
+        const url = buildPdfUrl();
+        pdfLinks.forEach((link) => link.href = url);
+
+        try {
+            if (pdfFrame && pdfFrame.src !== url) {
+                pdfFrame.src = url;
+            }
+            const frameWindow = pdfFrame?.contentWindow;
+            if (frameWindow) {
+                frameWindow.focus();
+                frameWindow.print();
+                return;
+            }
+        } catch (error) {
+            // Some mobile browsers block printing embedded PDFs. Fall back to opening the PDF.
+        }
+
+        window.open(url, '_blank', 'noopener');
+    };
+
+    refreshButton?.addEventListener('click', refreshPreview);
+    webPrintButtons.forEach((button) => button.addEventListener('click', printFromWeb));
+    checks.forEach((check) => check.addEventListener('change', scheduleRefresh));
+    updateCounts();
+})();
+</script>
+@endsection

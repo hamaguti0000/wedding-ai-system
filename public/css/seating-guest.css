@@ -1,0 +1,766 @@
+/* Guest wedding seating chart - paper reception style */
+.gs-page,
+.gs-page * {
+    box-sizing: border-box;
+}
+
+.gs-page {
+    --gs-ink: #20242a;
+    --gs-muted: #5f5850;
+    --gs-paper: #fbf7ef;
+    --gs-paper-deep: #eee4d7;
+    --gs-green: #245944;
+    --gs-green-soft: #7f9d77;
+    --gs-red: #c42b3d;
+    --gs-pink: #c99ac7;
+    --gs-gold: #96704c;
+    --gs-hydrangea: #7f89cf;
+    --gs-hydrangea-deep: #4f5aa4;
+    --gs-hydrangea-soft: #cdd5ff;
+    --gs-hydrangea-pale: #f1f3ff;
+    --gs-paper-fiber: rgba(91,73,55,.045);
+    min-height: calc(100vh - 60px);
+    padding: 26px 0 42px;
+    color: var(--gs-ink);
+    font-family: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+    background:
+        radial-gradient(circle at 18% 8%, rgba(236,240,255,.36), transparent 26%),
+        radial-gradient(circle at 82% 16%, rgba(213,220,255,.25), transparent 28%),
+        linear-gradient(180deg, #f8f2e9, #e9ddcf);
+}
+
+.gs-paper-shell {
+    width: min(1560px, calc(100% - 24px));
+    margin: 0 auto;
+}
+
+.gs-paper {
+    position: relative;
+    min-height: calc(100vh - 112px);
+    padding: 46px 54px 34px;
+    overflow: hidden;
+    border: 1px solid rgba(111,94,124,.18);
+    background:
+        radial-gradient(circle at 14% 18%, rgba(255,255,255,.64), transparent 18%),
+        radial-gradient(circle at 70% 8%, rgba(225,229,255,.24), transparent 16%),
+        radial-gradient(circle at 92% 74%, rgba(215,220,255,.18), transparent 18%),
+        repeating-linear-gradient(8deg, transparent 0 9px, var(--gs-paper-fiber) 10px 11px, transparent 12px 23px),
+        repeating-linear-gradient(96deg, transparent 0 13px, rgba(255,255,255,.24) 14px 15px, transparent 16px 31px),
+        linear-gradient(90deg, rgba(255,255,255,.32), transparent 24%, rgba(255,255,255,.18)),
+        var(--gs-paper);
+    box-shadow: 0 24px 66px rgba(68,47,28,.13);
+}
+
+/*
+  四隅の装飾。以前は2pxの濃い緑で描いた四分円だったため、線が硬く、紙の縁で
+  ぶつ切りになって「途中で切れた輪」に見えていた(2026-08-13、実機の写真で指摘)。
+  線を1pxに落として先に向かって淡く消えるマスクをかけ、手描きの草花のような
+  余韻を持たせる。あじさいも粒を散らすのではなく、小花が寄り集まった房として描く。
+*/
+.gs-corner {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    opacity: .88;
+}
+.gs-corner::before,
+.gs-corner::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+}
+/* あじさいの房 + 葉 */
+.gs-corner::before {
+    inset: 16px 22px auto auto;
+    width: 92px;
+    height: 30px;
+    transform: rotate(-26deg);
+    background:
+        radial-gradient(circle at 10% 52%, #cdd5ff 0 10%, transparent 11%),
+        radial-gradient(circle at 21% 34%, #9aa5df 0 11%, transparent 12%),
+        radial-gradient(circle at 24% 72%, #b6bfec 0 9%, transparent 10%),
+        radial-gradient(circle at 35% 50%, #aab4e8 0 11%, transparent 12%),
+        radial-gradient(circle at 45% 30%, #e4e8ff 0 8%, transparent 9%),
+        radial-gradient(circle at 47% 68%, #c6cdf0 0 8%, transparent 9%),
+        radial-gradient(ellipse at 70% 56%, var(--gs-green-soft) 0 13%, transparent 14%),
+        radial-gradient(ellipse at 87% 40%, var(--gs-green) 0 12%, transparent 13%);
+}
+/*
+  両端が筆跡のように消える細い弧。border-left+border-bottomで描く弧は左下が
+  中心になるため、左下を原点にした放射マスクで「中心は濃く、両端へ向かって
+  消える」形にする(直線マスクだと弧全体が消えてしまった)。
+*/
+.gs-corner::after {
+    right: 22px;
+    top: 46px;
+    width: 78px;
+    height: 78px;
+    border: 1px solid transparent;
+    border-left-color: rgba(36, 89, 68, .62);
+    border-bottom-color: rgba(36, 89, 68, .62);
+    -webkit-mask-image: radial-gradient(circle at 0% 100%, #000 52%, rgba(0,0,0,.55) 74%, transparent 96%);
+    mask-image: radial-gradient(circle at 0% 100%, #000 52%, rgba(0,0,0,.55) 74%, transparent 96%);
+}
+.gs-corner--tl { top: 18px; left: 18px; }
+.gs-corner--tr { top: 18px; right: 18px; transform: scaleX(-1); }
+.gs-corner--bl { bottom: 18px; left: 18px; transform: scaleY(-1); }
+.gs-corner--br { bottom: 18px; right: 18px; transform: scale(-1); }
+
+.gs-hero {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 26px;
+}
+
+.gs-hero__family {
+    display: grid;
+    gap: 4px;
+    justify-items: start;
+    color: var(--gs-ink);
+    font-size: 1.02rem;
+    letter-spacing: .16em;
+}
+.gs-hero__family small {
+    margin-top: 4px;
+    color: var(--gs-muted);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .66rem;
+    letter-spacing: .12em;
+}
+
+.gs-hero__center {
+    min-width: 430px;
+    text-align: center;
+}
+.gs-hero__eyebrow {
+    margin: 0 0 8px;
+    color: var(--gs-gold);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .36em;
+    text-transform: uppercase;
+}
+.gs-hero__title {
+    margin: 0;
+    color: #172027;
+    font-size: clamp(2.2rem, 4.2vw, 4.7rem);
+    font-weight: 700;
+    line-height: 1.05;
+    white-space: nowrap;
+}
+.gs-hero__amp {
+    margin: 0 .18em;
+    color: var(--gs-gold);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+}
+.gs-hero__script {
+    margin: 12px 0 0;
+    color: var(--gs-ink);
+    font-family: 'Brush Script MT', 'Segoe Script', cursive;
+    font-size: 1.45rem;
+    letter-spacing: .03em;
+}
+.gs-hero__meta {
+    justify-self: end;
+    margin: 0;
+    color: var(--gs-ink);
+    font-size: 1.02rem;
+    line-height: 1.8;
+    text-align: right;
+    letter-spacing: .08em;
+}
+.gs-hero__meta span {
+    display: block;
+    color: var(--gs-muted);
+    font-size: .88rem;
+}
+
+.gs-focus {
+    position: relative;
+    z-index: 1;
+    width: min(560px, 100%);
+    margin: 0 auto 26px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border: 1px solid rgba(196,43,61,.28);
+    background: rgba(255,248,240,.82);
+}
+.gs-focus__label {
+    margin: 0 0 2px;
+    color: var(--gs-gold);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+}
+.gs-focus__value {
+    margin: 0;
+    color: var(--gs-red);
+    font-size: 1.22rem;
+    font-weight: 800;
+}
+.gs-focus__note {
+    margin: 0;
+    color: var(--gs-muted);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .84rem;
+}
+.gs-focus__btn {
+    min-height: 38px;
+    padding: 0 18px;
+    border: 1px solid var(--gs-red);
+    background: var(--gs-red);
+    color: #fff;
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.gs-view-tools {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 0 auto 14px;
+}
+.gs-view-tools button {
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid rgba(157,113,66,.42);
+    background: rgba(255,248,240,.78);
+    color: var(--gs-gold);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.gs-view-tools button.is-active {
+    background: var(--gs-gold);
+    color: #fff;
+}
+
+/*
+  「拡大して読む」で横スクロールが必要な時だけJS側で.is-visibleを付けて表示する
+  (guest.blade.phpのsetBoardView参照)。スクロールできることに気づかず、最初に
+  見えている一番左の卓だけで全部だと誤解されるのを防ぐ。
+*/
+.gs-scroll-hint {
+    display: none;
+    position: relative;
+    z-index: 1;
+    margin: 0 0 8px;
+    text-align: center;
+    color: var(--gs-gold);
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    animation: gs-scroll-hint-nudge 1.6s ease-in-out infinite;
+}
+.gs-scroll-hint.is-visible {
+    display: block;
+}
+@keyframes gs-scroll-hint-nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
+}
+
+/*
+  表示倍率の操作。卓の並び（＝会場の配置）は変えられないので、狭い画面では
+  ここで倍率を上げて読んでもらう。
+*/
+.gs-zoom-tools {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 auto 12px;
+}
+.gs-zoom-tools button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(157,113,66,.42);
+    border-radius: 999px;
+    background: rgba(255,248,240,.78);
+    color: var(--gs-gold);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+.gs-zoom-tools button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+.gs-zoom-tools__field {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--gs-muted);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .78rem;
+    font-weight: 700;
+}
+.gs-zoom-tools__field input {
+    width: 62px;
+    min-height: 34px;
+    padding: 0 6px;
+    border: 1px solid rgba(157,113,66,.42);
+    border-radius: 6px;
+    background: rgba(255,255,255,.9);
+    color: var(--gs-ink);
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    text-align: right;
+}
+/* 数値入力のスピナーは狭い画面で押しづらく、誤操作のもとなので隠す */
+.gs-zoom-tools__field input::-webkit-outer-spin-button,
+.gs-zoom-tools__field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.gs-zoom-tools__field input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.gs-board-scroll {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    padding: 6px 2px 16px;
+}
+.gs-board-scroll.is-reading {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-color: var(--gs-gold) rgba(255,255,255,.4);
+    /* まだ続きがあることを示す固定の端影。スクロール位置に応じて消える動的なものではないが、
+       「ここは横に動かせる」という最低限のサインとして常時出しておく。 */
+    box-shadow:
+        inset -22px 0 16px -16px rgba(79,90,164,.22),
+        inset 22px 0 16px -16px rgba(79,90,164,.12);
+}
+.gs-board-scale {
+    --gs-board-scale: 1;
+    width: 100%;
+    min-height: 1px;
+}
+/*
+  1行8卓 × 卓の最小幅294px(氏名列88px + 花82px + 氏名列88px + column-gap 18px×2)
+  + 卓間gap 44px×7 = 2660px が、卓を潰さずに並べるのに必要な幅。以前は2240pxしか
+  なく1卓あたり約50px不足していたため、卓の中身がグリッドの枠からはみ出し、
+  右端の卓が見切れていた(2026-08-12発覚。氏名の折り返しや隣の卓との重なりも
+  同じ幅不足が原因だった)。余裕を持たせて2720pxにする。
+*/
+.gs-board {
+    width: 2720px;
+    margin: 0 auto;
+    padding: 12px 4px 0;
+    transform: scale(var(--gs-board-scale));
+    transform-origin: top left;
+}
+.gs-board-scale.is-fit .gs-board {
+    margin-inline: 0;
+}
+
+.gs-stage {
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+    color: var(--gs-ink);
+    letter-spacing: .18em;
+}
+.gs-stage--head {
+    width: 320px;
+    height: 42px;
+    margin-bottom: 28px;
+    border-top: 1px solid rgba(32,36,42,.28);
+    border-bottom: 1px solid rgba(32,36,42,.28);
+}
+.gs-stage--entrance {
+    width: 320px;
+    height: 36px;
+    margin-top: 26px;
+    color: var(--gs-muted);
+    font-size: .9rem;
+}
+
+.gs-table-row {
+    display: grid;
+    gap: 44px;
+    align-items: center;
+    margin-bottom: 52px;
+}
+.gs-table-row--eight {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+.gs-table-row--seven {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    padding-inline: calc((100% / 8) / 2);
+}
+.gs-table-row--edge {
+    grid-template-columns: 2fr 4fr 2fr;
+}
+.gs-edge-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 44px;
+}
+.gs-edge-gap {
+    min-height: 1px;
+}
+
+.gs-table {
+    position: relative;
+    min-height: 210px;
+    display: grid;
+    grid-template-columns: minmax(88px, 1fr) 82px minmax(88px, 1fr);
+    align-items: center;
+    column-gap: 18px;
+    scroll-margin: 140px;
+    /*
+      枠線ではなく、卓ごとの氏名+花マーカーをひとまとまりだと分かるよう、
+      境界のはっきりしない柔らかいハロー(楕円グラデーション)を敷く。硬い罫線だと
+      和紙・あじさいの意匠と喧嘩するため避けた(2026-08-12、テーブル同士の間隔を
+      空けてほしいという要望を受けて追加)。
+    */
+    border-radius: 22px;
+    background: radial-gradient(ellipse 88% 82% at center, rgba(241,243,255,.6), rgba(241,243,255,0) 74%);
+}
+.gs-table--mine {
+    filter: drop-shadow(0 8px 18px rgba(196,43,61,.16));
+}
+.gs-table--mine::after {
+    content: "あなたの卓";
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 3px 11px;
+    border: 1px solid rgba(196,43,61,.32);
+    background: rgba(255,243,244,.92);
+    color: var(--gs-red);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.gs-table__wreath {
+    position: relative;
+    z-index: 0;
+    width: 78px;
+    height: 78px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.96) 0 24%, transparent 25%),
+        radial-gradient(circle at 27% 18%, #eff1ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 43% 14%, #c8d1ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 61% 18%, #aeb8f0 0 8%, transparent 8.8%),
+        radial-gradient(circle at 76% 34%, #8793d6 0 8%, transparent 8.8%),
+        radial-gradient(circle at 80% 53%, #cbd3ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 67% 70%, #e2e6ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 49% 79%, #aeb8f0 0 8%, transparent 8.8%),
+        radial-gradient(circle at 29% 70%, #c8d1ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 18% 51%, #8e9bdd 0 8%, transparent 8.8%),
+        radial-gradient(circle at 18% 33%, #dfe4ff 0 8%, transparent 8.8%),
+        radial-gradient(circle at 50% 50%, rgba(127,137,207,.22) 0 55%, transparent 56%);
+    box-shadow:
+        inset 0 0 0 1px rgba(79,90,164,.18),
+        0 7px 16px rgba(79,90,164,.13);
+}
+.gs-table__wreath::before,
+.gs-table__wreath::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 36px;
+    height: 24px;
+    border-radius: 999px 10px 999px 10px;
+    background: linear-gradient(135deg, #9eb58d, var(--gs-green));
+    opacity: .92;
+}
+.gs-table__wreath::before {
+    left: -16px;
+    bottom: 12px;
+    transform: rotate(-30deg);
+}
+.gs-table__wreath::after {
+    right: -16px;
+    top: 13px;
+    transform: scaleX(-1) rotate(-30deg);
+}
+.gs-table__wreath .gs-table__mark {
+    position: relative;
+    z-index: 1;
+}
+.gs-table__wreath .gs-table__mark::before,
+.gs-table__wreath .gs-table__mark::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.74);
+    box-shadow:
+        14px -10px 0 rgba(255,255,255,.54),
+        -12px -8px 0 rgba(255,255,255,.50),
+        10px 12px 0 rgba(255,255,255,.46),
+        -14px 10px 0 rgba(255,255,255,.42);
+}
+.gs-table__wreath .gs-table__mark::before {
+    left: -18px;
+    top: -10px;
+}
+.gs-table__wreath .gs-table__mark::after {
+    right: -18px;
+    bottom: -10px;
+}
+
+.gs-table__mark {
+    position: relative;
+    z-index: 1;
+    color: var(--gs-hydrangea-deep);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.68rem;
+    line-height: 1;
+    text-shadow: 0 1px 0 rgba(255,255,255,.85);
+}
+.gs-table__name {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 118px;
+    color: var(--gs-hydrangea-deep);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .66rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.gs-table__guests {
+    display: grid;
+    gap: 8px;
+}
+.gs-table__guests--left {
+    text-align: right;
+}
+.gs-table__guests--right {
+    text-align: left;
+}
+
+.gs-guest {
+    min-width: 0;
+}
+.gs-guest__name {
+    margin: 0;
+    color: #1f2530;
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: 0;
+    /*
+      以前はwhite-space: nowrapで常に1行に収めていたが、卓の列幅(minmax(88px, 1fr))
+      より長い氏名(例:5文字以上の姓名)だと折り返せず、隣の卓の氏名列にテキストが
+      はみ出して重なって読めなくなっていた(2026-08-12、あじさいテーマの卓プレビューで
+      「テスト ゲスト様」が右隣の卓の氏名と重なって発覚)。折り返しを許可し、
+      はみ出すより行が増える方を選ぶ。
+    */
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+.gs-guest__name a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted #b38b59;
+    padding-bottom: 1px;
+}
+.gs-guest__name a::after {
+    content: '\f030';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.62em;
+    color: #b38b59;
+    margin-left: 3px;
+    vertical-align: 1px;
+}
+.gs-guest__name a:hover,
+.gs-guest__name a:active {
+    color: #b38b59;
+    border-bottom-style: solid;
+}
+.gs-guest.is-mine .gs-guest__name {
+    color: var(--gs-red);
+}
+.gs-guest.is-mine .gs-guest__name {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 5px;
+}
+
+.gs-footnote {
+    position: relative;
+    z-index: 1;
+    margin: 30px 0 0;
+    color: var(--gs-muted);
+    text-align: center;
+    font-size: .9rem;
+    letter-spacing: .06em;
+}
+
+.gs-empty {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+.gs-empty__panel {
+    width: min(480px, 100%);
+    padding: 32px 26px;
+    border: 1px solid rgba(122,87,48,.22);
+    background: rgba(255,248,240,.94);
+    text-align: center;
+}
+.gs-empty__icon {
+    margin-bottom: 14px;
+    font-size: 2rem;
+    color: var(--gs-gold);
+}
+.gs-empty__title {
+    margin: 0 0 8px;
+    color: var(--gs-ink);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+.gs-empty__desc {
+    margin: 0;
+    color: var(--gs-muted);
+    font-family: 'Noto Sans JP', system-ui, sans-serif;
+    font-size: .9rem;
+    line-height: 1.8;
+}
+
+@media (max-width: 767px) {
+    .gs-page {
+        min-height: calc(100vh - 56px);
+        padding: 8px 0 22px;
+    }
+    .gs-paper-shell {
+        width: 100%;
+    }
+    .gs-paper {
+        min-height: calc(100vh - 78px);
+        padding: 24px 10px 22px;
+        border-inline: 0;
+    }
+    .gs-corner {
+        width: 72px;
+        height: 72px;
+        opacity: .62;
+    }
+    .gs-corner--tl,
+    .gs-corner--tr { top: 8px; }
+    .gs-corner--bl,
+    .gs-corner--br { bottom: 8px; }
+    .gs-corner--tl,
+    .gs-corner--bl { left: 8px; }
+    .gs-corner--tr,
+    .gs-corner--br { right: 8px; }
+
+    .gs-hero {
+        display: block;
+        margin-bottom: 14px;
+        text-align: center;
+    }
+    .gs-hero__family {
+        display: none;
+    }
+    .gs-hero__center {
+        min-width: 0;
+    }
+    .gs-hero__eyebrow {
+        font-size: .62rem;
+    }
+    .gs-hero__title {
+        font-size: clamp(1.75rem, 8vw, 2.35rem);
+        white-space: normal;
+    }
+    .gs-hero__script {
+        font-size: .96rem;
+    }
+    .gs-hero__meta {
+        margin-top: 8px;
+        text-align: center;
+        font-size: .8rem;
+    }
+
+    .gs-focus {
+        width: calc(100% - 18px);
+        margin-bottom: 14px;
+        padding: 10px 12px;
+    }
+    .gs-focus__value {
+        font-size: 1rem;
+    }
+    .gs-focus__btn {
+        min-height: 34px;
+        padding: 0 12px;
+    }
+
+    .gs-view-tools {
+        margin-bottom: 10px;
+    }
+    .gs-view-tools button {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: .78rem;
+    }
+    .gs-board-scroll {
+        margin-inline: -10px;
+        padding: 2px 10px 10px;
+    }
+    /*
+      1行あたりの卓数は絶対に変えないこと。席次表は会場の卓配置そのものを表す図で、
+      ゲストは高砂との位置関係で自分の席を探す。読みやすくするために1行4卓へ
+      折り返したところ、配置が実際の会場と対応しなくなり「席次表ではない」状態に
+      なった(2026-08-13)。画面が狭い場合は、配置を保ったまま倍率で対応する。
+    */
+    .gs-board {
+        /* 卓間gapが34pxなので必要幅は 8×294 + 34×7 = 2590px。同じく余裕を持たせる。 */
+        width: 2660px;
+    }
+    .gs-table-row {
+        gap: 34px;
+        margin-bottom: 42px;
+    }
+    .gs-edge-group {
+        gap: 34px;
+    }
+    .gs-footnote {
+        margin-top: 18px;
+        padding-inline: 10px;
+        font-size: .76rem;
+        line-height: 1.8;
+    }
+}

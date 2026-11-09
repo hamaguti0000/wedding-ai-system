@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\WeddingSetting;
+use Illuminate\Http\Request;
+
+class AdminSettingController extends Controller
+{
+    public function edit()
+    {
+        $setting = WeddingSetting::firstOrNew([]);
+
+        return view('admin.settings', compact('setting'));
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'groom_name'     => 'required|string|max:50',
+            'groom_name_en'  => 'nullable|string|max:100',
+            'bride_name'     => 'required|string|max:50',
+            'bride_name_en'  => 'nullable|string|max:100',
+            'ceremony_date'  => 'required|date',
+            'ceremony_time'  => 'required|date_format:H:i',
+            'reception_time' => 'required|date_format:H:i',
+            'venue_name'     => 'required|string|max:100',
+            'venue_address'  => 'required|string|max:200',
+            'venue_url'               => 'nullable|url|max:500',
+            'venue_nearest_station'   => 'nullable|string|max:200',
+            'access_train'            => 'nullable|string|max:1000',
+            'access_car'              => 'nullable|string|max:1000',
+            'access_parking'          => 'nullable|string|max:500',
+            'venue_map_embed'         => 'nullable|string|max:5000',
+            'message'                 => 'nullable|string|max:1000',
+            'rsvp_deadline'           => 'nullable|date',
+            'shuttle_bus_enabled'     => 'boolean',
+            'shuttle_bus_departure'   => 'nullable|string|max:300',
+            'shuttle_bus_times'       => 'nullable|string|max:300',
+            'shuttle_bus_note'        => 'nullable|string|max:500',
+            'shuttle_bus_map_url'     => 'nullable|url|max:500',
+        ], [
+            'groom_name.required'     => '新郎名は必須です',
+            'bride_name.required'     => '新婦名は必須です',
+            'ceremony_date.required'  => '挙式日は必須です',
+            'ceremony_date.date'      => '正しい日付を入力してください',
+            'ceremony_time.required'  => '挙式時刻は必須です',
+            'ceremony_time.date_format' => '時刻は HH:MM 形式で入力してください',
+            'reception_time.required' => '披露宴時刻は必須です',
+            'reception_time.date_format' => '時刻は HH:MM 形式で入力してください',
+            'venue_name.required'     => '会場名は必須です',
+            'venue_address.required'  => '会場住所は必須です',
+            'venue_url.url'           => '正しいURL形式で入力してください',
+        ]);
+
+        WeddingSetting::updateOrCreate(
+            [],
+            [
+                'groom_name'        => $request->groom_name,
+                'groom_name_en'     => $request->groom_name_en ?: null,
+                'bride_name'        => $request->bride_name,
+                'bride_name_en'     => $request->bride_name_en ?: null,
+                'ceremony_date'     => $request->ceremony_date,
+                'ceremony_time'     => $request->ceremony_time . ':00',
+                'reception_time'    => $request->reception_time . ':00',
+                'venue_name'        => $request->venue_name,
+                'venue_address'     => $request->venue_address,
+                'venue_url'             => $request->venue_url ?: null,
+                'venue_nearest_station' => $request->venue_nearest_station ?: null,
+                'access_train'          => $request->access_train ?: null,
+                'access_car'            => $request->access_car ?: null,
+                'access_parking'        => $request->access_parking ?: null,
+                'venue_map_embed'       => $request->venue_map_embed ?: null,
+                'message'               => $request->message,
+                'is_seating_public'     => $request->boolean('is_seating_public'),
+                'is_profile_book_public' => $request->boolean('is_profile_book_public'),
+                'rsvp_deadline'         => $request->rsvp_deadline ?: null,
+                'shuttle_bus_enabled'   => $request->boolean('shuttle_bus_enabled'),
+                'shuttle_bus_departure' => $request->shuttle_bus_departure ?: null,
+                'shuttle_bus_times'     => $request->shuttle_bus_times ?: null,
+                'shuttle_bus_note'      => $request->shuttle_bus_note ?: null,
+                'shuttle_bus_map_url'  => $request->shuttle_bus_map_url ?: null,
+            ]
+        );
+
+        return redirect()->route('admin.settings')
+            ->with('success', '式の情報を更新しました');
+    }
+}

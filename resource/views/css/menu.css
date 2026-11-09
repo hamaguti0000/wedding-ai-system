@@ -1,0 +1,202 @@
+/* ===============================
+   ベース設定
+=============================== */
+body {
+    margin: 0;
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #fdfaf6;
+    color: #333;
+}
+
+.menu-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 100px 6%;
+}
+
+.menu-header {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.menu-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: #8c5c2c;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.menu-subtitle {
+    font-size: 1.2rem;
+    color: #777;
+}
+
+/* ===============================
+   各カテゴリ
+=============================== */
+.meal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 50px;
+    margin: 120px 0;
+}
+
+.meal-image {
+    flex: 1 1 40%;
+    min-width: 300px;
+}
+
+.meal-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    object-fit: cover;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease-out;
+}
+
+.meal-content {
+    flex: 1 1 55%;
+    min-width: 300px;
+}
+
+/* カテゴリタイトル */
+.meal-category {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: #8c5c2c;
+    position: relative;
+    margin-bottom: 30px;
+    width: 100%;
+    line-height: 1.2;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease-out;
+}
+
+.meal-category::after {
+    content: "";
+    display: block;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #b38b59, #f5e0b7, #b38b59);
+    background-size: 200% 100%;
+    margin-top: 8px;
+    border-radius: 2px;
+    transition: all 1.2s ease-out;
+}
+
+.meal.show .meal-category::after {
+    width: 100%;
+    animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* 料理アイテム（タイトル＋説明） */
+.meal-item {
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease-out;
+}
+
+.meal-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.meal-title {
+    font-size: 1.6rem;
+    color: #b38b59;
+    margin-bottom: 6px;
+}
+
+.meal-desc {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.7;
+    text-align: justify;
+}
+
+.fade-char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+}
+
+.fade-char.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===============================
+   表示状態
+=============================== */
+.meal.show .meal-image img {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.meal.show .meal-category {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* レスポンシブ */
+@media (max-width:1024px) {
+    .meal {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .meal-image, .meal-content {
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width:768px) {
+    .menu-title {
+        font-size: 2.2rem;
+    }
+
+    .menu-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .meal-category {
+        font-size: 2.1rem;
+    }
+
+    .meal-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width:480px) {
+    .menu-container {
+        padding: 60px 4%;
+    }
+
+    .meal-title {
+        font-size: 1.4rem;
+    }
+
+    .meal-desc {
+        font-size: 0.95rem;
+    }
+}

@@ -1,0 +1,309 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #1a130a;
+    overflow: auto;
+    padding: 24px 0;
+}
+
+/* ── 背景写真 ─────────────────────────────── */
+.wedding-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+.wedding-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.38) saturate(0.7);
+    transform: scale(1.03);
+}
+.wedding-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        160deg,
+        rgba(30, 18, 6, 0.55) 0%,
+        rgba(80, 55, 25, 0.3) 100%
+    );
+}
+
+/* ── カード ───────────────────────────────── */
+.login-card {
+    position: relative;
+    z-index: 10;
+    width: 460px;
+    max-width: calc(100vw - 32px);
+    background: rgba(255, 252, 247, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 2px;
+    padding: 52px 46px 44px;
+    box-shadow:
+        0 24px 64px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(179, 139, 89, 0.25);
+}
+
+/* ── モノグラム ───────────────────────────── */
+.monogram {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    color: #b38b59;
+    text-align: center;
+    letter-spacing: 10px;
+    margin-bottom: 18px;
+}
+
+/* ── 装飾ライン ───────────────────────────── */
+.ornament {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 34px;
+}
+.ornament::before,
+.ornament::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d4b896, transparent);
+}
+.ornament span {
+    font-size: 0.68rem;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: #b38b59;
+    white-space: nowrap;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+}
+
+/* ── 初回設定ステップ ───────────────────── */
+.setup-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: -14px 0 26px;
+}
+.setup-step {
+    min-width: 0;
+    padding: 10px 8px;
+    border: 1px solid #eadcc9;
+    border-radius: 3px;
+    background: rgba(255, 253, 249, 0.74);
+    color: #9b8573;
+    text-align: center;
+}
+.setup-step__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-bottom: 6px;
+    border-radius: 999px;
+    background: #f5eadc;
+    color: #9b7446;
+    font-size: 0.72rem;
+    line-height: 1;
+}
+.setup-step__label {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+.setup-step.is-current {
+    border-color: #b38b59;
+    background: #fff8ee;
+    color: #5e4632;
+}
+.setup-step.is-current .setup-step__number {
+    background: #b38b59;
+    color: #fff;
+}
+.setup-step.is-done:not(.is-current) {
+    border-color: #d8c19f;
+    color: #735f4e;
+}
+.setup-step.is-done:not(.is-current) .setup-step__number {
+    background: #3d2f25;
+    color: #fff;
+}
+.verify-card .setup-steps {
+    margin: 0 0 22px;
+}
+
+/* ── フォームタイトル ─────────────────────── */
+.login-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #3d2f25;
+    text-align: center;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+}
+
+/* ── エラー・サクセスメッセージ ──────────── */
+.alert {
+    padding: 11px 16px;
+    border-radius: 3px;
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+    line-height: 1.6;
+}
+.alert-error {
+    background: #fdf2f2;
+    border-left: 3px solid #c0392b;
+    color: #8b1a1a;
+}
+.alert-info {
+    background: #fef9f0;
+    border-left: 3px solid #b38b59;
+    color: #7a5c30;
+}
+
+.login-note {
+    margin: -4px 0 22px;
+    color: #7a6555;
+    font-size: 0.86rem;
+    line-height: 1.8;
+}
+
+/* ── フォームグループ ─────────────────────── */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #9b8573;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    font-weight: 400;
+}
+.form-group input {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid #e2d0bc;
+    border-radius: 2px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #fffdf9;
+    color: #3d2f25;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus {
+    border-color: #b38b59;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(179, 139, 89, 0.13);
+}
+.password-field {
+    position: relative;
+}
+.password-field input {
+    padding-right: 48px;
+}
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: #9b8573;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    transform: translateY(-50%);
+}
+.password-toggle:hover,
+.password-toggle:focus-visible,
+.password-toggle.is-visible {
+    background: #f5eadc;
+    color: #7a5c30;
+}
+.password-toggle:focus-visible {
+    outline: 2px solid rgba(179, 139, 89, 0.35);
+    outline-offset: 2px;
+}
+.icon-eye {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ── 送信ボタン ───────────────────────────── */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    margin-top: 6px;
+    background: #b38b59;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    font-size: 0.9rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.btn-submit:hover  { background: #9a7447; }
+.btn-submit:active { transform: scale(0.99); }
+.btn-submit:disabled {
+    background: #c9b9a3;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.78;
+}
+
+/* ── 下部リンク ───────────────────────────── */
+.card-footer {
+    margin-top: 26px;
+    text-align: center;
+    font-size: 0.83rem;
+    color: #a89282;
+    line-height: 1.8;
+}
+.card-footer a {
+    color: #b38b59;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+.card-footer a:hover { color: #9a7447; }
+
+/* ── レスポンシブ ─────────────────────────── */
+@media (max-width: 480px) {
+    body { padding: 16px 0; }
+    .login-card { padding: 34px 18px 30px; max-width: calc(100vw - 24px); }
+    .monogram   { font-size: 2.1rem; }
+    .ornament { margin-bottom: 28px; }
+    .ornament span { letter-spacing: 2.2px; }
+    .setup-steps { gap: 5px; margin-bottom: 22px; }
+    .setup-step { padding: 8px 4px; }
+    .setup-step__number { width: 20px; height: 20px; margin-bottom: 5px; }
+    .setup-step__label { font-size: 0.68rem; }
+    .btn-submit { letter-spacing: 1.6px; }
+}

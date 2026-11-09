@@ -1,0 +1,476 @@
+/* Escort cards - vertical uploaded design on business card sheet */
+.ec-page,
+.ec-page * {
+    box-sizing: border-box;
+}
+
+main {
+    padding-top: 60px;
+    text-align: initial;
+}
+
+.ec-page {
+    --ec-navy: #253a5c;
+    --ec-gold: #a98348;
+    --ec-paper: #f7f4ed;
+    --ec-paper-soft: rgba(247, 244, 237, .97);
+    --ec-muted: #837767;
+    min-height: calc(100vh - 60px);
+    padding: 22px;
+    background: #ebe6dc;
+    color: var(--ec-navy);
+    font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+}
+
+.ec-toolbar {
+    position: sticky;
+    top: 60px;
+    z-index: 10;
+    width: min(1120px, 100%);
+    margin: 0 auto 18px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border: 1px solid rgba(37, 58, 92, .18);
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 10px 28px rgba(37, 45, 58, .08);
+}
+
+.ec-toolbar a,
+.ec-toolbar button {
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid var(--ec-navy);
+    background: var(--ec-navy);
+    color: #fff;
+    font: 800 .84rem 'Noto Sans JP', system-ui, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ec-toolbar a {
+    background: transparent;
+    color: var(--ec-navy);
+}
+
+.ec-toolbar span {
+    color: var(--ec-muted);
+    font: 800 .84rem 'Noto Sans JP', system-ui, sans-serif;
+}
+
+
+.ec-selector,
+.ec-print-note,
+.ec-preview-action {
+    width: min(1120px, 100%);
+    margin: 0 auto 18px;
+    border: 1px solid rgba(37, 58, 92, .14);
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 18px 44px rgba(37, 45, 58, .1);
+}
+
+.ec-selector {
+    padding: 22px;
+}
+
+.ec-selector__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.ec-selector__eyebrow {
+    margin: 0 0 5px;
+    color: var(--ec-gold);
+    font: 800 .72rem 'Noto Sans JP', system-ui, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.ec-selector h1 {
+    margin: 0 0 6px;
+    color: var(--ec-navy);
+    font-size: 1.35rem;
+    line-height: 1.3;
+}
+
+.ec-selector p {
+    margin: 0;
+    color: #5f6670;
+    font: 500 .9rem/1.7 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-selector__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.ec-secondary,
+.ec-selector__summary button {
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid rgba(37, 58, 92, .28);
+    background: #fff;
+    color: var(--ec-navy);
+    font: 800 .78rem 'Noto Sans JP', system-ui, sans-serif;
+    cursor: pointer;
+}
+
+.ec-selector__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    background: #f5f0e7;
+    color: var(--ec-navy);
+    font: 700 .9rem 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-selector__summary button {
+    border-color: var(--ec-navy);
+    background: var(--ec-navy);
+    color: #fff;
+}
+
+.ec-guest-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    max-height: 420px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+.ec-guest-option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+    min-height: 68px;
+    padding: 10px 12px;
+    border: 1px solid rgba(37, 58, 92, .14);
+    background: #fff;
+    cursor: pointer;
+}
+
+.ec-guest-option:has(input:checked) {
+    border-color: rgba(169, 131, 72, .72);
+    background: #fffaf2;
+}
+
+.ec-guest-option input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ec-gold);
+}
+
+.ec-guest-option__body {
+    min-width: 0;
+}
+
+.ec-guest-option__name,
+.ec-guest-option__kana,
+.ec-guest-option__meta {
+    display: block;
+}
+
+.ec-guest-option__name {
+    color: #1e2b3f;
+    font: 800 .92rem 'Noto Sans JP', system-ui, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ec-guest-option__kana {
+    margin-top: 3px;
+    color: #78818d;
+    font: 600 .72rem 'Noto Sans JP', system-ui, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ec-guest-option__meta {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ec-status,
+.ec-table-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border: 1px solid rgba(37, 58, 92, .12);
+    color: #5d6470;
+    background: #f8f8f7;
+    font: 800 .68rem 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-status--attending {
+    border-color: rgba(58, 119, 93, .28);
+    color: #2f765a;
+    background: #edf7f2;
+}
+
+.ec-status--declining {
+    border-color: rgba(150, 81, 81, .25);
+    color: #965151;
+    background: #fbf0ef;
+}
+
+
+.ec-preview-action {
+    width: min(1120px, 100%);
+    margin: 0 auto 18px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border-color: rgba(169, 131, 72, .3);
+    background: #fffaf2;
+}
+
+.ec-preview-action h2 {
+    margin: 0 0 5px;
+    color: var(--ec-navy);
+    font-size: 1.12rem;
+}
+
+.ec-preview-action p {
+    margin: 0;
+    color: #5f6670;
+    font: 600 .88rem/1.65 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-preview-action__buttons,
+.ec-pdf-preview__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.ec-preview-action__button {
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--ec-navy);
+    background: var(--ec-navy);
+    color: #fff;
+    font: 900 .9rem 'Noto Sans JP', system-ui, sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ec-preview-action__button.is-disabled {
+    opacity: .45;
+    pointer-events: none;
+}
+
+.ec-pdf-preview {
+    width: min(1120px, 100%);
+    margin: 0 auto 28px;
+    border: 1px solid rgba(37, 58, 92, .14);
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(37, 45, 58, .12);
+}
+
+.ec-pdf-preview iframe {
+    display: block;
+    width: 100%;
+    height: min(78vh, 920px);
+    border: 0;
+    background: #fff;
+}
+
+.ec-pdf-preview__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 14px;
+    color: #66707d;
+    font: 700 .82rem 'Noto Sans JP', system-ui, sans-serif;
+    border-top: 1px solid rgba(37, 58, 92, .1);
+}
+
+.ec-pdf-preview__foot .ec-preview-action__button {
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: .82rem;
+}
+
+.ec-print-note {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    color: #5f6670;
+    font: 600 .86rem/1.6 'Noto Sans JP', system-ui, sans-serif;
+}
+
+.ec-print-note strong {
+    color: var(--ec-navy);
+    white-space: nowrap;
+}
+
+.ec-sheets {
+    display: grid;
+    gap: 24px;
+    justify-content: center;
+}
+
+.ec-print-sheet {
+    display: block;
+    width: 210mm;
+    height: 297mm;
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(37, 45, 58, .16);
+    break-after: page;
+    page-break-after: always;
+}
+
+.ec-print-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+}
+
+.ec-empty {
+    width: min(560px, calc(100% - 24px));
+    margin: 40px auto;
+    padding: 32px;
+    background: #fff;
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .ec-page {
+        padding: 14px 10px 28px;
+    }
+
+    .ec-toolbar {
+        top: 56px;
+        flex-wrap: wrap;
+    }
+
+    .ec-selector {
+        padding: 16px;
+    }
+
+    .ec-selector__head,
+    .ec-selector__summary,
+    .ec-print-note,
+    .ec-preview-action {
+        display: grid;
+    }
+
+    .ec-pdf-preview iframe {
+        height: 70vh;
+    }
+
+    .ec-pdf-preview__foot {
+        display: grid;
+    }
+
+    .ec-preview-action__buttons,
+    .ec-pdf-preview__buttons {
+        display: grid;
+        justify-content: stretch;
+    }
+
+    .ec-pdf-preview__foot .ec-preview-action__button,
+    .ec-preview-action__buttons .ec-preview-action__button {
+        justify-content: center;
+    }
+
+    .ec-selector__actions {
+        justify-content: start;
+    }
+
+    .ec-guest-list {
+        grid-template-columns: 1fr;
+        max-height: 54vh;
+    }
+
+    .ec-sheets {
+        justify-content: start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    html,
+    body {
+        width: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    main {
+        width: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .header,
+    .header-drawer,
+    .header-overlay,
+    .ec-toolbar,
+    .ec-selector,
+    .ec-print-note,
+    .ec-preview-action,
+    .ec-pdf-preview {
+        display: none !important;
+    }
+
+    .ec-page {
+        width: 210mm;
+        min-height: auto;
+        margin: 0 !important;
+        padding: 0;
+        background: #fff !important;
+    }
+
+    .ec-sheets {
+        display: block;
+    }
+
+    .ec-print-sheet {
+        display: block;
+        width: 210mm;
+        height: 297mm;
+        margin: 0 !important;
+        padding: 0;
+        box-shadow: none;
+        overflow: hidden;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .ec-print-sheet:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+}

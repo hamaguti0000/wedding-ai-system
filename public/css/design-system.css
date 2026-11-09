@@ -1,0 +1,107 @@
+/* ================================================================
+   design-system.css  —  デザイントークン定義
+   全ページ共通。CSS変数でカラー・スペース・タイポ・シャドウを一元管理。
+   ================================================================ */
+
+:root {
+    /* ── カラー：ゴールド系 ─────────────────────────── */
+    --ds-gold:          #b38b59;
+    --ds-gold-light:    #e8d5b7;
+    --ds-gold-lighter:  #f5edd8;
+    --ds-gold-dark:     #9a7447;
+    --ds-gold-muted:    rgba(179, 139, 89, 0.12);
+
+    /* ── カラー：ベース ─────────────────────────────── */
+    --ds-cream:         #fdfaf6;
+    --ds-cream-mid:     #f8f4ef;
+    --ds-white:         #ffffff;
+    --ds-bg:            #fefefc;
+
+    /* ── カラー：テキスト ────────────────────────────── */
+    --ds-text-dark:     #3d2f25;
+    --ds-text-mid:      #6b5b4e;
+    --ds-text-light:    #9b8573;
+    --ds-text-muted:    #b0a090;
+
+    /* ── カラー：ステータス ──────────────────────────── */
+    --ds-attending-bg:      #f0faf4;
+    --ds-attending-border:  #a8d8b9;
+    --ds-attending-text:    #2d6a4f;
+    --ds-declining-bg:      #fdf4f4;
+    --ds-declining-border:  #e8b4b4;
+    --ds-declining-text:    #7b2d2d;
+    --ds-pending-bg:        #fef9f0;
+    --ds-pending-border:    #e8d5b7;
+    --ds-pending-text:      #7a5c30;
+
+    /* ── カラー：新郎側 / 新婦側 ─────────────────────── */
+    --ds-groom-color:   #4a6fa5;
+    --ds-groom-bg:      #eff3fb;
+    --ds-groom-border:  #b8c8e8;
+    --ds-bride-color:   #a5526a;
+    --ds-bride-bg:      #fdf0f4;
+    --ds-bride-border:  #e8b8c8;
+
+    /* ── カラー：ご関係別 ────────────────────────────── */
+    --ds-friend-color:    #2d7a4f;
+    --ds-friend-bg:       #edf7f2;
+    --ds-family-color:    #6a4fa5;
+    --ds-family-bg:       #f4f0fd;
+    --ds-colleague-color: #a5752d;
+    --ds-colleague-bg:    #fef9ee;
+    --ds-other-color:     #6b5b4e;
+    --ds-other-bg:        #f8f4ef;
+
+    /* ── タイポグラフィ ──────────────────────────────── */
+    --ds-font-display:  'Playfair Display', serif;
+    --ds-font-body:     'Noto Sans JP', sans-serif;
+    --ds-font-size-xs:  0.68rem;
+    --ds-font-size-sm:  0.82rem;
+    --ds-font-size-md:  0.95rem;
+    --ds-font-size-lg:  1.1rem;
+    --ds-font-size-xl:  1.4rem;
+    --ds-font-size-2xl: 1.8rem;
+
+    /* ── スペーシング ────────────────────────────────── */
+    --ds-space-1:  4px;
+    --ds-space-2:  8px;
+    --ds-space-3:  12px;
+    --ds-space-4:  16px;
+    --ds-space-5:  20px;
+    --ds-space-6:  24px;
+    --ds-space-8:  32px;
+    --ds-space-10: 40px;
+    --ds-space-12: 48px;
+
+    /* ── ボーダー半径 ────────────────────────────────── */
+    --ds-radius-sm:   4px;
+    --ds-radius-md:   8px;
+    --ds-radius-lg:   12px;
+    --ds-radius-xl:   20px;
+    --ds-radius-full: 9999px;
+
+    /* ── シャドウ ────────────────────────────────────── */
+    --ds-shadow-card:
+        0 3px 14px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(232, 213, 183, 0.3);
+    --ds-shadow-hover:
+        0 6px 24px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(179, 139, 89, 0.15);
+    --ds-shadow-drag:
+        0 10px 36px rgba(0, 0, 0, 0.2),
+        0 0 0 2px rgba(179, 139, 89, 0.4);
+
+    /* ── z-index ─────────────────────────────────────── */
+    --ds-z-base:    1;
+    --ds-z-raised:  10;
+    --ds-z-overlay: 199;
+    --ds-z-drawer:  200;
+    --ds-z-header:  100;
+    --ds-z-drag:    9999;
+
+    /* ── トランジション ──────────────────────────────── */
+    --ds-transition-fast:   0.15s ease;
+    --ds-transition-base:   0.25s ease;
+    --ds-transition-slow:   0.4s ease;
+    --ds-transition-spring: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
